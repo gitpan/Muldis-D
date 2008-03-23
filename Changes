@@ -1,0 +1,1819 @@
+                                 Muldis::D
+---------------------------------------------------------------------------
+
+2008-03-22  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.24.0 is released on CPAN as
+    Muldis-D-0.24.0.tar.gz.
+
+    * What was Language-MuldisD at version 0.23.0 has been renamed to
+    Muldis-D.  This is the first release of the Muldis-D distribution, and
+    the first release of any distribution to contain Perl 5 package names
+    like Muldis::D(|::\w+).  All of the files in this distribution are as
+    identical as possible to how they were when last released under the
+    names Language::MuldisD(|::\w+) but for the name changes.  All lib/
+    files were renamed appropriately, and also the one t/LMD_00_Compile.t
+    was renamed to t/Muldis_D_00_Compile.t.
+
+    * All versioned files had their version numbers incremented to the
+    first higher 0.N.0.  New file versions are: D.pm 0.24.0 and Core.pod
+    and Types.pod and Types_Catalog.pod and Routines.pod and Ordered.pod
+    and Integer.pod and Blob.pod and Text.pod and Nonscalar.pod and Set.pod
+    and Sequence.pod and Bag.pod and Rational.pod 0.21.0 and Basics.pod
+    0.17.0 and PTMD_Tiny.pod 0.16.0 and HDMD_Perl_Tiny.pod 0.13.0 and
+    Temporal.pod and Spatial.pod 0.6.0 and SeeAlso.pod 0.4.0 and
+    Hierarchical.pod and Conventions.pod 0.1.0.
+
+    * Updated D.pm and the README file to clarify that commercial support
+    is available from the author specifically by way of Muldis Data
+    Systems.
+
+    * Updated all .pm and .pod files to add a new TRADEMARK POLICY section
+    near the end of each; it serves for trademarks what the LICENSE AND
+    COPYRIGHT did for copyrights.  The D.pm file had the actual text, and
+    the other files simply say to look at D.pm.  To summarize, the word
+    MULDIS is a trademark and how you may use it has limitations.
+
+    * (SeeAlso.pod)  Updated the "Muldis DB for Perl 6" implementation
+    reference to say that it is now a secondary version, and that the Perl
+    5 version is now the only main muldis D implementation.  Generally
+    speaking, it does not help the adoption of Muldis D if we are giving
+    the impression that it has a dependency that most people don't have
+    and/or isn't ready for production use, namely Perl 6, and Perl 5 should
+    be given more support in the meantime.
+
+    * (Basics.pod, Ordered.pod)  Minor fixes.
+
+    * This is the Muldis-D-0.24.0 file manifest:
+
+        Changes
+        INSTALL
+        lib/Muldis/D.pm
+        lib/Muldis/D/Basics.pod
+        lib/Muldis/D/Conventions.pod
+        lib/Muldis/D/Core.pod
+        lib/Muldis/D/Core/Routines.pod
+        lib/Muldis/D/Core/Types.pod
+        lib/Muldis/D/Core/Types_Catalog.pod
+        lib/Muldis/D/Dialect/HDMD_Perl_Tiny.pod
+        lib/Muldis/D/Dialect/PTMD_Tiny.pod
+        lib/Muldis/D/Ext/Bag.pod
+        lib/Muldis/D/Ext/Blob.pod
+        lib/Muldis/D/Ext/Integer.pod
+        lib/Muldis/D/Ext/Nonscalar.pod
+        lib/Muldis/D/Ext/Ordered.pod
+        lib/Muldis/D/Ext/Rational.pod
+        lib/Muldis/D/Ext/Sequence.pod
+        lib/Muldis/D/Ext/Set.pod
+        lib/Muldis/D/Ext/Spatial.pod
+        lib/Muldis/D/Ext/Temporal.pod
+        lib/Muldis/D/Ext/Text.pod
+        lib/Muldis/D/Hierarchical.pod
+        lib/Muldis/D/SeeAlso.pod
+        LICENSE/GPL
+        Makefile.PL
+        MANIFEST
+        MANIFEST.SKIP
+        META.yml
+        README
+        t/Muldis_D_00_Compile.t
+        TODO
+
+2008-03-22  Darren Duncan <perl@DarrenDuncan.net>
+
+    The next version of the Module List will list the following module:
+
+      modid:       Muldis::D
+      DSLIP:       cmong
+      description: Formal spec of Muldis D relational DBMS lang
+      userid:      DUNCAND (Darren Duncan)
+      chapterid:   7 (Database_Interfaces)
+      enteredby:   BDFOY (brian d foy)
+      enteredon:   Sat Mar 22 22:41:26 2008 GMT
+
+    The resulting entry will be:
+
+    Muldis::
+    ::D          cmong Formal spec of Muldis D relational DBMS lang DUNCAND
+
+2008-03-22  Darren Duncan <perl@DarrenDuncan.net>
+
+    Record update in the PAUSE modules database:
+
+           modid: [Language::MuldisD]
+           statd: [c]
+           stats: [m]
+           statl: [o]
+           stati: [n]
+           statp: [g]
+     description: [Formal spec of Muldis D relational DBMS lang]
+          userid: [DUNCAND]
+       chapterid: [7]
+        mlstatus: [delete] was [list]
+
+2008-03-05  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.23.0 is released on CPAN as
+    Language-MuldisD-0.23.0.tar.gz.
+
+    * Reverted the only change made in release 0.22.1, by recombining the 6
+    files Core(|/\w+).pod back into the single file Core.pod; it would then
+    be split apart again but in a different way.  For simplicity of
+    documentation, the rest of the release 0.23.0 change items are written
+    from the point of view of starting with the combined Core.pod.
+
+    * Pulled apart Core.pod to turn as much of it as possible into language
+    extensions, leaving the remaining core as minimalist as possible, such
+    that it contains barely more than what is needed to both bootstrap the
+    Muldis D language and satisfy the mandatory parts of "The Third
+    Manifesto".  The minimized core still provides the full system catalog
+    complexity, but has relatively few system-defined generic data types
+    and system-defined operators.  There were 9 new Ext/\w+.pod files
+    created out of the reductions: Ordered.pod, Integer.pod, Blob.pod,
+    Text.pod, Nonscalar.pod, Set.pod, Sequence.pod, Bag.pod, Rational.pod.
+    Details of what each contains appear below.
+
+    * Re-split apart Core.pod 4 ways, into itself and 3 new files, all of
+    which have the same names of and correspond to the files of the same
+    names that release 0.22.1 had: Types.pod, Types_Catalog.pod,
+    Routines.pod.  In that respect, then, release 0.23.0 actually served to
+    just eliminate the 2 files Functions_(S|Nons)calar.pod, whose contents
+    were either merged into Routines.pod or spread out into the 9 new Ext
+    files; and some smaller portions of Types(|_Catalog).pod were also
+    moved out into some of the 9 new Ext files.  Details pre-split follow.
+
+    * New file versions are: MuldisD.pm 0.23.0 and Core.pod and Types.pod
+    and Types_Catalog.pod and Routines.pod and Ordered.pod and Integer.pod
+    and Blob.pod and Text.pod and Nonscalar.pod and Set.pod and
+    Sequence.pod and Bag.pod and Rational.pod 0.20.0 and Basics.pod 0.16.0
+    and PTMD_Tiny.pod 0.15.0 and HDMD_Perl_Tiny.pod 0.12.0 and Temporal.pod
+    0.5.3.  The other pre-existing versioned files are unchanged.
+
+    * (Ordered.pod, Core.pod, Temporal.pod)  Removed the Ordered union
+    type; from now on, any type is potentialy orderable based on what
+    functions exist for it, not by its type declaration.  Also removed the
+    4 Spec.\w+ofOrdered types.  Any routine declarations that used Ordered
+    before now use Universal instead.  Moved all sys.Core.Ordered.\w+
+    functions to Ordered.pod from Core.pod, renaming them to
+    sys.Ordered.Ord.\w+.
+
+    * (Core.pod)  Removed the Cat.ScalarLiteral type; from now on, the
+    limitations of what values can be used for the scal_lit attribute of
+    Cat.ExprNode are either dialect-defined or implementation-defined; all
+    others can still be defined using the 'func' attribute.
+
+    * (Basics.pod, Rational.pod, Core.pod, PTMD_Tiny.pod,
+    HDMD_Perl_Tiny.pod)  Demoted the Rat types from the language core into
+    a language extension.  Moved all sys.Core.Rat.\w+ types (plus the
+    sys.Core.Spec\w+ofRat types) and functions to Rational.pod from
+    Core.pod, renaming the 'Core' to 'Rational'. Likewise moved and renamed
+    the 3 rational-specific catalog types [PInt2_N, E_RM, RatRoundRule].
+    Updated Basics.pod to reflect this.  Rearranged PTMD_Tiny.pod and
+    HDMD_Perl_Tiny.pod to move their elements for Rat and E_RM literals to
+    the end of the files, where language extension literals now go.
+
+    * (Integer.pod, Core.pod) Moved all sys.Core.Int.\w+ functions (plus
+    the sys.Core.Spec\w+of(Int|UInt) types) to Integer.pod from Core.pod,
+    renaming the 'Core' to 'Integer'.
+
+    * (Blob.pod, Core.pod) Moved all sys.Core.Blob.\w+ functions (plus the
+    sys.Core.Spec\w+ofBlob types) to Blob.pod from Core.pod, renaming the
+    'Core' to 'Blob'.  Likewise moved and renamed the blob-specific catalog
+    type PInt1_4.
+
+    * (Text.pod, Core.pod) Moved all sys.Core.Text.\w+ functions (plus the
+    sys.Core.Spec\w+ofText types) to Text.pod from Core.pod, renaming the
+    'Core' to 'Text'.
+
+    * (Core.pod, HDMD_Perl_Tiny.pod)  Renamed all 8
+    sys.Core.(Bool|Int|Text|Blob).\w+ remaining types to
+    sys.Core.Scalar.\w+.  So now all the generic core types have names in
+    the just 8 main type groupings: Scalar, Tuple, Relation, their 3 Quasi
+    counterparts, Universal, Remnant.
+
+    * (Core.pod)  Removed the 4 Spec.\w+ofScalar types.  So now the only
+    similar such types left in the core are the 4 Spec.\w+ofBool ones;
+    collapsed the mention of them under TYPE SUMMARY into a footnote.
+
+    * (Nonscalar.pod, Core.pod)  Moved 31 (about 3/7) of the
+    sys.Core.(Tuple|Relation).\w+ functions to Nonscalar.pod from Core.pod,
+    renaming the 'Core' to 'Nonscalar'.  The moved were in 5 groups, the
+    first being all Tuple.\w+, the remaining 4 all Relation.\w+.  Group 1
+    had these 4: degree, attr_from_Tuple, Tuple_from_attr,
+    substitution_in_default.  Group 2 had these 11: degree,
+    is(|_not)_empty, empty, universal, power_set, negation,
+    transitive_closure, (|maybe_)reduction, map.  Group 3 had these 5:
+    is(|_not)_proper_subset, exclusion, composition, join_with_group. Group
+    4 had these 6: (|static_)substitution(|_in_(restriction|semijoin)).
+    Group 5 had these 5:
+    outer_join_with_(group|maybes|defaults|product|extension).
+
+    * (Set.pod, Core.pod) Moved all sys.Core.(Set|Maybe).\w+ functions to
+    Set.pod from Core.pod, renaming the 'Core' to 'Set'.
+
+    * (Sequence.pod, Core.pod) Moved all sys.Core.Seq.\w+ functions to
+    Sequence.pod from Core.pod, renaming the 'Core' to 'Sequence'.
+
+    * (Bag.pod, Core.pod) Moved all sys.Core.Bag.\w+ functions to Bag.pod
+    from Core.pod, renaming the 'Core' to 'Bag'.
+
+    * Following all the above moves, there were 56 operators (53 functions,
+    1 updater, 2 procedures) remaining in Core.pod; of those, the
+    'Universal' namespace had 5 functions and 1 updater, the 'Bool'
+    namespace had 6 functions, the 'Tuple' namespace had 10 functions, the
+    'Relation' namespace had 33 functions, and the 'Control' namespace had
+    2 procedures.
+
+2008-02-29  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.22.1 is released on CPAN as
+    Language-MuldisD-0.22.1.tar.gz.
+
+    * This release takes place on a rare February 29th.
+
+    * This release is minimalist and serves only to split up the file
+    Core.pod into itself plus 5 new files, all named Core/\w+.pod:
+    Types.pod, Types_Catalog.pod, Routines.pod, Functions_Scalar.pod,
+    Functions_Nonscalar.pod.  This split was done mainly to make the
+    information easier to maintain and to read.  Where the original file
+    was 168KB, the largest of the new files is 60KB.
+
+    * New file versions are: MuldisD.pm 0.22.1 and Core.pod 0.19.1 (all 5
+    Core/\w+.pod started at 0.19.1 also).  The other pre-existing versioned
+    files are unchanged.
+
+2008-02-26  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.22.0 is released on CPAN as
+    Language-MuldisD-0.22.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.22.0 and Core.pod 0.19.0 and
+    Basics.pod 0.15.0 and PTMD_Tiny.pod 0.14.0 and HDMD_Perl_Tiny.pod
+    0.11.0.  The other pre-existing versioned files are unchanged.
+
+    * (Basics.pod)  Added new "Numeric Types" pod subsection under TYPE
+    SYSTEM, which outlines what features concerning numeric data are and
+    are not provided by the Muldis D language core.  To summarize, the core
+    numerics are all exact radix-independent "bignum", suitable for all
+    magnitude of rational or floating-point numbers; no special values like
+    NaNs or infinities are provided, they are left to language extensions.
+
+    * (Core.pod, PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Renamed the rounding
+    method 'to_even' to 'half_even' and added 2 more rounding methods
+    'half_down' and 'to_inf'; the 2 complement 'half_up' and 'to_zero'.
+
+    * (Core.pod, PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Enhanced the Rat
+    numeric type so it now has 2 actual possreps, defined over Ints, called
+    'ratio' (2 attrs) and 'float' (3 attrs), rather than having zero actual
+    possreps and just a conceptual ratio one.  The 'float' possrep is
+    intended to make it easier to deal with numbers in scientific notation,
+    which is particularly useful for very large or very small numbers.
+    Added the 4 functions Rat.Rat_from_Int_triple and
+    Rat.(mantissa|radix|exponent) to reflect the 'float' possrep.  (But
+    note that these such functions are deprecated for generic scalar ones.)
+    In PTMD_Tiny, added a third format for specifying Rat literals, named
+    'float', which looks like 'Rat:float:9:314159*10^-5'; also renamed the
+    'pair' format to 'ratio'.  In HDMD_Perl_Tiny, updated the PHMD node for
+    Rat literals to add some 'float' formats and rename the 'pair' formats.
+
+2008-02-15  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.21.0 is released on CPAN as
+    Language-MuldisD-0.21.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.21.0 and Core.pod 0.18.0 and
+    Basics.pod 0.14.1 and PTMD_Tiny.pod 0.13.0 and HDMD_Perl_Tiny.pod
+    0.10.0.  The other pre-existing versioned files are unchanged.
+
+    * (MuldisD.pm, Basics.pod)  Updated the paradigm list of Muldis D to
+    add the word "homoiconic", which I just learned about today and which
+    is strongly descriptive of any "D" language, especially of Muldis D.
+
+    * (Basics.pod, Core.pod)  Renamed the 'treat' function to 'treated';
+    renamed the 'v' parameter of that and the 'is_value_of_type' function
+    to 'topic'.
+
+    * (Core.pod)  Updated the notes on a complete tuple|relation types'
+    cardinalities to say specifically how to calculate them, rather than
+    generally saying it is done using permutations.
+
+    * (Core.pod, PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Added new scalar
+    catalog data type sys.Core.Cat.Comment which represents a Muldis D code
+    comment that programmers can attach to various catalog elements; it is
+    also useful for preserving comments translated to/from other languages.
+    This type is the same as Text|Name but is disjoint from both.  Also
+    added a new Comment token or PHMD node type to both Tiny dialects.
+
+    * (Core.pod)  Updated most (11) of the tuple catalog types to add a
+    'comment' attribute to each, so code comments can be attached to code
+    in the most appropriate places possible, such as to individual
+    expression nodes or to whole statements or to whole routines.
+
+    * (Core.pod)  Updated the 2 functions sys.Core.Relation.un(wrap|group)
+    to add the new 'inner' argument, which resolves ambiguity of what
+    attribute names are being added for the result when the input relation
+    has no tuples (and the MST of every input relation attribute is Empty).
+
+    * (Core.pod)  Added the 4 functions
+    Relation.static_(extension|substitution(|_in_(restriction|semijoin)))
+    which are all simpler-syntax versions their 'static_'-less counterparts
+    where the values being added or substituted are the same for every
+    tuple, so there is no need to incur a conceptual function call per
+    input tuple.  So now every Muldis D function with a function parameter
+    now has an alternate specialized variant which handles certain common
+    cases, without a function parameter.
+
+    * (Core.pod)  Added the function sys.Core.Tuple.multi_update as a
+    short-hand for multiple update_attr; in fact it is necessary in cases
+    where the latter would otherwise be used but a type constraint would
+    require multiple attribute updates as a unit.
+
+    * (Core.pod)  Added the function sys.Core.Tuple.substitution_in_default
+    which should help users write less verbose Muldis D code where they can
+    just specify parts of a desired tuple value and let the rest be filled
+    in with default attributes for the desired tuple's type.
+
+    * (PTMD_Tiny.pod)  Updated specifier for called procedure name so it
+    can be in both formats that a Cat.NameChain can have.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Added support for
+    quasi-nonscalar literals as per nonscalar literals.
+
+2008-02-07  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.20.0 is released on CPAN as
+    Language-MuldisD-0.20.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.20.0 and Core.pod 0.17.2 and
+    Basics.pod 0.14.0 and PTMD_Tiny.pod 0.12.0 and HDMD_Perl_Tiny.pod 0.9.0
+    and SeeAlso.pod 0.3.4.  The other pre-existing versioned files are
+    unchanged.
+
+    * (MuldisD.pm, PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Renamed the constant
+    first part of a fully-qualified name format for a Muldis D language
+    variant, from 'MuldisD' to 'Muldis_D'.  This is to help not perpetuate
+    the myth that the normal/correct way to spell the language name is with
+    MuldisD (1 word) rather than Muldis D (2 words); I have already seen a
+    number of places using that shortened form, incorrectly.  Note that the
+    only reason the package name has them rammed together is because that
+    is normal practice for Perl namespaces, which the spec is written
+    under.
+
+    * (Basics.pod, Core.pod, PTMD_Tiny.pod, HDMD_Perl_Tiny.pod,
+    SeeAlso.pod)  Rewrote the "Representation" POD sub-section of the
+    "MULDIS D" POD main section of Basics.pod, which included renaming the
+    "Concrete" and "Abstract" dialect groupings to "Plain Text" and "Hosted
+    Data".  Then renamed any references to said groupings in all 5 files.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Rewrote most of the DESCRIPTION
+    pod in light of both the "Representation" change and MuldisD.pm's new
+    VERSIONING section, to conform to them and remove redundancies.  Also
+    smaller changes for the same reasons in other parts of the 2 Tiny
+    files.  In HDMD_Perl_Tiny.pod, split the GENERAL STRUCTURE pod section
+    into itself and LANGUAGE NAME, the latter portion being rewritten.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Shortened the syntax for a
+    Cat.Name value, which huffmanizes the grammars more and also allows
+    other improvements.  The cat_name grammar token no longer specifies a
+    "Cat.Name:" prefix, and the Cat.Name phmd node is now simply a Perl Str
+    rather than being a 2-element Array; any parsing context that is
+    expecting a generic literal grammar token or generic phmd node will
+    interpret a character string without metadata as being a Cat.Name.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Updated every nonscalar literal
+    grammar token and phmd node to remove its element that specifies a
+    predefined type name which constrains/defines the literal's heading.
+    This meta-data was verbosity that couldn't really be used except within
+    the DBMS, wherein it already existed there in code definitions that is
+    processing the literals.  As an exception to this straight-removal, for
+    plain relation literals, a new replacement feature was added for the
+    removed, which specifies the relation's attribute list when the
+    relation has no tuples to provide that information.  Given that this
+    attribute list is formatted differently than a tuple list, just one of
+    those things appears in a relation literal, and a parser can easily
+    distinguish between them.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Fleshed out or fixed the
+    syntaxes for specifying Cat.NameChain literals.
+
+    * (PTMD_Tiny.pod)  Added the syntax to call procedures, thus making a
+    PTMD_Tiny code file actually able to represent a Muldis D 'main'
+    routine, and hence actually represent a program; which is simply a
+    sequence of procedure calls following a language name declaration.  The
+    literal-defining syntax which still makes up most of the grammar is now
+    specifically for defining arguments for the procedure calls
+
+2008-02-07  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.19.1 is released on CPAN as
+    Language-MuldisD-0.19.1.tar.gz.
+
+    * This release is very minimalist, serving to rename a few files, and
+    do as little as possible otherwise.  It seemed best to do all actual
+    file content changes separately, so that it is easy to do
+    same-file-name diffs on consecutive distro versions and see what
+    content changed.
+
+    * Renamed Grammar.pod to Dialect/PTMD_Tiny.pod, and PerlHosted.pod to
+    Dialect/HDMD_Perl_Tiny.pod.  Correspondingly renamed the pseudo-package
+    names (what the NAME pod says) in those files.  Then updated all the
+    other distro files to refer to the 2 renamed by their new names.
+
+    * New file versions are: MuldisD.pm 0.19.1 and Core.pod 0.17.1 and
+    Basics.pod 0.13.1 and PTMD_Tiny.pod 0.11.1 and HDMD_Perl_Tiny.pod 0.8.1
+    and Hierarchical.pod 0.0.3.  The other pre-existing versioned files are
+    unchanged.
+
+2008-02-03  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.19.0 is released on CPAN as
+    Language-MuldisD-0.19.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.19.0 and Core.pod 0.17.0 and
+    Basics.pod 0.13.0 and Grammar.pod 0.11.0 and PerlHosted.pod 0.8.0 and
+    Hierarchical.pod and Conventions.pod 0.0.2.  The other pre-existing
+    versioned files are unchanged.
+
+    * (MuldisD.pm)  Added new main pod section VERSIONING which explains
+    the fully-qualified name formats of Muldis D variants in a generic
+    manner, so to help make the Muldis D code more future-proof.  Updated
+    the related DESCRIPTION paragraph.
+
+    * (Basics.pod, Core.pod)  Renamed the 2 operators is(|_not)_equal to
+    is(|_not)_identical, which is arguably less ambiguous on what they are
+    testing for.  Also renamed their parameters from v(1|2) to
+    (topic|other); the parameters are still commutative, though.
+
+    * (Core.pod)  Renamed the 2 operators is_(increase|decrease_or_same) to
+    is(|_not)_before, and eliminated the 2 operators
+    is_(decrease|increase_or_same); considering that all Muldis D
+    parameters are named rather than ordered, the eliminated operators are
+    completely redundant with invoking the 2 kept ones with the arguments
+    swapped, and order-specific variants are not helpful.  Also renamed
+    their parameters as per the is_identical change.  This elimination also
+    brings more parity with other parts of the language that considered
+    only-position-swapped variants useless, such as the presence of
+    is_subset but no is_superset.
+
+    * (Core.pod, Grammar.pod, PerlHosted.pod)  Eliminated the Cat.Order
+    type, which currently doesn't seem to be that useful after all (if this
+    judgement was wrong, it could be brought back later).  Eliminated the
+    corresponding grammar token and PHMD node kind.  Eliminated the 2
+    Ordered.(|reverse_)comparison functions.  Eliminated the 4
+    Cat.Order_\w+ functions.
+
+    * (Core.pod, Grammar.pod, PerlHosted.pod)  Renamed the Just type to
+    Single (and QuasiJust to QuasiSingle); while breaking from the
+    Haskell-inspired triple, it reads better for Muldis D, and is more
+    descriptive.
+
+    * (Core.pod)  Added 3 functions sys.Core.Maybe.(nothing|single|attr)
+    where the first 2 will select a Nothing or Single value respectively,
+    and the last one will extract the payload of a known-Just value.
+
+    * (Core.pod)  Renamed the 2 functions Int.(in|de)crease to
+    Int.(in|de)crement.
+
+    * (Core.pod)  Added an initial complement of 5 relational functions to
+    do half-outer natural joins in different ways,
+    Relation.outer_join_with_(group|maybes|defaults|product|extension);
+    also added inner join variant of the first, Relation.join_with_group.
+    The 2 'group' functions are intended as convenient tools for gathering
+    both parent and child records from a database using a single query
+    while avoiding duplication of the parent record values.
+
+    * (Core.pod, Hierarchical.pod, Conventions.pod)  Other minor updates.
+
+2008-01-25   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.18.0 is released on CPAN as
+    Language-MuldisD-0.18.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.18.0 and Core.pod 0.16.0 and
+    Basics.pod 0.12.0 and Grammar.pod 0.10.0 and PerlHosted.pod 0.7.0 and
+    Hierarchical.pod and Conventions.pod 0.0.1.  The other pre-existing
+    versioned files are unchanged.
+
+    * (Basics.pod)  Updated TYPE SYSTEM to remove the requirement where
+    every value must have exactly one most-specific-type / MST, which is
+    supposed to exist in a generic "D" language to assist some kinds of
+    polymorphism.  Although that restriction is still generally followed
+    for all system-defined types, and it would ideally be the case for all
+    user-defined types, the design of Muldis D does not generally require a
+    value to have a single MST in order to work, and moreover to enforce
+    the single-MST requirement would place an undue burden on users, who
+    would typically need to define many gratuitous types to satisfy it.
+
+    * (Basics.pod)  Updated the "Tuple Types and Relation Types" subsection
+    of TYPE SYSTEM to directly explain that any 2 zero-tuple relation
+    values of the same degree and with the same attribute names are
+    considered identical, regardless of the declared types of those
+    attributes in the code that produced them; every attribute of a
+    zero-tuple relation value has an MST of Empty, which is a subtype of
+    every other type.  A consequence is that every Set|Maybe or Seq or Bag
+    type's single zero-tuple value is identical to every other's one.
+
+    * (Core.pod)  Further echoing the design of Haskell's "Maybe" feature,
+    added 2 complementary subtypes of Maybe named
+    sys.Core.Relation.(Nothing|Just), which have exactly zero tuples or 1
+    tuple, respectively; the Nothing type has exactly 1 value of Maybe, and
+    the Just type has all the rest of them.  Nothing is Muldis D's answer
+    to the SQL NULL, in that it is meant as a marker that a value is
+    unknown or inapplicable; but unlike SQL, Nothing is an actual value,
+    and it does equal itself.  Just is the same container, that always does
+    hold exactly one value.  Also added the 2 subtypes Quasi(Nothing|Just).
+
+    * (Grammar.pod, PerlHosted.pod)  Took the explicit grammar token or
+    PHMD node type specific to the Maybe type, and replaced it with two
+    that are specific to the Nothing or Just types, where each
+    more-specialized replacement has simpler syntax than what it replaced.
+
+    * (Basics.pod, Core.pod, Grammar.pod, PerlHosted.pod)  Rounded out /
+    added better symmetry to the type system by adding the concept of a
+    quasi-scalar type and adding the system-defined QuasiScalar maximal
+    type.  Since there are no normal system-defined quasi-scalar types from
+    which that new maximal would draw a default value (all normal
+    quasi-scalar types are expected to be user-defined, if they exist at
+    all), also added the QuasiScalar.E_D subtype which exists soley for
+    that purpose.  Also added the system-defined Remnant maximal type, and
+    that already had the pre-existing ScaTupRel normal system-defined type
+    from which to draw a default value.
+
+    * (Core.pod)  Removed the ExprNode|ProcStmtArg attribute 'tk' and
+    InnerFunc attribute 'result_tk', due to seemingly not being too useful.
+
+    * (Core.pod)  Added constraint to trees of expression nodes or inner
+    routines such that any node which is the sole tree root in its context
+    must have the empty string as its name.  These 4 catalog data types now
+    have that constraint added: ExprTree, Inner(Func|Updater|Proc)Tree.
+    Removed the no-longer-needed 'root_\w+' attribute from each of these 4
+    catalog data types: InnerFunc, Func, Updater, Proc.  Some small fixes.
+
+    * (Core.pod)  Added the 2 functions Ordered.is_(in|de)crease_or_same,
+    which are to is_(in|de)crease what '>='|'<=' are to '>'|'<'.  With this
+    addition, all 6 of the common binary compare operators [=,!=,<,>,<=,>=]
+    are directly represented, so no need to emulate over several functions.
+
+    * (Core.pod)  Added the 3 functions Relation.disjoint_(insertion|union)
+    and Set.disjoint_insertion; they are the same as the non-disjoint
+    versions but that they fail if there are duplicate tuples|elements
+    rather than succeeding as a full or partial no-op.
+
+    * (Basics.pod, Core.pod, Hierarchical.pod, Conventions.pod)  Other
+    minor updates.
+
+2008-01-12   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.17.0 is released on CPAN as
+    Language-MuldisD-0.17.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.17.0 and Core.pod 0.15.0 and
+    Grammar.pod 0.9.0 and PerlHosted.pod 0.6.0.  The other pre-existing
+    versioned files are unchanged.  Added 2 new files
+    lib/Language/MuldisD/Hierarchical.pod and
+    lib/Language/MuldisD/Conventions.pod, each of which start at version
+    0.0.0.
+
+    * (Core.pod)  Updated the Cat.InnerFunc type to add a couple missing
+    attributes, result_tk and result_type.
+
+    * (Grammar.pod, PerlHosted.pod)  Removed the explicit grammar tokens or
+    PHMD node types that were specific to these 7 Muldis D types: UInt,
+    PInt, URat, PRat, NEBlob, NEText, Database.  So now just these 14 ones
+    are directly supported: Bool, Int, Rat, Blob, Text, Tuple, Relation,
+    Set, Maybe, Seq, Bag, Cat.Name, Cat.NameChain, Cat.Order.  This change
+    was made to remove unnecessary complexity from the grammar/PHMD specs;
+    now for the most part there is now only 1 distinct grammar token or
+    PHMD node type for each core Muldis D root type (so the removed are
+    covered by their remaining parents); non-root types generally only have
+    their own when they also have a syntactic short-hand to take advantage
+    of.  Any otherwise orphaned examples were updated to the parent syntax.
+    Also removed the 'index' variant of Seq from Grammar, leaving just the
+    ordered variant, which was all PerlHosted had anyway.  And updated the
+    'count' variant of Bag to do itself what it had used a PInt token/node
+    to do.
+
+    * (Grammar.pod, PerlHosted.pod)  Upgraded the specification formats for
+    rationals so that now any rational value can be directly selected, not
+    just those whose denominators are powers of 2..36; for example, you can
+    now select the rational 1/43 directly where you couldn't before.  To
+    facilitate this, there are now 2 formats you can define a rational in,
+    the previous 'N.N' format, called 'radix', and the new 'N/N' format,
+    called 'pair'; in PerlHosted, the latter is given as 2 elements, not 1.
+
+    * (Grammar.pod, PerlHosted.pod)  Added grammar tokens and PHMD node
+    types for all the not yet covered enumerated scalar catalog types:
+    Cat.E_RM, Cat.E_TK, Cat.E_TDM, Cat.E_ENK, Cat.E_PSAK.  So that fills in
+    all the remaining gaps in those files and it is now possible to either
+    directly select any Muldis D value or directly define the system
+    catalog entries of any Muldis D code that would.
+
+    * (Hierarchical.pod)  This new file has begun to outline an additional
+    official dialect of Muldis D, which is terse and intended for normal
+    use for writing code in, or writing code examples in, unlike the
+    'catalog' dialect which is damningly verbose for normal use.
+
+    * (Conventions.pod)  This new file is a style guide, and mainly starts
+    off with suggesting good ways to name entities.
+
+    * (Core.pod)  Other minor updates.
+
+2008-01-05   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.16.0 is released on CPAN as
+    Language-MuldisD-0.16.0.tar.gz.
+
+    * This release coincides with the 5th anniversary of the first CPAN
+    release of the first Muldis D / Muldis DB progenitor; DBIx::Portable
+    version 0.01 was released on 2003 January 5th.
+
+    * New file versions are: MuldisD.pm 0.16.0 and Core.pod 0.14.0 and
+    Basics.pod 0.11.0 and Grammar.pod 0.8.0 and PerlHosted.pod 0.5.0.  The
+    other pre-existing versioned files have their version numbers all
+    incremented by 0.0.1.
+
+    * (Basics.pod, Core.pod)  Renamed the routine kinds update_operator and
+    inner_update_operator to the shorter 'updater' and 'inner_updater',
+    though the terms 'update operator' and 'updater' will continue to be
+    interchangeable.  Also renamed 6 corresponding catalog types to
+    UpdStmt, MultiUpdStmt, InnerUpdater, InnerUpdaterSet, InnerUpdaterTree,
+    Updater, and renamed any referencing attributes as appropriate.
+
+    * (Core.pod)  Reformatted all the routine signatures to look more
+    natural for Muldis D, rather than being mostly identical to the Perl 6
+    routine signature format.  The format for function declarations is now
+    "function foo result Bar params { baz(Quux) }" rather than "foo of Bar
+    (Quux $baz)", and the format for updater or procedure declarations is
+    now "updater|procedure foo update { fi(Fum) } read { baz(Quux) }"
+    rather than "foo (UPD: Fum $fi ; RO: Quux $baz)".  Note that this
+    version may not be final, and another reformat may likely come, though
+    that one would likely just consist of different keywords to replace
+    [result, params, update, read] and not other changes; feedback on this
+    is welcome.
+
+    * (Core.pod)  Removed the 3 core pseudo-types
+    sys.Core.Some.(Universal|ScaTupRel|Ordered), and added the 1 core
+    remnant type sys.Core.Remnant.ScaTupRel; the new one replaces one of
+    the removed, and the other 2 removed are now just redundant with the
+    normal Universal and Ordered types.  It seemed rather arbitrary that
+    some contexts (like routine signatures) which couldn't actually take
+    all combinations of their parameter types would in some cases have said
+    parameters documented as pseudo-types, other times as regular types.
+
+    * (Core.pod, Grammar.pod, PerlHosted.pod)  Reversing one change made
+    for release 0.9.0, a Cat.Name is once again allowed to be the empty
+    string (like 'Text', not 'NEText'), and Cat.NameChain parts likewise.
+
+    * (Core.pod, Grammar.pod, PerlHosted.pod)  Officially demoted the Order
+    type from a generic type to a catalog-specific type, since it isn't
+    really ever expected to be used in user data, but just routine
+    definitions.  It was renamed from sys.Core.Order.Order to
+    sys.Core.Cat.Order, and the definition of the type was moved from the
+    generic scalars section to the catalog scalars section; it did not get
+    further renamed to 'E_FOO' as Order is still more special than the
+    average enum type as per the enum type Bool, if nothing else than for
+    directly corresponding to a concept in multiple other programming
+    languages such as Perl 6.  In Core.pod, added new main pod section
+    SYSTEM-DEFINED CORE CATALOG FUNCTIONS and moved the Order routines
+    there, renaming each of them from Order.foo to Cat.Order_foo in the
+    process.  In Grammar.pod, renamed the 'order' token to 'cat_order' and
+    moved it next to the existing catalog types; made other appropriate
+    updates there, and updates and moves in PerlHosted.pod.
+
+    * (Core.pod)  Updated any routine signatures that specified some
+    collection-type parameters as Foo{Bar} so they spell it FooAsBar
+    instead.  Also added a few explicitly system-defined Spec.FooOfBar that
+    didn't previously exist but were referred to by said routines.
+
+    * (Core.pod)  Renamed the 3 scalar types Spec.PInt(1_4|2_(N|36)) to
+    Cat.PInt(1_4|2_(N|36)), moved to catalog types.
+
+    * (Core.pod)  Renamed (from 'Spec') or added the following 9
+    quasi-catalog incomplete types, which are used only as the declared
+    types of some system-defined N-ary relational operators; all are in the
+    new package 'sys.Core.QuasiCat': (Set|Bag)Of(Tuple|Relation), SetOfBag,
+    MaybeOfTuple, SeqOfSeq, QuasiSetOf(Tuple|Relation).  Moved to a new doc
+    section SYSTEM-DEFINED CORE QUASI-CATALOG PARAMETERIZED TYPES.
+
+    * (Core.pod)  With the above 2 groups removed from 'Spec', that package
+    is now simply for conveniently system-defined collection-of-scalar
+    types that are likely to be used in user data, and many of which are
+    the declared types of N-ary system-defined scalar operators.  Added any
+    of the following 32 subtypes that didn't previously exist:
+    sys.Core.Spec.(Set|Maybe|Seq|Bag)Of(Scalar|Ordered),
+    sys.Core.Spec.(Set|Maybe|Seq|Bag)Of(Bool|Int|UInt|Rat|Blob|Text).
+
+    * Brought the TODO file in line with recent progress, replacing the few
+    broad-scope line items with more detail-scope ones, added some
+    speculation items.
+
+    * Incremented all copyright year range-ends to 2008.
+
+    * (Core.pod)  Other minor updates.
+
+2007-12-31   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.15.0 is released on CPAN as
+    Language-MuldisD-0.15.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.15.0 and Core.pod 0.13.0 and
+    Basics.pod 0.10.3.  The other pre-existing versioned files are
+    unchanged.
+
+    * (Core.pod)  Renamed the type sys.Core.Int.PInt2_N to
+    sys.Core.Spec.PInt2_N and moved its declaration downwards.
+
+    * (Core.pod)  Generally speaking, Muldis D now requires that for any
+    defined relation type, there is a corresponding (same heading) tuple
+    type also defined; the reverse is not true, though.  To be specific,
+    any relation type is defined over the type that its tuples must be; a
+    tuple type definition covers the minimal required relational heading.
+
+    * (Core.pod)  Added the 6 tuple type factories
+    (|Quasi)(Set|Seq|Bag)Elem, which have the same headings as the 6
+    existing relation type factories (|Quasi)(Set|Seq|Bag).
+
+    * (Core.pod)  Renamed Cat.(|SetOf)NameMap to Cat.(|SetOf)NameExprMap,
+    and renamed its attributes from 'key','value' to 'name','expr'.  Also,
+    as a reversal of one change made for release 0.8.0, renamed
+    Cat.BiDiNameMap to Cat.AttrRenameMap, and renamed its attributes from
+    'key','value' to 'before','after'.  The latter is therefore no longer a
+    subtype of (the first of) the former.
+
+    * (Core.pod)  Fleshed out the catalog types so that they can now fully
+    define expression trees and functions (except where new data types are
+    also required).  Renamed the enumerated type Cat.E_EK to Cat.E_ENK.
+    Renamed the tuple type Cat.Expr to Cat.ExprNode, and added a 9th 'tk'
+    attribute to it.  Added 6 new tuple|relation catalog types Cat.ExprSet,
+    Cat.ExprTree, Cat.InnerFunc, Cat.InnerFuncSet, Cat.InnerFuncTree,
+    Cat.Func.
+
+    * (Core.pod)  Fleshed out the catalog types so that they can now fully
+    define multi-update statements and multi-update operators (as per
+    above).  Building on the expr/func stuff, added 6 new tuple|relation
+    catalog types Cat.UpdateStmt, Cat.MultiUpdateStmt, Cat.InnerUpdateOper,
+    Cat.InnerUpdateOperSet, Cat.InnerUpdateOperTree, Cat.UpdateOper.  Also
+    added 2 more values to the Cat.E_ENK type, '(upd|ro)_param', and then
+    generalized Cat.Expr so it can be used with subject-to-update
+    params/args to define pseudo|virtual-variables.  So the composition of
+    an update operator definition is mostly expression nodes like with the
+    composition of functions.  Note that presumably the Muldis D provision
+    of updateable virtual relvars (aka SQL's "views") would be provided as
+    an abstraction over functions and update operators, or some such.
+
+    * (Core.pod)  Fleshed out the catalog types so that they can now fully
+    define non-atomic statements and procedures (as per above).  Building
+    on the expr/func/upd stuff, added 1 new scalar catalog type Cat.E_PSAK
+    and 7 new tuple|relation catalog types Cat.ProcStmtArg,
+    Cat.ProcStmtArgSet, ProcStmt, Cat.SeqOfProcStmt, InnerProc,
+    Cat.InnerProcTree, Cat.Proc.
+
+    * (Core.pod)  Added 8 generic reduction operators
+    'sys.Core.(Relation|Set|Seq|Bag).(|maybe_)reduction', so users can more
+    easily write their own N-ary reduction operators.
+
+    * (Core.pod)  Added initial complement of 11 Seq-specific functions,
+    besides the 2 aforementioned: 'value', 'update_value', 'insertion',
+    'deletion', 'is_element', 'is_not_element', 'catenation', 'repeat',
+    'reverse', 'is_subseq', 'is_not_subseq'.
+
+    * (Basics.pod, Core.pod)  Other minor updates.
+
+2007-12-18   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.14.0 is released on CPAN as
+    Language-MuldisD-0.14.0.tar.gz.
+
+    * This release coincides with the 20th birthday of Perl; Larry Wall
+    released Perl 1 to the public on 1987 December 18th.  Moreover, on this
+    20th birthday is the general/stable release of Perl 5.10, its best yet.
+
+    * New file versions are: MuldisD.pm 0.14.0 and Core.pod 0.12.0 and
+    Basics.pod 0.10.2 and Grammar.pod 0.7.2 and PerlHosted.pod 0.4.2.  The
+    other pre-existing versioned files are unchanged.
+
+    * (Basics.pod)  Small updates to the ROUTINES main section.
+
+    * (Core.pod, Grammar.pod, PerlHosted.pod)  Added 4 new trivial data
+    type definitions 'sys.Core.(|Quasi)(Tuple|Relation).D0', some of which
+    were previously referenced but not defined; also corrected any
+    references that said 'D0C(0|1)' to just say'D0'.
+
+    * (Core.pod)  Added new pseudo-type sys.Core.Some.ScaTupRel, which is
+    essentially a union type over Scalar|Tuple|Relation; it is for tersely
+    refering to the general type of a scalar|tuple|relation attribute.
+
+    * (Core.pod)  Added 3 new Int functions, 'increase' and 'decrease'
+    (meaning '++' and '--'), and 'factorial'.
+
+    * (Core.pod)  Added 2 new Tuple functions 'attr_from_Tuple' and
+    'Tuple_from_attr', which work with degree-one tuples; they are
+    analagous to the 2 "(T|R) from (R|T)" Relation functions that work with
+    cardinality-one relations.  Also added 2 new Tuple functions 'attr' and
+    'update_attr', which read or write an attribute in an arbitrary tuple.
+
+    * (Core.pod)  Added new Relation function 'power_set', which results in
+    a Set of all subsets of its Relation argument (which could itself be
+    just a Set).  (Note: Not sure whether or not this is actually useful.)
+
+    * (Core.pod)  Added descriptions to the Relation functions
+    group|ungroup, updated those of tuple wrap|unwrap.  Added 3 new
+    complementary tuple|relation functions cmpl_wrap|cmpl_group.
+
+    * (Core.pod)  Fleshed out the Relation function 'substitution', and
+    added 2 new relational functions,
+    'substitution_in_(restriction|semijoin)'.  While 'substitution' will
+    transform all tuples unconditionally, the 2 new 'in' functions let one
+    keep the substitutions within a subset of the tuples.
+
+    * (Core.pod)  Added new Relation function 'map', which provides a
+    convenient one-place generalization of per-tuple transformations that
+    otherwise might require the chaining of up to a half-dozen other
+    operators like restriction, extension, and rename; like Perl's "map",
+    or SQL's generic select-list.
+
+    * (Core.pod)  Fleshed out the Relation function 'summary', giving it a
+    full parameter list and description.  Note that this function is only
+    intended to be used in situations where the corresponding SQL would
+    involve a GROUP BY, and there is to be one result tuple per group,
+    which also means an empty result relation from an empty input relation.
+    Those who want their summary to be one tuple for the entire input, even
+    an empty one, would just invoke the N-ary / aggregate operators
+    directly without doing it by way of 'summary'.
+
+    * (Core.pod)  Added 2 new Relation functions 'is_(|not_)proper_subset'.
+
+    * (Core.pod)  Added initial complement of 6 Set-specific functions:
+    'is_member', 'is_not_member', 'insertion', 'deletion', 'Set_from_wrap',
+    'Set_from_attr'.  The first 4 are just short-hands for their Relation
+    counterparts, having tuple attribute values as parameters rather than
+    whole tuples.  The 'Set_from_attr' is intended to be the most
+    convenient way to pull out values from an attribute for feeding to an
+    aggregate function; it is short-hand for simple relational operations.
+    The 'Set_from_wrap' ought to be convenient for other reasons, or if not
+    then its counterparts under Bag or Seq perhaps will be.
+
+    * (Core.pod)  Added initial complement of 2 Maybe-specific functions:
+    'attr_or_default', 'attr_or_value'.  They are intended to be like
+    Perl's defined-or functions, resulting in their only/main argument's
+    content if it isn't empty, or a default value / second argument if it
+    is; alternately these are like SQL's 2-argument COALESCE or NVL or
+    IF_NULL etc; these should be useful in defining outer-joins.
+
+    * (Core.pod)  Added initial complement of 17 Bag-specific functions:
+    'is_member', 'is_not_member', 'insertion', 'deletion', 'Bag_from_wrap',
+    'Bag_from_attr', 'cardinality', 'is_subset', 'is_not_subset',
+    'is_proper_subset', 'is_not_proper_subset', 'union', 'intersection',
+    'difference', 'count', 'Set_from_Bag', 'Bag_from_Set'.  The first 6 are
+    as per the 6 set-specific functions.  The next 8 are as per the
+    same-named Relation functions but that they have special semantics that
+    take > 1 multiplicity of values into account; the Relation ones work as
+    is for Set, but not as typically desired for Bag.  Then 'count' says
+    how many occurrances (which may be zero) of a value are in a Bag.  The
+    last 2 are short-hands for moving data between Set and Bag types.
+
+    * (Core.pod)  Other minor updates.
+
+2007-12-09   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.13.0 is released on CPAN as
+    Language-MuldisD-0.13.0.tar.gz.
+
+    * As of this release, the in-code $VERSION declarations of all Perl 5
+    packages in this distribution are changed to match the X.Y.Z format
+    that the same packages' own VERSION POD had all along (the old in-code
+    format was X.00Y00Z).  A consequence of this change is that this
+    distribution has gained an external dependency on the Perl 5 module
+    'version', which is not bundled with Perl 5.8.x; however, it *is*
+    bundled with Perl 5.10.x, so if you are using that newer Perl, you
+    won't have to install 'version' separately from CPAN.
+
+    * New file versions are: MuldisD.pm 0.13.0 and Core.pod 0.11.0.  The
+    other pre-existing versioned files are unchanged.
+
+    * (Core.pod)  Renamed some tuple|relation functions so they describe
+    the function's result rather than its action, or are otherwise more
+    improved; that is, they are less verbs and more nouns or adjectives:
+    'exists' => 'is_member', 'insert' => 'insertion', 'delete' =>
+    'deletion', 'evacuate' => 'empty', 'project' => 'projection', 'remove'
+    => 'cmpl_projection', 'tclose' => 'transitive_closure', 'restrict' =>
+    'restriction', 'extend' => 'extension', 'summarize' => 'summary',
+    'substitute' => 'substitution', 'compose' => 'composition'.  Also
+    renamed the enumerated value Cat.E_TDM:restrict to
+    Cat.E_TDM:restriction.  Also added 2 new complementary functions
+    sys.Core.Relation.(is_not_member|cmpl_restriction), and added
+    sys.Core.Relation.universal to go with sys.Core.Relation.empty.
+
+    * (Core.pod)  Renamed some blob|text functions: 'catenate' =>
+    'catenation', 'fold_case_to_(upper|lower)' =>
+    'case_folded_to_(upper|lower)', 'trim_whitespace' =>
+    'whitespace_trimmed'.  Also renamed some ordered functions:
+    '(|reverse_)compare' => '(|reverse_)comparison'.
+
+2007-11-23   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.12.0 is released on CPAN as
+    Language-MuldisD-0.12.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.12.0 and Basics.pod 0.10.1 and
+    Core.pod 0.10.0.  The other pre-existing versioned files are unchanged.
+
+    * (Core.pod)  Added new core functions Ordered.is_(in|out)side_range,
+    which provide generic range checking for any Ordered subtype.
+
+    * (Core.pod)  Renamed the 2 functions (Blob|Text).contains each to
+    .is_substr, and renamed Relation.contains to .is_subset; also added 3
+    new functions that are 'is_not' variants of the first 3.
+
+    * (Core.pod)  Added new enumerated type Cat.E_RM (rounding
+    method), and then merged the 5 old specialized functions
+    Rat.round_(half_up|to_(even|floor|ceiling|zero)) into the 1 new generic
+    function Rat.Int_from_Rat, whose second parameter is of the new type;
+    also renamed Rat.rebase to Rat.round.
+
+    * (Core.pod)  Added new ternary tuple type Cat.RatRoundRule which
+    defines a controlled coercion of a real number into a rational number
+    having a specific radix and precision.  (Also added new type
+    Int.PInt2_N, an integer > 1, which supports it.)  Then refactored the 4
+    functions Rat.(round|log|natural_(power|log)) to have 1 parameter of
+    the new tuple type rather than 3 round-guiding parameters.
+
+    * (Basics.pod, Core.pod)  Small typo fixes.
+
+2007-11-19   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.11.0 is released on CPAN as
+    Language-MuldisD-0.11.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.11.0 and Basics.pod 0.10.0.  The
+    other pre-existing versioned files are unchanged.
+
+    * (Basics.pod)  Updated multiple sections to indicate express support
+    for multi-threading within Muldis D virtual machines, where the
+    transaction trees of the in-DBMS processes are mutually autonomous, but
+    synchronized by the DBMS when they use the same depots.  Updated
+    sections were mainly ENVIRONMENT, and TRANSACTIONS AND CONCURRENCY, and
+    RESOURCE MODULARITY AND PERSISTENCE, and ENTITY NAMES.  The top level
+    entity namespace 'fed' is now specifically the depot mounts by a single
+    in-DBMS process, not all depot mounts in the whole DBMS.
+
+2007-11-08   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.10.0 is released on CPAN as
+    Language-MuldisD-0.10.0.tar.gz.
+
+    * New file versions are: MuldisD.pm 0.10.0 and Core.pod 0.9.2 and
+    Basics.pod 0.9.0 and Grammar.pod 0.7.1 and PerlHosted.pod 0.4.1.  The
+    other pre-existing versioned files are unchanged.
+
+    * (MuldisD.pm)  Updated the DESCRIPTION to mention Muldis D in
+    retrospect having some designs in common with FoxPro or xBase.
+
+    * (Basics.pod)  Added a TERMINOLOGY item for "universal" to specify
+    that Muldis D does not allow sets to be members of themselves, and more
+    generally that no type or value definitions may be recursive; so
+    "universal" is only the common superset of sets that these rules allow;
+    some philosophers may say that it is possible for sets to have
+    themselves as members, so this update specifies that Muldis D does not.
+
+    * (Basics.pod)  Updated the 'main' routine kind to specify that it can
+    not see or update any global variables, which now leaves
+    '(|inner_)procedure' as the only kind that can; also that 'main' should
+    just be loading/invoking depots, where all other user-defined code is.
+
+    * (Basics.pod)  Added new RESOURCE MODULARITY AND PERSISTENCE main
+    section.  Removed the whole concept of user-defined entities being
+    allowed to exist outside of depots; now all user-defined entities must
+    exist in depots.  Also, the conceptual role of depots has been expanded
+    to cover general user code libraries, and are not mainly just for data.
+    Also, all user-defined relvars|types|invokable-routines now live in
+    packages, rather than users having the choice for them to be in or out;
+    but package members can also be public, so no actual choice is lost.
+
+    * (Basics.pod)  Updated ENTITY NAMES; removed the 'app' top namespace.
+
+    * (Basics.pod)  Updated ENTITY NAMES to add the 'imp' top level
+    namespace, which is like 'sys' in purpose but that while 'sys' is just
+    for types and routines that are defined by the standard Muldis D
+    specification, 'imp' is for other, non-standard types and routines that
+    a Muldis D implementation has added, and which are specific to that
+    implementation.  Also added is the new relcon namespace 'cat.impl',
+    which is to 'imp' what 'cat.system' is to 'sys'.  It is expected that
+    the catalog relvars under cat.(mount|foreign|interp), whose structures
+    were already expected to be implementation-specific, would likely need
+    to be defined in terms of (typically named nonscalar) data types that
+    are also implementation-specific, and so those are invokable under
+    'imp'.  Besides that main intended purpose of 'imp', a Muldis D
+    implementation that wants to embrace and extend Muldis D with further
+    types and routines intended for user data, should declare them there.
+
+    * (Basics.pod, Grammar.pod, PerlHosted.pod)  Updated ENTITY NAMES, and
+    other references, to rename the 'glo' (global) top-level entity
+    namespace to 'fed' (federation), for better accuracy; likewise, renamed
+    the 'sch' (schema) top-level namespace to 'sdp' (subdepot).
+
+    * (Basics.pod)  Fleshed out ENTITY NAMES with new documentation
+    subsections that describe the various name spaces, and interpretation.
+
+    * (Core.pod)  Added comment to Relation.Set mentioning that a set type
+    is essentially the power set of the type of its 'value' attribute.
+
+2007-10-11   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.9.1 is released on CPAN as
+    Language-MuldisD-0.9.1.tar.gz.
+
+    * New file versions are: MuldisD.pm and Core.pod 0.9.1.  The other
+    pre-existing versioned files are unchanged.
+
+    * (Core.pod)  Each main type declaration now had its own level-2
+    heading rather than it being a bullet-list item.
+
+    * Fleshed out the tail of this Changes file with a summary pre-release
+    (rel. 2007 June) history of Muldis D; going from mid-2002 to mid-2007.
+
+2007-10-09   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.9.0 is released on CPAN as
+    Language-MuldisD-0.9.0.tar.gz.
+
+    * New file versions are: MuldisD.pm and Core.pod 0.9.0 and Basics.pod
+    0.8.0 and Grammar.pod 0.7.0 and PerlHosted.pod 0.4.0.  The other
+    pre-existing versioned files are unchanged.
+
+    * (MuldisD.pm, Grammar.pod, PerlHosted.pod)  Added a paragraph to the
+    DESCRIPTION of MuldisD.pm that gives the fully-qualified name of the
+    official/original (not embraced and extended) Muldis D language spec
+    that this distro represents, and gives instructions for people to
+    change at least its authority portion of the name if they release their
+    own modifications to the language spec, and instructs for Muldis D code
+    to embed the long name of the spec they are written to.  In Grammar.pod
+    and PerlHosted.pod, updated their formats for specifying the language
+    long name they conform to; in both cases, the root token or PHMD node
+    is now a simple sequence of these 4 parts: 'MuldisD', the authority
+    string, the version number, and the payload; PerlHosted.pod also gives
+    an alternative 3 parts version for up-front VM config, rather than
+    repeating it with every payload later.
+
+    * (Basics.pod)  Overhauled what kinds of Muldis D routines there are,
+    and consequences thereof; the largest updates were to the ROUTINES
+    section.  A hierarchical diagram was added to ROUTINES to group the
+    kinds by similarity.  The 3 kinds function|update_operator|procedure
+    gained inner_\w+ counterparts, which are the same but soley live within
+    and comprise the definitions of other routines, while the initial 3 are
+    now strictly not so.  All kinds of constraint routines are now pure
+    deterministic functions (that don't see globals), like just the
+    type_constraint used to be, which is fine since entire databases are
+    defined as being types or variables (so now only procedure|main can see
+    globals).  The distinct state_constraint is now gone, merged into
+    type_constraint, each of which is tied to a data type definition and
+    runs at value selection time.  Now, a transition_constraint is tied to
+    a variable and runs when it is updated, it has 2 arguments holding the
+    before|after state.  Updated ENTITY NAMES to split the 'lex' namespace
+    into itself and 'inn', the latter being used to invoke inner routines,
+    and the former being just for true lexicals.  Also updated TRANSACTIONS
+    AND CONCURRENCY.
+
+    * (Basics.pod, Core.pod)  In Core.pod, added a new SYSTEM-DEFINED CORE
+    PROCEDURES section, and its first 2 entries,
+    sys.Core.Control.(fail|try_catch), the use of which is now how you
+    generally do explicit transactions; appropriate parts of Basics.pod
+    were updated to mention/explain this.
+
+    * (Core.pod)  Renamed the operator sys.Core.Relation.not to
+    sys.Core.Relation.negation, for better symmetry with other set ops.
+
+    * (Basics.pod)  Updated the TYPE SYSTEM section to add a new main type
+    category called "remnant types", which is composed of all types that
+    don't qualify as a type of the previous 5 categories.  Generally
+    speaking, a remnant type is the declared type of each attribute of a
+    quasi-nonscalar type, when said attribute isn't one of the special
+    system-defined maximal types.  Also added the concepts of "exclusion"
+    types and "negation" types to complement the 3 existing concepts of
+    union|intersection|difference types.
+
+    * (Core.pod, Grammar.pod, PerlHosted.pod)  Renamed the catalog data
+    types 'Cat.ShortName' and 'Cat.LongName' to 'Cat.Name' and
+    'Cat.NameChain' respectively, and updated their definitions; a Cat.Name
+    must now be a non-empty string, Cat.NameChain parts must be likewise,
+    and updated the escaping rules for the latter.  In Core.pod, updated
+    their documentation, and added 2 more types 'Cat.NESeqOfName' and
+    'Cat.FlattenedNameChain' which now are part of the definition of
+    'Cat.NameChain'.  In Grammar.pod, updated the grammar concerning entity
+    names so they are treated differently than text data; also added
+    examples of both to EXAMPLES.  In PerlHosted.pod, added for the first
+    time definitions of Cat.Name and Cat.NameChain PHMD nodes, as the new
+    section CATALOG SCALAR VALUES; also, "type name" portions of older PHMD
+    nodes now can take both payload formats of Cat.NameChain nodes.  Also
+    in Core.pod, renamed any other types having 'ShortName' to remove the
+    'Short'.
+
+    * (Core.pod)  Added new catalog data type Cat.Type plus new supporting
+    types: Cat.E_TK, Cat.E_TDM, Cat.NameTypeMap, Cat.SetOfSetOfName,
+    Cat.SetOfNameChain.
+
+    * (Core.pod)  Added new data type 'Cat.Exception' which holds the
+    details of a thrown exception, but it lacks a description for now.
+
+    * (Basics.pod)  Removed the CATALOGS main section, and the "Temp Old
+    Entity Names Docs" subsection of ENTITY NAMES; these texts were very
+    out of date and will be replaced later.
+
+2007-09-23   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.8.1 is released on CPAN as
+    Language-MuldisD-0.8.1.tar.gz.
+
+    * From now on, the file version of MuldisD.pm will be kept in sync with
+    the distribution version, regardless of whether that file had otherwise
+    been changed since the previous release.
+
+    * New file versions are: MuldisD.pm and Core.pod 0.8.1 and Grammar.pod
+    0.6.1 and PerlHosted.pod 0.3.1.  The other pre-existing versioned files
+    are unchanged.
+
+    * (Core.pod, Grammar.pod, PerlHosted.pod)  Made various minor
+    documentation bug-fixes or updates.
+
+    * (Core.pod)  Updated the SYSTEM-DEFINED CORE SCALAR FUNCTIONS sections
+    for enumerated types to consolidate the per-value selector function
+    documentation for brevity; the functions themselves were unchanged.
+
+    * (Core.pod)  Updated all the system-defined function signatures to
+    remove the 'RO:' text by parameters; that text was superfluous because
+    all parameters of all functions are always read-only.  The 'UPD:' and
+    'RO:' text in system-defined procedure signatures remains, since a
+    procedure can have either/both subject-to-update or read-only params.
+
+2007-09-22   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.8.0 is released on CPAN as
+    Language-MuldisD-0.8.0.tar.gz.
+
+    * New file versions are: Core.pod 0.8.0 and Basics.pod 0.7.0 and
+    Temporal.pod and Spatial.pod 0.5.1 and MuldisD.pm 0.5.0 and SeeAlso.pod
+    0.3.2 and PerlHosted.pod 0.3.0.  The other pre-existing versioned files
+    are unchanged.
+
+    * (MuldisD.pm, Basics.pod)  Updates to various main/introductory
+    documentation.  Changed the NAME of Basics.pod to "10,000 Mile View of
+    Muldis D" from "Design document of the Muldis D language" as it isn't
+    the intro file anymore (MuldisD.pm is instead).  Moved the large
+    PREFACE and DESCRIPTION sections from Basics.pod to MuldisD.pm, then
+    did a small amount of editing to them; Basics.pod then gained small
+    replacements.  Further minor edits to other sections.
+
+    * (Core.pod, PerlHosted.pod, Temporal.pod, Spatial.pod)  More
+    system-defined package consolidation: Empty merged into Universal;
+    Database merged into Tuple; (Set|Maybe|Seq|Bag) merged into Relation;
+    Quasi(Set|Maybe|Seq|Bag) merged into QuasiRelation.
+
+    * (Basics.pod)  Added indenting to the ENTITY NAMES hierarchy.
+
+    * (Core.pod)  Moved the documentation sections about non-catalog
+    specialized subtypes below their counterpart sections on catalog types.
+
+    * (Core.pod)  Renamed the data types Cat.(ShortNameSet|AttrRenameMap)
+    to Cat.(SetOfShortName|BiDiShortNameMap); the latter's attributes were
+    also renamed.
+
+    * (Core.pod)  Fleshed out the set of catalog data types by adding these
+    new ones: Cat.ScalarLiteral, Cat.E_EK, Cat.Expr, Cat.ShortNameMap,
+    Cat.SetOfShortNameMap.
+
+    * (SeeAlso.pod)  Reflected that Muldis DB is now LGPL rather than GPL.
+
+2007-09-11   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.7.0 is released on CPAN as
+    Language-MuldisD-0.7.0.tar.gz.
+
+    * Removed the file Catalog.pod, after moving its main content into the
+    files Basics.pod and Core.pod, and removed any references to
+    Catalog.pod in other files.  The CATALOGS documentation section was
+    moved into Basics.pod, below ENTITY NAMES.  The TYPE SUMMARY section
+    was merged into its counterpart in Core.pod.  The 2 SYSTEM-DEFINED CORE
+    CATALOG (|NON-)SCALAR DATA TYPES sections were moved into Core.pod, at
+    the end of all the type definitions.
+
+    * New file versions are: Core.pod 0.7.0 and Basics.pod and Grammar.pod
+    0.6.0 and Temporal.pod and Spatial.pod 0.5.0 and PerlHosted.pod 0.2.0.
+    The other pre-existing versioned files are unchanged.
+
+    * (Basics.pod)  Chopped the 'main' routine kind down so that it is now
+    only applicable to a non-hosted Muldis D application; hosted (eg, by
+    Perl) Muldis D programs don't have 'main' Muldis D routines.
+
+    * (Basics.pod, Core.pod)  Changed the database type so its attributes
+    may now be composed of not only relations, but databases (the leaves of
+    this recursion are all relations); the reason for this was to provide a
+    more elegant way to represent the common convention of dividing a
+    relational database into schemas for better entity management.
+
+    * (Basics.pod)  Started rewrite of the ENTITY NAMES documentation; for
+    now there is just the addition of a new namespace hierarchy.  The new
+    hierarchy has the following 8 top-level names: cat, sys, app, glo, dep,
+    sch, pkg, lex.  The old namespaces map to the new ones as follows:
+    sys.cat -> cat.system ; nat.cat -> cat.native ; mnt -> cat.mount ;
+    foreign -> cat.foreign ; interp -> cat.interp ; sys.(type|rtn).* ->
+    sys.(Core|<extension>).<package>.* ; nat.(data|type|rtn).* ->
+    (app|glo.<depot>).* ; lex.* -> lex.* .  The top-level names [dep, sch,
+    pkg] are context-sensitive aliases for something under 'app' and/or
+    'glo', so entities can tersely and portably refer to their own
+    depot|schema|package, sort of like 'lex' (lexical) allows.  Notably,
+    the type of entity, data|type|rtn, is no longer included in the long
+    name of most entities, and entities of different types now clearly
+    share the same namespace, as per is typical with SQL DBMSs where both
+    tables and stored procedures are in the same schema object namespaces.
+
+    * (Core.pod, Grammar.pod, PerlHosted.pod, Temporal.pod, Spatial.pod)
+    Renamed all the system-defined types and operators to roughly fit into
+    the new namespace hierarchy.  The operators saw less drastic changes,
+    as roughly speaking, their 'rtn' name component was simply changed to
+    'Core' (it would have been different for temporal/spatial operators,
+    but none of those were defined yet).  The types saw more drastic
+    changes; roughly speaking, all 'type' were renamed to one of
+    Core|Temporal|Spatial, and for non-catalog core types, the unique part
+    of each name was replaced with 2 instances of itself.  Roughly
+    speaking, what used to be a type name now doubles as a type name and a
+    package name for both that type and for its operators.  Following this,
+    the new system-defined packages were then either consolidated or split
+    as appropriate, grouping most similar entities and separating less
+    similar ones.  For example, all generic 'Int' types were grouped under
+    one package, and the 'Temporal' types were split into several.
+
+    * (Grammar.pod, PerlHosted.pod)  Updated the example user-defined
+    entity names so that they roughly fit into the new namespace hierarchy.
+    What was nat.type.* is now glo.the_db.*.
+
+2007-09-03   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.6.0 is released on CPAN as
+    Language-MuldisD-0.6.0.tar.gz.
+
+    * New file versions are: Core.pod 0.6.0 and Basics.pod 0.5.1 and
+    Grammar.pod 0.5.0 and Temporal.pod 0.4.1 and Spatial.pod 0.4.0 and
+    Catalog.pod 0.3.1 and PerlHosted.pod 0.1.0.  The other pre-existing
+    versioned files are unchanged.
+
+    * (Core.pod, Basics.pod, Catalog.pod, Temporal.pod, Spatial.pod)
+    Renamed the union type Ordinal to Ordered, and any types previously
+    referred to as being ordinal types are now referred to as being ordered
+    types.  This change makes things more correct (and less confusing),
+    since actual ordinal types are supposed to be both finite and discrete,
+    whereas some Muldis D ordered types are infinite and/or continuous.
+
+    * (Core.pod)  Removed the floating-point numeric types from the core
+    again, but that they aren't yet re-added to some language extension;
+    they will be later, as per inexact or significant-figure-watching
+    numerics in general.  Now the core just contains exact numerics that
+    are integers or rationals (and generally speaking it will now be said
+    exact types specifically which some common language extensions like
+    temporals or spatials are generally built over).  This simplifying
+    change was made because it is expected that most general uses of
+    numerics in Muldis D program code will not use numbers in the extreme
+    ranges that only inexact floats can represent efficiently (eg, 10^308),
+    and rather they will likely just have numbers of less than 20-30
+    digits, which are easy enough for rationals.
+
+    * (Core.pod)  Updated the Rat|BRat|DRat type definitions slightly.
+
+    * (Core.pod)  Added the URat|PRat types, which are to Rat what
+    UInt|PInt are to Int.  Also added (Set|Maybe|Seq|Bag)OfRat types.
+
+    * (Core.pod)  Added new Int operators range|median|mode, updated the
+    Int operator 'power', moved the definition of 'abs' upward.
+
+    * (Core.pod)  Added an initial complement of 28 Rat operators, which
+    are mostly a superset of analogies to the Int operators (minus
+    'remainder'); additions include operators for calculating
+    means/averages, logarithms, and rounding.
+
+    * (Grammar.pod, PerlHosted.pod)  Added sections for the Rat|URat|PRat
+    types as per for Int|UInt|PInt.
+
+    * (Spatial.pod)  Added an initial hierarchy of 15 spatial types, but
+    as yet they lack descriptions.
+
+2007-08-31   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.5.0 is released on CPAN as
+    Language-MuldisD-0.5.0.tar.gz.
+
+    * The rational numeric and floating-point numeric data types have been
+    promoted to the language core, and so the main content of Num.pod was
+    moved into Core.pod, under the TYPE SUMMARY and SYSTEM-DEFINED CORE
+    SCALAR DATA TYPES sections; the rest of the file Num.pod was then
+    deleted, and any references to it in other files were removed.  The
+    promoted data types were also renamed to remove the '.Num'.
+
+    * New file versions are: Basics.pod and Core.pod 0.5.0 and Grammar.pod
+    0.4.1.  The other pre-existing versioned files are unchanged.
+
+    * (Basics.pod)  Reorganized the entity namespace 'lex.*' so it no
+    longer mirrors the structure of the (global) 'nat.*' namespace.  There
+    are no longer any lexically scoped data types or routines or special
+    catalog variables; only normal variables can be lexical.
+
+    * (Basics.pod)  Updated the definition of the 'function' routine kind
+    so it has no lexical variables, consists of a single expression tree,
+    and can only invoke functions; hence a function is now just a named
+    expression tree.  Replaced the 'host_gate' routine type with the 'main'
+    routine type, as it is conceptually the non-invokable "main program" of
+    a Muldis D program.
+
+    * (Core.pod)  Added a bunch of named core data subtypes that exist for
+    convenience, such as because they name many core operator parameter
+    types.  Added a tree of these to the TYPE SUMMARY section, and added a
+    new SYSTEM-DEFINED CORE SPECIALIZED SUBTYPES section.  For example,
+    many of these additions are named
+    'sys.type.(Set|Maybe|Seq|Bag)Of(Bool|Int|Blob|Text)'.  The pre-existing
+    'sys.type.PInt2_36' type was also moved into these sections.
+
+    * (Core.pod)  Rearranged the documentation sections for operators, so
+    that they are all grouped first by routine kind and second by the
+    mainly applicable data type, rather than the reverse grouping; all
+    functions appear first (the vast majority), then all update operators
+    (a minority), then all system services (a smaller minority.
+
+    * (Core.pod)  Renamed many 'v' function parameters to 'topic'.
+
+    * (Core.pod)  Updated the 2 int-text mapping function signatures to
+    rename any 'Text' to 'NEText'.  Merged and generalized the 4 blob-text
+    mapping functions into 2 which lack '_(2|16)' suffixes.  Added
+    'maybe_*' variants of the 2 functions 'Int.(quotient|remainder)'.
+
+    * (Core.pod)  Removed the 'Rat' subtype 'RatI' and renamed its sibling
+    subtypes to '(B|D)Rat' from 'Rat(B|D)'.
+
+    * (Core.pod)  Replaced the 2 'FloatB(32|64)' data types with the more
+    generic 'Float' type, then gave that 2 new subtypes of '(B|D)Float' as
+    per the 'Rat' type hierarchy.  The new 'Float' type is an exact numeric
+    of unlimited precision as per 'Int' and 'Rat', and it doesn't have any
+    special values like a +/- zero distinction, nor infinities, nor NaNs.
+    Note that all Muldis D core numeric types are exact and lack special
+    values; any numerics that are inexact or have special values will be
+    relegated to language extensions; in the core, any precision loss that
+    could possibly happen in an operation (eg, from a square-root) is part
+    of the defintion of operators, not the data type.
+
+    * (Core.pod)  Replaced the function 'Tuple.extend' with
+    'Tuple.product'; the latter is also fleshed out.
+
+    * (Core.pod)  Fleshed out the definitions of these functions:
+    'Relation.quotient' (also renamed from 'divide'), 'Relation.restrict',
+    'Relation.extend'.  Also added these functions: 'Relation.product'.
+
+    * (Grammar.pod)  Changed the tokens 'Cat(Short|Long)Name' to
+    'Cat.(Short|Long)Name' so they match actual type names like the rest of
+    Grammar.pod does.
+
+2007-08-12   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.4.1 is released on CPAN as
+    Language-MuldisD-0.4.1.tar.gz.
+
+    * New file versions are: PerlHosted.pod 0.0.1.  The other pre-existing
+    versioned files are unchanged.
+
+    * (PerlHosted.pod)  This release is an experiment with an alternate
+    formatting of the POD list items, in an attempt to make them look more
+    like actual lists under the Search CPAN site, rather than paragraphs;
+    each "=item Foo" is now spelled "=item *\rFoo".
+
+2007-08-09   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.4.0 is released on CPAN as
+    Language-MuldisD-0.4.0.tar.gz.
+
+    * Renamed MuldisD.pod to MuldisD.pm, and added an empty dummy package
+    declaration of Language::MuldisD to it, all for the sole purpose of
+    helping the CPAN indexer link to this distribution properly; it doesn't
+    work when the namespace file is plain pod.  For similar reasons, the
+    version number of MuldisD.pm will now always be kept in sync with the
+    whole-distribution version number declared in the Makefile.PL.
+
+    * Also renamed Language.pod to Basics.pod.
+
+    * New file versions are: MuldisD.pm and Basics.pod and Core.pod and
+    Grammar.pod and Num.pod and Temporal.pod 0.4.0.  The other pre-existing
+    versioned files are unchanged.
+
+    * (Basics.pod)  Introduced complete vs parameterized types.
+
+    * (Basics.pod)  Every data type is now named and is referred to by that
+    name, the change being that only scalar types used to have names.  This
+    said, the actual identities of types haven't changed, so 2
+    differently-named declarations of types that aren't scalar and have the
+    same structure will still be considered to be the same actual type; the
+    names for types that aren't scalars are simply aliases for this
+    identity.  This change was made to greatly simplify (and reduce errors
+    in) the process of declaring data types, particularly hierarchical
+    types, and declaring nonscalar values.
+
+    * (Core.pod)  Added new operators
+    Universal.(is_value_of_type|treat|default).
+
+    * (Core.pod)  Renamed each of the operators Universal.(equal|not_equal)
+    and Relation.(empty|not_empty) to prepend an "is_".
+
+    * (Core.pod, Num.pod, Temporal.pod)  Updated each of the ordinal data
+    types to specify what their minimum and maximum values are, or whether
+    said are infinities.
+
+    * (Core.pod)  Redefined the Maybe-returning N-ary functions
+    Ordinal.(min|max) with versions that instead try to return that
+    functions' identity value when given zero argument values, and
+    fails/dies in just specific situations where said identity is
+    impossibly or impractically large to handle.  Also added 2 new
+    functions Ordinal.maybe_(min|max) that provide the old behaviour.
+
+    * (Core.pod)  Redefined the N-ary functions Blob.(and|or|xor) from
+    resulting in Maybes to resulting in identity values on zero inputs.
+    Also corrected the Relation.intersection function definition such that
+    its identity value is actually the universal relation for its heading,
+    not the empty relation; depending how big that is, the function may now
+    possibly fail on zero input values.  Also added new function
+    Relation.not, which results in its argument subtracted from the
+    universal relation for the same heading; this may possibly fail if that
+    is too big a value.
+
+    * (Temporal.pod)  Restricted the Temporal.Duration(|OfDays) types to be
+    specific to data with time zone offsets, and added 2 more types
+    Temporal.Duration(|OfDays)NoTZ to handle the other possibility; the
+    idea is that the former should be considered more accurate than the
+    latter, as per DateTime vs DateTimeNoTZ.  Also updated all 4 to permit
+    negative durations in addition to positive ones.  Also rearranged the
+    types to group all the with-timezone and no-timezone together.
+
+    * (Grammar.pod)  Rewrote the representative Concrete Muldis D grammar
+    so that it is formatted as an actual compiling (though otherwise
+    untested) Perl 6 grammar, rather than the pseudo-LALR grammar.  Also,
+    the rewritten grammar is actually complete, unlike the many "todo" gaps
+    in the old.  Not that it won't stand to be further improved later.
+
+    * (Grammar.pod)  Added new EXAMPLES documentation section which shows
+    actual Concrete Muldis D code fragments.
+
+    * Added new file lib/Language/MuldisD/PerlHosted.pod, which starts at
+    version 0.0.0.  This file parallels Grammar.pod, but instead shows what
+    arrangement of core Perl data structures make up Perl hosted Abstract
+    Muldis D, which is the recommended interchange format between Muldis D
+    implementations and Perl applications.  With code examples!  This file
+    also stands as a recommendation for a general AST for use by database
+    related modules, such as ORMs, to specify database queries with.
+
+2007-07-24   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.3.1 is released on CPAN as
+    Language-MuldisD-0.3.1.tar.gz.
+
+    * New file versions are: Language.pod and SeeAlso.pod 0.3.1.  The other
+    versioned files are unchanged at 0.3.0.
+
+    * Fixed a bug where both MuldisD.pod and Language.pod had the same
+    NAME, which resulted in CPAN indexing problems.
+
+    * Minor fix in SeeAlso.pod.
+
+2007-07-24   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Language::MuldisD version 0.3.0 is released on CPAN as
+    Language-MuldisD-0.3.0.tar.gz.
+
+    * What was Muldis-DB at version 0.2.0 and earlier, has been split in 2,
+    with the parts to be Language-MuldisD and Muldis-DB, each at version
+    0.3.0 and later.  Prior to the split, both the Perl 5 and Perl 6
+    versions of Muldis-DB contained identical copies of what became
+    Language-MuldisD; after the split, neither Muldis-D had a copy.
+
+    * All versioned files had their version numbers brought up to 0.3.0.
+
+    * This is the first release of the Language-MuldisD distribution, and
+    the first release of any distribution to contain Perl 5 modules named
+    Language::MuldisD::\w+.
+
+    * The file lib/Language/MuldisD.pod is cloned from part of what used to
+    be lib/Muldis/DB.pm, and the file lib/Language/MuldisD/SeeAlso.pod is
+    cloned from part of what used to be lib/Muldis/DB/SeeAlso.pod, and
+    lib/Language/MuldisD/Language.pod was renamed from
+    lib/Muldis/DB/Language.pod, and all other lib/Language/MuldisD/\w+ were
+    renamed from lib/Muldis/DB/Language/\w+.
+
+    * Updated Grammar.pod concerning '(Int|Blob):x:y' so that the 'x' is
+    now a single character in the same base as the 'y', rather than being a
+    possibly multi-character integer in base-10; moreover, the 'x' is now
+    equal to the highest value that a character may represent, which in the
+    base in question is 1 less than the base number.  So eg, base-2 is now
+    specified with an 'x' value of '1', base-10 is a '9', base-16 an 'F',
+    etc.  Also, the 'y' part for Int|Blob is no longer quote-delimited.
+
+    * This is the Language-MuldisD-0.3.0 file manifest:
+
+        Changes
+        INSTALL
+        lib/Language/MuldisD.pod
+        lib/Language/MuldisD/Catalog.pod
+        lib/Language/MuldisD/Core.pod
+        lib/Language/MuldisD/Ext/Num.pod
+        lib/Language/MuldisD/Ext/Spatial.pod
+        lib/Language/MuldisD/Ext/Temporal.pod
+        lib/Language/MuldisD/Grammar.pod
+        lib/Language/MuldisD/Language.pod
+        lib/Language/MuldisD/SeeAlso.pod
+        LICENSE/GPL
+        Makefile.PL
+        MANIFEST
+        MANIFEST.SKIP
+        META.yml
+        README
+        t/LMD_00_Compile.t
+        TODO
+
+2007-07-22   Darren Duncan <perl@DarrenDuncan.net>
+
+    The next version of the Module List will list the following module:
+
+      modid:       Language::MuldisD
+      DSLIP:       cmong
+      description: Formal spec of Muldis D relational DBMS lang
+      userid:      DUNCAND (Darren Duncan)
+      chapterid:   7 (Database_Interfaces)
+      enteredby:   ADAMK (Adam Kennedy)
+      enteredon:   Mon Jul 23 04:56:26 2007 GMT
+
+    The resulting entry will be:
+
+    Language::
+    ::MuldisD    cmong Formal spec of Muldis D relational DBMS lang DUNCAND
+
+2007-07-20   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::DB version 0.2.0 for Perl 5 is released on CPAN as
+    Muldis-DB-0.2.0.tar.gz.  The rest of this Changes entry refers only to
+    the portions of it that became part of the Language-MuldisD
+    distribution following release 0.2.0.
+
+    * New file versions are: DB.pod and Language.pod and Core.pod and
+    Catalog.pod and Grammar.pod and SeeAlso.pod 0.2.0.  Unchanged file
+    versions are: Num.pod and Temporal.pod and Spatial.pod 0.1.0.
+
+    * Updated the TRANSACTIONS AND CONCURRENCY section of Language.pod in
+    regards to how the scope of explicit transactions is specified, and
+    where implicit transactions occur.  Also, Muldis D now no longer has
+    language for non-scope-attached transactions, and any concept of
+    distinct transaction initiation or termination statements will be
+    hoisted to the host language (presumably as methods of ::DBMS objects).
+
+    * Updated Core.pod to add the scalar type 'PInt2_36', and to replace
+    the pseudo-type 'Any' with the pseudo-type 'Some.Universal', and added
+    'Some.Ordinal'.
+
+    * Updated Grammar.pod concerning integer literals; they can be
+    represented with any of base-2 thru base-36 now.
+
+    * Updated Grammar.pod and Core.pod concerning enumerated types, such as
+    Bool and Order; individual values are now specified using eg
+    [Bool:true] rather than [Bool.True], which then makes them more like
+    literals of other simple types, and less like data type names.
+
+    * Updated Core.pod to add definitions for the generic operators common
+    to all ordinal types: compare, reverse_compare, is_increase,
+    is_decrease, min, max.  Added 'reverse' operator for the Order type.
+    Added or replaced a bunch of operators for the Int|Blob|Text types.
+    Other small changes.
+
+    * Updated Core.pod to add an initial complement of common tuple and
+    relation operators (such as project, join, union), perhaps most of
+    them.  These are a large part of what makes Muldis D a relational
+    language at all.
+
+    * Updated Catalog.pod to add new core data types: Cat.ShortNameSet,
+    Cat.AttrRenameMap.
+
+2007-07-11   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::DB version 0.1.0 for Perl 5 is released on CPAN as
+    Muldis-DB-0.1.0.tar.gz.  The rest of this Changes entry refers only to
+    the portions of it that became part of the Language-MuldisD
+    distribution following release 0.2.0.
+
+    * This is a major release that focuses on overhauling or defining part
+    of the Muldis D meta-model / system catalog, which is essential for
+    supporting any user-defined DBMS entities, that is, for doing anything
+    remotely useful.  Said overhaul is expected to be staged over 3-4
+    consecutive releases, of which the current one is essentially just
+    updating documentation; not much code was changed by this release.
+
+    * As of this release, all pod-only files now also have version numbers,
+    shown in the VERSION docs by NAME, like code-containing modules do; the
+    initial version numbers are all 0.1.0.
+
+    * Muldis D now has 2 representation formats (Concrete Muldis D,
+    Abstract Muldis D) rather than 3 (relations, ASTs, strings).
+
+    * Rearranged any relevant docs so that the most important core scalar
+    types are now in the order [Bool, Int, Blob, Text] and the relation
+    type factory Maybe now appears after Set.
+
+    * Muldis D now has a new scalar data type, "Order", which is an
+    enumeration (like "Bool" is) of 3 values: [Increase, Same, Decrease];
+    it is the result type of any binary comparison operator that underlies
+    the likes of less|greater-than or min|max or sorting operations.
+
+    * Muldis D now has the new scalar types "Cat.ShortName" and
+    "Cat.LongName", which replace the also removed "Cat.EntityName" and its
+    (as yet unused) system-defined subtypes.
+
+    * Split up Language.pod 6 ways, into itself and
+    Language/(Core|Catalog).pod and
+    Language/Ext/(Num|Temporal|Spatial).pod.  For the most part, the only
+    initial content of the 5 new files are corresponding portions of what
+    used to be the SYSTEM-DEFINED DATA TYPES and (actually empty)
+    SYSTEM-DEFINED ROUTINES main documentation sections of Language.pod,
+    but that the CATALOGS main section was also moved to Catalog.pod;
+    Language.pod retained all the other documentation sections that it
+    previously had.  (Language.pod retained about 75% of its previous
+    content; about 25% was moved out.)
+
+    * Further updated the 5 language files with type definitions, to update
+    some definitions, and also to add a small TYPE SUMMARY main doc section
+    to each file.
+
+    * Updated Core.pod to add several main doc sections that have an
+    initial complement of system-defined routines.  In particular, the
+    equal|not_equal|assign routines that all types have are now defined,
+    and all the common boolean and integer operators were added, and some
+    converter routines such as int-from-text et al, were all added.  Many
+    other operator definitions are pending, especially the relational ones.
+
+    * Added new file lib/Muldis/DB/Language/Grammar.pod, which describes
+    Concrete Muldis D details that aren't applicable to Abstract Muldis D.
+
+2007-06-29   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::DB version 0.0.1 for Perl 5 is released on CPAN as
+    Muldis-DB-0.0.1.tar.gz.  The rest of this Changes entry refers only to
+    the portions of it that became part of the Language-MuldisD
+    distribution following release 0.2.0.
+
+    * New file versions (not marked though) are: Language.pod 0.0.1.
+
+    * The primary purpose of this release is to re-license the Muldis D
+    specification under actual free software licenses, specifically version
+    3 of the GPL family of licenses, which the Free Software Foundation
+    formally published on 2007 June 29th.  By contrast, the previous Muldis
+    D releases were under an expiring proprietary license, with just the
+    promise of a free re-license to come.  Accordingly, the file
+    LICENSE/GPL was added to this distro, which contains the text of the
+    GPL version 3.0.
+
+    * This release also includes a collection of small documentation
+    updates and fixes, such as the following:  We now use the official
+    typography for the names 'TTM' and 'D' and such.  Added a DOCUMENTATION
+    READING ORDER section to the README file.
+
+2007-06-20   Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::DB version 0.0.0 for Perl 5 is released on CPAN as
+    Muldis-DB-0.0.0.tar.gz.  The rest of this Changes entry refers only to
+    the portions of it that became part of the Language-MuldisD
+    distribution following release 0.2.0.
+
+    * Initial file versions (not marked though) are: Language.pod 0.0.0.
+
+    * As of this release, the Muldis D specification is officially in
+    pre-alpha development status.  A lot of documentation is present, but a
+    lot isn't.  What is mostly done is the higher level documentation.
+    What is mostly undone is documentation of the API details.  What is
+    already present should be sufficient to begin study of Muldis D such
+    that it can actually be put to use within the next few weeks or months
+    as Muldis D is fleshed out.  Also, it should be possible now to start
+    writing code that implements it or uses said.
+
+2006-09-15 thru 2007-06-02
+
+    * Started rewriting Rosetta again, but with a name change, since
+    "Rosetta" was no longer appropriate for various reasons.  This rewrite
+    took the intentionally bad and temporary name QDRDBMS, to be renamed
+    again (to Muldis DB) later on.  With the name change allowed for the
+    previous version numbering of Rosetta to be dropped, and this rewrite
+    would eventually be first released as version zero.
+
+    * QDRDBMS was started in the wake of having had a lot more experience
+    in reading up on the truly relational model of data, and was now
+    designed fundamentally to be the design and implementation of a new
+    turing complete programming language for working with relational
+    databases, now called "QDRDBMS D".
+
+    * Made an experimental CPAN release of QDRDBMS version 0.0.0 on
+    2007-05-31, which specifically was a quick branch that stripped out all
+    the code and just contained the documentation.  This was the only CPAN
+    release of the (partial) project under the QDRDBMS name.
+
+    * Shortly after this, QDRDBMS was renamed to its presumably final name
+    of "Muldis DB", and its command language to "Muldis D".
+
+2006-04-14 thru 2006-11-22
+
+    * Started a complementary Perl 6 project named "Relation" which was
+    intended to provide native tuple and relation data types for ordinary
+    use in Perl 6 programs like other built-in collection types.  It is
+    now stagnant; it will likely get un-stuck after Muldis DB sets an
+    example for it.
+
+2006-02-01 thru 2006-04-13
+
+    * The first simultaneous releases of the Perl 5 and 6 versions of
+    Rosetta's rewrite occurred on 2006-02-01; they were also the first CPAN
+    releases of either version.  The Perl 6 one was Pugs release 6.2.11
+    (SVN rev 8934).
+
+    * On 2006-02-23 was the first (Perl 5) CPAN release of Rosetta where
+    the project was then officially an implementation of "The Third
+    Manifesto", the central work of Darwen and Date's DBMS proposal;
+    moreover, Rosetta's command language was named "Rosetta D", to be a "D"
+    language by the terms of said proposal.
+
+    * On 2006-03-20 was the (Perl 5) release that declared Rosetta was to
+    be fundamentally a self-contained relational DBMS (and the core
+    distribution would bundle such an implementation of its API) rather
+    than "just" a DBMS wrapper; though extensions could still chose to
+    operate as wrappers over other DBMSs.
+
+    * On 2006-04-13 was the last CPAN release of the Perl 5 Rosetta, and
+    Pugs 6.2.12 (SVN rev 10930), on 2006-06-26, had the corresponding Perl
+    6 version; Pugs 6.2.13 (SVN rev 11402), on 2006-10-27, had the last
+    CPAN release of Perl 6 Rosetta, with trivial Perl 6 only updates.
+    After this, Pugs would have a Muldis DB instead.
+
+2005-12-06 thru 2006-01-31
+
+    * Rosetta started to evolve so that its API and design was based on
+    relational algebra, which is a lot of smaller generic constructs that
+    can easily be arranged into queries; this is in contrast to the
+    previous design based around monolithic and unwieldy SQL "select"
+    queries.  Generally speaking, there was increasing influence on the
+    design by Hugh Darwen's and Chris Date's proposals on how a truly
+    relational DBMS should work.  This time period also saw very little
+    code, and almost entirely documentation updates.
+
+2005-12-05
+
+    * Darren Duncan is introduced by David Wheeler to the truly relational
+    model of data, in a posting on the Bricolage development list in the
+    "Re: [6977] New branch for maintenance of Bricolage 1.10.x." thread.
+
+    * David said that Darren's expressed thought, that compound data types
+    in table fields was a violation of first normal form, was in fact a
+    misconception about the relational model.  David then referenced a
+    recent interview with C. J. Date.
+
+    * This set off a chain of events which was the largest paradigm shift
+    to ever affect the Rosetta project.  While the continuing goal of
+    Rosetta remained largely the same, the way this was to be accomplished
+    would become quite different, and the project would gain a new goal, to
+    help improve the design of relational DBMSs themselves.
+
+2005-09-30 thru 2005-12-04
+
+    * Started a full rewrite of Rosetta, with the intent of avoiding being
+    over-engineered, and cutting corners in the short term so to get
+    something useable at all sooner.  The idea was to focus on vertical
+    development first, so that at least a subset of features work earlier,
+    taking the development strategy of Perl6-Pugs itself as an example;
+    this is in contrast to the more horizontal development strategy of the
+    first Rosetta implementation.
+
+    * Moreover, this rewrite was being done simultaneously in both Perl 5
+    and Perl 6; each language had its own independent but synchronized
+    version, with the Perl 6 one intended to be the main future one that
+    guided design decisions, and the Perl 5 one intended to be the one
+    production-ready first, to be used until Perl 6 itself was production
+    ready.  That co-development was maintained afterwards, and happens with
+    the Muldis DB core.
+
+2002-11-12 thru 2005-09-28, plus 2006-01-13
+
+    * Developed and released on CPAN the Rosetta DBMS framework, whose
+    intended purpose was to provide rigorous portability of database
+    schemas and database-using applications between different SQL DBMS
+    products.  A lot of design documentation was produced, as well as some
+    code and tests, but while a significant amount of executing code was
+    produced, no solution emerged that was actually useable for real work;
+    what did get produced was also unnecessarily complicated.
+
+    * The very first CPAN release of anything related to Rosetta was on
+    2003-01-05, in the form of DBIx::Portable version 0.01, as
+    DBIx-Portable-0.01.tar.gz.
+
+    * A Lightning Talk was also given introducing Rosetta at OSCON 2005;
+    but it is Muldis DB instead that will fulfill the promises made in it.
+
+2002-06-07
+
+    * Started writing self-contained code components that were explicitly
+    designed to enable external code that used them to work seamlessly on
+    multiple database products.  Some of this work was reused later in the
+    Rosetta DBMS framework et al, and hence 2002 is the start of the
+    declared copyright date range for Muldis D language specification.

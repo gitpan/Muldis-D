@@ -1,0 +1,583 @@
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+Muldis::D::Dialect::PTMD_Tiny -
+How to format Plain Text Muldis D
+
+=head1 VERSION
+
+This document is Muldis::D::Dialect::PTMD_Tiny version 0.16.0.
+
+=head1 PREFACE
+
+This document is part of the Muldis D language specification, whose root
+document is L<Muldis::D>; you should read that root document
+before you read this one, which provides subservient details.
+
+=head1 DESCRIPTION
+
+This document outlines the grammar of the I<Plain Text Muldis D> dialect
+named C<PTMD_Tiny>.  The fully-qualified name of this Muldis D dialect, in
+combination with the base language spec it is bundled with, is
+C<Muldis_D:'cpan:DUNCAND':'N.N.N':'PTMD_Tiny'> (when the bundled base
+language version is substituted for the C<N.N.N>).
+
+This dialect is designed to exactly match the Muldis D system catalog (the
+possible representation of Muldis D code that is visible to or updateable
+by Muldis D programs at runtime) as to what non-critical meta-data it
+explicitly stores; so code in the C<PTMD_Tiny> dialect should be
+round-trippable with the system catalog with the result maintaining all the
+details that were started with.  Since it matches the system catalog, this
+dialect should be able to exactly represent all possible Muldis D base
+language code (and probably all extensions too), rather than a subset of
+it.  This dialect similarly matches the C<HDMD_Perl_Tiny> dialect, which is
+documented at L<Muldis::D::Dialect::HDMD_Perl_Tiny>.
+
+This dialect is designed to be as small as possible while meeting the above
+criteria, and is designed such that a parser that handles all of this
+dialect can be tiny, hence the dialect's C<Tiny> name.  Likewise, a code
+generator for this dialect from the system catalog can be tiny.
+
+This document mainly just specifies a way to represent Muldis D values as
+character strings.  Since the fundamental way to do data definition in
+Muldis D is to update catalog (information schema) variables, aka the
+Muldis D meta-model, which are themselves just data, then this document
+only needs to tell you how to define values to put in the catalog
+variables.  Defining data types or routines are done by defining catalog
+values describing them.
+
+See instead L<Muldis::D::Core> for how to actually define the
+tuples and relations that define your data types and routines and queries
+and so forth.
+
+See also L<Muldis::D::Dialect::HDMD_Perl_Tiny> and look up its
+syntax for representing Muldis D literal values, each syntax item typically
+corresponds to a syntax item in the current document; the other document
+helps explain the meaning of and further constraints on value
+specifications than this current document does.  The syntax given in the
+current document primarily tests for well-formedness, not that code is
+otherwise valid.
+
+Keeping in mind that any Plain Text Muldis D code file has to actually
+consist of a Muldis D C<main> routine (something that Hosted Data code does
+not), the following grammar is actually the grammar to parse a C<main>
+routine, which is simply a series of procedure calls, where earlier
+procedure calls are to system-defined data-definition routines (their
+arguments are values to put in the system catalog), and later ones are then
+to user-defined routines that the earlier statements either loaded or
+defined.  The current grammar assumes that the C<main> does not have any
+lexical variables, and that all parameters of routines it calls are
+read-only parameters.
+
+=head1 GRAMMAR OF TINY PLAIN TEXT MULDIS D
+
+This grammar is formatted as a Perl 6 grammar which could be used to parse
+it.  That said, it is only meant to be illustrative, as only some Muldis D
+implementations would actually be written in Perl 6 or understand Perl 6
+grammars.  The following Perl 6 code does successfully compile using the
+current Perl6::Pugs, though it has not yet been tested for correct
+execution.  Any remaining errors should be corrected as soon as possible.
+
+    use v6-alpha;
+
+    # grammar Muldis_D_PTMD_Tiny:auth<cpan:DUNCAND>:ver<0.16.0>;
+    grammar Muldis_D_PTMD_Tiny-0.16.0-cpan:DUNCAND;
+
+    token start {
+        (<language_name>)
+        (<procedure_call>*)
+    }
+
+    token language_name {
+        (Muldis_D)
+        <spec_sep>
+        <ln_authority>
+        <spec_sep>
+        <ln_version>
+        <spec_sep>
+        <ln_dialect>
+        <spec_sep>
+        <ln_extensions>
+        <statement_end>
+    }
+
+    token ln_authority { <quoted_text_str> }
+
+    token ln_version { <quoted_text_str> }
+
+    token ln_dialect { <text_delim> (PTMD_Tiny) <text_delim> }
+
+    token ln_extensions { <tuple_body> }
+
+    token procedure_call {
+        (Call)
+        <spec_sep>
+        <procedure_name>
+        <spec_sep>
+        <procedure_args>
+        <statement_end>
+    }
+
+    token procedure_name { <cat_name_chain_body> }
+
+    token procedure_args { <tuple_body> }
+
+    token statement_end { ';' \s* }
+
+    token literal {
+          <bool>
+        | <int>
+        | <blob>
+        | <text>
+        | <tuple_or_qv>
+        | <relation_or_qv>
+        | <cat_name>
+        | <cat_name_chain>
+        | <cat_comment>
+        | <cat_e_tk>
+        | <cat_e_tdm>
+        | <cat_e_enk>
+        | <cat_e_psak>
+        | <rat>
+        | <cat_e_rm>
+    }
+
+    token bool { (Bool) <spec_sep> (false|true) }
+
+    token int {
+        (Int)
+        <spec_sep>
+        (<[1-9A-Z]>)
+        <spec_sep>
+        (0|\-?<[1-9A-Z]><[0-9A-Z]>*)
+    }
+
+    token blob {
+        (Blob)
+        <spec_sep>
+        (<[137F]>)
+        <spec_sep>
+        (<[0-9A-F]>*)
+    }
+
+    token text {
+        (Text)
+        <spec_sep>
+        <quoted_text_str>
+    }
+
+    token tuple_or_qv {
+        ((Quasi)? Tuple)
+        <spec_sep>
+        <tuple_body>
+    }
+
+    token relation_or_qv {
+          <generic_relation_empty_body_or_qv>
+        | <generic_relation_with_tuples_or_qv>
+        | <set_or_qv>
+        | <nothing_or_qv>
+        | <single_or_qv>
+        | <seq_or_qv>
+        | <bag_or_qv>
+    }
+
+    token generic_relation_empty_body_or_qv {
+        ((Quasi)? Relation)
+        <spec_sep>
+        <list_open>
+            (((<cat_name>) <list_sep>)*)
+        <list_close>
+    }
+
+    token generic_relation_with_tuples_or_qv {
+        ((Quasi)? Relation)
+        <spec_sep>
+        <list_open>
+            (((<tuple_body>) <list_sep>)*)
+        <list_close>
+    }
+
+    token tuple_body {
+        <list_open>
+            (((<cat_name> <pair_sep> <literal>) <list_sep>)*)
+        <list_close>
+    }
+
+    token set_or_qv {
+        ((Quasi)? Set)
+        <spec_sep>
+        <list_open>
+            (((<literal>) <list_sep>)*)
+        <list_close>
+    }
+
+    token nothing_or_qv { ((Quasi)? Nothing) }
+
+    token single_or_qv {
+        ((Quasi)? Single)
+        <spec_sep>
+        <list_open>
+            (<literal>)
+        <list_close>
+    }
+
+    token seq_or_qv {
+        ((Quasi)? Seq)
+        <spec_sep>
+        <list_open>
+            (((<literal>) <list_sep>)*)
+        <list_close>
+    }
+
+    token bag_or_qv {
+          bag_counted_values_or_qv
+        | bag_repeated_values_or_qv
+    }
+
+    token bag_counted_values_or_qv {
+        ((Quasi)? Bag)
+        <spec_sep>
+        (count)
+        <spec_sep>
+        <list_open>
+            (((<literal>) <pair_sep> (<count>) <list_sep>)*)
+        <list_close>
+    }
+
+    token count {
+        (<[1-9A-Z]>)
+        <spec_sep>
+        (<[1-9A-Z]><[0-9A-Z]>*)
+    }
+
+    token bag_repeated_values_or_qv {
+        ((Quasi)? Bag)
+        <spec_sep>
+        (repeat)
+        <spec_sep>
+        <list_open>
+            (((<literal>) <list_sep>)*)
+        <list_close>
+    }
+
+    token list_open { '{' \s* }
+
+    token list_close { \s* '}' }
+
+    token list_sep { ',' \s* }
+
+    token pair_sep { \s* '=>' \s* }
+
+    token spec_sep { ':' }
+
+    token quoted_text_str {
+        <text_delim>
+            (<text_char>*)
+        <text_delim>
+    }
+
+    token text_delim { <[']> }
+
+    token text_char { ['\b'|'\q'|<-[\\\']>] }
+
+    token cat_name { <quoted_text_str> }
+
+    token cat_name_chain {
+        (Cat.NameChain)
+        <spec_sep>
+        <cat_name_chain_body>
+    }
+
+    token cat_name_chain_body {
+          nc_sequence
+        | nc_flattened
+    }
+
+    token nc_sequence {
+        ((<cat_name>) (<nc_elem_sep> <cat_name>)*)
+    }
+
+    token nc_flattened {
+        <text_delim>
+            (<nc_char>*)
+        <text_delim>
+    }
+
+    token nc_elem_sep { '.' }
+
+    token nc_char { ['\b'|'\q'|'\p'|<-[\\\']>] }
+
+    token cat_comment {
+        (Cat.Comment)
+        <spec_sep>
+        <quoted_text_str>
+    }
+
+    token cat_e_tk {
+        (Cat.E_TK)
+        <spec_sep>
+        (special|scalar|tuple|relation
+            |quasi_scalar|quasi_tuple|quasi_relation|remnant)
+    }
+
+    token cat_e_tdm {
+        (Cat.E_TDM)
+        <spec_sep>
+        (special|root|restriction|alias
+            |union|intersection|exclusion|difference|negation)
+    }
+
+    token cat_e_enk {
+        (Cat.E_ENK)
+        <spec_sep>
+        (default|scalar|tuple|relation
+            |quasi_scalar|quasi_tuple|quasi_relation
+            |param|upd_param|ro_param|func)
+    }
+
+    token cat_e_psak {
+        (Cat.E_PSAK)
+        <spec_sep>
+        (default|upd_param|ro_param|inner_var|outer_var)
+    }
+
+    token rat {
+          rat_with_radix
+        | rat_as_ratio
+        | rat_as_float
+    }
+
+    token rat_with_radix {
+        (Rat)
+        <spec_sep>
+        (radix)
+        <spec_sep>
+        (<[1-9A-Z]>)
+        <spec_sep>
+        (0|\-?<[1-9A-Z]><[0-9A-Z]>*\.?<[0-9A-Z]>*)
+    }
+
+    token rat_as_ratio {
+        (Rat)
+        <spec_sep>
+        (ratio)
+        <spec_sep>
+        (<[1-9A-Z]>)
+        <spec_sep>
+        ((0|\-?<[1-9A-Z]><[0-9A-Z]>*)\/(<[1-9A-Z]><[0-9A-Z]>*))
+    }
+
+    token rat_as_float {
+        (Rat)
+        <spec_sep>
+        (float)
+        <spec_sep>
+        (<[1-9A-Z]>)
+        <spec_sep>
+        ((0|\-?<[1-9A-Z]><[0-9A-Z]>*)
+        \*
+        (<[2-9A-Z]><[0-9A-Z]>*)
+        \^
+        (0|\-?<[1-9A-Z]><[0-9A-Z]>*))
+    }
+
+    token cat_e_rm {
+        (Cat.E_RM)
+        <spec_sep>
+        (half_down|half_up|half_even|to_floor|to_ceiling|to_zero|to_inf)
+    }
+
+=head1 EXAMPLES
+
+The following are fragments of actual Plain Text Muldis D code.
+
+    Muldis_D:'cpan:DUNCAND':'1.2.3':'PTMD_Tiny':{}
+
+    Call:'sys.Core.Cat.create_public_relvar':{ ... }
+
+    Bool:true
+
+    Int:1:11001001
+
+    Int:7:0
+
+    Int:7:644
+
+    Int:9:-34
+
+    Int:9:42
+
+    Int:F:DEADBEEF
+
+    Int:Z:-HELLOWORLD
+
+    Int:3:301
+
+    Int:B:A09B
+
+    Blob:1:00101110100010
+
+    Blob:3:
+
+    Blob:F:A705E
+
+    Blob:7:523504376
+
+    Text:'Ceres'
+
+    Text:'サンプル'
+
+    Text:''
+
+    Text:'Perl'
+
+    Tuple:{}
+
+    Tuple:{
+        'login_name' => Text:'hartmark',
+        'login_pass' => Text:'letmein',
+        'is_special' => Bool:true,
+    }
+
+    Tuple:{
+        'name' => Text:'Michelle',
+        'age'  => Int:9:17,
+    }
+
+    Relation:{}
+
+    Relation:{ {}, }
+
+    Relation:{ 'x', 'y', 'z', }
+
+    Relation:{
+        {
+            'login_name' => Text:'hartmark',
+            'login_pass' => Text:'letmein',
+            'is_special' => Bool:true,
+        },
+    }
+
+    Relation:{
+        {
+            'name' => Text:'Michelle',
+            'age'  => Int:9:17,
+        },
+    }
+
+    Set:{
+        Text:'Canada',
+        Text:'Spain',
+        Text:'Jordan',
+        Text:'Thailand',
+    }
+
+    Set:{
+        Int:9:3,
+        Int:9:16,
+        Int:9:85,
+    }
+
+    Nothing
+
+    Single:{ Text:'2003.07.24' }
+
+    Seq:{
+        Text:'Alphonse',
+        Text:'Edward',
+        Text:'Winry',
+    }
+
+    Seq:{
+        Int:9:57,
+        Int:9:45,
+        Int:9:63,
+        Int:9:61,
+    }
+
+    Bag:count:{
+        Text:'Apple'  => 9:500,
+        Text:'Orange' => 9:300,
+        Text:'Banana' => 9:400,
+    }
+
+    Bag:repeat:{
+        Text:'Foo',
+        Text:'Quux',
+        Text:'Foo',
+        Text:'Bar',
+        Text:'Baz',
+        Text:'Baz',
+    }
+
+    'login_pass'
+
+    'First Name'
+
+    Cat.NameChain:'fed'.'the_db'.'gene'.'sorted_person_name'
+
+    Cat.NameChain:'fed.the_db.stats.samples_by_order'
+
+    Cat.Comment:'This does something.'
+
+    Cat.E_TK:scalar
+
+    Cat.E_TDM:alias
+
+    Cat.E_ENK:default
+
+    Cat.E_PSAK:ro_param
+
+    Rat:radix:1:-1.1
+
+    Rat:radix:9:-1.5
+
+    Rat:radix:9:3.14159
+
+    Rat:radix:A:0.0
+
+    Rat:radix:F:DEADBEEF.FACE
+
+    Rat:radix:Z:0.000AZE
+
+    Rat:ratio:6:500001/1000
+
+    Rat:ratio:B:A09B/A
+
+    Rat:float:1:1011101101*10^-11011
+
+    Rat:float:9:45207196*10^37
+
+    Cat.E_RM:half_up
+
+=head1 SEE ALSO
+
+Go to L<Muldis::D> for the majority of distribution-internal
+references, and L<Muldis::D::SeeAlso> for the majority of
+distribution-external references.
+
+=head1 AUTHOR
+
+Darren Duncan (C<perl@DarrenDuncan.net>)
+
+=head1 LICENSE AND COPYRIGHT
+
+This file is part of the formal specification of the Muldis D language.
+
+Muldis D is Copyright © 2002-2008, Darren Duncan.
+
+See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
+
+=head1 TRADEMARK POLICY
+
+The TRADEMARK POLICY in L<Muldis::D> applies to this file too.
+
+=head1 ACKNOWLEDGEMENTS
+
+The ACKNOWLEDGEMENTS in L<Muldis::D> apply to this file too.
+
+=cut

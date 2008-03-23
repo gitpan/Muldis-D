@@ -1,0 +1,1960 @@
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+Muldis::D::Basics -
+10,000 Mile View of Muldis D
+
+=head1 VERSION
+
+This document is Muldis::D::Basics version 0.17.0.
+
+=head1 PREFACE
+
+This document is part of the Muldis D language specification, whose root
+document is L<Muldis::D>; you should read that root document
+before you read this one, which provides subservient details.
+
+=head1 DESCRIPTION
+
+This document provides a 10,000 mile view of the Muldis D language.  It
+provides the basics of how the language is designed and works, as a
+foundation upon which to understand the other parts of the language spec.
+
+=head1 NOTES ON TERMINOLOGY
+
+There are a few terms that the Muldis D documentation uses which may have
+different meanings than what you may be used to, so here are a few notes to
+clarify what they mean in this document.  Similarly, there are some terms
+used in the industry that are expressly not used here so to help avoid
+confusion given what meaning is often attributed to them.
+
+=over
+
+=item type / data type
+
+The term I<type> as a noun always refers to a I<data type>; the term is not
+used to indicate classifications of other things; eg, I<kind> or other
+terms will be used for such instead, to avoid confusion.  The terms
+I<class> and I<domain> are not used in this documentation to mean I<type>.
+
+=item value, variable, constant
+
+A I<value> is unique, eternal, immutable, and is not fixed in time or space
+(it has no address).  A I<variable> is fixed in time and space (it does
+have an address); it holds an appearance of a value; it is neither unique
+nor eternal nor immutable in the general case.  A I<constant> is a variable
+which is defined to not mutate after initially being set.  Terms like
+I<object> are not used in this documentation for any aspects of Muldis D
+since their meaning in practice is both ambiguous and wide-reaching, and
+could refer to both values and variables depending on usage context.
+
+=item universal
+
+The term I<universal> refers to the common superset of all allowable sets,
+and is specifically non-recursive.  While philosophy in general might allow
+it (or might not due to certain paradoxes that might result), Muldis D
+specifically does not allow any set to be a member of itself.  No Muldis D
+data type may be defined in terms of itself, either directly or indirectly;
+any data type must be completely defined in isolation before some other
+type may be defined in terms of it.  Therefore, I<universal> in this
+documentation only refers to values or types whose definitions follow those
+non-recursion rules.
+
+=item text, character
+
+A I<text> is a string composed of Unicode characters, where a I<character>
+is an abstract concept that usually is a I<grapheme> or
+I<language-independent grapheme>, but could potentially be a I<codepoint>
+or I<language-specific grapheme>.  This documentation only uses the term
+I<character> in an abstract sense, and no part of the Muldis D API is
+defined using that term.  Rather, any operators or constraints that work
+with sub-strings of text will be specified in terms like I<NFC grapheme>.
+
+=item tuple
+
+A I<tuple> is an unordered heterogeneous collection of 0..N elements that
+are keyed by the element's name; each element is a name-value pair, and all
+names in the tuple are distinct.  While I<tuple> legitimately refers to the
+same thing as the Muldis D term I<sequence> in other contexts, it does
+not in this documentation.  Terms like I<record> or I<row> are not used in
+this documentation, the latter in particular because it implies ordered.
+
+=item relation, relvar, relcon
+
+A I<relation> is like an unordered homogeneous set of I<tuple> where all
+member tuples have identical degree and name-sets, but that a relation data
+type knows what its allowed names are even if it has no tuples.  Like with
+I<tuple>, the term I<relation> legitimately refers to a set or "ordered
+tuple" in other contexts, but it does not in this documentation.  Terms
+like I<record set> or I<row set> or I<table> are not used in this
+documentation, the last 2 in particular because they imply a significance
+to the order of tuples, where there is none in a relation.  Moreover, the
+term I<domain> does not mean the same thing as I<relation>, and neither
+does the term I<function>; those terms have distinct meanings here.  Note
+that the term I<relvar> is short hand for I<relation-typed variable>, and
+I<relcon> is short hand for I<relation-typed constant>.  Note also that a
+I<relational database> is called that I<because> it is composed of
+relations, and I<not> just because its relations can be joined or be
+associated through foreign key constraints.
+
+=item function
+
+A I<function> is a routine whose invocation is used as a value expression,
+and it conceptually serves as a map between the domains of its parameters
+and its result value.  A I<function> is not the same as a I<relation>,
+though both can be used as maps between values.  Besides their conceptual
+difference in Muldis D as a routine vs a value, a selected I<relation>
+value in Muldis D is always finite, and hence so is the cardinality of
+the map it can provide; whereas, a function can have an infinite map size.
+
+=item database / relational database, dbvar, dbcon
+
+Within this documentation, the actually more generic term I<database> will
+be used to refer exclusively to a I<relational database>, so you should
+read the former as if it were the latter.  A I<database> is a tuple, all of
+whose (distinctly named) attributes are each relation-typed or
+database-typed (a recursion whose leaves are all relations); one holds all
+user data that is being maintained as an interconnected unit.  A
+database-typed variable, aka a I<dbvar>, is managed by a DBMS/RDBMS, and
+such is what is more informally referred to outside this documentation as a
+"database". Whenever a user is "using a database", they are reading or
+updating a dbvar.  Examples of databases are genealogy records, financial
+records, and a CMS' data.  A I<database> is I<not> a program.  A
+database-typed constant is a I<dbcon>.
+
+=item catalog
+
+A I<catalog> is a special kind of dbvar or dbcon whose relations hold
+meta-data about the normal databases that hold user data (and about
+themselves too); updating a catalog dbvar has the side-effect of changing
+the structure of the associated normal database.  This meta-data describes
+all user-defined data types and operators, plus base and viewed relations,
+stored with and used with the database.
+
+=item depot / repository
+
+A I<depot> or I<repository> is a local abstraction of a typically external
+storage system which holds 1 database variable and 1 associated catalog,
+plus perhaps other details that assist the mapping of the abstraction to
+the actuality.  All user-defined non-lexical code and data lives in one or
+more depots, and those are generally persisted.  A depot can also have just
+code, in which case it is essentially a dynamically loaded library.
+
+=item DBMS / RDBMS
+
+Within this documentation, the actually more generic term I<DBMS> will be
+used to refer exclusively to a I<RDBMS> (Relational Database Management
+System), so you should read the former as if it were the latter.  A
+I<RDBMS> is a computer program that manages relational database variables,
+associated catalogs, and depots in general.  Muldis D aspires to or does
+define one, and likewise are various other I<TTM>-inspired programs like
+Rel and Duro; most other DBMS-like programs are technically non-relational,
+including all SQL DBMSs such as Oracle, PostgreSQL and SQLite, though they
+usually give lip-service to the relational data model and approximate a
+RDBMS to varying degrees.
+
+=item sequence
+
+Within this documentation, a I<sequence> generically refers to an ordered
+collection of 0..N elements.  The term I<array> is not used in this
+documentation because that word's actual meaning is more broad, and
+includes both matrices plus unordered collections of name-value pairs.
+Note that a sequence may be used simply to maintain a simple collection in
+order, though the actual order of its elements may not always be
+significant.  Sometimes I<sequence> also refers specifically to the C<Seq>
+data type, which is a particular binary relation.
+
+=item selector
+
+A I<selector> is a routine that captures an appearance of a value for use
+in a variable or expression.  The term I<constructor> is not used in this
+documentation because all values in Muldis D are conceptually eternal and
+immutable, so it does not make sense to say that we are "building" one; we
+are "selecting" one.
+
+=item fail
+
+Within this documentation, if a routine is said to I<fail> under some
+circumstance, such as with certain arguments, that can mean either or both
+of the routine throwing an exception at runtime, or failing to compile in
+the first place (which is a thrown exception at compile time); the latter
+is more likely to happen if the compiler can detect that certain arguments
+will always be unacceptable, and the former usually happens just if a
+problem can likely not be caught at compile time.
+
+=back
+
+I<This documentation is pending.>
+
+=head1 INTERPRETATION OF THE RELATIONAL MODEL
+
+The relational model of data is based on predicate logic and set theory.
+
+The model assumes that all data is represented as mathematical N-ary
+I<relations>, an N-ary relation being a subset of the cartesian product of
+N I<data types>.  Reasoning about such data is done in two-valued predicate
+logic, meaning there are 2 possible evaluations for each proposition,
+either I<true> or I<false>.
+
+The basic relational building block is the data type, which can consist of
+either scalar values or values of more complex types.  A I<tuple> is an
+unordered set of I<attributes>, each of which has a name and a declared
+data type; an attribute value is a specific valid value for the type of the
+attribute.  An N-relation is defined as an unordered set of N-tuples, and
+the tuples comprise the I<body> of the relation; the relation has a
+I<heading>, which is a set of attribute definitions (their names and
+types); this heading is also the heading of each of its tuples.
+
+A heading represents a predicate, and there is a one-to-one correspondence
+between the free variables of the predicate and the attribute names of the
+heading.  The body of a relation represents the set of true propositions
+that can be formed from the predicate represented by the relation's
+heading.  The body of a tuple with the same heading provides attribute
+values to instantiate the predicate into a proposition by substituting each
+of its free variables.  When a tuple appears in a relation body, the
+proposition it represents is deemed to be true.  Contrariwise, for every
+tuple whose heading is the same as the relation's but does not appear in
+the relation body, its proposition is deemed to be false.  This assumption
+is known as the I<closed world assumption>.
+
+The relational model specifies that data is operated on by means of a
+relational calculus or a relational algebra.  These 2 are logically
+equivalent; for any expression in the relational calculus, there is an
+equivalent one in the relational algebra, and vice versa.  Relational
+algebra, an offshoot of first-order logic, is a set of relations closed
+under operators; each operator takes N relations as arguments and results
+in a relation.  While the relational algebra provides a more procedural way
+for specifying database queries, in contrast the relational calculus
+provides a more declarative way for specifying queries.
+
+=head2 Mechanics of Some Relational Operations
+
+This documentation section takes a very informal (and possibly blatantly
+incorrect) alternate approach to describing the nature of relations,
+tuples, and attributes, within the context of explaining the mechanics of
+how some relational operations work in practice.
+
+Herein, we shall conceptualize a relation as a long boolean expression,
+consisting of a string of basic boolean-valued expressions that are
+selectively anded or ored together.  A basic boolean-valued expression, C<<
+<attr> >>, takes the form C<< attribute <name> is <value> >>.  Each tuple
+body, C<< <tuple> >>, in the relation takes the form of a chained C<and>
+that connects N C<< <attr> >>, one per each attribute in the relation, and
+each having a distinct C<< <name> >>.  The relation body takes the form of
+a chained C<or> that connects N C<< <tuple> >>, one per each tuple in the
+relation, and each C<< <tuple> >> has the same set of C<< <name> >> as the
+others, but the set of C<< <value> >> that each C<< <tuple> >> has is
+distinct.
+
+Take, for example, a relation having some details about people, where each
+attribute is a type of detail and each tuple has details for one person:
+
+       name is John  and age is 32 and city is Vancouver
+    or name is Andy  and age is 46 and city is Toronto
+    or name is Julia and age is 27 and city is Halifax
+    etc...
+
+Or a multi-relation example involving suppliers, foods, and shipments:
+
+       farm is Hodgesons and country is Canada
+    or farm is Beckers   and country is England
+    or farm is Wickets   and country is Canada
+
+       food is Bananas and colour is yellow
+    or food is Carrots and colour is orange
+    or food is Oranges and colour is orange
+    or food is Kiwis   and colour is green
+    or food is Lemons  and colour is yellow
+
+       farm is Hodgesons and food is Kiwis   and qty is 100
+    or farm is Hodgesons and food is Lemons  and qty is 130
+    or farm is Hodgesons and food is Oranges and qty is 10
+    or farm is Hodgesons and food is Carrots and qty is 50
+    or farm is Beckers   and food is Carrots and qty is 90
+    or farm is Beckers   and food is Bananas and qty is 120
+    or farm is Wickets   and food is Lemons  and qty is 30
+
+Now a very simple pair of relations:
+
+       x is 4 and y is 7
+    or x is 3 and y is 2
+
+       y is 5 and z is 6
+    or y is 2 and z is 1
+    or y is 2 and z is 4
+
+So now will be briefly introduced a few common fundamental relational
+operations, that are projection, join, union.
+
+A projection of a relation derives a relation that has a subset of the
+original's attributes, and all of its tuples.  Continuing the boolean
+expression analogy, the projected relation contains fewer C<< and <attr> >>
+than the original.  For example, lets take the projection of the C<food>
+column from the shipments relation, to get, initially:
+
+       food is Kiwis
+    or food is Lemons
+    or food is Oranges
+    or food is Carrots
+    or food is Carrots
+    or food is Bananas
+    or food is Lemons
+
+Now, the above expression can be simplified because it now contains
+redundancies, and the simplified version is logically identical:
+
+       food is Kiwis
+    or food is Lemons
+    or food is Oranges
+    or food is Carrots
+    or food is Bananas
+
+So this projected relation has 5 tuples rather than the original 7, and
+saving logical redundancy is why relations never have duplicate tuples.
+
+A join of 2 relations derives a relation that has all of the originals'
+attributes, and its set of tuples is fundamentally the cartesian product of
+those of the originals.  Following our boolean analogy, we start off by
+pairwise connecting instances of every C<< <tuple> >> of the first relation
+with instances of every C<< <tuple> >> of the second one, with the members
+of each pair then being chained together with C<and> to form a single,
+longer chain of C<and>.  Note that join is commutative, so it doesn't
+matter which of the source relations is first or second, the result is the
+same, as much as C<foo and bar> is the same as C<bar and foo>.  For
+example, lets do a join of our 2 simplest relations:
+
+       x is 4 and y is 7 and y is 5 and z is 6
+    or x is 4 and y is 7 and y is 2 and z is 1
+    or x is 4 and y is 7 and y is 2 and z is 4
+    or x is 3 and y is 2 and y is 5 and z is 6
+    or x is 3 and y is 2 and y is 2 and z is 1
+    or x is 3 and y is 2 and y is 2 and z is 4
+
+Now, when multiple relations are connected into one such as with a join,
+the relational model assumes that if either of the sources have attributes
+with the same names as each other, then they are both describing the same
+things.  In this case, the references to attribute C<y> from both relations
+are talking about the same C<y>.  And so, any result tuples that contradict
+themselves, saying that C<y> equals both one value and equals a different
+one, can't ever be true and are eliminated; only the tuples where the C<y>
+value is identical are kept:
+
+       x is 3 and y is 2 and y is 2 and z is 1
+    or x is 3 and y is 2 and y is 2 and z is 4
+
+Moreover, this expression can be simplified by removing the redundant C<y>
+attribute:
+
+       x is 3 and y is 2 and z is 1
+    or x is 3 and y is 2 and z is 4
+
+All attributes in a relation have distinct names.  And if there were any
+identical tuples, the redundant ones would be eliminated.
+
+A join operation has several trivializing scenarios.  If the 2 source
+relations have no attribute names in common, the result is simply the
+cartesian product.  If the 2 sources have all their attribute names in
+common, the result is the common subset or intersection of their existing
+sets of tuples.  If one source has all the attributes of the other, but the
+reverse isn't true, then the result is a subset of tuples from the relation
+that has more attributes; this is a semijoin.
+
+A union of 2 relations, which requires that the 2 relations have the same
+headings, derives another relation with the same heading, and a union of
+the two's set of tuples as its body, with any duplicates eliminated.  In
+terms of our boolean analogy, a union is simply chaining together the
+entirety of each relation's boolean expression with an C<or>, and then
+eliminating redundancies from the result.
+
+A full list of all the relational operators having more formal (but Muldis
+D specific) descriptions occurs in the L<Muldis::D::Core>
+document; that list does I<not> use the aforementioned boolean analogies.
+
+=head1 MULDIS D
+
+Muldis D is a computationally / Turing complete (and industrial strength)
+high-level programming language with fully integrated database
+functionality; you can use it to define, query, and update relational
+databases.  The language's paradigm is a mixture of declarative,
+homoiconic, functional, imperative, and object-oriented.  It is primarily
+focused on providing reliability, consistency, portability, and ease of use
+and extension.  (Logically, speed of execution can not be declared as a
+Muldis D quality because such a quality belongs to an implementation alone;
+however, the language should lend itself to making fast implementations.)
+
+The language is rigorously defined and requires users to be explicit, which
+leaves little room for ambiguity and related bugs.  When something is
+specified in Muldis D, its semantics should be well known and fully
+portable (not implementation dependent).  If a conforming implementation
+(such as a Muldis DB Engine class) can't provide a specified behaviour,
+code using it will refuse to run at all, rather than silently changing its
+semantics; this also helps users to avoid bugs.  Moreover, Muldis D
+generally disallows any details of an implementation's "physical
+representation" or other internals to leak through into the language; eg,
+there is no "varchar" vs "char", simply "text".  Users should not have to
+know about this level of detail, and implementers should be free to
+adaptively pick optimum ways to satisfy user requests, and change later.
+
+Muldis D, being first and foremost a data processing language, provides a
+thorough means to both introspect and define all DBMS entities using just
+data processing operators, which is called the DBMS "catalog".  The catalog
+is a set of system-defined relvars (relation-typed variables) which reflect
+the definitions of DBMS entities; users can generally update these to
+create, alter, or drop DBMS entities.  In fact, updating the catalog
+relvars is the fundamental way to do data-definition tasks in Muldis D,
+and any other provisions for data-definition are conceptually abstractions
+of this.  Generally speaking, users can do absolutely everything in the
+DBMS with just data querying and updating operations.
+
+The design and various features of Muldis D go a long way to help both its
+users and implementers alike.  A lot of flexibility is afforded to
+implementers of the language to be adaptive to changing constraints of
+their environment and deliver efficient solutions.  This also makes things
+a lot easier for users of the language because they can focus on the
+meaning of their data rather than worrying about implementation details;
+users can focus on defining what needs to be accomplished rather than how
+to accomplish that, which relieves burdens on their creativity, and saves
+them time.  In short, this system improves everyone's lives.
+
+What users fundamentally write are Muldis D "routines", each consisting of
+one or more "statements", and in executing these, all work is done.
+
+=head2 Representation
+
+Muldis D has multiple official representation formats, each of which is
+referred to by this multi-part document as a I<dialect>.  Each official
+Muldis D dialect has its own syntax rules, but all of them are capable of
+representing the same code; that is, they can all represent code that has
+the same behaviour, and Muldis D code can be translated between any 2 of
+these dialects without changing its behaviour.
+
+Some dialects maintain more non-critical explicit meta-data than others, so
+translating code from a dialect with more to a dialect with less will lose
+explicit information, and translating the other way will require automatic
+generation of that information, so round tripping code starting and ending
+at the 'more' end will likely change it; however the changes won't be
+behaviour-changing ones.  An example of non-critical meta-data is the names
+of intermediate values in multi-part value-determining expressions; some
+dialects require you to explicitly name these intermediate values, and
+others don't always have names for them at all.  Another example of
+non-critical is code comments.  By contrast, some given pairs of dialects
+maintain all of the same non-critical meta-data, and simply have different
+syntaxes; round-tripping code between these is guaranteed to result in
+everything that was started with, non-criticals included.
+
+Generally speaking, every Muldis D dialect belongs to one of just 2 groups,
+which are I<non-hosted plain-text> and I<hosted data>; any Muldis D dialect
+will go by the abstract names I<Plain Text Muldis D> (I<PTMD>), and
+I<Hosted Data Muldis D> (I<HDMD>), respectively.  With all Plain Text
+dialects, the Muldis D code is represented by an (ordered) string/sequence
+of characters like with most normal programming languages.  With all Hosted
+Data dialects, the Muldis D code is represented by collection-typed values
+that are of some native type of some other programming language (eg, Perl)
+which is the host of Muldis D.  The Muldis D code is written here by way of
+writing code in the host language.
+
+Some official Muldis D dialects have their specifications bundled with the
+current multi-document: L<Muldis::D::Dialect::PTMD_Tiny>,
+L<Muldis::D::Dialect::HDMD_Perl_Tiny>, L<Muldis::D::Hierarchical>.  Other,
+unofficial Muldis D dialects may be made by third parties in the future,
+but none are currently known.
+
+The other parts of the current multi-document generally focus on the
+behaviours and semantic features of Muldis D, rather than its syntax, and
+what they describe is generally common to all Muldis D dialects.  The most
+important of those parts are the current B<Basics> file and the
+L<Muldis::D::Core> file.
+
+=head1 TYPE SYSTEM
+
+The Muldis D type system is a formal type system, at least in intent, and
+works conceptually in the following manner.
+
+There is a single universal value set/domain, named C<Universal>, whose
+members are all the values that can possibly exist; C<Universal> is the
+maximal data type of the entire type system.  Also there is a single
+nullary value set/domain, named C<Empty>, which has zero members; C<Empty>
+is the minimal data type.
+
+All Muldis D data values as individuals are eternal and immutable.  All
+values are logically distinct, and each value occurs exactly once, and is
+not fixed within time or space (so doesn't have an "address").  It does not
+make sense to say that you are creating or destroying or copying or
+mutating a I<value>.  However, an eternal immutable value can make an
+I<appearance> within a I<variable>, as a variable I<is> a named/addressable
+container that is fixed within time and space, and it can be created,
+destroyed, mutated, and multiple variables can hold appearances of the same
+value.  So when one appears to be testing 2 values for equality, they are
+actually testing whether 2 value appearances are in fact the same value.
+
+Given that all data values in Muldis D are fundamentally immutable, the
+term "selector" is used to describe a routine that captures an appearance
+of a value into a variable (or for use in a value expression); this is
+analogous to the task that a "constructor" routine does in a typical
+object-oriented language, but that the former is conceptually "selecting"
+an eternally existing value rather than conceptually "creating" a new one.
+
+In the Muldis D type system, a I<data type> is a set of values, and as with
+individual values, a data type is eternal and immutable.  Every data type
+is distinct from all other data types, and no 2 data types may encompass
+exactly the same set of values.  Every data type other than C<Universal>
+and C<Empty> has at least 1 member value, and at most 1 less value than the
+universal set.  If 2 data types have no values in common, they are said to
+be I<disjoint>.
+
+Given 2 arbitrary data types, I<T1> and I<T2>, I<T1> is called a
+I<supertype> of I<T2> if its value set is a superset of that of I<T2>, and
+in that situation, I<T2> is a I<subtype> of I<T1>, as its value set is a
+subset of that of I<T1>.  Note that every type includes itself as its own
+supertype and subtype, in which case, the I<T1> and I<T2> of the previous
+example are the same type.  By contrast, if I<T1> and I<T2> are explicitly
+different types but otherwise have that relationship, then I<T1> has at
+least 1 value that I<T2> doesn't have, in which case I<T1> is also called a
+I<proper supertype> of I<T2>, and I<T2> is also called a I<proper subtype>
+of I<T1>.  Given those last examples, I<T1> is a I<more general> type, and
+I<T2> is a I<more specific> type.  In this way, the system-defined
+C<Universal> type is a proper supertype of all other types, and the
+system-defined C<Empty> type is a proper subtype of all other types.  Now,
+if no data type, I<T3> exists which is both a proper subtype of I<T1> and a
+proper supertype of I<T2>, then I<T1> is an I<immediate supertype> of
+I<T2>, and I<T2> is an I<immediate subtype> of I<T1>.  Note that the
+Muldis D type system supports multiple inheritance, so types can form a
+lattice rather than a tree.
+
+Every value conceptually has exactly one I<most specific type> (or I<MST>),
+which is cited as the general answer to the question "what is this value's
+type".  The MST of a value is the data type containing that value which has
+no proper subtypes that also contain that value.  A value will conceptually
+always implicitly assume the most specific type that exists which contains
+it, even if a selector for a less specific type was explicitly used to
+select it (although some use of explicit C<treated> may be required in code
+to assist its compilation).  With a generic B<D> language, to enforce the
+"exactly one" requirement, which keeps answering the question a simple
+affair, it would be mandatory that when any 2 data types have values in
+common, there must exist a data type which contains only the values that
+they have in common, and hence is a subtype of both; the main intent of
+that B<D> requirement is to support polymorphism where multiple distinct
+operators that have the same name but different semantics can dispatch
+correctly based on the MST of their operands.  However, in practice, such a
+requirement would place a gratuitous large and error-prone burden on users,
+where when they want to define a new type (typically a proper subtype of
+another), they may have to define many explicit subtypes of their new type
+to account for every overlap of their useful type with pre-existing system
+or user defined types.  Moreover, Muldis D uses distinct fully-qualified
+names for all operators, so no 2 operators would exist with the same name
+but different semantics, so that user trouble would be for naught in
+practice.  Therefore, Muldis D does not enforce single MSTs for values in
+general, but it might in specific (as yet unknown) future situations where
+there is ambiguity that needs resolving.  I<To keep documentation simpler,
+any reference to most-specific-types/MSTs elsewhere will assume each value
+has just one of them.>
+
+A I<union type> is a data type that has at least 2 immediate subtypes, and
+every one of its values is also a value of an immediate subtype; that is,
+the MST of every value in a union type is not that type.  An I<intersection
+type> is a data type that has at least 2 immediate supertypes.  In this
+way, C<Universal> is a union type of all other types, and C<Empty> is an
+intersection type of all other types.
+
+A I<difference type> is a data type that has exactly 1 immediate supertype,
+and that supertype is a union type such that the difference type and
+another peer subtype of that union type are complementary with respect to
+the union type; every union type value is in either the difference type or
+its complement, but not both.  An I<exclusion type> is like a I<union> type
+except that it only consists of the values that are members of exactly an
+odd number of its immediate subtypes.  A I<negation type> is a type that
+consists of only the values that aren't members of a single other type; it
+is like a difference type where the common supertype is C<Universal>.
+
+A I<root type> is a data type for which all of its values can be selected
+by the same single selector, and which has no proper supertype that is a
+root type.  All root types are mutually disjoint, so every value is a
+member of exactly one root type.  Generally speaking, root types are the
+implementational foundation over which all operators and all other types
+are built, and the declared parameter and result types of most
+system-defined operators are root types.  The 6 most important
+system-defined root types are: C<Bool>, C<Int>, C<Blob>, C<Text>, C<Tuple>,
+C<Relation>.  All user-defined root types are scalar types that are defined
+not in terms of other types except for that any components of their
+I<possreps> (possible representations) have declared types.  I<Perhaps it
+should be said that all root types are defined by this last sentence?>  A
+I<leaf type> is a data type that has no proper subtypes save for C<Empty>.
+
+A I<complete type> is a data type that is fully defined, and for which it
+would be possible to have values that are of just that data type, if it
+didn't have proper subtypes.  An I<incomplete type> or I<parameterized
+type> is a data type that is not fully defined, but serves as a template by
+which complete types can be defined; there can never be values that are
+just of a parameterized type.  The most important complete types are
+C<Bool>, C<Int>, C<Blob>, C<Text>; the most important incomplete types are
+C<Tuple>, C<Relation>.  For that matter, any implicit supertypes such as
+C<Universal> and C<Scalar> could be considered incomplete types, but that
+they are not parameterized.
+
+=head2 Type Identification
+
+All values in the Muldis D type system are broadly categorized into 6
+complementary sets called I<scalar values>, I<tuple values>, I<relation
+values>, I<quasi-scalar values>, I<quasi-tuple values>, and
+I<quasi-relation values>; tuple and relation values are collectively known
+as I<nonscalar values>; quasi-tuple and quasi-relation values are
+collectively known as I<quasi-nonscalar values>.  The type system has the
+system-defined data types named C<Scalar>, C<Tuple>, C<Relation>,
+C<QuasiScalar>, C<QuasiTuple>, and C<QuasiRelation>, which serve as maximal
+data types for each category, respectively.  The 6 types are all mutually
+disjoint, and C<Universal> is a union type over all of them.
+
+Most data types each consist exclusively of values from exactly one of the
+above 6 categories, and each such type does not include values from several
+of them.  Therefore, every such data type is said to be either a I<scalar
+type>, a I<tuple type>, a I<relation type>, a I<quasi-scalar> type, a
+I<quasi-tuple type>, or a I<quasi-relation type>, depending which category
+all of its values come from.  In similar fashion, a I<nonscalar type> is
+generally any type that is not a scalar type, if we ignored quasi- types,
+meaning it is either a tuple type or a relation type.
+
+A I<remnant type> is any type having at least 2 values, where at least 2 of
+the values are not allowed to be in a same single type of one of the other
+6 categories, according to their type definition rules.  The remnant
+category is the complement category to all the others in that every
+possible proper subset of the values of C<Universal> can now be represented
+by a type that fits in one of the 7 categories, save C<Empty> itself.  The
+type system has the system-defined data type named C<Remnant> which serves
+as a partially redundant maximal data type for remnant types.
+
+The identity of every scalar type is defined by its name alone, and every
+scalar type must have a distinct name that is explicitly defined, either by
+the system or by the user as is applicable.  Every value of a scalar type
+is conceptually opaque and atomic, and its components are not known to
+users of that type; but even when the components are known (because they
+are user-defined structured types), two independently defined scalar types
+are completely disjoint even if their components look the same, by
+definition.  The only way for 2 scalar types to have values in common is if
+one is explicitly defined, directly or indirectly, as a subtype of, or as a
+union type encompassing a subtype of, the other.
+
+Every value of a nonscalar type (either a tuple type I<or> a relation type,
+respectively) is conceptually transparent, and its component structure is
+known to all.  The identity of every nonscalar type is defined by its
+component structure alone, and every nonscalar type must have a distinct
+component structure.  Any two nonscalar types that have the same component
+structure are in fact the same type, by definition, regardless of whether
+they were defined independently of each other or not.
+
+A quasi- type is the same as its similarly named non-quasi counterpart as
+far as the means of identifying it go (by name for scalar vs by its
+structure for nonscalar), but that particular kinds of components are
+permitted in quasi- types that aren't permitted in non-quasi types.
+
+A remnant type is always defined in terms of one or more other types, and
+it can never be a root type with defined components.  The identity of every
+remnant type is defined only in terms of it being, directly or indirectly,
+a union or negation of other non-remnant types.  As per with nonscalars,
+several independently defined remnant types can be considered the same one.
+
+To keep things simpler, every data type in Muldis D has a name by which it
+is referenced, even nonscalar and quasi-nonscalar types; however, the names
+of types that are not scalar or quasi-scalar types are simply convenient
+aliases for their true identities, which are their structures (the
+convenience allows various Muldis D catalog features to be designed and
+implemented more easily).
+
+=head2 Scalar Types
+
+Scalar types are the only conceptually encapsulated types in Muldis D, and
+are like other languages' concepts of object classes where all their
+attributes are private, and only accessible indirectly.  The definition of
+a scalar type comprises usually one or more named I<possreps> or I<possible
+representations>, and for each of those, at least one I<selector> operator
+and usually at least one I<accessor> or I<the> operator.
+
+A I<possrep> of a type is an exhaustively complete means for users to
+conceptualize the structure of the type; it is like a "role" or "interface"
+definition.  A possrep has the appearance of a complete collection of (zero
+or more) named object attributes (of any scalar or nonscalar type) that the
+type could logically be implemented as, and users can use it as if it
+actually was implemented that way, but without the requirement that the
+type actually is implemented that way.  If a type has multiple possreps,
+said possreps can differ from each other in arbitrarily large ways, but
+every one is individually capable of representing all of the type's values;
+any possrep could be used exclusively by a user when they work with its
+type, without diminishing what they can do.  A single possrep is specific
+to one and only one type, so it is possible to refer to a type by simply
+referring to the name of one of its possreps.
+
+Taking for example an integer data type, one of its possreps could
+represent an integer value as a string of binary digits, while another
+possrep could represent an integer value as a string of decimal digits.  Or
+taking for example a temporal data type, one of its possreps could
+represent a date as an ISO 8601 formatted character string in the Gregorian
+calendar, and another possrep could represent it as a number of seconds
+since the UNIX epoch.  Or taking for example a spatial data type that is a
+rectangle, one possrep could specify the 4 vertices as 4 (or 3) point
+values, and another possrep could specify fewer vertices and also specify
+the rectangle's width and height as numeric values.
+
+A possrep additionally has a defined boolean-valued constraint expression
+(which is simply I<true> in the trivial case), that restricts what values
+the possrep components can have within the context of their fellows.
+Taking for example a "medium polygon" data type, there could be a
+constraint that the area of the polygon is between 5 and 10 units.
+
+Each possrep comprises exactly one selector operator whose named parameter
+set exactly matches that possrep's set of named attributes, and you
+select a value of the type by invoking the selector with a full set of
+values for the possible attributes.  Each possrep also comprises an
+accessor operator for each of its attributes, with which users can extract
+the possible attribute's value.
+
+TODO: EDIT THE ABOVE TO REFLECT THE ACTUAL sys.Core.Scalar.\w+ FUNCTIONS;
+FOR EXAMPLE, THERE ARE NOT SEPARATE FUNCTIONS OR PARAMETERS FOR EACH
+ATTRIBUTE OF EACH SCALAR TYPE'S POSSREP; RATHER THE ATTRIBUTE NAMES ARE
+ARGUMENTS FOR PARAMETERS OF JUST A HANDFUL OF GENERIC FUNCTIONS.
+
+No data type has any operators built-in to its definition except for the
+aforementioned selectors and accessors.  All other operators that are used
+with a data type are expressly I<not> built-in to the type (even if they
+are system-defined); the other operators do not have any access to the data
+type's internals, and must be defined (directly or indirectly) in terms of
+(that is, layered on top of) the few that are built-in, though the
+built-ins from any or all possreps of the type can be utilized.
+
+With a user-defined scalar type, if the type is to have multiple possreps,
+then just one possrep is defined as the fundamental one, and the other
+possreps are defined in terms of the first, by which means the mappings
+between them is done.  The type-defining user can later come back and
+redefine the type if they wish, using a different possrep as the
+fundamental, but assuming the redefinition has all the same values,
+non-defining users of the type won't know any different.
+
+The Muldis D implementation can choose for itself as to how the scalar
+type is physically represented behind the scenes, either picking between
+any of the user-provided possreps (assuming enough information is present
+to derive all needed inverse functions as applicable) or using yet another
+one or several of its own; the implementation can work how it knows best to
+achieve an efficient system, and this is all hidden away from the users,
+who simply perceive in it what they requested.
+
+In the context of scalar subtype/supertype relationships, the definition of
+a subtype can add additional possreps that are only valid for the subtype,
+such that users of the subtype can use both possreps defined for the
+subtype and the supertype, but users of the supertype can only use the
+possreps for the supertype, and not the subtype.  Taking for example the
+data types of rectangle and square, the latter is a subtype of the former;
+a possrep for a rectangle in general comprises its center point as well as
+its width and its height, which also works for a square; an additional
+possrep that just works for a square rather than a rectangle in general
+comprises a center point plus its length.
+
+As a corollary to this, all union types have none of the possreps defined
+by their subtypes.  So the system-defined C<Scalar> type has no possreps at
+all, and hence has no selectors or accessors defined for it.
+
+=head2 Tuple Types and Relation Types
+
+Tuple types are the fundamental heterogeneous conceptually non-encapsulated
+collection types in Muldis D, and are like the Pascal language's concept
+of a record, or the C language's concept of a struct.  The definition of a
+tuple type comprises a set of zero or more named I<attributes> of any
+scalar or nonscalar type.  This set definition is called the tuple's
+I<heading>.
+
+Relation types are the fundamental homogeneous conceptually
+non-encapsulated collection types in Muldis D, and are like other
+languages' concepts of sets (or arrays where all elements are distinct),
+but restricted in that all elements are tuples.  The definition of a
+relation type looks exactly like the definition of a tuple type (such that
+a relation has a I<heading> even if it has no tuples), but that the
+definition defines every tuple in the relation, and also but that relation
+types can additionally have I<keys> defined which indicate that a subset of
+its attributes' values are distinct between all tuples in the relation.
+
+Generic selector and accessor operators exist that work with all tuple and
+relation types, so they do not need to be defined per such type.
+
+The system-defined types C<Tuple> and C<Relation> (and their system-defined
+subtypes) are technically generic factory types, such that they themselves
+do not define any attribute sets, and are supertypes of all tuple and
+relation types that do.  Beyond this special case, a pair of tuple or
+relation types can only have a subtype/supertype relationship if they have
+compatible headings, which means the attribute sets are of the same
+degree, the attribute names are identical, and the name-wise corresponding
+attributes in each heading have a valid subtype/supertype relationship;
+each attribute of a tuple or relation subtype is a subtype of the
+same-named attribute of the tuple or relation supertype.
+
+The most specific type (MST) of a tuple value is determined by the MSTs of
+all of its attributes' values; what the heading of that tuple says for each
+of its attributes is that its data type is the MST of the value of that
+attribute in the tuple's body.
+
+The MST of a relation value is similarly based on the attribute values in
+its member tuples; for each relation attribute, its MST is the most
+specific common supertype of the MSTs of the tuple values for that
+attribute.  If a relation value has zero tuples, then the MST of every one
+of its attributes is simply C<Empty>, regardless of whether that attribute
+would otherwise be scalar or tuple or relation valued.  A consequence of
+this is that 2 relation values with zero tuples are always identical if
+just their degree and the names of their attributes match, and regardless
+of the declared types of the attributes.  A corollary to this is that if
+the declared type of an attribute of a relation type is C<Empty>, then that
+type can only consist of exactly 1 value, which is the zero-tuple relation
+having those attribute names (and their types are all C<Empty>).  This
+quality is reserved for relation (and quasi-relation) types alone; no
+scalar possrep or tuple (or quasi- variants) may use C<Empty> as a declared
+attribute type because their attributes can't contain zero values.
+
+A consequence of these identity matters is that a Muldis D implementation
+can choose to keep all the actual type information of a nonscalar (and
+quasi-nonscalar) value's attributes in the body, leaving the heading to
+keep nothing but the names of the attributes.  An empty relation (or
+quasi-relation) body does not mean that any important meta-data is lost.
+
+=head2 Quasi- Types
+
+The union types C<Universal>, C<Tuple>, C<Relation> (and the system-defined
+subtypes of the latter 2), and remnant types, can be used as the declared
+types of such as variables and routine parameters, but they can not be used
+as the declared types of scalar possrep or nonscalar (tuple or relation)
+attributes.  The declared type of each of the latter must be either a
+scalar type, or a specific tuple or relation subtype (meaning tuple or
+relation types that have specific attribute sets defined for them).
+
+If all data types were scalar or nonscalar, then it would not be possible
+to define operators with N-ary parameters whose declared types are any of
+the aforementioned 3 union types plus the remnant types.  That is, an N-ary
+parameter is usually relation-typed, such that the multiplicity of values
+that the parameter can take are each provided as a tuple of said relation;
+however, as relation attributes can not have said union types as their
+declared types, it would not be possible to implement an N-ary relational
+join operator, for example, since each relation being joined would probably
+have a different heading than the others.
+
+Quasi-tuple types and quasi-relation types exist as a solution to this
+problem (and quasi-scalar types round out the type system), such that the
+I<quasi-heading> of one is allowed to include attributes whose declared
+types are any type at all, including the union types C<Universal>,
+C<Tuple>, C<Relation>, C<QuasiScalar>, C<QuasiTuple>, C<QuasiRelation>,
+C<Remnant>, and subtypes of tuple and relation without specific attribute
+sets, and remnant types.
+
+This said, the situations in which quasi- types may be used are limited;
+only quasi- types may have quasi- types as components; (non-quasi) scalar
+and nonscalar types may not.
+
+Also, quasi-nonscalar types only have defined for them a subset of
+corresponding nonscalar type operators, partly because the former are not
+intended to replace the latter for the majority of use cases, and partly
+because some of them are simply impossible to implement for
+quasi-nonscalars in the general case: C<unwrap>, C<ungroup>.
+
+By some conceptions, the type system could be organized such that all
+non-quasi types are proper subtypes of their quasi- counterparts (as
+integers could be considered proper subtypes of rationals); however, these
+type groups have been made disjoint intentionally for reasons which include
+making it easier to avoid using quasi- types, which are not needed for the
+vast majority of tasks, and which are not allowed in truly relational
+databases as global/persisting variables.
+
+=head2 Remnant Types
+
+Generally speaking, a remnant type is what results when one defines a union
+type over 2 other types whose values are mutually incompatible for use in
+the same relation attribute, such as 2 relation types with different
+degrees or attribute names.  Generally speaking, a remnant type is the
+declared type of each attribute of a quasi-nonscalar type, when said
+attribute isn't one of the special system-defined maximal types.  A remnant
+type also results from defining a negation type over a non-remnant type.
+
+=head2 Finite Types and Infinite Types
+
+A I<finite type> is a data type whose cardinality (count of member values)
+is known to be finite, and this cardinality can be deterministically
+computed; moreover, every value of a finite type can be represented somehow
+using a finite amount of memory.  This doesn't exclude the possibility that
+either the cardinality or individual values are larger than present-day
+computing hardware can handle, but even if so, they could be handled by
+sufficiently larger but finite resources.  An I<infinite type> is a data
+type that is not a finite type; its cardinality is either known to be
+infinity, or it is unknown.
+
+Generally speaking, all finite types are defined either as an explicit
+enumeration of values (for example, the boolean type, which has exactly 2
+values), or they are scalar types whose possreps have zero attributes (each
+one is a singleton, having exactly 1 value), or they are the tuple or
+relation type that has zero attributes (which has exactly 1 or 2 values,
+respectively), or their values are all discrete and fall into a closed
+range (for example, a type comprising the range of integers between 1 and
+100, or a type comprising all real numbers in the same range that have a
+granularity of 0.001, or any IEEE floating point number of a specific bit
+length), or their values are length-constrained strings of
+finite-cardinality elements (for example, a character string that is not
+longer than 250 characters), or they are composite scalar or nonscalar or
+quasi-nonscalar types whose attributes are all of finite types themselves
+(for example, a type whose attributes are all C<Bool>).
+
+Generally speaking, all infinite types are defined either as being some
+open-ended natural domain (for example, the type having all integers, or
+the type having all prime numbers), or they are some continuous domain,
+whether open-ended or not (for example, the type having all real or complex
+numbers between 1 and 100), or they are non-length-constrained strings (for
+example, the set of all possible text strings), or they are composite
+scalar or nonscalar or quasi-nonscalar types which have at least one
+attribute which is itself infinite (for example, a type that has an I<Int>
+attribute).
+
+The system-defined root type C<Bool> is finite (2 values), as is the
+C<Empty> type (zero values), while all of the other 5 most important
+system-defined root types (C<Int>, C<Blob>, C<Text>, C<Tuple>, C<Relation>)
+are infinite, as are the C<Universal>, C<Scalar>, C<QuasiScalar>,
+C<QuasiTuple>, C<QuasiRelation>, C<Remnant> types.
+
+All proper subtypes of finite types are themselves finite types.  Proper
+subtypes of infinite types can be either finite or infinite depending on
+how they are defined.  For example, a subtype of C<Int> whose numbers are
+all simply greater than 10 is infinite, but a subtype whose numbers are
+additionally all less than 1000 is finite.  I<The documentation for
+individual system-defined data types, further below, specifies whether each
+of which is finite or infinite, and in the latter case, it states a most
+generic means to specify a finite subtype.>
+
+Note that, while it is not mandated by the language, some Muldis D
+implementations may legitimately choose to impose restrictions on their
+users such that the declared types of all persisting variables must be of
+finite types only.
+
+For example that all persisting C<Text> types must have a maximum allowed
+length in characters specified, or that all persisting C<Int> types must
+have a least and greatest allowed value specified.  This would typically
+happen if the implementation needs to use fixed-size fields internally,
+such as 32-bit integers, and it is not practical to support the possibility
+that a value could be of any size at all (this is often the case with SQL
+databases implemented in C).
+
+On the other hand, some implementations may natively support unlimited size
+values, such as those written in Perl, and so these can allow persisting
+the plain C<Text> or C<Int> types, which can make things less complicated
+for their users.
+
+Of course, even with implementations that require finite types, this isn't
+to say that the declared type can't be a very large finite type, but then
+the implementation can choose to use, for example, either a machine native
+integer or a string of digits behind the scenes for all values of the type,
+and can do this deterministically, depending what constraint the type
+defining user chose.
+
+=head2 Universal Implicit Operators
+
+Muldis D is universally polymorphic to at least a small degree, such that
+every data type without exception has both an C<assign> update operator
+(for assigning a value of that type to a variable of that type) and an
+C<is_identical> function for testing that 2 values of that type are
+identical (as well as C<is_not_identical>, for nonidentical).  Moreover,
+these operators exist implicitly, so when one defines the initial possrep
+of a new type, they get those operators for the type at no extra cost.
+
+=head2 Numeric Types
+
+Conceptually speaking, Muldis D has just a single most-important numeric
+data type, which consists of every possible real rational number.  This
+data type is a "bignum", and will exactly represent a rational number with
+any arbitrary magnitude and precision, limited only by the amount of
+available system memory.  This type does not include multiple zeros, nor
+any special non-numeric values such as NaNs, infinities, over|underflows,
+nor any symbolic irrationals or complex/imaginary numbers etc; any core
+language operation that might have produced such will either fail or
+(explicitly) round to a nearby rational as is applicable.
+
+This numeric type is exact, not approximate, and every figure
+(bit|digit|etc) is significant; no 2 distinct values will ever compare as
+equal as there is never any implicit rounding; there is no tracking of
+significant figures, and there is no fuzzy logic.  Every one of this type's
+member values can be described in terms of 3 integers; the value is the
+result of multiplying a I<mantissa> (any integer) by the result of a
+I<radix> (any integer greater than one) raised to the power of an
+I<exponent> (any integer).  Or alternately, every value can be described
+using 2 integers; the value is the result of dividing a I<numerator> by a
+I<denominator>.  This numeric type is truly radix-independent; although it
+is most common for the radix to be 2 or 10, any other radix can be used
+instead, such as to represent the value four-thirds exactly.
+
+If you want to represent any numeric or numeric-related value in Muldis D
+other than the aforementioned core-supported ones, you will need to do it
+with some less-important non-core language type, either some system-defined
+extension or some user-defined type.  For example, if you want division by
+zero to produce a special infinity value rather than fail / throw an
+exception, you'll need a non-core type.  Or likewise if you want your math
+to process approximate/measured numbers with proper significant figure
+handling.
+
+On the other hand, if you want to have something that's just like either a
+traditional 32-bit integer or 64-bit IEEE-754 float sans special values,
+you can have that as a simple proper subtype of the most-important numeric
+type.
+
+Now, the Muldis D language actually has 2 most-important numeric data types
+which are disjoint: C<Int> (which is in the language core) and C<Rat>
+(which is in the system-defined C<Rational> language extension).  The
+latter one is equal to the conceptual single numeric type as to what
+numeric values it can represent; the first one by contrast is conceptually
+a proper subtype which just contains all the integers, that is the values
+where the conceptual I<exponent> is zero (or I<denominator> is 1) and so
+the I<mantissa> (or I<numerator>) by itself is the value.  The reason that
+Muldis D has these 2 types disjoint is to assist ease of use and
+implementation; moreover, C<Int> is conceptually a lot simpler, and C<Rat>
+is conceptually defined in terms of C<Int>.  And C<Rat> isn't needed for
+bootstrapping a minimal Muldis D implementation or the system catalog,
+whereas C<Int> is.
+
+I<This documentation is pending.>
+
+=head1 ENVIRONMENT
+
+The Muldis D DBMS / virtual machine, which by definition is the
+environment in which Muldis D executes, conceptually resembles a hardware
+PC, having command processors (CPUs), standard user input and output
+channels, persistent read-only memory (ROM), volatile read-write memory
+(RAM), and persistent read-write disk or network storage.
+
+When a new virtual machine is activated, the virtual machine has a default
+state where the CPUs are ready to accept user-input commands to process,
+and there is a built-in (to the ROM) set of system-defined entities (data
+types, operators, variables, etc) which are ready to be used to define or
+be invoked by said user-input commands; the RAM starts out effectively
+empty and the persistent disk or network storage is ignored.
+
+Following this activation, the virtual machine is mostly idle except when
+executing Muldis D commands that it receives via the standard inputs.  The
+virtual machine effectively has multiple concurrent processes, where each
+process effectively handles just one (possibly complex) command at a time,
+and executes each separately and in the order received; any results or
+side-effects of each command provide a context for the next command, both
+in the current process and, where applicable, in other processes.
+
+At some point in time, as the result of appropriate commands, data
+repositories, or "depots" (either newly created or previously existing)
+that live in the persistent disk or network storage, or volatile memory,
+will be mounted within the virtual machine, at which point subsequent
+commands can read or update them, then later unmount them when done.
+Speaking in the terms of a typical database access solution like the Perl
+DBI, this mounting and unmounting of a repository usually corresponds to
+connecting to and disconnecting from a database.  Speaking in the terms of
+a typical disk file system, this is mounting or unmounting a logical
+volume.
+
+Any mounted depot is home to all user-defined data variables, data types,
+operators, constraints, packages, and routines; they collectively are the
+database that the Muldis D DBMS is managing.  Most commands against the
+DBMS would typically involve reading and updating the data variables, which
+in typical database terms is performing queries and data manipulation. Much
+less frequently, you would also see "data definition" changes, namely what
+user-defined variables, types, etceteras exist, done fundamentally by
+data-updating special system-defined "catalog" variables.  Any updates to a
+persistent depot will usually last between multiple activations of the
+virtual machine, while any updates to a temporary depot are lost when the
+machine deactivates.
+
+All virtual machine commands are subject to a collection of both
+system-defined and user-defined constraints (also known as business rules),
+which are always active over the period that they are defined.  The
+constraints restrict what state the database can be in, and any commands
+which would cause the constraints to be violated will fail; this mechanism
+is a large part of what makes the Muldis D DBMS a reliable modeler of
+anything in reality, since it only stores values that are reasonable.
+
+Note that in practice, the aforementioned concept of "commands" is realized
+by "statements" or "routines".
+
+=head1 ROUTINES
+
+There are several kinds of Muldis D routines, each of which is intended
+for, and in many cases only permitted to be used for, particular tasks.
+Note that for all Muldis D routines which have parameters, they are all
+named rather than positional parameters; in the case of N-ary routines, the
+N similar argument values come by way of a single nonscalar (or, if
+necessary, quasi-nonscalar) typed parameter.
+
+They following hierarchy should briefly illustrate how the kinds of
+routines are similar or dissimilar, but it expressly does not indicate
+substitutability:
+
+    routine
+        functional
+            function
+            inner_function
+            type_constraint
+            transition_constraint
+        imperative
+            deterministic
+                updater
+                inner_updater
+            nondeterministic
+                system_service
+                procedure
+                inner_procedure
+                main
+
+Specifically, the routine kinds are all of the leaf nodes in the above
+hierarchy, and every Muldis D routine is designated as exactly one of
+those; the non-leaf nodes are not routine kinds.
+
+Note that, in an environment where Muldis D is being hosted under another
+language, the other language may only directly invoke these 4 kinds of
+routines: C<function>, C<updater>, C<system_service>, C<procedure>.
+
+=over
+
+=item C<function>
+
+A C<function> is an explicitly invokable read-only operator whose
+invocation both results in and represents a value of a specific data type
+(that is the function's I<result type> or I<declared type>; this invocation
+can only exist as part of a value-expression of another routine; the body
+of a function is also itself a single value-expression (though its parts
+can be named for internal reuse).  A C<function> is pure and deterministic
+in the functional-language sense, such that all of its 0..N parameters are
+read-only / not subject to update, it has no lexical variables at all, and
+that it can only see its own parameters, if it has any; it can not see any
+global variables of any kind, and that it can only invoke C<function> (and
+local C<inner_function>) routines.  A C<function> invocation is trivially
+atomic, since it doesn't conceptually update anything.  A C<function> does
+not have any side-effects at all, either inside of or outside of the
+current in-DBMS process.  The vast majority of invokable system-defined
+routines are C<function>; they include all value selectors, and the typical
+numeric, string, and relational operators, such that you would compose a
+typical database "select" query out of.
+
+=item C<inner_function>
+
+A C<inner_function> is the same as a C<function>, but that it is
+quasi-lexically scoped within another, non-lexical routine, and it is only
+visible within or invokable by either its parent routine or its sibling
+C<inner_function>.  Conceptually speaking, a C<inner_function> is part of
+the definition of the body of the parent routine (like a value expression
+in general), but is isolated into a named C<function>-like entity for
+technical / language design reasons.  For example, it is used to implement
+what would conceptually be an anonymous function defined within its parent
+routine for use as a function-valued argument of some other routine call;
+or to implement what is conceptually a self-referencing/cyclic expression.
+
+=item C<type_constraint>
+
+A C<type_constraint> is the same as a C<inner_function>, but that it is
+part of the definition of a data type (every data type composes 0..N
+explicit ones of these, plus an implicit one that always results in
+C<Bool:true>) rather than a routine, it is invoked automatically by the
+DBMS when a value of that type is being selected, and it always results in
+a C<Bool>.  The parameters of a C<type_constraint> carry information about
+the value selection attempt, and the C<type_constraint> results in either
+C<Bool:true> if the described value would be a member of the data type, or
+C<Bool:false> if not; in the latter case, the DBMS would then throw a
+type-constraint-violation exception (resulting in a transaction rollback
+where applicable), or in the former case, it would consider the selection a
+success.  If the data type being selected of is defined as a scalar root
+type, then the parameter list matches its initial/core possrep's component
+attributes list (their names and declared types), and the arguments are the
+candidate values for those attributes; or, if the data type being selected
+of is defined as a restriction of one other data type, then the parameter
+list has exactly one parameter whose name is C<topic> and whose declared
+type is that other data type.  Note that, because Muldis D requires dbvars
+to be defined over named data types, all I<state constraints> for a
+database, including uniqueness keys or foreign keys or other
+state-constraining business rules, are normally defined as the
+C<type_constraint> for the type which that database is.  Conceptually
+speaking, a C<type_constraint> will execute as the beginning part of a
+statement, prior to any attempt to update any variable's state or affect
+the environment.
+
+=item C<transition_constraint>
+
+A C<transition_constraint> is the same as a C<type_constraint> except that
+it is part of the definition of a variable (or pseudo-variable) rather than
+of a data type, and it is invoked automatically by the DBMS when that
+variable is being updated.  A C<transition_constraint> takes exactly 2
+parameters, whose names are C<before> and C<after>, and whose declared
+types are both the same as that of the variable; it returns C<Bool:true> if
+the variable is allowed (according to current business rules) to transition
+directly from the C<before> state to the C<after> state, or C<Bool:false>
+if not; in the latter case, the DBMS would then throw a
+transition-constraint-violation exception (resulting in a transaction
+rollback of at least the statement that attempted the update), or in the
+former case, it would consider the update a success (barring other causes
+for failure).  Conceptually speaking, a C<transition_constraint> will
+execute as the ending part of a statement, right at the moment of trying to
+update any variable's state, with the result of a value expression or
+otherwise; in the case of a multi-update statement, all the updates would
+happen simultaneously, so a transition failure for any update would prevent
+all that statement's updates from occurring.
+
+=item C<updater>
+
+An C<updater> (update operator) is the same as a C<function>, but that it
+is imperative rather than functional (its invocation does not result in or
+represent a value, and it is invoked as the root part of another routine's
+statement rather than in an expression), and it has at least one parameter
+which is subject to update; any result that it produces is returned by
+updating said parameters.  The body of an updater is a single statement
+(plus any support expressions) that invokes one or more C<updater>
+(recursively down to some system-defined variable assignment operator); if
+invoking several, it is a multi-update statement.  An C<updater> can only
+invoke C<function> and C<updater> (and local C<inner_(function|updater)>)
+routines.  Despite being imperative, an C<updater> has no lexical variables
+save for its subject-to-update parameters, and it just assigns to those as
+its last/only action; but like functions, it does have named expression
+nodes whose use can ease program writing like lexical variables would have.
+An C<updater> invocation is implicitly atomic, and a failure in the middle
+of one will at least rollback any partial update that it may conceptually
+have done.  Most invokable system-defined imperative routines are
+C<updater>; they include all C<assign> operators, plus some
+relational-assignment short-hands such as "assign_insert", "assign_update",
+"assign_delete".
+
+=item C<inner_updater>
+
+A C<inner_updater> (inner update operator) is to an C<updater> what a
+C<inner_function> is to a C<function>.
+
+=item C<system_service>
+
+A C<system_service> is an explicitly invokable system-defined procedure
+with 0..N parameters that can reach outside of the more deterministic DBMS
+environment in order to do non-deterministic things (besides working with
+depots), such as to initiate I/O of various kinds, or fetch the current
+date and time, or generate a random number.  Given the nature of this
+beast, users can not define their own C<system_service> routines but by
+updating the Muldis D implementation's source code itself.  Invoking a
+C<system_service> can have side-effects outside of the DBMS, but it will
+not alter anything inside the DBMS aside from any of its subject-to-update
+parameters.
+
+=item C<procedure>
+
+A C<procedure> is an explicitly invokable routine with 0..N parameters that
+can directly see and update global variables (both catalog and data), and
+is generally the only kind of routine that can; every call chain that is
+meant to work with a persisting (global) dbvar must generally include a
+C<procedure> invocation.  The body of a C<procedure> consists of 0..N
+statements which conceptually run in sequence (not concurrently).  A
+C<procedure> can invoke every kind of explicitly invokable routine.  A
+C<procedure> invocation is I<not> implicitly atomic; unless a wider-scope
+explicit transaction is active, an aborted C<procedure> will leave an
+incomplete update (though not one that violates any constraints or leaves
+the system in an inconsistant state), because each of its statements had
+conceptually auto-committed; so Muldis D does support batch operations
+where partial completion or interruptability is acceptable.  A procedure
+can define explicit (lexically scoped) transactions over multiple
+consecutive statements, and is generally the only kind of routine that can;
+specifically, those statements are parcelled together into a separate
+C<inner_procedure>, and then that is invoked indirectly by way of a new
+statement in the first procedure that invokes the system-defined
+C<try_catch> procedure.  The vast majority of C<procedure> that exist will
+be user-defined.  But some system-defined routines that would otherwise be
+C<function> or C<updater> are C<procedure> instead solely because they are
+non-deterministic; an example is an operator that derives a tuple sequence
+from a relation without fully sorting the tuples, because the result is
+fundamentally random and non-repeatable.
+
+=item C<inner_procedure>
+
+A C<inner_procedure> is to an C<procedure> what a C<inner_function> is to a
+C<function>.
+
+=item C<main>
+
+A C<main> is the single anonymous procedure that is the "main program" of a
+non-hosted Plain Text Muldis D application.  A C<main> is the same as a
+C<procedure>, but that it can not be invoked by any other Muldis D routine,
+it does not live in any depot, it can not directly see or update any global
+variables, and it can not have any parameters.  Fundamentally, the only
+task that a 'main' should be doing is loading or creating depots (by
+invoking system-defined routines that update the system catalog), which
+should contain all of the other user-defined routines as if they were code
+libraries, and invoking them.  In a mixed-language application, where
+Muldis D code is invoked by another host language, there is no Muldis D
+C<main> at all, since it would be redundant with host langauge routines.
+
+=back
+
+Note that Muldis D currently has no direct support for the concept of a
+trigger-routine that can update a database; updating virtual relvars or
+invoking C<procedure> are recommended instead.  As for non-updating
+trigger-routines, the type/transition constraint routines already perform
+that feature.  I<The feature in question may be directly supported later?>
+
+I<This documentation is pending.>
+
+=head1 USERS AND PRIVILEGES
+
+The Muldis D DBMS / virtual machine itself does not have its own set of
+named users where one must authenticate to use it.  Rather, any concept of
+such users is associated with individual persistent repositories, such that
+you may have to authenticate in order to mount them within the virtual
+machine; moreover, there may be user-specific privileges for that
+repository that restrict what users can do in regards to its contents.
+
+The Muldis D privilege system is orthogonal to the standard Muldis D
+constraint system, though both have the same effect of conditionally
+allowing or barring a command from executing.  The constraint system is
+strictly charged with maintaining the logical integrity of the database,
+and so only comes into affect when an update of a repository or its
+contents are attempted; it usually ignores what users were attempting the
+changes.  By contrast, the privilege system is strictly user-centric, and
+gates a lot of activities which don't involve any updates or threaten
+integrity.
+
+The privilege system mainly controls, per user, what individual repository
+contents they are allowed to see / read from, what they are allowed to
+update, and what routines they are allowed to execute; it also controls
+other aspects of their possible activity.  The concerns here are analogous
+to privileges on a computer's file system, or a typical SQL database.
+
+I<This documentation is pending.>
+
+=head1 TRANSACTIONS AND CONCURRENCY
+
+This official specification of the Muldis D DBMS includes full ACID
+compliance as part of the core feature set; moreover, all types of changes
+within a repository are subject to transactions and can be rolled back,
+including both data manipulation and schema manipulation; moreover, an
+interrupted session with a repository must result in an automatic rollback,
+not an automatic commit.  (But changes that occur outside the DBMS
+environment, such as by a C<system_service>, or by a host language routine,
+are generally not affected by transactions at all.)
+
+It is important to point out that any attempt to implement Muldis D (what
+a Muldis DB Engine does) which does not include full ACID compliance, with
+all aspects described above, is not a true Muldis D implementation, but
+rather is at best a partial implementation, and should be treated with
+suspicion concerning reliability.  Of course, such partial implementations
+will likely be made and used, such as ones implemented over existing DBMS
+products that are themselves not ACID compliant, but you should see them
+for what they are and weigh the corruption risks of using them.
+
+I<Note that the best way for an implementation to behave, if for some
+reason it is built in such a way and/or over an existing DBMS product that
+does implicit commits after, say, data-definition statements, is for it to
+throw an exception if data-definition is attempted within an explicit /
+multi-statement transaction, such that a user of that Engine can only do
+data-definition outside of an explicit transaction; in this way, the
+implementation is still following all the Muldis D safety rules, and hence
+should be relatively safe to use, even if it lacks Muldis D features.>
+
+Each individual instance of the Muldis D DBMS is conceptually a multiple
+concurrent process / multi-threaded virtual machine, and conceptually there
+may be several things happening in it simultaneously.  This design helps a
+Muldis D implementation use a computer's resources more efficiently when
+multiple hardware CPUs are available, or when multiple autonomous tasks
+need doing in the DBMS that don't necessarily need doing in a specific
+order, nor depend on each other, and either should be able to commit even
+if the other doesn't.  Users may explicitly specify distinct processes for
+particular high-level statements when appropriate.  Moreover, many
+system-defined functions will automatically use multiple threads to do
+their work, which is often highly symmetrical and order-independent, as set
+based or relational operations often are.  This said, Muldis D has a high
+level of isolation between any concurrent processes so to reduce the
+complexity of using them and avoid the common pitfalls of concurrency; in
+particular, there is generally no data sharing between processes, and any
+access to common updateable resources, typically repositories, is
+serialized by the system; for example, only one process at a time may hold
+a for-update transaction on the same depot.  Speaking in terms of SQL, the
+Muldis D DBMS supports only the serializable transaction isolation level.
+
+Within each thread of execution, conceptually only one thing is happening
+in it at a time; each individual Muldis D statement executes in sequence,
+following the completion or failure of its predecessor.  During the life of
+a statement's execution, the state of the virtual machine is constant,
+except for any updates (and side-effects of such) that the statement makes.
+Breaking this down further, a statement's execution has 2 sequential
+phases; all reads from the environment are done in the first phase, and all
+writes to the environment are done in the second phase. Therefore,
+regardless of the complexity of the statement, and even if it is a
+multi-update statement, the final values of all the expressions to be
+assigned are determined prior to any target variables being updated.
+Moreover, as all functions may not have side-effects, and we don't support
+the concept of "trigger" routines that can perform updates, we avoid
+complicating the issue due to environment updates occurring during their
+invoker statement's first phase.  I<TODO: elegantly support updating
+triggers somehow.>
+
+In account to situations where external processes are concurrently using
+the same persistent (and externally visible) repository as a Muldis D
+DBMS instance, the Muldis D DBMS will maintain a lock on the whole
+repository (or appropriate subset thereof) during any active read-only
+and/or for-update transaction, to ensure that the transaction sees a
+consistent environment during its life.  The lock is a shared lock if the
+transaction only does reading, and it is an exclusive lock if the
+transaction also does writing.  Similar management happens to handle
+multiple Muldis D internal processes.
+
+The rest of this documentation section is written just within the context
+of a single in-DBMS process, unless explicitly stated otherwise.
+
+No multi-update statement may target both catalog and non-catalog
+variables.  If you want to perform the equivalent of SQL's "alter"
+statement on a relation variable that already contains data, you must have
+separate statements to change the definition of the relation variable and
+change what data is in it, possibly more than one of each; the combination
+can still be wrapped in an explicit transaction for atomicity.
+
+Transactions can be nested, by starting a new one before concluding a
+previous one, and the parent-most transaction has the final say on whether
+all of its committed children actually have a final committed effect or
+not.  There are no mutually autonomous transactions within the same process
+of a DBMS.
+
+Transactions in Muldis D come in both implicit and explicit varieties, but
+the implicit transactions only exist (that is, only have an effect) when
+there are no explicit transaction active.
+
+The most generalized way to specify an explicit transaction within Muldis D
+is to take the statements comprising it and isolate them into their own
+C<procedure> (or C<inner_procedure>), then invoke that by way of the
+system-defined C<try_catch> procedure; the invoked procedure is
+conceptually an exception-trapping I<try block>.  A procedure invoked
+through C<try_catch> is wrapped in a new child transaction that is tied to
+its lexical scope.  The transaction will begin when that scope is entered
+and end when that scope is exited; if the scope is exited normally, its
+transaction commits; if the scope terminates early due to a thrown
+exception, its transaction rolls back.  In the latter case, C<try_catch>
+will catch that exception, so the rollback doesn't proceed further than
+itself, but that if the I<catch block> it then invokes also throws (or
+re-throws) an exception, that is not caught here.  In a pure Muldis D
+application, this lexically-scoped exception handling mechanism is the
+I<only> kind of generalized explicit transaction.
+
+I<TODO:  How do we specify when to start a new thread or message with
+service threads (eg, that log errors, do sequences).>
+
+In a mixed-language application, when Muldis D routines are invoked by a
+host language, the host language is allowed to specify further parent-most
+explicit transactions within the DBMS that are not bound to the lexical
+scope of a block, using distinct transaction initiation and termination
+statements.  Such open-ended transactions are intended for transactions
+which last over multiple DBMS invocations of an application (whereas Muldis
+D scope-bound transactions always occur entirely within one invocation of
+the DBMS by a host language).  But it is a recommended best practice that
+host language code will associate the invocation of said statements with
+its own lexical scopes, such as its own I<try-catch> constructs.
+
+An implicit transaction is associated with the lexical scope of every
+Muldis D C<updater> and C<system_service>, and by extension, every Muldis D
+statement that is an invocation of said.  Or more accurately, an update
+operation (including a multi-update operation) is implicitly atomic, and
+will either succeed and commit as a whole, or fail and rollback as a whole.
+This is as if every update operator invocation was surrounded by its own
+I<try> block, except that any thrown exceptions are not caught.  Similarly,
+every C<function> and C<\w+_constraint> is trivially a transaction, though
+since these never update anything, all that really means is that they see a
+consistent view of their environment.
+
+By contrast, every C<procedure> (and C<inner_procedure>) and C<main> is
+neither implicitly a transaction nor atomic (except when externally wrapped
+in one), so you can use a procedure to define an operation where you want
+to keep partial results of a failure.
+
+Since failures are always accompanied by thrown exceptions, a failure will
+unwind the call stack and rollback any active transactions one nesting
+layer at a time until either a I<try> block is exited, which halts the
+unwinding, or the application exits, rolling back all remaining active
+transactions.
+
+If no explicit transactions are active at all when a failure occurs, then
+each non-procedure-invoking statement in a procedure is the parent-most
+transaction, and so a failure part-way through said procedure will result
+in the prior-completed statements to be fully committed, and only the
+failed statement to have left no state change.  At this point, a pure
+Muldis D application will have exited, and a mixed-language application
+will have either exited or caught an exception in a host-language I<try>
+block.
+
+All current repository mounts (persistent and temporary both) by the same
+in-DBMS process/thread are joined at the hip with respect to transactions;
+a commit or rollback is performed on all of them simultaneously, and a
+commit either succeeds for all or fails for all (a repository suddenly
+becoming inaccessible counts as a failure). I<Note that if a Muldis D
+implementation can not guarantee such atomicity between multiple
+repositories, then it must refuse to mount more than one repository at a
+time under the same process (users can still employ multiple depots each
+under multiple in-DBMS processes, that are not synchronized); by doing one
+of those two actions, a less capable implementation can still be considered
+reliable and recommendable.>
+
+Some Muldis D commands can not be executed within the context of a parent
+transaction; in other words, they can only be executed directly by a
+C<procedure> etc or the host language, the main examples being those that
+mount or unmount a persistent repository; this is because such a change in
+the environment mid-transaction would result in an inconsistent state.
+
+I<Muldis D lets you explicitly place locks on resources that you don't
+want external processes to change out from under you, and these locks do
+not automatically expire when transactions end; or maybe they do; this
+feature has to be thought out more.>
+
+I<This documentation is pending.>
+
+=head1 RESOURCE MODULARITY AND PERSISTENCE
+
+The architecture of Muldis D is based on collections of highly structured
+resources, where resources can be executable code (that is, data type and
+routine definitions) and/or user data.  Muldis D provides facilities to
+introspect all kinds of resources, whether system-defined or user-defined,
+and it allows users to update the latter.  Resources typically have names
+within the DBMS environment, and are referred to as I<entities>.
+
+=head2 System-Defined Resources
+
+The standard Muldis D language includes a complement of data types and
+routines that should be hardwired into every implementation of Muldis D as
+globally visible and invokable system-defined entities.  Even if an
+implementation can't provide the whole complement, the subset that it does
+should carry identical semantics so user entities that just use the
+provided subset are still portable.
+
+System-defined types and routines are grouped into multiple dynamically
+loadable libraries.  One of these libraries, named C<Core>, is loaded by
+default at DBMS startup, and provides the most fundamental resources that
+everything else needs.  Other system-defined libraries will load
+automatically when something in them is referenced by user code; users
+never explicitly ask to use a system-defined extension, or at least not
+from within Muldis D code.  It is up to each Muldis D implementation to
+choose whether any particular system-defined entities are implemented at a
+low level using platform-specific primitives, or at a higher level over
+other Muldis D types and routines.  Users generally may only introspect the
+public interface of system-defined resources, not their implementations, so
+they won't know any different.
+
+Each implementation of Muldis D may want to embrace and extend the language
+with a further complement of data types and routines, which are
+non-standard and fundamentally just useable with that implementation.  They
+are implemented in the same way as standard system-defined entities, but
+they live under a different DBMS top-level namespace than the standard
+entities, so that later enhancements to the standard don't have to worry
+about name collisions with unofficial extensions.
+
+=head2 User-Defined Resources
+
+All user-defined resources in Muldis D are actually data, even those that
+look like code, and these are all exist in one or more I<depots>, which are
+the normal means provided by Muldis D for persistence.  A depot is a
+completely self-sufficient storage system for normal user data and includes
+all the meta-data (type definitions) required to understand the structure
+of, and the business rules / constraints for, that normal data; the depot
+typically also includes all the user-defined routines for querying or
+manipulating that data.  All the entities in a single depot must be fully
+definable using only system-defined entities and/or user-defined entities
+in the same depot; this allows a depot to maintain an independent existence
+as far as its interpretability and integrity goes.  Depots are normally
+updateable within a DBMS at runtime, but they can alternately be used
+read-only.  If a depot doesn't contain normal data, but rather just data
+type and/or routine definitions, it is essentially a code library; in fact,
+all user-defined Muldis D code libraries are implemented as depots.
+
+A depot is the native perception by the application / virtual machine
+environment of some conceptually external storage system, such as a disk
+file or a database server; a depot conceptually will outlast any particular
+execution of the application / virtual machine and represents long term
+data storage.  That said, the depot doesn't actually have to be persistent;
+one could be defined as a temporary space in the computer's working memory,
+that will not outlast a DBMS execution.
+
+If the storage mechanism for depots is based on files (eg, SQLite), and
+each file can exist separately, but several can optionally be used at the
+same time, then each file should be represented in the DBMS environment by
+a separate depot.  If the storage mechanism is represented by a SQL
+database server (eg, PostgreSQL, Oracle), then probably everything defined
+for it within a common SQL catalog should be represented by one depot.  If
+a database user authentication is applicable to access the storage system,
+then a depot might include everything visible within the context of one
+login (in any event, user login/authentication can only be applied at the
+per-depot level, unless a more fine-grained approach is reasonable).
+Technically, a depot can represent a narrower scope than this, but it
+should never represent a wider scope than what is considered a single
+independent unit.
+
+At DBMS startup, there are no depots mounted.  The only user-defined Muldis
+D code that doesn't live in a depot is the "main program" of a non-hosted
+Plain Text Muldis D application, and the only job of that code is to mount
+one or more depots that contain the rest of the program code (as libraries)
+and invoke their high-level routines; or it creates and populates said
+depots if necessary.  In a mixed-language application, where Muldis D code
+is invoked by another host language, this depot-external code doesn't exist
+at all, since it would be redundant with the job of host language routines.
+
+An external storage system may be mounted as multiple distinct depots
+within the same DBMS.  This is useful, for example, when the user wants to
+connect to the same resource as multiple distinct authenticated users at
+once that have different privileges, or where different actions against the
+resource ought to be recorded as happening by different database users.  Or
+this is useful when the user wants to carry on multiple autonomous
+transactions to the same external resource at once, such as to do normal
+database activity in one transaction, and to record an audit of failed
+update attempts using another autonomous transaction; or alternately, to
+increment a sequence generator whose state is persisted in one autonomous
+transaction and use sequence values in another, so the sequence generator
+doesn't give repeat values if the transaction using it rolls back.
+
+All concurrent depot mounts under the same in-DBMS process are a
+I<federation> whose updates must be collectively atomic, and commit or
+rollback as one, such as if they are all managed by the same actual DBMS or
+DBMS cluster.  Although depots have independent definitions, procedures
+defined in them are allowed to invoke or reference resources stored in
+others under certain situations.  For example, one might want to perform
+cross-database queries or multi-updates, or they may want to migrate an
+older depot's schema or data to a newer one.  To assist this, resources of
+multiple depots can be mapped to each other on a transient (while both are
+mounted) basis, so that the DBMS knows, for example, that their necessarily
+redundant data type definitions are supposed to be treated as being the
+same data types.
+
+Now, most of the time, the code for a Muldis D application would just be
+collected in a single depot, matters of reusability between multiple
+database-sharing applications aside.  Each depot is designed to accommodate
+its own collections of resources according to various good practices.  A
+depot fundamentally consists a collection of packages (under a potentially
+multi-level namespace), into which everything else is grouped.  Each
+package declares its own public interface, consisting of the types,
+routines, and relvars that are allowed to be directly invoked or referenced
+from outside of the package, and it can also have more types, routines, and
+relvars which are private to the package.  This is analogous to a class
+definition with public and private elements, or to C .h vs .c files, or to
+an Oracle DBMS' "package".  Unlike with a typical supporting SQL DBMS that
+gives users a choice, Muldis D requires all depot entities to be in
+packages for simplicity; but making all package members public has the
+effect of negating package encapsulation.  All non-lexical data variables
+in a depot may only be relation typed, because relational databases are
+composed fundamentally of just relations.
+
+When a DBMS starts up, it only contains one auto-started process, which is
+the root process; the root process is defined either by the non-hosted
+Muldis D "main program" (it runs at DBMS startup, and the DBMS shuts down
+when it ends), or host language routines (the DBMS exists for the life of
+some host language object that represents it), as applicable.  This root
+process can start other processes, which are its direct child processes,
+and other processes can start yet others, thus forming a process hierarchy;
+no process may exit until all of its children do.  Generally speaking, a
+process can only communicate directly with its own parent or child
+processes, through something akin to an inter-process message pipe.  Any
+process that wasn't created to autothread a function can communicate with
+the DBMS-external user, which includes the root process and/or host
+language routines, though typically where there is a host language, all
+user interaction is done there.  If a Muldis D DBMS is being used to
+implement a multi-client server, then multiple in-DBMS processes may
+typically be started directly by the server request listener, so each
+client typically is autonomous from others, shared depot contention aside.
+
+=head1 ENTITY NAMES
+
+All entities that exist at some given time within a DBMS environment can be
+explicitly referenced in some manner for definition and/or use; there are
+no orphans.  At the very least, every kind of DBMS entity is defined in one
+or more catalog relvars or relcons; its interface and/or implementation can
+be observed and possibly updated therein.
+
+All entity names are generally context specific, with each context
+generally being provided by a routine or other entity; all entity names are
+generally relative to the definition location of a routine or other
+user-defined DBMS entity.
+
+Since all in-DBMS processes/threads are isolated from each other and
+effectively have their own environment, the following namespaces are
+generally specific to the context of a single process; so, for example,
+each process has only a single depot mount federation.
+
+Note that the following namespaces assume that a program that is written in
+Muldis D executes possibly either standalone or a peer-to-peer process
+that can have its global variables made visible to other processes, or have
+others' made visible to it.  Or in other words, the program can both manage
+its own dbvars and be a DBMS client, and the program can either just use
+the DBMS itself or be a server of it.
+
+I<Note that all entity names in Muldis D are case-sensitive, as with
+character strings in general.  Implementations should take special care to
+compensate for any case-insensitive storage system they might use.>
+
+This is the hierarchy of invocation namespaces of DBMS entities:
+
+    cat  # system catalog desc everything; all but .system|impl updateable
+        cat.system
+        cat.impl
+        cat.native
+            cat.native.fed
+            cat.native.dep
+            cat.native.sdp
+            cat.native.pkg
+        cat.mount
+        cat.foreign
+        cat.interp
+    sys  # system-defined types and routines defined by standard Muldis D
+        sys.Core
+            sys.Core.<package>
+                sys.Core.<package>.<type>
+                sys.Core.<package>.<routine>
+        sys.<extension>
+            sys.<extension>.<package>
+                sys.<extension>.<package>.<type>
+                sys.<extension>.<package>.<routine>
+    imp  # sys-def types and routines added by, specific to implementations
+        imp.<authority-or-impl-name>
+            imp.<authority-or-impl-name>(.<namespace>){0,}
+                imp.<authority-or-impl-name>(.<namespace>){0,}.<type>
+                imp.<authority-or-impl-name>(.<namespace>){0,}.<routine>
+    fed  # the transac-synced federation of curr mounted depots w mount nms
+        fed.<depot>
+            fed.<depot>(.<subdepot>){0,}
+                fed.<depot>(.<subdepot>){0,}.<package>
+                    fed.<depot>(.<subdepot>){0,}.<package>.<relvar>
+                    fed.<depot>(.<subdepot>){0,}.<package>.<type>
+                    fed.<depot>(.<subdepot>){0,}.<package>.<routine>
+    dep  # entities in a self-sufficient depot ref their own depot w this
+        dep(.<subdepot>){0,}
+            dep(.<subdepot>){0,}.<package>
+                dep(.<subdepot>){0,}.<package>.<relvar>
+                dep(.<subdepot>){0,}.<package>.<type>
+                dep(.<subdepot>){0,}.<package>.<routine>
+    sdp  # entities in a subdepot (public gen nsp) ref their own sdp w this
+        sdp.<package>
+            sdp.<package>.<relvar>
+            sdp.<package>.<type>
+            sdp.<package>.<routine>
+    pkg  # entities in a package (priv nsp) ref their own package with this
+        pkg.<relvar>
+        pkg.<type>
+        pkg.<routine>
+    inn  # entities in a main|inner routine ref child|sib rtns with this
+        inn.<routine>
+    lex  # entities in a rtn ref own lexical params|exprs|vars with this
+        lex.param.<param>
+        lex.expr.<expr>
+        lex.var.<var>
+
+Further details of each namespace follow below.
+
+=head2 User Data Variables and System Catalog Variables
+
+All globally visible Muldis D variables can be grouped into two main kinds,
+which are system catalog variables (some of which are actually constants)
+and user data variables; the former all exist under the C<cat> primary
+namespace, and the latter live under some of the other primary namespaces,
+specifically C<fed|dep|sdp|pkg>.  All non-global variables are just of the
+user data variety, and use the C<pkg|lex> primary namespaces (yes, C<pkg>
+has both public and private variables).
+
+The purpose of user data variables is hold user data, and are what gets
+read or updated by database users the vast majority of the time; working
+with these is termed I<data manipulation>.  These variables are typically
+all user-defined.  They are all non-magical, in that updating them has no
+side-effects, assuming they are not defined virtual.
+
+The purpose of system catalog variables is to reflect and (where
+appropriate) empower modification to the Muldis D I<meta-model>, which is
+the active machine readable definition of all DBMS entities in the current
+virtual machine, both system-defined (read-only) and user-defined
+(updateable); working with these is termed I<data definition>.  They are
+all magical, as updating them has immediate side-effects on the visibility
+of or existence of or structure of or constraints on some other, typically
+user-defined, entities.
+
+Note that magicalness is always associated with variables, not data types,
+so users can define their own variables of catalog data types, but updating
+those would have no meta-model affecting side effects like with system
+catalog variables.
+
+As an exception to the above, users can define virtual variables that alias
+one or more other variables (sometimes by way of a function), where
+updating the virtual variables is akin to updating the other variables; if
+the other variables are system catalog variables, then effectively so are
+the user defined virtual ones; this is the only way users can effectively
+define magical variables, which otherwise isn't possible.
+
+The C<cat> primary namespace of Muldis D can be considered analogous to the
+"information schema" of SQL, but that the latter is just read-only.
+
+The secondary namespaces under C<cat> are described in other sections.
+
+=head2 Standard System-Defined Entities
+
+All system-defined data types and routines are globally visible and
+invokable.
+
+Each standard system-defined type and routine exists under the C<sys>
+primary namespace, and its fully qualified name has 3 parts besides the
+C<sys>.  The most fundamental standard types and routines, those that are
+ideally the least that every Muldis D implementation would provide, are
+further under the C<Core> secondary namespace; less fundamental but still
+standard types and routines are grouped under various other secondary
+"extension" namespaces, with each secondary namespace conceptually
+representing a dynamically loadable plug-in library.  Finally, each of the
+C<Core> and any other extensions has a 2-level namespace, where closely
+related types and routines are grouped under common package names.  For
+system-defined entities, package names are simply a convenience, routines
+that work with particular types don't have to be grouped with said types'
+declarations.
+
+The catalog namespace C<cat.system> is where all the relcons that describe,
+in a machine-readable way, all of the standard system-defined entities just
+discussed, as well as themselves, reside; the definitions of the standard
+data types of these relcons are also reflected by the same relcons.
+
+=head2 Implementation Specific System-Defined Entities
+
+Minimally speaking, the structure and contents of the catalog namespaces
+C<cat.(mount|foreign|interp)> are expected to be implementation specific,
+and so the (typically named nonscalar) types in terms of which they are
+defined would also have to be implementation specific.  While adhering to
+that minimum purpose for non-standard additions would be the best in terms
+of portability, it is realistic to assume that some implementations will
+intend some of their additions to be used for user data as well.  But even
+then, ideally such additions would be to serve specialized niches only,
+rather than being intended for general use.  Or ideally these would be
+deprecated in favor of support of the niche coming into the standard
+language as an elegantly designed extension.
+
+The C<imp> primary namespace is for the hardwired non-standard /
+implementation specific system-defined types and routines in the same way
+that C<sys> is for the standard system-defined types and routines.  Keeping
+this separate namespace now allows for implementations to continue
+supporting an evolving standard without becoming conflicted with their own
+legacy extensions.  Non-standard system-defined entities have fully
+qualified names with at least 2 parts besides the C<imp>.  The secondary
+namespace is always some authority-like identifier which could alternately
+be an implementation name.  If some implementation ended up supporting not
+only its own extensions, but also the extensions of other implementations,
+then the secondary namespace would say who declared the entity in question;
+or, that is still useful for external processors of the extended Muldis D
+code.  Finally, the depth of the namespace under the authority-like level
+is purely implementation specific, and is at least 1 level.
+
+The catalog namespace C<cat.impl> corresponds to C<cat.system>.  The two
+being separated also results in the value of the C<cat.system> catalog
+constant being exactly the same for all implementations.
+
+=head2 User-Defined Entities
+
+Users of Muldis D can define their own data types, routines, and variables,
+and each of these exists in a I<depot>, which is the means provided by
+Muldis D for persistence.
+
+The C<fed> primary namespace is for all non-lexical user-defined entities.
+Beneath C<fed>, each secondary namespace is the name that a depot is
+mounted with by the current process/thread in the virtual machine, and
+there is one distinct second-level name per depot, and often there is just
+one of those at a time.  Under each depot name is an optional tree of
+generic namespaces, adding 0..N name parts, each of which we refer to
+simply as a I<subdepot>.  After that we have 1 layer that are package
+names.  After that, we have the lowest layer, which are globally
+addressable relvar, type, and routine unqualified names.  So the
+fullly-qualified names of most user-defined entities by way of C<fed> are
+4-5 parts.
+
+Entities declared in a depot are recommended to refer to other entities
+within the same depot using the localizing primary namespace C<dep>, which
+for them substitutes for C<fed> plus their mounting name; this allows depot
+entities to be coded in a portable way, not having to know too much about
+how they would be used (eg, not knowing what name they are mounted with).
+In fact, nothing is allowed to directly refer to entities using C<fed>
+except procedures, or the C<main> if it exists, or the host language if it
+exists.
+
+Similarly, the primary namespace C<sdp> is for self-references between
+entities in a common subdepot; if there are 2 or more layers of
+subdepot, then this is specifically to the most immediate one of
+the referencer; if there are zero layers of subdepot, then this is
+an alias for C<dep>.
+
+Similarly, the primary namespaces C<pkg|inn|lex> refer to entities within
+the same private scope as the referencer; except for a subset of what is
+seen under C<pkg>, these items are not referenceable globally; a package
+could be referred to as a I<generic privatizable namespace>.  Variables
+under C<lex> only are allowed to be of any data type, not just be relvars.
+
+=head2 Conceptions and Requirements
+
+Practically speaking, the conceptions of some namespaces for user-defined
+entities are as follows.
+
+A single virtual machine contains 0..N concurrent processes that are each
+autonomous, and generally isolated from each other.  All depot mounts held
+by a process are as a whole synchronized with respect to transactions.
+(Also, generally speaking, no depot may be mounted or unmounted while an
+explicit transaction is active.)  If this is not possible for an
+implementation to handle, then only one depot should be allowed to mount at
+a time, meaning the implementation is always a non-federated DBMS.  Also,
+the virtual machine as a whole represents the application working
+environment itself, and there is no database-level user
+login/authentication for the virtual machine itself, as it doesn't make
+sense for an application to login to its own working state.
+
+The division of a depot into multiple subdepots is optional, and this
+construct is provided to allow a perception of the storage system that is
+as reasonably unabstracted as possible; the native namespace hierarchy of
+the storage system can be exploited with little difficulty.  Assuming the
+previously described meaning of a depot is adhered to, there will typically
+be either zero (SQLite) or one (PostgreSQL, Oracle) layers of generic
+namespaces; where there is one, it typically corresponds to the storage
+system's concept of a I<schema>; but N layers are provided by Muldis D
+"just in case".  This said, all entities that are directly under a generic
+namespace should all be considered public or globally referenceable
+(database user privileges notwithstanding).  If fine-grained user ownership
+or privileges are applicable, they would typically be applied either at the
+generic namespace level or to other individual entities under depots.
+
+Each individual package should be interpreted as an integrated collection
+of type and routine definitions where some parts of the collection are
+private and just a subset are public.
+
+The concept of "inner routines" in Muldis D exists mainly to deal with the
+design decision where type and routine definitions are expressly fixed
+depth trees (because they are represented by components in a relational
+catalog database), rather than N-depth trees like in a typical programming
+language.  So when a conceptually N-depth syntax tree of another language
+is converted to Muldis D, the nodes in that tree are all given distinct
+names and then turned into a flat list, where each list item is, loosely
+speaking, a 2-level tree declaring its own name as a root and declaring its
+direct children in a set.  The primary namespace C<inn> is used for
+individual nodes to refer to other nodes within the common conceptual
+single routine, and all of these are private.  The only time some other
+host language might map directly to this concept is if it allows named
+types or routines to be declared within the lexical scope of other
+routines.  There are no variables under C<inn>, but each inner routine
+can have its own variables, or parameters, where applicable.
+
+The primary namespace C<lex> is for entities that would commonly be
+considered lexical parameters or variables in a routine; these would
+typically map directly to their counterparts for a routine definition
+translated to or from some other language.  That said, some kinds of
+routines (eg, functions) expressly don't have actual variables, and instead
+have pseudo-variables which are named expression nodes; these would
+typically either be turned into actual expression trees or actual
+variables, or sometimes use native equivalents if the other language is
+pure functional.
+
+=head1 SEE ALSO
+
+Go to L<Muldis::D> for the majority of distribution-internal
+references, and L<Muldis::D::SeeAlso> for the majority of
+distribution-external references.
+
+=head1 AUTHOR
+
+Darren Duncan (C<perl@DarrenDuncan.net>)
+
+=head1 LICENSE AND COPYRIGHT
+
+This file is part of the formal specification of the Muldis D language.
+
+Muldis D is Copyright © 2002-2008, Darren Duncan.
+
+See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
+
+=head1 TRADEMARK POLICY
+
+The TRADEMARK POLICY in L<Muldis::D> applies to this file too.
+
+=head1 ACKNOWLEDGEMENTS
+
+The ACKNOWLEDGEMENTS in L<Muldis::D> apply to this file too.
+
+=cut
