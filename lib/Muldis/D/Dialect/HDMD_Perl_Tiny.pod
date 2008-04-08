@@ -9,7 +9,7 @@ How to format Perl Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl_Tiny version 0.13.0.
+This document is Muldis::D::Dialect::HDMD_Perl_Tiny version 0.14.0.
 
 =head1 PREFACE
 
@@ -22,8 +22,8 @@ before you read this one, which provides subservient details.
 This document outlines the grammar of the I<Hosted Data Muldis D> dialect
 named C<HDMD_Perl_Tiny>.  The fully-qualified name of this Muldis D
 dialect, in combination with the base language spec it is bundled with, is
-C<Muldis_D:'cpan:DUNCAND':'N.N.N':'HDMD_Perl_Tiny'> (when the bundled base
-language version is substituted for the C<N.N.N>).
+C<Muldis_D:'http://muldis.com':'N.N.N':'HDMD_Perl_Tiny'> (when the bundled
+base language version is substituted for the C<N.N.N>).
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -103,7 +103,7 @@ Node type / language base name: the Perl C<Str> value C<Muldis_D>.
 =item *
 
 Base authority: a Perl C<Str> as per the payload of a C<Text> node;
-typically the Perl C<Str> value C<cpan:DUNCAND>.
+typically the Perl C<Str> value C<http://muldis.com>.
 
 =item *
 
@@ -122,7 +122,7 @@ Extensions: a Perl C<Hash|Mapping> as per the payload of a C<Tuple> node.
 
 Examples:
 
-    [ 'Muldis_D', 'cpan:DUNCAND', '1.2.3', 'HDMD_Perl_Tiny', {} ]
+    [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl_Tiny', {} ]
 
 More specifically, a language name PHMD node like the above would generally
 be the input for a Perl Hosted Muldis D implementating virtual machine's
@@ -131,7 +131,7 @@ other PHMD trees to said virtual machine.
 
 =head1 CORE GENERIC SCALAR VALUES
 
-=head2 sys.Core.Scalar.Bool
+=head2 sys.Core.Type.Bool
 
 This node type represents a logical boolean value.  It has 3 elements:
 
@@ -151,7 +151,7 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Scalar.Bool> value as
+This node is interpreted as a Muldis D C<sys.Core.Type.Bool> value as
 follows:
 
 =over
@@ -189,7 +189,7 @@ Examples:
 
     [ 'Bool', 'perl_any', 42 ]
 
-=head2 sys.Core.Scalar.Int
+=head2 sys.Core.Type.Int
 
 This node type represents an integer value.  It has 3-4 elements:
 
@@ -213,7 +213,7 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Scalar.Int> value as
+This node is interpreted as a Muldis D C<sys.Core.Type.Int> value as
 follows:
 
 =over
@@ -274,7 +274,7 @@ Examples:
 
     [ 'Int', 'perl_int', 101 ]
 
-=head2 sys.Core.Scalar.Blob
+=head2 sys.Core.Type.Blob
 
 This node type represents a bit string.  It has 3-4 elements:
 
@@ -298,7 +298,7 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Scalar.Blob> value as
+This node is interpreted as a Muldis D C<sys.Core.Type.Blob> value as
 follows:
 
 =over
@@ -335,7 +335,7 @@ Examples:
 
     [ 'Blob', 'perl_blob', (pack 'H2', 'Z') ]
 
-=head2 sys.Core.Scalar.Text
+=head2 sys.Core.Type.Text
 
 This node type represents a character string.  It has 2 elements:
 
@@ -351,7 +351,7 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Scalar.Text> value by
+This node is interpreted as a Muldis D C<sys.Core.Type.Text> value by
 directly mapping the payload.  Note that, while Plain Text Muldis D may
 contain a few escape sequences, those would be replaced with what they
 represent prior to making a PHMD node.  Under Perl 6, the payload must be a
@@ -371,7 +371,7 @@ Examples:
 
 =head1 CORE GENERIC NONSCALAR VALUES
 
-=head2 sys.Core.Tuple.Tuple
+=head2 sys.Core.Type.Tuple
 
 This node type represents a tuple value.  It has 2 elements:
 
@@ -387,7 +387,7 @@ The payload; a Perl C<Hash|Mapping> value.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Tuple.Tuple> value whose
+This node is interpreted as a Muldis D C<sys.Core.Type.Tuple> value whose
 attributes are defined by the payload.  Each key+value pair of the payload
 defines a named attribute of the new tuple; the pair's key and value are,
 respectively, a Perl C<Str> that specifies the attribute name, and a PHMD
@@ -408,7 +408,7 @@ Examples:
         'age'  => [ 'Int', 'perl_int', 17 ],
     } ]
 
-=head2 sys.Core.Relation.Relation
+=head2 sys.Core.Type.Relation
 
 This node type represents a relation value.  It has 2 elements:
 
@@ -424,7 +424,7 @@ The payload; a Perl C<Array|Seq|Set|KeySet> of C<Str|Hash|Mapping> value.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Relation.Relation> value
+This node is interpreted as a Muldis D C<sys.Core.Type.Relation> value
 whose tuples and attribute names are defined by the payload.  Iff the
 payload has zero elements, then it defines the only relation value having
 zero attributes and zero tuples.  If the payload has elements, then either
@@ -463,7 +463,7 @@ Examples:
         },
     ] ]
 
-=head2 sys.Core.Relation.Set
+=head2 sys.Core.Type.Set
 
 This node type represents a set value.  It has 2 elements:
 
@@ -479,7 +479,7 @@ The payload; a Perl C<Array|Seq|Set|KeySet> value.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Relation.Set> value whose
+This node is interpreted as a Muldis D C<sys.Core.Type.Set> value whose
 elements are defined by the payload.  Each element of the payload defines a
 unary tuple of the new set; each element is a PHMD node that defines the
 C<value> attribute of the tuple.
@@ -499,17 +499,17 @@ Examples:
         [ 'Int', 'perl_int', 85 ],
     ] ]
 
-=head2 sys.Core.Relation.Nothing
+=head2 sys.Core.Type.Nothing
 
 This node type represents a 'nothing' value; it is interpreted as a Muldis
-D C<sys.Core.Relation.Nothing>.  It has 1 element, which is the Perl C<Str>
+D C<sys.Core.Type.Nothing>.  It has 1 element, which is the Perl C<Str>
 value C<Nothing>.
 
 Examples:
 
     [ 'Nothing' ]
 
-=head2 sys.Core.Relation.Single
+=head2 sys.Core.Type.Single
 
 This node type represents a 'single' value.  It has 2 elements:
 
@@ -525,7 +525,7 @@ The payload; a PHMD node that defines a single scalar or nonscalar value.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Relation.Single> value
+This node is interpreted as a Muldis D C<sys.Core.Type.Single> value
 whose element is defined by the payload.  The payload is a PHMD node that
 defines the C<value> attribute of the single tuple of the new 'single'.
 
@@ -533,7 +533,7 @@ Examples:
 
     [ 'Single', [ 'Text', '2003.07.24' ] ]
 
-=head2 sys.Core.Relation.Seq
+=head2 sys.Core.Type.Seq
 
 This node type represents a sequence value.  It has 2 elements:
 
@@ -549,7 +549,7 @@ The payload; a Perl C<Array|Seq> value.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Relation.Seq> value whose
+This node is interpreted as a Muldis D C<sys.Core.Type.Seq> value whose
 elements are defined by the payload.  Each element of the payload defines a
 binary tuple of the new sequence; the element value is a PHMD node that
 defines the C<value> attribute of the tuple, and the element index is used
@@ -570,7 +570,7 @@ Examples:
         [ 'Int', 'perl_int', 61 ],
     ] ]
 
-=head2 sys.Core.Relation.Bag
+=head2 sys.Core.Type.Bag
 
 This node type represents a bag value.  It has 3 elements:
 
@@ -591,7 +591,7 @@ C<Array|Seq> of C<Array|Seq>.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Relation.Bag> value whose
+This node is interpreted as a Muldis D C<sys.Core.Type.Bag> value whose
 elements are defined by the payload.  The payload is interpreted as
 follows:
 
@@ -661,15 +661,14 @@ for each one of them, the value of its first element has the Perl C<Str>
 value C<Quasi> prepended.  So PHMD nodes whose first elements each are
 [C<QuasiTuple>, C<QuasiRelation>, C<QuasiSet>, C<QuasiNothing>,
 C<QuasiSingle>, C<QuasiSeq>, C<QuasiBag>] are interpreted as Muldis D
-[C<sys.Core.QuasiTuple.QuasiTuple>,
-C<sys.Core.QuasiRelation.QuasiRelation>,
-C<sys.Core.QuasiRelation.QuasiSet>, C<sys.Core.QuasiRelation.QuasiNothing>,
-C<sys.Core.QuasiRelation.QuasiSingle>, C<sys.Core.QuasiRelation.QuasiSeq>,
-C<sys.Core.QuasiRelation.QuasiBag>] values, respectively.
+[C<sys.Core.Type.QuasiTuple>, C<sys.Core.Type.QuasiRelation>,
+C<sys.Core.Type.QuasiSet>, C<sys.Core.Type.QuasiNothing>,
+C<sys.Core.Type.QuasiSingle>, C<sys.Core.Type.QuasiSeq>,
+C<sys.Core.Type.QuasiBag>] values, respectively.
 
 =head1 CATALOG SCALAR VALUES
 
-=head2 sys.Core.Cat.Name
+=head2 sys.Core.Type.Cat.Name
 
 This node type represents a canonical short name for any kind of DBMS
 entity when declaring it; it is a character string type, that is disjoint
@@ -681,7 +680,7 @@ this difference is done for huffmanizing reasons, since a short name is
 probably the most often used node type, and moreover this change allows for
 simplifying other parts of the grammar.
 
-This node is interpreted as a Muldis D C<sys.Core.Cat.Name> value by
+This node is interpreted as a Muldis D C<sys.Core.Type.Cat.Name> value by
 directly mapping itself / the payload.  Note that, while Plain Text Muldis
 D may contain a few escape sequences, those would be replaced with what
 they represent prior to making a PHMD node.  The node / its payload must be
@@ -693,7 +692,7 @@ Examples:
 
     'First Name'
 
-=head2 sys.Core.Cat.NameChain
+=head2 sys.Core.Type.Cat.NameChain
 
 This node type represents a canonical long name for invoking some a DBMS
 entity in some contexts; it is conceptually a sequence of entity short
@@ -711,8 +710,8 @@ The payload; a Perl C<Array|Seq> value or C<Str> (char-mode scalar) value.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Cat.NameChain> value as
-follows:
+This node is interpreted as a Muldis D C<sys.Core.Type.Cat.NameChain> value
+as follows:
 
 =over
 
@@ -738,7 +737,7 @@ Examples:
 
     [ 'Cat.NameChain', 'fed.the_db.stats.samples_by_order' ]
 
-=head2 sys.Core.Cat.Comment
+=head2 sys.Core.Type.Cat.Comment
 
 This node type represents the text of a Muldis D code comment; it is a
 character string type, that is disjoint from both C<Text> and C<Name>.  It
@@ -756,8 +755,8 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Cat.Comment> value by
-directly mapping the payload.  Note that, while Plain Text Muldis D may
+This node is interpreted as a Muldis D C<sys.Core.Type.Cat.Comment> value
+by directly mapping the payload.  Note that, while Plain Text Muldis D may
 contain a few escape sequences, those would be replaced with what they
 represent prior to making a PHMD node.  The payload must be as per the
 payload of a C<Text> PHMD node.
@@ -766,7 +765,7 @@ Examples:
 
     [ 'Comment', 'This does something.' ]
 
-=head2 sys.Core.Cat.E_TK
+=head2 sys.Core.Type.Cat.E_TK
 
 This node type represents a type kind.  It has 2 elements:
 
@@ -782,7 +781,7 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Cat.E_TK> value by
+This node is interpreted as a Muldis D C<sys.Core.Type.Cat.E_TK> value by
 directly mapping the payload.  The payload must be a Perl C<Str> having one
 of the 8 values C<special>, C<scalar>, C<tuple>, C<relation>,
 C<quasi_scalar>, C<quasi_tuple>, C<quasi_relation>, C<remnant>.
@@ -791,7 +790,7 @@ Examples:
 
     [ 'Cat.E_TK', 'scalar' ]
 
-=head2 sys.Core.Cat.E_TDM
+=head2 sys.Core.Type.Cat.E_TDM
 
 This node type represents a type definition method.  It has 2 elements:
 
@@ -807,7 +806,7 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Cat.E_TDM> value by
+This node is interpreted as a Muldis D C<sys.Core.Type.Cat.E_TDM> value by
 directly mapping the payload.  The payload must be a Perl C<Str> having one
 of the 9 values C<special>, C<root>, C<restriction>, C<alias>, C<union>,
 C<intersection>, C<exclusion>, C<difference>, C<negation>.
@@ -816,7 +815,7 @@ Examples:
 
     [ 'Cat.E_TDM', 'alias' ]
 
-=head2 sys.Core.Cat.E_ENK
+=head2 sys.Core.Type.Cat.E_ENK
 
 This node type represents an expression node kind.  It has 2 elements:
 
@@ -832,17 +831,17 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Cat.E_ENK> value by
+This node is interpreted as a Muldis D C<sys.Core.Type.Cat.E_ENK> value by
 directly mapping the payload.  The payload must be a Perl C<Str> having one
-of the 11 values C<default>, C<scalar>, C<tuple>, C<relation>,
-C<quasi_scalar>, C<quasi_tuple>, C<quasi_relation>, C<param>, C<upd_param>,
-C<ro_param>, C<func>.
+of the 10 values C<scalar>, C<tuple>, C<relation>, C<quasi_scalar>,
+C<quasi_tuple>, C<quasi_relation>, C<param>, C<upd_param>, C<ro_param>,
+C<func>.
 
 Examples:
 
-    [ 'Cat.E_ENK', 'default' ]
+    [ 'Cat.E_ENK', 'func' ]
 
-=head2 sys.Core.Cat.E_PSAK
+=head2 sys.Core.Type.Cat.E_PSAK
 
 This node type represents a procedural statement argument kind.  It has 2
 elements:
@@ -859,10 +858,9 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Core.Cat.E_PSAK> value by
+This node is interpreted as a Muldis D C<sys.Core.Type.Cat.E_PSAK> value by
 directly mapping the payload.  The payload must be a Perl C<Str> having one
-of the 5 values C<default>, C<upd_param>, C<ro_param>, C<inner_var>,
-C<outer_var>.
+of the 4 values C<upd_param>, C<ro_param>, C<inner_var>, C<outer_var>.
 
 Examples:
 
@@ -870,7 +868,7 @@ Examples:
 
 =head1 RATIONAL EXTENSION SCALAR VALUES
 
-=head2 sys.Rational.Rat.Rat
+=head2 sys.Rational.Type.Rat
 
 This node type represents a rational value.  It has 3-4 elements:
 
@@ -896,7 +894,7 @@ The payload.
 
 =back
 
-This node is interpreted as a Muldis D C<sys.Rational.Rat.Rat> value as
+This node is interpreted as a Muldis D C<sys.Rational.Type.Rat> value as
 follows:
 
 =over

@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.21.0.
+This document is Muldis::D::Core::Types_Catalog version 0.22.0.
 
 =head1 PREFACE
 
@@ -25,141 +25,144 @@ This document contains one or more sections that were moved here from
 L<Muldis::D::Core> so that that other document would not be too
 large.
 
+These core data types are more special-purpose in nature and are intended
+for use in defining or working with the system catalog.  Those types that
+are nonscalar are completely defined types.
+
+Note that whenever an attribute of one of the tuple types isn't
+significant, given the context (determined by other attributes of the same
+type), and should be ignored, its value is the default for its type.
+
+Note that many of the tuple types might conceptually have C<name>
+attributes, but those would actually be provided by any larger types in
+which they are embedded, rather than by these types themselves.
+
+I<To keep things simpler for now, most constraint definitions for these
+types are missing, or just defined informally.>
+
 =head1 TYPE SUMMARY
 
 These system-defined subtypes are specific to defining the system catalog,
 more or less:
 
-    sys.Core.Universal.Universal
+    sys.Core.Type.Universal
 
-        sys.Core.Universal.Empty
+        sys.Core.Type.Empty
 
-        sys.Core.Scalar.Scalar
+        sys.Core.Type.Scalar
 
             # The following are all regular ordered scalar types.
 
-            sys.Core.Cat.Name
-            sys.Core.Cat.NameChain
-            sys.Core.Cat.FlattenedNameChain
-            sys.Core.Cat.Comment
-
-            sys.Core.Scalar.Int
-                sys.Core.Scalar.UInt
-                    sys.Core.Scalar.PInt
-
-                        # These are all finite integer types.
-
-                        sys.Core.Cat.PInt2_36
+            sys.Core.Type.Cat.Name
+            sys.Core.Type.Cat.NameChain
+            sys.Core.Type.Cat.FlattenedNameChain
+            sys.Core.Type.Cat.Comment
 
             # The following are all regular non-ordered scalar types.
 
-            sys.Core.Cat.E_TK
-            sys.Core.Cat.E_TDM
-            sys.Core.Cat.E_ENK
-            sys.Core.Cat.E_PSAK
+            sys.Core.Type.Cat.E_TK
+            sys.Core.Type.Cat.E_TDM
+            sys.Core.Type.Cat.E_ENK
+            sys.Core.Type.Cat.E_PSAK
 
-        sys.Core.Tuple.Tuple
+        sys.Core.Type.Tuple
 
             # The following are all regular tuple types.
 
-            sys.Core.Cat.Type
-            sys.Core.Cat.ExprNode
-            sys.Core.Cat.InnerFunc
-            sys.Core.Cat.Func
-            sys.Core.Cat.UpdStmt
-            sys.Core.Cat.InnerUpdater
-            sys.Core.Cat.Updater
-            sys.Core.Cat.ProcStmtArg
-            sys.Core.Cat.ProcStmt
-            sys.Core.Cat.InnerProc
-            sys.Core.Cat.Proc
-            sys.Core.Cat.Exception
+            sys.Core.Type.Cat.Type
+            sys.Core.Type.Cat.ExprNode
+            sys.Core.Type.Cat.InnerFunc
+            sys.Core.Type.Cat.Func
+            sys.Core.Type.Cat.UpdStmt
+            sys.Core.Type.Cat.InnerUpdater
+            sys.Core.Type.Cat.Updater
+            sys.Core.Type.Cat.ProcStmtArg
+            sys.Core.Type.Cat.ProcStmt
+            sys.Core.Type.Cat.InnerProc
+            sys.Core.Type.Cat.Proc
+            sys.Core.Type.Cat.Exception
 
-        sys.Core.Relation.Relation
+        sys.Core.Type.Relation
 
             # The following are all regular relation types.
 
-            sys.Core.Cat.NameTypeMap
-            sys.Core.Cat.NameExprMap
-            sys.Core.Cat.AttrRenameMap
-            sys.Core.Cat.ExprSet
-                sys.Core.Cat.ExprTree
-            sys.Core.Cat.InnerFuncSet
-                sys.Core.Cat.InnerFuncTree
-            sys.Core.Cat.MultiUpdStmt
-            sys.Core.Cat.InnerUpdaterSet
-                sys.Core.Cat.InnerUpdaterTree
-            sys.Core.Cat.ProcStmtArgSet
-            sys.Core.Cat.InnerProcTree
+            sys.Core.Type.Cat.NameTypeMap
+            sys.Core.Type.Cat.NameExprMap
+            sys.Core.Type.Cat.AttrRenameMap
+            sys.Core.Type.Cat.ExprSet
+                sys.Core.Type.Cat.ExprTree
+            sys.Core.Type.Cat.InnerFuncSet
+                sys.Core.Type.Cat.InnerFuncTree
+            sys.Core.Type.Cat.MultiUpdStmt
+            sys.Core.Type.Cat.InnerUpdaterSet
+                sys.Core.Type.Cat.InnerUpdaterTree
+            sys.Core.Type.Cat.ProcStmtArgSet
+            sys.Core.Type.Cat.InnerProcTree
 
-            sys.Core.Relation.Set
+            sys.Core.Type.Set
 
                 # The following are all regular set types.
 
-                sys.Core.Cat.SetOfName
-                sys.Core.Cat.SetOfSetOfName
-                sys.Core.Cat.SetOfNameExprMap
-                sys.Core.Cat.SetOfNameChain
+                sys.Core.Type.Cat.SetOfName
+                sys.Core.Type.Cat.SetOfSetOfName
+                sys.Core.Type.Cat.SetOfNameExprMap
+                sys.Core.Type.Cat.SetOfNameChain
 
-            sys.Core.Relation.Seq
+            sys.Core.Type.Seq
 
                 # The following are all regular sequence types.
 
-                sys.Core.Cat.NESeqOfName
-                sys.Core.Cat.SeqOfProcStmt
+                sys.Core.Type.Cat.NESeqOfName
+                sys.Core.Type.Cat.SeqOfProcStmt
 
 These system-defined subtypes are used as the declared types of some
 parameters of some system-defined N-ary routines, but they are not used in
 defining the system catalog itself; it is not anticipated that they would
 be used for user data:
 
-    sys.Core.Universal.Universal
+    sys.Core.Type.Universal
 
-        sys.Core.Universal.Empty
+        sys.Core.Type.Empty
 
-        sys.Core.Relation.Relation
-            sys.Core.Relation.Set
+        sys.Core.Type.Relation
+            sys.Core.Type.Set
 
                 # The following are all nonscalar type factories.
 
-                sys.Core.QuasiCat.SetOfTuple
-                sys.Core.QuasiCat.SetOfRelation
-                    sys.Core.QuasiCat.SetOfBag
+                sys.Core.Type.QuasiCat.SetOfTuple
+                sys.Core.Type.QuasiCat.SetOfRelation
+                    sys.Core.Type.QuasiCat.SetOfBag
 
-                sys.Core.Relation.Maybe
+                sys.Core.Type.Maybe
 
                     # The following are all nonscalar type factories.
 
-                    sys.Core.QuasiCat.MaybeOfTuple
+                    sys.Core.Type.QuasiCat.MaybeOfTuple
 
-            sys.Core.Relation.Seq
-
-                # The following are all nonscalar type factories.
-
-                sys.Core.QuasiCat.SeqOfSeq
-
-            sys.Core.Relation.Bag
+            sys.Core.Type.Seq
 
                 # The following are all nonscalar type factories.
 
-                sys.Core.QuasiCat.BagOfTuple
-                sys.Core.QuasiCat.BagOfRelation
+                sys.Core.Type.QuasiCat.SeqOfSeq
 
-        sys.Core.QuasiRelation.QuasiRelation
-            sys.Core.QuasiRelation.QuasiSet
+            sys.Core.Type.Bag
+
+                # The following are all nonscalar type factories.
+
+                sys.Core.Type.QuasiCat.BagOfTuple
+                sys.Core.Type.QuasiCat.BagOfRelation
+
+        sys.Core.Type.QuasiRelation
+            sys.Core.Type.QuasiSet
 
                 # The following are all quasi-nonscalar type factories.
 
-                sys.Core.QuasiCat.QuasiSetOfTuple
-                sys.Core.QuasiCat.QuasiSetOfRelation
+                sys.Core.Type.QuasiCat.QuasiSetOfTuple
+                sys.Core.Type.QuasiCat.QuasiSetOfRelation
 
 =head1 SYSTEM-DEFINED CORE CATALOG SCALAR DATA TYPES
 
-These core scalar data types are more special-purpose in nature and are
-intended for use in defining or working with the system catalog, which is
-mainly composed of nonscalar types built using these.
-
-=head2 sys.Core.Cat.Name
+=head2 sys.Core.Type.Cat.Name
 
 A C<Cat.Name> (scalar) is a canonical short name for any kind of DBMS
 entity (or named component) when declaring it; this short name is
@@ -167,10 +170,12 @@ sufficient to identify the entity within its immediate namespace.
 Similarly, a DBMS entity can often be invoked or referred to using just its
 C<Cat.Name>, depending on the context; other times, a C<Cat.NameChain> must
 be used instead to also qualify the reference with a namespace.
-C<Cat.Name> is the same as C<Text> in all ways but that it is specifically
-intended for use in naming DBMS entities rather than being normal data.
+C<Cat.Name> is the same as C<Text> in representation (each value as a
+string of characters) and cardinality though its values are distinct; it is
+specifically intended for use in naming DBMS entities rather than being for
+general-purpose user data.
 
-=head2 sys.Core.Cat.NameChain
+=head2 sys.Core.Type.Cat.NameChain
 
 A C<Cat.NameChain> (scalar) is a canonical long name for invoking or
 referring to a DBMS entity, when its name needs to be qualified with a
@@ -183,33 +188,25 @@ the first element at the start of the string), with a period (C<.>) between
 the parts, and each part escaped such that backslashes, single-quotes, and
 periods are escaped as C<\b>, C<\q> and C<\p> respectively.
 
-=head2 sys.Core.Cat.FlattenedNameChain
+=head2 sys.Core.Type.Cat.FlattenedNameChain
 
 The C<Cat.FlattenedNameChain> (scalar) type is used as the definition of
 the character string possrep of a C<Cat.NameChain> (see that type for
 details); while being a character string like C<Cat.Name>, the two are
 disjoint.
 
-=head2 sys.Core.Cat.Comment
+=head2 sys.Core.Type.Cat.Comment
 
 A C<Cat.Comment> (scalar) is the text of a Muldis D code comment, which
 programmers can populate as an attribute of several catalog data types,
 such as whole routines or statements or expression nodes.  C<Cat.Comment>
-is the same as C<Text>, and C<Name>, in all ways but that it is
-specifically intended for use in commenting Muldis D code rather than being
-normal data; they are disjoint.  One main intended use of this type is to
-help preserve comments in code translated to or from other languages;
-though only a subset of those (FoxPro?) keep comments in the AST rather
-than discarding them.
+is exactly the same as C<Cat.Name> in representation and cardinality though
+its values are distinct; it is intended just for commenting Muldis D code.
+One main intended use of this type is to help preserve comments in code
+translated to or from other languages; though only a subset of those
+(FoxPro?) keep comments in the AST rather than discarding them.
 
-=head2 sys.Core.Cat.PInt2_36
-
-A C<Cat.PInt2_36> is a proper subtype of C<Cat.PInt2_N> where all member
-values are between 2 and 36.  (The significance of the number 36 is 10
-digits plus 26 letters.)  Its maximum value is 36.  The cardinality of this
-type is 35.
-
-=head2 sys.Core.Cat.E_TK
+=head2 sys.Core.Type.Cat.E_TK
 
 A C<Cat.E_TK> (type kind) is a scalar enumeration consisting of the 8
 values C<Cat.E_TK:special> (mainly for system-defined implicit supertypes),
@@ -218,7 +215,7 @@ C<Cat.E_TK:quasi_scalar>, C<Cat.E_TK:quasi_tuple>,
 C<Cat.E_TK:quasi_relation>, C<Cat.E_TK:remnant>.  Its default value is
 C<Cat.E_TK:scalar>.
 
-=head2 sys.Core.Cat.E_TDM
+=head2 sys.Core.Type.Cat.E_TDM
 
 A C<Cat.E_TDM> (type definition method) is a scalar enumeration consisting
 of the 9 values C<Cat.E_TDM:special> (for some system-defined types that
@@ -233,11 +230,10 @@ C<Cat.E_TDM:difference> (defined as explicit difference of 2 other types),
 C<Cat.E_TDM:negation> (defined as explicit negation of another type).  Its
 default value is C<Cat.E_TDM:alias>.
 
-=head2 sys.Core.Cat.E_ENK
+=head2 sys.Core.Type.Cat.E_ENK
 
 A C<Cat.E_ENK> (expression node kind) is a scalar enumeration consisting of
-the 11 values C<Cat.E_ENK:default> (default value of expression's declared
-type),
+the 10 values
 C<Cat.E_ENK:(scalar|tuple|relation|quasi_scalar|quasi_tuple|quasi_relation)
 > (hard-coded literal
 scalar|tuple|relation|quasi-scalar|quasi-tuple|quasi-relation value),
@@ -250,12 +246,11 @@ body).  Note that only C<upd_param> and C<func> (over C<upd_param>) can be
 used for a subject-to-update argument of an update operator, but all of
 these can be used elsewhere.  Its default value is C<Cat.E_ENK:scalar>.
 
-=head2 sys.Core.Cat.E_PSAK
+=head2 sys.Core.Type.Cat.E_PSAK
 
 A C<Cat.E_PSAK> (procedural statement argument kind) is a scalar
-enumeration consisting of the 5 values C<Cat.E_PSAK:default> (default value
-of argument's declared type), C<Cat.E_PSAK:upd_param> (current value of
-statement-containing procedure subject-to-update parameter),
+enumeration consisting of the 4 values C<Cat.E_PSAK:upd_param> (current
+value of statement-containing procedure subject-to-update parameter),
 C<Cat.E_PSAK:ro_param> (value of statement-containing procedure read-only
 parameter), C<Cat.E_PSAK:inner_var> (current value of statement-containing
 procedure lexical variable, not param), C<Cat.E_PSAK:outer_var> (current
@@ -266,22 +261,7 @@ C<Cat.E_PSAK:ro_param>.
 
 =head1 SYSTEM-DEFINED CORE CATALOG TUPLE DATA TYPES
 
-These tuple data types, essentially all of the system-defined tuple types
-are special-purpose in nature and are intended for use in defining or
-working with the system catalog.  They are all completely defined types.
-
-Note that many of these types might conceptually have C<name> attributes,
-but those would actually be provided by any larger types in which they are
-embedded, rather than by these types themselves.
-
-Note that whenever an attribute of one of these types isn't significant,
-given the context (determined by other attributes of the same type), and
-should be ignored, its value is the default for its type.
-
-I<To keep things simpler for now, most constraint definitions for these
-types are missing, or just defined informally.>
-
-=head2 sys.Core.Cat.Type
+=head2 sys.Core.Type.Cat.Type
 
 A C<Cat.Type> is a C<Tuple>.  It defines a data type, which can either be
 (sometimes) invoked directly for values, or be invoked by or embedded into
@@ -385,7 +365,7 @@ This is an optional programmer comment about the data type.
 
 The default value of C<Cat.Type> is an alias of C<Empty>.
 
-=head2 sys.Core.Cat.ExprNode
+=head2 sys.Core.Type.Cat.ExprNode
 
 A C<Cat.ExprNode> is a C<Tuple>.  It specifies a named expression node,
 which is the majority component of functional Muldis D code.  All
@@ -404,7 +384,7 @@ argument for a subject-to-update parameter of an update operator call; in
 that case the leaf nodes / only node of the expression must map to a
 subject-to-update parameter of the containing update operator.
 
-A C<Cat.ExprNode> has these 9 attributes:
+A C<Cat.ExprNode> has these 8 attributes:
 
 =over
 
@@ -413,21 +393,6 @@ A C<Cat.ExprNode> has these 9 attributes:
 This is the declared name of the expression node; other Muldis D code that
 is composing this expression node into their own definitions would
 reference it with this name.
-
-=item C<type> - C<Cat.NameChain>
-
-This is the declared result data type of the expression node.  If the
-expression node represents a literal value, this is often necessary for
-properly interpreting the details of that literal, particularly for
-literals that are not scalar.  Otherwise, although the result type of an
-expression can sometimes be inferred from context, such as from the result
-type of a function it is an invocation of, this redundancy helps make
-static analysis of Muldis D code easier, so it is easier to validate and
-optimize in isolation from the other routines it interacts with.  Moreover,
-this type declaration provides a terse way to use the C<treated> function
-frequently in code, so that the programmer and compiler knows that some
-generic routines are actually supposed to be resulting in a subtype of
-their normal result types.
 
 =item C<kind> - C<Cat.E_ENK>
 
@@ -487,7 +452,7 @@ the expression node (sub-)tree it is the root of.
 The default value of C<Cat.ExprNode> has an empty name and represents the
 literal scalar value C<Bool:false>.
 
-=head2 sys.Core.Cat.InnerFunc
+=head2 sys.Core.Type.Cat.InnerFunc
 
 A C<Cat.InnerFunc> is a C<Tuple>.  It specifies a named C<inner_function>
 routine, which is the main component type of a complete routine; a complete
@@ -541,7 +506,7 @@ This is an optional programmer comment about the inner function as a whole.
 The default value of C<Cat.InnerFunc> has an empty name and unconditionally
 results in the literal scalar value C<Bool:false>.
 
-=head2 sys.Core.Cat.Func
+=head2 sys.Core.Type.Cat.Func
 
 A C<Cat.Func> is a C<Tuple>.  It specifies a named C<function> routine,
 which is conceptually a non-anonymous function that is generally invokable
@@ -573,7 +538,7 @@ This is an optional programmer comment about the function as a whole.
 The default value of C<Cat.Func> unconditionally results in the literal
 scalar value C<Bool:false> as per the default of C<Cat.InnerFunc>.
 
-=head2 sys.Core.Cat.UpdStmt
+=head2 sys.Core.Type.Cat.UpdStmt
 
 A C<Cat.UpdStmt> is a C<Tuple>.  It specifies a single update statement (of
 1..N variables), which is the most fundamental component of procedural
@@ -627,7 +592,7 @@ whole.
 The default value of C<Cat.UpdStmt> will unconditionally update 1
 subject-to-update parameter of name C<topic> with the value C<Bool:false>.
 
-=head2 sys.Core.Cat.InnerUpdater
+=head2 sys.Core.Type.Cat.InnerUpdater
 
 A C<Cat.InnerUpdater> is a C<Tuple>.  It specifies a named C<updater>
 routine, which is the main component type of a complete implicitly atomic
@@ -686,7 +651,7 @@ subject-to-update parameter named C<topic> and declared type C<Bool> and
 will unconditionally update it to the value C<Bool:false>; it has zero
 read-only parameters.
 
-=head2 sys.Core.Cat.Updater
+=head2 sys.Core.Type.Cat.Updater
 
 A C<Cat.Updater> is a C<Tuple>.  It specifies a named C<update operator>
 routine, which is conceptually a non-anonymous update operator that is
@@ -723,13 +688,13 @@ This is an optional programmer comment about the updater as a whole.
 The default value of C<Cat.Updater> is as per the default of
 C<Cat.InnerUpdater>.
 
-=head2 sys.Core.Cat.ProcStmtArg
+=head2 sys.Core.Type.Cat.ProcStmtArg
 
 A C<Cat.ProcStmtArg> is a C<Tuple>.  It specifies a named argument for a
 procedural routine invocation done as a procedure statement, and is
 composed into the C<Cat.ProcStmt> definition of said statement.
 
-A C<Cat.ProcStmtArg> has these 7 attributes:
+A C<Cat.ProcStmtArg> has these 6 attributes:
 
 =over
 
@@ -737,11 +702,6 @@ A C<Cat.ProcStmtArg> has these 7 attributes:
 
 This is the declared name of the invoked procedural routine's parameter
 (either subject-to-update or read-only) that this argument is binding to.
-
-=item C<type> - C<Cat.NameChain>
-
-This is as per the C<type> attribute of a C<Cat.ExprNode>, but applying to
-the declared data type of the argument.
 
 =item C<kind> - C<Cat.E_PSAK>
 
@@ -775,7 +735,7 @@ The default value of C<Cat.ProcStmtArg> will bind to a read-only parameter
 of name C<topic> with a value of the containing procedure's read-only
 parameter named C<topic>.
 
-=head2 sys.Core.Cat.ProcStmt
+=head2 sys.Core.Type.Cat.ProcStmt
 
 A C<Cat.ProcStmt> is a C<Tuple>.  It specifies a generic statement from
 which non-implicitly-atomic procedural Muldis D code is composed.  Only
@@ -812,7 +772,7 @@ The default value of C<Cat.ProcStmt> will invoke
 C<sys.Core.Universal.assign>, giving it arguments from same-named and typed
 parameters.
 
-=head2 sys.Core.Cat.InnerProc
+=head2 sys.Core.Type.Cat.InnerProc
 
 A C<Cat.InnerProc> is a C<Tuple>.  It specifies a named C<procedure>
 routine, which is the main component type of a complete procedure; a
@@ -868,7 +828,7 @@ The default value of C<Cat.InnerProc> has an empty name and is a no-op; its
 C<name> has the default value of C<Cat.Name>, it has zero parameters, zero
 variables, and zero statements.
 
-=head2 sys.Core.Cat.Proc
+=head2 sys.Core.Type.Cat.Proc
 
 A C<Cat.Proc> is a C<Tuple>.  It specifies a named C<procedure> routine,
 which is conceptually a non-anonymous procedure that is generally invokable
@@ -907,20 +867,13 @@ This is an optional programmer comment about the procedure as a whole.
 
 The default value of C<Cat.Proc> is as per the default of C<Cat.InnerProc>.
 
-=head2 sys.Core.Cat.Exception
+=head2 sys.Core.Type.Cat.Exception
 
 I<TODO.>
 
 =head1 SYSTEM-DEFINED CORE CATALOG RELATION DATA TYPES
 
-These relation data types, essentially all of the system-defined relation
-types are special-purpose in nature and are intended for use in defining or
-working with the system catalog.  They are all completely defined types.
-
-I<To keep things simpler for now, most constraint definitions for these
-types are missing, or just defined informally.>
-
-=head2 sys.Core.Cat.NameTypeMap
+=head2 sys.Core.Type.Cat.NameTypeMap
 
 A C<Cat.NameTypeMap> is a C<Relation>.  It defines a basic component list,
 meaning a set of names, with a declared data type name for each.  It forms
@@ -933,7 +886,7 @@ the declared name of the attribute or parameter, and comprises a unary key;
 the C<type> is the declared data type of the attribute or parameter.  Its
 default value has zero tuples.
 
-=head2 sys.Core.Cat.NameExprMap
+=head2 sys.Core.Type.Cat.NameExprMap
 
 A C<Cat.NameExprMap> is a C<Relation>.  It defines a basic component-values
 list, meaning a set of names, with a declared local expression node name
@@ -945,14 +898,14 @@ the tuple/etc attribute or routine argument, and comprises a unary key; the
 C<expr> is the declared local name of the expression node which defines the
 value for the attribute or argument.  Its default value has zero tuples.
 
-=head2 sys.Core.Cat.AttrRenameMap
+=head2 sys.Core.Type.Cat.AttrRenameMap
 
 A C<Cat.AttrRenameMap> is a C<Relation>.  It is used as a specification for
 how to rename attributes of some collection.  A C<Cat.AttrRenameMap> has 2
 attributes, C<before> and C<after>, each of those being a C<Cat.Name>, and
 each of those being a unary key.  Its default value has zero tuples.
 
-=head2 sys.Core.Cat.ExprSet
+=head2 sys.Core.Type.Cat.ExprSet
 
 A C<Cat.ExprSet> is the same as a C<Cat.ExprTree> except that it can
 represent multiple trees rather than one, and there is no requirement for
@@ -961,7 +914,7 @@ than one (rather than exactly one) member may have none of its peers as a
 parent node.  It so happens then that C<Cat.ExprTree> is a proper subtype
 of C<Cat.ExprSet>.
 
-=head2 sys.Core.Cat.ExprTree
+=head2 sys.Core.Type.Cat.ExprTree
 
 A C<Cat.ExprTree> is a C<Relation> with the same heading as
 C<Cat.ExprNode>; it specifies a simple tree of named expression nodes,
@@ -975,7 +928,7 @@ node must be the empty string.  The default value of C<Cat.ExprTree> has
 one tuple that is the default value of C<Cat.ExprNode>; the tree represents
 the literal scalar value C<Bool:false>.
 
-=head2 sys.Core.Cat.InnerFuncSet
+=head2 sys.Core.Type.Cat.InnerFuncSet
 
 A C<Cat.InnerFuncSet> is a C<Relation> with the same heading as
 C<Cat.InnerFunc>; it specifies a set of inner functions (that comprise
@@ -983,7 +936,7 @@ parts of the same complete routine), which are its tuples.  It has a unary
 (unique) key on the C<name> attribute.  Its default value is empty, which
 may be applicable if the complete routine is not a function.
 
-=head2 sys.Core.Cat.InnerFuncTree
+=head2 sys.Core.Type.Cat.InnerFuncTree
 
 A C<Cat.InnerFuncTree> is a proper subtype of C<Cat.InnerFuncSet> which is
 likely to only be applicable if the complete routine is a function.  It
@@ -994,7 +947,7 @@ the name of the root node must be the empty string.  The default value of
 C<Cat.InnerFuncTree> has one tuple that is the default value of
 C<Cat.InnerFunc>.
 
-=head2 sys.Core.Cat.MultiUpdStmt
+=head2 sys.Core.Type.Cat.MultiUpdStmt
 
 A C<Cat.MultiUpdStmt> is a C<Relation> with the same heading as
 C<Cat.UpdStmt>; it is a multi-update statement, which is the narrowest
@@ -1004,7 +957,7 @@ inner-update-operator).  It must have at least 1 member tuple.  The default
 value of C<Cat.MultiUpdStmt> has one tuple that is the default value of
 C<Cat.UpdStmt>.
 
-=head2 sys.Core.Cat.InnerUpdaterSet
+=head2 sys.Core.Type.Cat.InnerUpdaterSet
 
 A C<Cat.InnerUpdaterSet> is a C<Relation> with the same heading as
 C<Cat.InnerUpdater>; it specifies a set of inner update operators (that
@@ -1012,7 +965,7 @@ comprise parts of the same complete routine), which are its tuples.  It has
 a unary (unique) key on the C<name> attribute.  Its default value is empty,
 which may be applicable if the complete routine is not an update operator.
 
-=head2 sys.Core.Cat.InnerUpdaterTree
+=head2 sys.Core.Type.Cat.InnerUpdaterTree
 
 A C<Cat.InnerUpdaterTree> is a proper subtype of C<Cat.InnerUpdaterSet>
 which is likely to only be applicable if the complete routine is a update
@@ -1023,46 +976,46 @@ if applicable); the name of the root node must be the empty string.  The
 default value of C<Cat.InnerUpdaterTree> has one tuple that is the default
 value of C<Cat.InnerUpdater>.
 
-=head2 sys.Core.Cat.ProcStmtArgSet
+=head2 sys.Core.Type.Cat.ProcStmtArgSet
 
 A C<Cat.ProcStmtArgSet> is a C<Relation> with the same heading as
 C<Cat.ProcStmtArg>; it specifies a set of arguments to an invocation of a
 procedural routine.  It has a unary (unique) key on the C<name> attribute.
 Its default value is empty.
 
-=head2 sys.Core.Cat.InnerProcTree
+=head2 sys.Core.Type.Cat.InnerProcTree
 
 A C<Cat.InnerProcTree> is to C<Cat.InnerProc> what C<Cat.InnerUpdaterTree>
 is to C<Cat.InnerUpdater>.
 
-=head2 sys.Core.Cat.SetOfName
+=head2 sys.Core.Type.Cat.SetOfName
 
 A C<Cat.SetOfName> is a C<Set> whose C<value> attribute has a declared type
 of C<Cat.Name>.
 
-=head2 sys.Core.Cat.SetOfSetOfName
+=head2 sys.Core.Type.Cat.SetOfSetOfName
 
 A C<Cat.SetOfSetOfName> is a C<Set> whose C<value> attribute has a declared
 type of C<Cat.SetOfName>.
 
-=head2 sys.Core.Cat.SetOfNameExprMap
+=head2 sys.Core.Type.Cat.SetOfNameExprMap
 
 A C<Cat.SetOfNameExprMap> is a C<Set> whose C<value> attribute has a
 declared type of C<Cat.NameExprMap>.
 
-=head2 sys.Core.Cat.SetOfNameChain
+=head2 sys.Core.Type.Cat.SetOfNameChain
 
 A C<Cat.SetOfNameChain> is a C<Set> whose C<value> attribute has a declared
 type of C<Cat.NameChain>.
 
-=head2 sys.Core.Cat.NESeqOfName
+=head2 sys.Core.Type.Cat.NESeqOfName
 
 A C<Cat.NESeqOfName> is a C<Seq> whose C<value> attribute has a declared
 type of C<Cat.Name> and that must have at least 1 element; this type is
 used as the definition of the sequence possrep of a C<Cat.NameChain> (see
 that type for details).
 
-=head2 sys.Core.Cat.SeqOfProcStmt
+=head2 sys.Core.Type.Cat.SeqOfProcStmt
 
 A C<Cat.SeqOfProcStmt> is a C<Seq> whose C<value> attribute has a declared
 type of C<Cat.ProcStmt>.
@@ -1078,33 +1031,33 @@ also are not used to compose the system catalog either.
 
 =over
 
-=item C<sys.Core.QuasiCat.(Set|Bag)Of(Tuple|Relation)>
+=item C<sys.Core.Type.QuasiCat.(Set|Bag)Of(Tuple|Relation)>
 
 A C<(Set|Bag)OfRelation> is an incompletely defined proper subtype of
 C<Set|Bag> whose C<value> attribute has a declared type of a
 C<Tuple|Relation> subtype; this is the parameter type of several N-ary
 relational operators.
 
-=item C<sys.Core.QuasiCat.SetOfBag>
+=item C<sys.Core.Type.QuasiCat.SetOfBag>
 
 A C<SetOfBag> is an incompletely defined proper subtype of C<Set> whose
 C<value> attribute has a declared type of a C<Bag> subtype; this is the
 parameter type of several N-ary relational operators that work with C<Bag>
 values.
 
-=item C<sys.Core.QuasiCat.MaybeOfTuple>
+=item C<sys.Core.Type.QuasiCat.MaybeOfTuple>
 
 A C<MaybeOfTuple> is an incompletely defined proper subtype of C<Maybe>
 whose C<value> attribute has a declared type of a C<Tuple> subtype; this is
 the parameter type of the C<sys.Core.Relation.maybe_reduction> operator.
 
-=item C<sys.Core.QuasiCat.SeqOfSeq>
+=item C<sys.Core.Type.QuasiCat.SeqOfSeq>
 
 A C<SeqOfSeq> is an incompletely defined proper subtype of C<Seq> whose
 C<value> attribute has a declared type of a C<Seq> subtype; this is the
 parameter type of the N-ary C<sys.Core.Seq.catenation> operator.
 
-=item C<sys.Core.QuasiCat.QuasiSetOf(Tuple|Relation)>
+=item C<sys.Core.Type.QuasiCat.QuasiSetOf(Tuple|Relation)>
 
 A C<QuasiSetOfRelation> is an incompletely defined proper subtype of
 C<QuasiSet> whose C<value> attribute has a declared type of

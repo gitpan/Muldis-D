@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_Tiny version 0.16.0.
+This document is Muldis::D::Dialect::PTMD_Tiny version 0.17.0.
 
 =head1 PREFACE
 
@@ -22,7 +22,7 @@ before you read this one, which provides subservient details.
 This document outlines the grammar of the I<Plain Text Muldis D> dialect
 named C<PTMD_Tiny>.  The fully-qualified name of this Muldis D dialect, in
 combination with the base language spec it is bundled with, is
-C<Muldis_D:'cpan:DUNCAND':'N.N.N':'PTMD_Tiny'> (when the bundled base
+C<Muldis_D:'http://muldis.com':'N.N.N':'PTMD_Tiny'> (when the bundled base
 language version is substituted for the C<N.N.N>).
 
 This dialect is designed to exactly match the Muldis D system catalog (the
@@ -64,13 +64,14 @@ otherwise valid.
 Keeping in mind that any Plain Text Muldis D code file has to actually
 consist of a Muldis D C<main> routine (something that Hosted Data code does
 not), the following grammar is actually the grammar to parse a C<main>
-routine, which is simply a series of procedure calls, where earlier
-procedure calls are to system-defined data-definition routines (their
-arguments are values to put in the system catalog), and later ones are then
-to user-defined routines that the earlier statements either loaded or
-defined.  The current grammar assumes that the C<main> does not have any
-lexical variables, and that all parameters of routines it calls are
-read-only parameters.
+routine, which is simply a series of procedure calls (specifically
+procedures with no subject-to-update parameters), where earlier procedure
+calls are to system-defined data-definition routines (their arguments are
+values to put in the system catalog), and later ones are then to
+user-defined routines that the earlier statements either loaded or defined.
+The current grammar assumes that the C<main> does not have any lexical
+variables, and that all parameters of routines it calls are read-only
+parameters.
 
 =head1 GRAMMAR OF TINY PLAIN TEXT MULDIS D
 
@@ -83,8 +84,8 @@ execution.  Any remaining errors should be corrected as soon as possible.
 
     use v6-alpha;
 
-    # grammar Muldis_D_PTMD_Tiny:auth<cpan:DUNCAND>:ver<0.16.0>;
-    grammar Muldis_D_PTMD_Tiny-0.16.0-cpan:DUNCAND;
+    # grammar Muldis_D_PTMD_Tiny:auth<http://muldis.com>:ver<0.17.0>;
+    grammar Muldis_D_PTMD_Tiny-0.17.0-http://muldis.com;
 
     token start {
         (<language_name>)
@@ -334,7 +335,7 @@ execution.  Any remaining errors should be corrected as soon as possible.
     token cat_e_enk {
         (Cat.E_ENK)
         <spec_sep>
-        (default|scalar|tuple|relation
+        (scalar|tuple|relation
             |quasi_scalar|quasi_tuple|quasi_relation
             |param|upd_param|ro_param|func)
     }
@@ -342,7 +343,7 @@ execution.  Any remaining errors should be corrected as soon as possible.
     token cat_e_psak {
         (Cat.E_PSAK)
         <spec_sep>
-        (default|upd_param|ro_param|inner_var|outer_var)
+        (upd_param|ro_param|inner_var|outer_var)
     }
 
     token rat {
@@ -395,7 +396,7 @@ execution.  Any remaining errors should be corrected as soon as possible.
 
 The following are fragments of actual Plain Text Muldis D code.
 
-    Muldis_D:'cpan:DUNCAND':'1.2.3':'PTMD_Tiny':{}
+    Muldis_D:'http://muldis.com':'1.2.3':'PTMD_Tiny':{}
 
     Call:'sys.Core.Cat.create_public_relvar':{ ... }
 
@@ -528,7 +529,7 @@ The following are fragments of actual Plain Text Muldis D code.
 
     Cat.E_TDM:alias
 
-    Cat.E_ENK:default
+    Cat.E_ENK:func
 
     Cat.E_PSAK:ro_param
 
