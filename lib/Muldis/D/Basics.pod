@@ -9,7 +9,7 @@ Muldis::D::Basics -
 
 =head1 VERSION
 
-This document is Muldis::D::Basics version 0.18.1.
+This document is Muldis::D::Basics version 0.19.0.
 
 =head1 PREFACE
 
@@ -404,10 +404,12 @@ data processing operators, which is called the DBMS "catalog".  The catalog
 is a set of system-defined relvars (relation-typed variables) which reflect
 the definitions of DBMS entities; users can generally update these to
 create, alter, or drop DBMS entities.  In fact, updating the catalog
-relvars is the fundamental way to do data-definition tasks in Muldis D,
-and any other provisions for data-definition are conceptually abstractions
-of this.  Generally speaking, users can do absolutely everything in the
-DBMS with just data querying and updating operations.
+relvars is the fundamental way to do data-definition tasks in Muldis D, and
+any other provisions for data-definition are conceptually abstractions of
+this.  Generally speaking, users can do absolutely everything in the DBMS
+with just data querying and updating operations.  (Technically speaking,
+any global-scope relvars are actually pseudo-variables which reflect
+components of dbvars, the actual variables.)
 
 The design and various features of Muldis D go a long way to help both its
 users and implementers alike.  A lot of flexibility is afforded to
@@ -1095,7 +1097,8 @@ substitutability:
                 system_service
                 procedure
                 inner_procedure
-                main
+                bootloader_exclusive
+                bootloader
 
 Specifically, the routine kinds are all of the leaf nodes in the above
 hierarchy, and every Muldis D routine is designated as exactly one of
@@ -1263,24 +1266,66 @@ non-repeatable.
 A C<inner_procedure> is to an C<procedure> what a C<inner_function> is to a
 C<function>.
 
-=item C<main>
+=item C<bootloader_exclusive>
 
-A C<main> is the single anonymous procedure that is the "main program" of a
-non-hosted Plain Text Muldis D application.  A C<main> is the same as a
-C<procedure>, but that it can not be invoked by any other Muldis D routine,
-it does not live in any depot, it can not have any parameters or lexical
-variables or inner routines, it can not directly see or update any global
-variables, and it can only invoke procedures that have no subject-to-update
-parameters.  Fundamentally, the only task that a 'main' should be doing is
-loading or creating depots (by invoking system-defined procedures that
-update the system catalog), which should contain all of the other
-user-defined routines as if they were code libraries, and invoking them. In
-a mixed-language application, where Muldis D code is invoked by another
-host language, there is no Muldis D C<main> at all, since it would be
-redundant with host langauge routines (and host language routines can do
-anything that a C<function> or C<updater> or C<procedure> can do).
+A C<bootloader_exclusive> is the same as C<system_service> but that it can
+not be directly invoked except as a statement of a C<bootloader>; it also
+has no subject-to-update parameters.  Examples of this routine kind are
+standalone transaction initiation and termination statements.
+
+=item C<bootloader>
+
+A C<bootloader> is a very simple routine whose fundamental purpose is to
+load or create the depot that contains the user-defined C<procedure> that
+is the actual "main program" of a Muldis D application, and invoke it.  All
+that a C<bootloader> can do is invoke C<procedure> (or C<system_service>)
+routines (specifically ones with no subject-to-update parameters), and
+statements to invoke such are all that a C<bootloader> consists of (besides
+the declaration of what Muldis D language variant it is written in).  A
+C<bootloader> can not exist in a depot, and typically takes the form of a
+thin wrapper script which is what users of the Muldis D application would
+directly invoke, in order to invoke the actual program in an existing
+persistent depot, which is effectively a dynamically loadable library.  On
+the other hand, if it is the job of a C<bootloader> to first or just create
+a depot, then said script can actually be quite large and contain all of
+the user-defined Muldis D code of the application.  So then if the thin
+script is analagous to a typical compiled program, then the large script
+that creates a persistent depot but doesn't invoke it is analagous to a
+straight source compiler, while one that both creates and invokes is
+analagous to a runtime for a program distributed as source, especially so
+if the main depot is just a transient / volatile memory one.  A
+C<bootloader> does not have any inner routines nor lexical variables (but
+it does have inline constants) nor parameters, and it can not directly see
+or update any global variables.  A C<bootloader> can, depending on the
+Muldis D implementation, be split into multiple pieces such as for
+organizing into multiple code source files (in which case a system-defined
+routine can be invoked in one piece to load and execute another piece), or
+for feeding piece-meal by a host language into its hosted Muldis D
+environment.  Note that the result of a database dump as Muldis D code, or
+a batch of data insert statements, would most likely take the form of a
+C<bootloader> routine.  Note that a C<bootloader> can not directly read
+command-line arguments or environment variables, but it can act on them
+indirectly by invoking certain C<procedure>, as C<procedure> can see them
+by way of special system catalog variables.  Note that a C<bootloader> can
+not directly invoke statements conditionally, so all of its statements will
+run unless the sequence is stopped early by a thrown exception in one.
 
 =back
+
+In a mixed-language application, where Muldis D code is invoked by another
+host language, it is unlikely that there would be any Muldis D "main
+program" C<procedure> to invoke, since it would be redundant with host
+langauge routines, which would likely invoke the non-"main" Muldis D
+routines directly.  Host language routines can directly invoke Muldis D
+C<function> or C<updater> or C<system_service> or C<procedure> routines,
+with possibly updateable arguments, as well as have their own lexical
+Muldis D constants or variables for use as arguments or results for said
+invocations.  Sometimes for increased efficiency or flexability, the host
+language may instead feed C<bootloader> pieces, consisting of multiple
+C<procedure> calls having no updateable arguments.  Host language routines
+can not directly invoke Muldis D C<bootloader_exclusive> routines but by
+way of a fed C<bootloader> piece; however, some appropriate counterparts
+to those may be provided directly by the virtual machine's API.
 
 Note that Muldis D currently has no direct support for the concept of a
 trigger-routine that can update a database; updating virtual relvars or
@@ -1373,7 +1418,7 @@ a statement's execution, the state of the virtual machine is constant,
 except for any updates (and side-effects of such) that the statement makes.
 Breaking this down further, a statement's execution has 2 sequential
 phases; all reads from the environment are done in the first phase, and all
-writes to the environment are done in the second phase. Therefore,
+writes to the environment are done in the second phase.  Therefore,
 regardless of the complexity of the statement, and even if it is a
 multi-update statement, the final values of all the expressions to be
 assigned are determined prior to any target variables being updated.
@@ -1425,9 +1470,16 @@ transaction commits; if the scope terminates early due to a thrown
 exception, its transaction rolls back.  In the latter case, C<try_catch>
 will catch that exception, so the rollback doesn't proceed further than
 itself, but that if the I<catch block> it then invokes also throws (or
-re-throws) an exception, that is not caught here.  In a pure Muldis D
-application, this lexically-scoped exception handling mechanism is the
-I<only> kind of generalized explicit transaction.
+re-throws) an exception, that is not caught here.  This lexically-scoped
+exception handling mechanism is the I<only> kind of generalized explicit
+transaction that Muldis D code living in a depot can perform.  By contrast,
+a C<bootloader> routine (not in a depot) may only directly perform an
+explicit transaction using distinct transaction initiation and termination
+statements (see C<start_trans>, C<commit_trans>, C<rollback_trans>).  Note
+that, since all C<bootloader> statement calls are unconditional (ignoring
+any host language), it would only make sense to include a C<rollback_trans>
+if all you are interested in is the non-subjugated side-effects of the
+transaction.
 
 I<TODO:  How do we specify when to start a new thread or message with
 service threads (eg, that log errors, do sequences).>
@@ -1454,10 +1506,10 @@ every C<function> and C<\w+_constraint> is trivially a transaction, though
 since these never update anything, all that really means is that they see a
 consistent view of their environment.
 
-By contrast, every C<procedure> (and C<inner_procedure>) and C<main> is
-neither implicitly a transaction nor atomic (except when externally wrapped
-in one), so you can use a procedure to define an operation where you want
-to keep partial results of a failure.
+By contrast, every C<procedure> (and C<inner_procedure>) and C<bootloader>
+is neither implicitly a transaction nor atomic (except when externally
+wrapped in one), so you can use a procedure to define an operation where
+you want to keep partial results of a failure.
 
 Since failures are always accompanied by thrown exceptions, a failure will
 unwind the call stack and rollback any active transactions one nesting
@@ -1466,13 +1518,13 @@ unwinding, or the application exits, rolling back all remaining active
 transactions.
 
 If no explicit transactions are active at all when a failure occurs, then
-each non-procedure-invoking statement in a procedure is the parent-most
-transaction, and so a failure part-way through said procedure will result
-in the prior-completed statements to be fully committed, and only the
-failed statement to have left no state change.  At this point, a pure
-Muldis D application will have exited, and a mixed-language application
-will have either exited or caught an exception in a host-language I<try>
-block.
+each non-procedure-invoking statement in a procedure or bootloader or host
+language routine is the parent-most transaction, and so a failure part-way
+through said procedure will result in the prior-completed statements to be
+fully committed, and only the failed statement to have left no state
+change.  At this point, a pure Muldis D application will have exited, and a
+mixed-language application will have either exited or caught an exception
+in a host-language I<try> block.
 
 All current repository mounts (persistent and temporary both) by the same
 in-DBMS process/thread are joined at the hip with respect to transactions;
@@ -1579,13 +1631,10 @@ should never represent a wider scope than what is considered a single
 independent unit.
 
 At DBMS startup, there are no depots mounted.  The only user-defined Muldis
-D code that doesn't live in a depot is the "main program" of a non-hosted
-Plain Text Muldis D application, and the only job of that code is to mount
-one or more depots that contain the rest of the program code (as libraries)
-and invoke their high-level routines; or it creates and populates said
-depots if necessary.  In a mixed-language application, where Muldis D code
-is invoked by another host language, this depot-external code doesn't exist
-at all, since it would be redundant with the job of host language routines.
+D code that doesn't live in a depot takes the form of C<bootloader>
+routines, and the only job of that code is to mount one or more depots that
+contain the rest of the program code (as libraries) and invoke their
+high-level routines; or it creates and populates said depots if necessary.
 
 An external storage system may be mounted as multiple distinct depots
 within the same DBMS.  This is useful, for example, when the user wants to
@@ -1629,13 +1678,15 @@ gives users a choice, Muldis D requires all depot entities to be in
 packages for simplicity; but making all package members public has the
 effect of negating package encapsulation.  All non-lexical data variables
 in a depot may only be relation typed, because relational databases are
-composed fundamentally of just relations.
+composed fundamentally of just relations.  (Technically speaking, all
+non-lexical relvars are actually pseudo-variables which reflect components
+of dbvars, the actual non-lexical variables.)
 
 When a DBMS starts up, it only contains one auto-started process, which is
 the root process; the root process is defined either by the non-hosted
-Muldis D "main program" (it runs at DBMS startup, and the DBMS shuts down
-when it ends), or host language routines (the DBMS exists for the life of
-some host language object that represents it), as applicable.  This root
+Muldis D C<bootloader> routine (it runs at DBMS startup, and the DBMS shuts
+down when it ends), or host language routines (the DBMS exists for the life
+of some host language object that represents it), as applicable.  This root
 process can start other processes, which are its direct child processes,
 and other processes can start yet others, thus forming a process hierarchy;
 no process may exit until all of its children do.  Generally speaking, a
@@ -1654,8 +1705,8 @@ client typically is autonomous from others, shared depot contention aside.
 All entities that exist at some given time within a DBMS environment can be
 explicitly referenced in some manner for definition and/or use; there are
 no orphans.  At the very least, every kind of DBMS entity is defined in one
-or more catalog relvars or relcons; its interface and/or implementation can
-be observed and possibly updated therein.
+or more catalog (pseudo-) relvars or relcons; its interface and/or
+implementation can be observed and possibly updated therein.
 
 All entity names are generally context specific, with each context
 generally being provided by a routine or other entity; all entity names are
@@ -1680,17 +1731,7 @@ compensate for any case-insensitive storage system they might use.>
 
 This is the hierarchy of invocation namespaces of DBMS entities:
 
-    cat  # system catalog desc everything; all but .system|impl updateable
-        cat.system
-        cat.impl
-        cat.native
-            cat.native.fed
-            cat.native.dep
-            cat.native.sdp
-            cat.native.pkg
-        cat.mount
-        cat.foreign
-        cat.interp
+    cat  # read-only sys cat db desc entities under cat|sys|imp|mnt, *.cat
     sys  # system-defined types and routines defined by standard Muldis D
         sys.Core
             sys.Core(.<namespace>){0,}
@@ -1705,46 +1746,59 @@ This is the hierarchy of invocation namespaces of DBMS entities:
             imp.<authority-or-impl-name>(.<namespace>){0,}
                 imp.<authority-or-impl-name>(.<namespace>){0,}.<type>
                 imp.<authority-or-impl-name>(.<namespace>){0,}.<routine>
+    mnt  # updateable system catalog controlling what depot mounts exist
     fed  # the transac-synced federation of curr mounted depots w mount nms
-        fed.<depot>
-            fed.<depot>(.<subdepot>){0,}
-                fed.<depot>(.<subdepot>){0,}.<package>
-                    fed.<depot>(.<subdepot>){0,}.<package>.<relvar>
-                    fed.<depot>(.<subdepot>){0,}.<package>.<type>
-                    fed.<depot>(.<subdepot>){0,}.<package>.<routine>
+        fed.cat  # updateable sys cat db desc entities under fed.(lib|data)
+        fed.lib  # invokable user-def types and routines in this federation
+            fed.lib.<depot>
+                fed.lib.<depot>(.<subdepot>){0,}
+                    fed.lib.<depot>(.<subdepot>){0,}.<package>
+                       fed.lib.<depot>(.<subdepot>){0,}.<package>.<type>
+                       fed.lib.<depot>(.<subdepot>){0,}.<package>.<routine>
+        fed.data  # updateable db of normal user data in this federation
     dep  # entities in a self-sufficient depot ref their own depot w this
-        dep(.<subdepot>){0,}
-            dep(.<subdepot>){0,}.<package>
-                dep(.<subdepot>){0,}.<package>.<relvar>
-                dep(.<subdepot>){0,}.<package>.<type>
-                dep(.<subdepot>){0,}.<package>.<routine>
+        dep.cat  # updateable sys cat db desc entities under dep.(lib|data)
+        dep.lib  # invokable user-def types and routines in this depot
+            dep.lib(.<subdepot>){0,}
+                dep.lib(.<subdepot>){0,}.<package>
+                    dep.lib(.<subdepot>){0,}.<package>.<type>
+                    dep.lib(.<subdepot>){0,}.<package>.<routine>
+        dep.data  # updateable db of normal user data in this depot
     sdp  # entities in a subdepot (public gen nsp) ref their own sdp w this
-        sdp.<package>
-            sdp.<package>.<relvar>
-            sdp.<package>.<type>
-            sdp.<package>.<routine>
+        sdp.cat  # updateable sys cat db desc entities under sdp.(lib|data)
+        sdp.lib  # invokable user-def types and routines in this subdepot
+            sdp.lib.<package>
+                sdp.lib.<package>.<type>
+                sdp.lib.<package>.<routine>
+        sdp.data  # updateable db of normal user data in this subdepot
     pkg  # entities in a package (priv nsp) ref their own package with this
-        pkg.<relvar>
-        pkg.<type>
-        pkg.<routine>
-    inn  # entities in a main|inner routine ref child|sib rtns with this
-        inn.<routine>
+        pkg.cat  # updateable sys cat db desc entities under pkg.(lib|data)
+        pkg.lib  # invokable user-def types and routines in this package
+            pkg.lib.<type>
+            pkg.lib.<routine>
+        pkg.data  # updateable db of normal user data in this package
+    inn  # entities in a main|inner tp|rtn ref child|sib tps|rtns with this
+        inn.<inner-type>
+        inn.<inner-routine>
     lex  # entities in a rtn ref own lexical params|exprs|vars with this
-        lex.param.<param>
-        lex.expr.<expr>
-        lex.var.<var>
+        lex.<param>
+        lex.<expr>
+        lex.<var>
 
 Further details of each namespace follow below.
 
 =head2 User Data Variables and System Catalog Variables
 
-All globally visible Muldis D variables can be grouped into two main kinds,
-which are system catalog variables (some of which are actually constants)
-and user data variables; the former all exist under the C<cat> primary
-namespace, and the latter live under some of the other primary namespaces,
-specifically C<fed|dep|sdp|pkg>.  All non-global variables are just of the
-user data variety, and use the C<pkg|lex> primary namespaces (yes, C<pkg>
-has both public and private variables).
+All globally visible Muldis D variables are database-typed and can be
+grouped into two main kinds, which are system catalog variables (one of
+which is actually constant) and user data variables.  The global system
+catalog variables exist partially as the C<cat|mnt> primary namespaces
+(C<cat> is constant), and partially as the C<(fed|dep|sdp|pkg).cat>
+secondary namespaces.  The global user data variables all live as the
+C<(fed|dep|sdp|pkg).data> secondary namespaces.  All non-global variables
+are just of the user data variety, can be of any types, and use the
+C<pkg|lex> primary namespaces (yes, C<pkg> has both public and private
+variables).
 
 The purpose of user data variables is hold user data, and are what gets
 read or updated by database users the vast majority of the time; working
@@ -1773,10 +1827,10 @@ the other variables are system catalog variables, then effectively so are
 the user defined virtual ones; this is the only way users can effectively
 define magical variables, which otherwise isn't possible.
 
-The C<cat> primary namespace of Muldis D can be considered analogous to the
-"information schema" of SQL, but that the latter is just read-only.
+The system catalog namespaces of Muldis D can be considered analogous to
+the "information schema" of SQL, but that the latter is just read-only.
 
-The secondary namespaces under C<cat> are described in other sections.
+The individual catalog namespaces are described in other sections.
 
 =head2 Standard System-Defined Entities
 
@@ -1793,9 +1847,7 @@ other secondary "extension" namespaces, with each secondary namespace
 conceptually representing a dynamically loadable plug-in library.  Finally,
 each of the C<Core> and any other extensions has at least a 1-level
 namespace, where types and routines are optionally grouped under common
-extra name spaces.  For system-defined entities, package names are simply a
-convenience, routines that work with particular types don't have to be
-grouped with said types' declarations.
+extra name spaces.
 
 The catalog namespace C<cat.system> is where all the relcons that describe,
 in a machine-readable way, all of the standard system-defined entities just
@@ -1849,7 +1901,7 @@ one of those at a time.  Under each depot name is an optional tree of
 generic namespaces, adding 0..N name parts, each of which we refer to
 simply as a I<subdepot>.  After that we have 1 layer that are package
 names.  After that, we have the lowest layer, which are globally
-addressable relvar, type, and routine unqualified names.  So the
+addressable pseudo-relvar, type, and routine unqualified names.  So the
 fullly-qualified names of most user-defined entities by way of C<fed> are
 4-5 parts.
 
@@ -1859,8 +1911,7 @@ for them substitutes for C<fed> plus their mounting name; this allows depot
 entities to be coded in a portable way, not having to know too much about
 how they would be used (eg, not knowing what name they are mounted with).
 In fact, nothing is allowed to directly refer to entities using C<fed>
-except procedures, or the C<main> if it exists, or the host language if it
-exists.
+except a procedure or bootloader, or the host language if it exists.
 
 Similarly, the primary namespace C<sdp> is for self-references between
 entities in a common subdepot; if there are 2 or more layers of
@@ -1934,6 +1985,29 @@ have pseudo-variables which are named expression nodes; these would
 typically either be turned into actual expression trees or actual
 variables, or sometimes use native equivalents if the other language is
 pure functional.
+
+=head2 Terse Pseudo-Variable Syntax
+
+An important feature of DBMS entity names is that the components of
+variables' current values can be addressed directly as if they were normal
+variables, both for reading and for updating; and so this feature allows
+for attributes of tuple and possrep-having-scalar (but not relation) typed
+variables to be used as pseudo-variables, to the Nth degree of recursion,
+with very terse syntax.
+
+For example, if C<lex.foo> was the name of a tuple-typed variable, and that
+tuple type had an attribute named C<bar>, then C<lex.foo.bar> can be
+addressed as if it were a normal variable in the same vein as C<lex.foo>.
+As a (read-only) value expression, C<lex.foo.bar> would be short-hand for
+the result of invoking a tuple attribute extractor function on C<lex.foo>
+that extracts C<bar>.  When C<lex.foo.bar> is used as the target of a value
+assignment, say the value 42, that is a short-hand for selecting the tuple
+value that is equal to what C<lex.foo>'s value is except for its C<bar>
+attribute being 42, and assigning that tuple to C<lex.foo>.
+
+Note that in general, any value expression can denote a pseudo-variable,
+but only components of tuples or scalar possreps get the special short-hand
+where an extended entity name can be used as the full expression.
 
 =head1 SEE ALSO
 

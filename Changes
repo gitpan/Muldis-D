@@ -1,6 +1,67 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-04-21  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.26.0 is released on CPAN as
+    Muldis-D-0.26.0.tar.gz.
+
+    * New file versions are: D.pm 0.26.0 and Types_Catalog.pod 0.23.0 and
+    Routines.pod 0.22.0 and Basics.pod 0.19.0 and PTMD_Tiny.pod 0.18.0 and
+    HDMD_Perl_Tiny.pod 0.15.0.  The other pre-existing versioned files are
+    unchanged.
+
+    * (Basics.pod, PTMD_Tiny.pod)  Renamed the routine kind 'main' to
+    'bootloader' and updated its description.  This routine kind is now not
+    so much a "main program" as it is more like a thin wrapper that loads
+    and invokes the main from a depot.  A bootloader can be used by both
+    plain text and hosted data Muldis D, not just the former; it can also
+    be split into pieces.  Also added the bootloader_exclusive routine kind
+    which is a system service that can only be called by a bootloader,
+    examples being distinct transaction initiation and termination
+    statements.  Most updates were in the ROUTINES and TRANSACTIONS AND
+    CONCURRENCY and RESOURCE MODULARITY AND PERSISTENCE sections of
+    Basics.pod, and in the DESCRIPTION of PTMD_Tiny.pod.
+
+    * (Routines.pod)  Added new SYSTEM-DEFINED CORE BOOTLOADER EXCLUSIVES
+    with 3 new sys.Core.Control.(start|commit|rollback)_trans routines.
+
+    * (Basics.pod)  In the ENTITY NAMES section, refactored the
+    fed|dep|sdp|pkg namespaces so that each has cat|lib|data secondary
+    namespaces.  The 'lib' namespace retains the type and routine
+    invocation names while 'data' now represents a dbvar and it replaces
+    all the '<relvar>'; this change was made to emphasize the fact that
+    there is just a single global variable (per scope) for user data, and
+    that relvars are just pseudo-variable components of a dbvar.  The new
+    'cat' secondary namespaces, each a dbvar, are now the parts of the
+    system catalog for user-defined entities, and the 'cat' primary
+    namespace is now just a dbcon for system-defined entities.  Added new
+    'mnt' primary namespace catalog dbvar to countrol what depot mounts
+    exist, rather than that being under the 'cat' primary.  Also indicated
+    that type definitions can have inner routines, and routine definitions
+    can have inner types; that is there are both inner and outer types now.
+
+    * (Basics.pod)  In ENTITY NAMES, added "Terse Pseudo-Variable Syntax"
+    section which specifies that you can indeed use extended entity names
+    to directly reference components of eg tuples, such as by writing
+    "tupvar.attrname" rather than having to say "attr( tupvar, attrname )"
+    or "assign( tupvar.attrname, 42 )" rather than "assign( tupvar,
+    update_attr( tupvar, attrname, 42 ) )".
+
+    * (Types_Catalog.pod, PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Formalized
+    the Cat.NameChain type with actual possrep names, and updated it to
+    require a minimum of 2 chain elements; also deleted the superfluous
+    types Cat.NESeqOfName and Cat.FlattenedNameChain, which have been
+    merged into Cat.NameChain as informal inner types.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Supplemented the HDMD_Perl_Tiny
+    dialect so you can define whole bootloader routines in it as you
+    already could with the PTMD_Tiny dialect; added 2 new pod sections /
+    PHMD node types BOOTLOADER and BOOTLOADER PROCEDURE CALL.  Updated the
+    PTMD_Tiny dialect to rename the 'start' token to 'bootloader', and
+    'procedure_call' to 'bootloader_procedure_call'; the latter now starts
+    with the literal text 'boot_call' rather than 'Call'.
+
 2008-04-13  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.25.1 is released on CPAN as

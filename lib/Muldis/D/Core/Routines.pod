@@ -9,7 +9,7 @@ Muldis D general purpose routines
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Routines version 0.21.0.
+This document is Muldis::D::Core::Routines version 0.22.0.
 
 =head1 PREFACE
 
@@ -695,6 +695,29 @@ that one is not caught and the call stack unwinding plus applicable
 transaction rollback carries on to the caller of the C<try_catch>.  If the
 C<try> procedure succeeds (doesn't throw an exception), then the C<catch>
 procedure is not called.
+
+=back
+
+=head1 SYSTEM-DEFINED CORE BOOTLOADER EXCLUSIVES
+
+These system services may only be invoked directly by a C<bootloader>
+routine.
+
+=over
+
+=item C<bootloader_exclusive sys.Core.Control.start_trans read {}>
+
+This system service starts a new child-most transaction.
+
+=item C<bootloader_exclusive sys.Core.Control.commit_trans read {}>
+
+This system service commits the child-most transaction; it will fail if
+there isn't one.
+
+=item C<bootloader_exclusive sys.Core.Control.rollback_trans read {}>
+
+This system service rolls back the child-most transaction; it will fail if
+there isn't one.
 
 =back
 
