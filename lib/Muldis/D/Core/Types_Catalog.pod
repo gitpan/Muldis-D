@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.23.0.
+This document is Muldis::D::Core::Types_Catalog version 0.24.0.
 
 =head1 PREFACE
 
@@ -55,56 +55,65 @@ more or less:
 
             sys.Core.Type.Cat.Name
             sys.Core.Type.Cat.NameChain
+            sys.Core.Type.Cat.DeclNameChain
             sys.Core.Type.Cat.Comment
 
             # The following are all regular non-ordered scalar types.
 
             sys.Core.Type.Cat.E_TK
             sys.Core.Type.Cat.E_TDM
-            sys.Core.Type.Cat.E_ENK
-            sys.Core.Type.Cat.E_PSAK
 
         sys.Core.Type.Tuple
 
             # The following are all regular tuple types.
 
-            sys.Core.Type.Cat.Type
-            sys.Core.Type.Cat.ExprNode
-            sys.Core.Type.Cat.InnerFunc
-            sys.Core.Type.Cat.Func
-            sys.Core.Type.Cat.UpdStmt
-            sys.Core.Type.Cat.InnerUpdater
-            sys.Core.Type.Cat.Updater
-            sys.Core.Type.Cat.ProcStmtArg
+            sys.Core.Type.Cat.System
+            sys.Core.Type.Cat.Federation
+            sys.Core.Type.Cat.Depot
+            sys.Core.Type.Cat.Package
+            sys.Core.Type.Cat.FuncHead
+            sys.Core.Type.Cat.UpdHead
+            sys.Core.Type.Cat.ProcHead
+            sys.Core.Type.Cat.FuncBody
+            sys.Core.Type.Cat.UpdBody
+            sys.Core.Type.Cat.ProcBody
+            sys.Core.Type.Cat.InnerFuncBody
+            sys.Core.Type.Cat.ExprNodeSet
+            sys.Core.Type.Cat.InnerUpdBody
+            sys.Core.Type.Cat.InnerProcBody
             sys.Core.Type.Cat.ProcStmt
-            sys.Core.Type.Cat.InnerProc
-            sys.Core.Type.Cat.Proc
+            sys.Core.Type.Cat.Type
             sys.Core.Type.Cat.Exception
 
         sys.Core.Type.Relation
 
             # The following are all regular relation types.
 
+            sys.Core.Type.Cat.SysNspSet
+            sys.Core.Type.Cat.Sys(Func|Upd|Proc)Set
+            sys.Core.Type.Cat.DepotMountSet
+            sys.Core.Type.Cat.SubdepotSet
+            sys.Core.Type.Cat.PackageSet
+            sys.Core.Type.Cat.Dep(Func|Upd|Proc)Set
+            sys.Core.Type.Cat.Pkg(Func|Upd|Proc)Set
+            sys.Core.Type.Cat.Inner(Func|Upd|Proc)Set
+            sys.Core.Type.Cat.ScaLitExprNodeSet
+            sys.Core.Type.Cat.ScaPRLitExprNodeSet
+            sys.Core.Type.Cat.TupLitExprNodeSet
+            sys.Core.Type.Cat.RelLitExprNodeSet
+            sys.Core.Type.Cat.FuncInvoExprNodeSet
+            sys.Core.Type.Cat.MultiUpdStmt
             sys.Core.Type.Cat.NameTypeMap
             sys.Core.Type.Cat.NameExprMap
             sys.Core.Type.Cat.AttrRenameMap
-            sys.Core.Type.Cat.ExprSet
-                sys.Core.Type.Cat.ExprTree
-            sys.Core.Type.Cat.InnerFuncSet
-                sys.Core.Type.Cat.InnerFuncTree
-            sys.Core.Type.Cat.MultiUpdStmt
-            sys.Core.Type.Cat.InnerUpdaterSet
-                sys.Core.Type.Cat.InnerUpdaterTree
-            sys.Core.Type.Cat.ProcStmtArgSet
-            sys.Core.Type.Cat.InnerProcTree
 
             sys.Core.Type.Set
 
                 # The following are all regular set types.
 
                 sys.Core.Type.Cat.SetOfName
-                sys.Core.Type.Cat.SetOfSetOfName
                 sys.Core.Type.Cat.SetOfNameExprMap
+                sys.Core.Type.Cat.SetOfSetOfName
                 sys.Core.Type.Cat.SetOfNameChain
 
             sys.Core.Type.Seq
@@ -158,7 +167,7 @@ be used for user data:
                 sys.Core.Type.QuasiCat.QuasiSetOfTuple
                 sys.Core.Type.QuasiCat.QuasiSetOfRelation
 
-=head1 SYSTEM-DEFINED CORE CATALOG SCALAR DATA TYPES
+=head1 TYPES FOR DEFINING ENTITY NAMES AND COMMENTS
 
 =head2 sys.Core.Type.Cat.Name
 
@@ -203,6 +212,18 @@ most-generalized finite C<Cat.NameChain> subtype, you must specify a
 maximum number of sequence elements of its values, and each element must be
 of a finite C<Cat.Name> subtype.
 
+=head2 sys.Core.Type.Cat.DeclNameChain
+
+A C<Cat.DeclNameChain> (scalar) is mostly the same as a C<Cat.NameChain>
+but that it is a sequence of 0..N rather than 2..N, and that its C<flat>
+possrep has N+1 periods rather than N-1; the possrep starts with a period,
+and also has a period just following each sequence element, and so an empty
+sequence means a C<flat> possrep consisting of just a period.  A
+C<Cat.DeclNameChain> is used in declaring system catalogs where DBMS
+entities live under a potentially N-depth namespace, such as depot entities
+grouped in a subdepot hierarchy.  The default and minimum value of
+C<Cat.DeclNameChain> is a zero element sequence.
+
 =head2 sys.Core.Type.Cat.Comment
 
 A C<Cat.Comment> (scalar) is the text of a Muldis D code comment, which
@@ -214,6 +235,1180 @@ One main intended use of this type is to help preserve comments in code
 translated to or from other languages; though only a subset of those
 (FoxPro?) keep comments in the AST rather than discarding them.  The
 default value et al is as for C<Cat.Name>.
+
+=head1 TYPES FOR DEFINING SYSTEM-DEFINED ENTITIES
+
+=head2 sys.Core.Type.Cat.System
+
+A C<Cat.System> is a C<Tuple>.  It specifies the public interfaces of
+system-defined entities, specifically all the system-defined types,
+routines, and catalogs.  Both standard system-defined entities and
+implementation-specific system-defined entities are specified here,
+specifically all the relcons and relvars with the names
+C<(sys|mnt|fed|dep|sdp|pkg).cat>.  The system catalog constant named
+C<sys.cat> is of the C<Cat.System> type.
+
+A C<Cat.System> has these N attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the collection of
+system-defined entities as a whole.
+
+=item C<namespaces> - C<Cat.SysNspSet>
+
+These are all the system-defined namespaces where DBMS entities may live.
+
+=item C<functions|updaters|procedures> - C<Cat.Sys(Func|Upd|Proc)Set>
+
+These are the interfaces of all the system-defined
+functions|updaters|procedures.
+
+=item C<types> - C<Cat.SysTypeSet>
+
+These are the interfaces of all the system-defined types.
+
+=item C<catalogs> - C<Cat.SysCatSet>
+
+These are the interfaces of all the catalog relcons, relvars.
+
+=back
+
+The default value of C<Cat.System> defines a system with zero builtins.
+
+=head2 sys.Core.Type.Cat.SysNspSet
+
+A C<Cat.SysNspSet> is a C<Relation> that specifies the set of system
+namespaces that exist for organizing DBMS public entities, mostly the
+system-defined ones; these system namespaces are organized into a tree
+whose root has no name.  A C<Cat.SysNspSet> only specifies that a system
+namespace exists, not which public entities it contains; see the
+C<Cat.System> which contains it for that.
+
+A C<Cat.SysNspSet> has these 3 attributes:
+
+=over
+
+=item C<parent> - I<TODO.>
+
+I<TODO.>
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the system namespace within the namespace
+defined by C<parent>; other Muldis D code would reference it with the
+combination of C<parent> and C<name>.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about this specific system
+namespace.
+
+=back
+
+A C<Cat.SysNspSet> has a binary (unique) key on the C<parent> plus
+C<name> attributes.  Its default value is empty.
+
+=head2 sys.Core.Type.Cat.Sys(Func|Upd|Proc)Set
+
+A C<Cat.Sys(Func|Upd|Proc)Set> is a C<Relation> that specifies a set of
+system-defined functions|updaters|procedures.
+
+A C<Cat.Sys(Func|Upd|Proc)Set> has these 4 attributes:
+
+=over
+
+=item C<parent> - I<TODO.>
+
+I<TODO.>
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the function|updater|procedure within the
+namespace defined by C<parent>; other Muldis D code would reference it with
+the combination of C<parent> and C<name>.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the function|updater|procedure
+as a whole.
+
+=item C<head> - C<Cat.(Func|Upd|Proc)Head>
+
+This defines the entire function|updater|procedure heading, that is its
+public interface sans the name, which is all the details of how to use it
+and no more detail than necessary about how it is implemented.
+
+=back
+
+A C<Cat.Sys(Func|Upd|Proc)Set> has a binary (unique) key on the C<parent>
+plus C<name> attributes.  Its default value is empty.
+
+=head1 TYPES FOR DEFINING FEDERATIONS
+
+=head2 sys.Core.Type.Cat.Federation
+
+A C<Cat.Federation> is a C<Tuple>.  It specifies a federation of depot
+mounts, that is, all the depot mounts that an in-DBMS process can see or
+update, and that defines the scope of an active transaction.  There is
+exactly one of these per process and it doesn't have a name.  The system
+catalog variable named C<fed.cat> is of the C<Cat.Federation> type.
+
+A C<Cat.Federation> has these 2 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the federation as a whole.
+
+=item C<mounts> - C<Cat.DepotMountSet>
+
+These are the depot mounts that comprise the federation.
+
+=back
+
+The default value of C<Cat.Federation> has zero depot mounts.
+
+=head2 sys.Core.Type.Cat.DepotMountSet
+
+A C<Cat.DepotMountSet> is a C<Relation> that specifies a set of depot
+mounts, such that each tuple is a single depot mount.  A depot mount is a
+named in-DBMS context by which a depot is referenced from either other
+depots or by the main application, and it also specifies the catalog
+content of the depot itself.
+
+A C<Cat.DepotMountSet> has these 3 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the depot mount; other Muldis D code would
+reference it with this name.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about this specific mount of the
+depot.
+
+=item C<depot> - C<Cat.Depot>
+
+This defines the entire system catalog of the depot that this mount has
+made visible to the DBMS.
+
+=back
+
+A C<Cat.DepotMountSet> has a unary (unique) key on the C<name> attribute.
+Its default value is empty.
+
+=head1 TYPES FOR DEFINING DEPOTS AND SUBDEPOTS
+
+=head2 sys.Core.Type.Cat.Depot
+
+A C<Cat.Depot> is a C<Tuple>.  It specifies the entire system catalog of a
+single depot, that is, the widest scope within which all entities must be
+fully defined in terms of just user-defined entities within the same scope
+or of system-defined entities.  It also doubles to specify the system
+catalog of a subdepot, which is an arbitrary subset of a depot's entities
+that internally looks like a depot; a depot can have 0..N subdepots, and
+any that exist are arranged in a hierarchy with the depot as the root.  The
+system catalog variables named C<dep.cat> and C<sdp.cat> are both of the
+C<Cat.Depot> type.
+
+A C<Cat.Depot> has these N attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the (|sub)depot as a whole.
+
+=item C<subdepots> - C<Cat.SubdepotSet>
+
+These are all the subdepots that this (|sub)depot contains.
+
+=item C<packages> - C<Cat.PackageSet>
+
+These are all the packages that this (|sub)depot contains.
+
+=item C<functions|updaters|procedures> - C<Cat.Dep(Func|Upd|Proc)Set>
+
+These are all the function|updater|procedure definitions that this
+(|sub)depot contains.
+
+=item C<types> - C<Cat.DepTypeSet>
+
+These are all the type definitions that this (|sub)depot contains.
+TODO: possibly split into scalar|tuple|relation|etc
+
+=item C<vars> - TODO: all public variables or pseudo-variables or something
+
+=item C<data> - TODO: the single main/root database variable
+
+=back
+
+The default value of C<Cat.Depot> defines an empty (|sub)depot.
+
+=head2 sys.Core.Type.Cat.SubdepotSet
+
+A C<Cat.SubdepotSet> is a C<Relation> that specifies the set of subdepots
+that a depot might optionally have for organizing its public entities;
+these subdepots are organized into a tree whose root is the depot.  A
+C<Cat.SubdepotSet> only specifies that a subdepot exists, not which depot
+entities it contains; see the C<Cat.Depot> which contains it for that.
+
+A C<Cat.SubdepotSet> has these 3 attributes:
+
+=over
+
+=item C<parent> - C<Cat.DeclNameChain>
+
+This is the fully-qualified name, in the C<dep.(cat|lib|data)> namespace,
+of the subdepot's parent subdepot, which is often just the depot itself.
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the subdepot within the namespace defined by
+C<parent>; other Muldis D code would reference it with the combination of
+C<parent> and C<name>.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about this specific subdepot.
+
+=back
+
+A C<Cat.SubdepotSet> has a binary (unique) key on the C<parent> plus
+C<name> attributes.  Its default value is empty.
+
+=head2 sys.Core.Type.Cat.PackageSet
+
+A C<Cat.PackageSet> is a C<Relation> that specifies the set of packages
+that a depot might optionally have for organizing its possibly private
+entities.
+
+A C<Cat.PackageSet> has these 4 attributes:
+
+=over
+
+=item C<parent> - C<Cat.DeclNameChain>
+
+This is the fully-qualified name, in the C<dep.(cat|lib|data)> namespace,
+of the packages's parent (|sub)depot.
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the package within the namespace defined by
+C<parent>; other Muldis D code would reference it with the combination of
+C<parent> and C<name>.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the package definition as
+associated with this package name.
+
+=item C<package> - C<Cat.Depot>
+
+This defines the entire system catalog of the package.
+
+=back
+
+A C<Cat.PackageSet> has a binary (unique) key on the C<parent> plus
+C<name> attributes.  Its default value is empty.
+
+=head2 sys.Core.Type.Cat.Dep(Func|Upd|Proc)Set
+
+A C<Cat.Dep(Func|Upd|Proc)Set> is a C<Relation> that specifies a set of
+functions|updaters|procedures that a (|sub)depot might directly contain.
+
+A C<Cat.Dep(Func|Upd|Proc)Set> has these 5 attributes:
+
+=over
+
+=item C<parent> - C<Cat.DeclNameChain>
+
+This is the fully-qualified name, in the C<dep.(cat|lib|data)> namespace,
+of the function|updater|procedure's parent (|sub)depot.
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the function|updater|procedure within the
+namespace defined by C<parent>; other Muldis D code would reference it with
+the combination of C<parent> and C<name>.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the function|updater|procedure
+as a whole.
+
+=item C<head> - C<Cat.(Func|Upd|Proc)Head>
+
+This defines the entire function|updater|procedure heading, that is its
+public interface sans the name, which is all the details of how to use it
+and no more detail than necessary about how it is implemented.
+
+=item C<body> - C<Cat.(Func|Upd|Proc)Body>
+
+This defines the entire function|updater|procedure body, that is its
+implementation, besides what C<interface> defines.
+
+=back
+
+A C<Cat.Dep(Func|Upd|Proc)Set> has a binary (unique) key on the C<parent>
+plus C<name> attributes.  Its default value is empty.
+
+=head1 TYPES FOR DEFINING PACKAGES
+
+=head2 sys.Core.Type.Cat.Package
+
+A C<Cat.Package> is a C<Tuple>.  It specifies the entire system catalog of
+a single package, which provides a privatizing namespace for a subset of a
+depot's entities; entities outside a package can only invoke that package's
+entities which have been declared part of its public interface.  A package
+internally looks like a depot but that it doesn't contain subdepots or
+other packages.  The system catalog variable named C<pkg.cat> is of the
+C<Cat.Package> type.
+
+A C<Cat.Package> has these N attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the package as a whole.
+
+=item C<functions|updaters|procedures> - C<Cat.Pkg(Func|Upd|Proc)Set>
+
+These are all the function|updater|procedure definitions that this package
+contains.
+
+=item C<types> - C<Cat.PkgTypeSet>
+
+These are all the type definitions that this package contains.
+
+=item C<vars> - TODO: all public variables or pseudo-variables or something
+
+=item C<data> - TODO: the single main/root database variable
+
+=back
+
+The default value of C<Cat.Package> defines an empty package.
+
+=head2 sys.Core.Type.Cat.Pkg(Func|Upd|Proc)Set
+
+A C<Cat.Pkg(Func|Upd|Proc)Set> is a C<Relation> that specifies a set of
+functions|updaters|procedures that a package might contain, where each
+function|updater|procedure may be either public for the DBMS as a whole or
+private to the package.
+
+A C<Cat.Pkg(Func|Upd|Proc)Set> has these 5 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the function|updater|procedure.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the function|updater|procedure
+as a whole.
+
+=item C<is_public> - C<Bool>
+
+This is C<Bool:true> if the function|updater|procedure is part of the
+package's own public interface and may be invoked from outside the package;
+it is C<Bool:false> if it is just part of the package's internals.
+
+=item C<head> - C<Cat.(Func|Upd|Proc)Head>
+
+This defines the entire function|updater|procedure heading, that is its
+public interface sans the name, which is all the details of how to use it
+and no more detail than necessary about how it is implemented.
+
+=item C<body> - C<Cat.(Func|Upd|Proc)Body>
+
+This defines the entire function|updater|procedure body, that is its
+implementation, besides what C<interface> defines.
+
+=back
+
+A C<Cat.Pkg(Func|Upd|Proc)Set> has a unary (unique) key on the C<name>
+attribute.  Its default value is empty.
+
+=head1 TYPES FOR DEFINING ROUTINE HEADINGS
+
+=head2 sys.Core.Type.Cat.FuncHead
+
+A C<Cat.FuncHead> is a C<Tuple>.  It specifies the entire heading or public
+interface of a function or inner function, except for its name and
+public/private status; the latter are provided by any type embedding this
+one when applicable.
+
+A C<Cat.FuncHead> has these 3 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the function heading.
+
+=item C<result_type> - C<Cat.NameChain>
+
+This is the declared result data type of the function as a whole.
+
+=item C<params> - C<Cat.NameTypeMap>
+
+This is the declared parameter list of the function, which has 0..N named
+and typed parameters.
+
+=back
+
+The default value of C<Cat.FuncHead> has zero parameters and a result type
+of C<Bool>.
+
+=head2 sys.Core.Type.Cat.UpdHead
+
+A C<Cat.UpdHead> is a C<Tuple>.  It specifies the entire heading or public
+interface of an updater or inner updater, except for its name and
+public/private status; the latter are provided by any type embedding this
+one when applicable.
+
+A C<Cat.UpdHead> has these 3 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the updater heading.
+
+=item C<upd_params> - C<Cat.NameTypeMap>
+
+This is the declared subject-to-update parameter list of the updater, which
+has 1..N named and typed such parameters.  It must have at least 1 element.
+
+=item C<ro_params> - C<Cat.NameTypeMap>
+
+This is the declared read-only parameter list of the updater, which has
+0..N named and typed such parameters.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of
+C<upd_params> and C<ro_params>.
+
+The default value of C<Cat.UpdHead> has 1 subject-to-update parameter whose
+name is C<topic> and whose declared type is C<Bool>; it has zero read-only
+parameters.
+
+=head2 sys.Core.Type.Cat.ProcHead
+
+A C<Cat.ProcHead> is a C<Tuple>.  It specifies the entire heading or public
+interface of a procedure or inner procedure, except for its name and
+public/private status; the latter are provided by any type embedding this
+one when applicable.
+
+A C<Cat.ProcHead> has these 3 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the procedure heading.
+
+=item C<upd_params> - C<Cat.NameTypeMap>
+
+This is the declared subject-to-update parameter list of the procedure,
+which has 0..N named and typed such parameters.
+
+=item C<ro_params> - C<Cat.NameTypeMap>
+
+This is the declared read-only parameter list of the procedure, which has
+0..N named and typed such parameters.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of
+C<upd_params> and C<ro_params>.
+
+The default value of C<Cat.ProcHead> has zero parameters.
+
+=head1 TYPES FOR DEFINING ROUTINE BODIES
+
+=head2 sys.Core.Type.Cat.FuncBody
+
+A C<Cat.FuncBody> is a C<Tuple>.  It specifies the entire body or
+implementation of a function, besides the details that a C<Cat.FuncHead>
+has, one of which each C<Cat.FuncBody> typically must be paired with.
+
+A C<Cat.FuncBody> has these N attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the function body.
+
+=item C<main_body> - C<Cat.InnerFuncBody>
+
+This defines the entire main body of the function, namely what's left of
+the function body after parts of it are optionally factored out into inner
+routines or inner types.  It must consist of a value expression whose
+result type is of the result type of the function, and which invokes all of
+the function's parameters.
+
+=item C<inner_funcs> - C<Cat.InnerFuncSet>
+
+These are all the inner function definitions that this function contains.
+
+=item C<inner_types> - C<Cat.InnerTypeSet>
+
+These are all the inner type definitions that this function contains.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of
+C<inner_(funcs|types)>.
+
+The default value of C<Cat.FuncBody> directly corresponds to the default
+value of C<Cat.FuncHead> and unconditionally results in the value
+C<Bool:false>.
+
+=head2 sys.Core.Type.Cat.UpdBody
+
+A C<Cat.UpdBody> is a C<Tuple>.  It specifies the entire body or
+implementation of an updater, besides the details that a C<Cat.UpdHead>
+has, one of which each C<Cat.UpdBody> typically must be paired with.
+
+A C<Cat.UpdBody> has these N attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the updater body.
+
+=item C<main_body> - C<Cat.InnerUpdBody>
+
+This defines the entire main body of the updater, namely what's left of the
+updater body after parts of it are optionally factored out into inner
+routines or inner types.  It must consist of a multi-update statement which
+invokes all of the updater's parameters.
+
+=item C<inner_upds> - C<Cat.InnerUpdSet>
+
+These are all the inner updater definitions that this updater contains.
+
+=item C<inner_funcs> - C<Cat.InnerFuncSet>
+
+These are all the inner function definitions that this updater contains.
+
+=item C<inner_types> - C<Cat.InnerTypeSet>
+
+These are all the inner type definitions that this updater contains.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of
+C<inner_(upds|funcs|types)>.
+
+The default value of C<Cat.UpdBody> directly corresponds to the default
+value of C<Cat.UpdHead> and unconditionally updates its C<topic> argument
+to the value C<Bool:false>.
+
+=head2 sys.Core.Type.Cat.ProcBody
+
+A C<Cat.ProcBody> is a C<Tuple>.  It specifies the entire body or
+implementation of a procedure, besides the details that a C<Cat.ProcHead>
+has, one of which each C<Cat.ProcBody> typically must be paired with.
+
+A C<Cat.ProcBody> has these N attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the procedure body.
+
+=item C<main_body> - C<Cat.InnerProcBody>
+
+This defines the entire main body of the procedure, namely what's left of
+the procedure body after parts of it are optionally factored out into inner
+routines or inner types.
+
+=item C<inner_procs> - C<Cat.InnerProcSet>
+
+These are all the inner procedure definitions that this procedure contains.
+
+=item C<inner_upds> - C<Cat.InnerUpdSet>
+
+These are all the inner updater definitions that this procedure contains.
+
+=item C<inner_funcs> - C<Cat.InnerFuncSet>
+
+These are all the inner function definitions that this procedure contains.
+
+=item C<inner_types> - C<Cat.InnerTypeSet>
+
+These are all the inner type definitions that this procedure contains.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of
+C<inner_(procs|upds|funcs|types)>.
+
+The default value of C<Cat.ProcBody> directly corresponds to the default
+value of C<Cat.ProcHead> and is a no-op, having zero statements.
+
+=head2 sys.Core.Type.Cat.Inner(Func|Upd|Proc)Set
+
+A C<Cat.Inner(Func|Upd|Proc)Set> is a C<Relation> that specifies a set of
+inner functions|updaters|procedures that a function|updater|procedure might
+contain.
+
+A C<Cat.Inner(Func|Upd|Proc)Set> has these 4 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the inner function|updater|procedure.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the inner
+function|updater|procedure as a whole.
+
+=item C<head> - C<Cat.(Func|Upd|Proc)Head>
+
+This defines the entire inner function|updater|procedure heading, that is
+its public interface sans the name, which is all the details of how to use
+it and no more detail than necessary about how it is implemented.
+
+=item C<body> - C<Cat.Inner(Func|Upd|Proc)Body>
+
+This defines the entire inner function|updater|procedure body, that is its
+implementation, besides what C<interface> defines.
+
+=back
+
+A C<Cat.Inner(Func|Upd|Proc)Set> has a unary (unique) key on the C<name>
+attribute.  Its default value is empty.
+
+=head1 TYPES FOR DEFINING INNER ROUTINE BODIES
+
+=head2 sys.Core.Type.Cat.InnerFuncBody
+
+A C<Cat.InnerFuncBody> is a C<Tuple>.  It specifies the entire body or
+implementation of an inner function (or the main body of a function),
+besides the details that a C<Cat.FuncHead> has, one of which each
+C<Cat.InnerFuncBody> typically must be paired with.
+
+A C<Cat.InnerFuncBody> has these 2 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the (|inner )function body.
+
+=item C<expr> - C<Cat.ExprNodeSet>
+
+This defines the value expression tree that comprises the entire (|inner
+)function body.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of all the
+attributes of C<expr>; and if this C<Cat.InnerFuncBody> is paired with a
+C<Cat.FuncHead>, then the distributed key also extends over the head's
+parameter names.
+
+A C<Cat.InnerFuncBody> specifies a simple value expression tree of named
+expression nodes, each of which is a tuple of one of its C<expr.\w+_exprs>
+attributes.  It must have at least 1 member node, except that it may have
+zero member nodes iff the (|inner )function it is composed into has exactly
+1 parameter, in which case the value expression tree implicitly results in
+the argument to said parameter.  Otherwise:  All member nodes must define a
+simple expression node tree, such that every member except one (which is
+the root node) has one of its peers as a parent node, and no direct cycles
+between members are permitted (only indirect cycles based on (|inner
+)function invocations are allowed); the name of the root node must be the
+empty string.  Note that the composed-into (|inner )function's parameters
+are also implicitly tree nodes, and are referenced by name into the
+expression the same way as any other named expression node is.  Regardless
+of whether the node count is zero or 1+, the tree must denote a value
+expression whose result type is of the result type of the (|inner )function
+it is composed into, and which invokes all of the (|inner )function's
+parameters.
+
+The default value of C<Cat.InnerFuncBody> directly corresponds to the
+default value of C<Cat.FuncHead> and unconditionally results in the value
+C<Bool:false>.
+
+=head2 sys.Core.Type.Cat.ExprNodeSet
+
+A C<Cat.ExprNodeSet> is a C<Tuple> that specifies a set of named value
+expression nodes.  It is typically composed into a (|inner
+)(function|updater). Each tuple of a C<Cat.ExprNodeSet> attribute is a
+named expression node, which is the majority component of functional Muldis
+D code.  All arbitrarily complex Muldis D expression trees, including
+relational queries, are composed of just expression nodes, either directly,
+or indirectly by way of (|inner )function invocations, as each (|inner
+)function body is itself composed entirely of a single expression tree (of
+at least 1 node).  Only functions and updaters may contain expression
+nodes, so for any procedures that would conceptually include them, those
+portions of the procedures need to be separated out and encapsulated by
+named (|inner )functions or (|inner )updaters.  Note that, while the
+general case has expression trees simply denoting a value, in some cases
+they may instead define a pseudo-variable / virtual variable; that only
+happens in (|inner )updaters where the expression is used as an argument
+for a subject-to-update parameter of an (|inner )update operator call; in
+that case the leaf nodes / only node of the expression must map to a
+subject-to-update parameter of the containing (|inner )update operator.
+
+A C<Cat.ExprNodeSet> has these 5 attributes:
+
+=over
+
+=item C<sca_lit_exprs> - C<Cat.ScaLitExprNodeSet>
+
+These are expression nodes that define (|quasi-)scalar literals of types
+such that the Muldis D dialect provides special literal syntax specific to
+the type, and the type may not have any possreps.
+
+=item C<sca_pr_lit_exprs> - C<Cat.ScaPRLitExprNodeSet>
+
+These are expression nodes that define (|quasi-)scalar literals of types
+such that each type has at least 1 possrep, and each literal is specified
+simply in terms of possrep attributes.
+
+=item C<tup_lit_exprs> - C<Cat.TupLitExprNodeSet>
+
+These are expression nodes that define (|quasi-)tuple literals.
+
+=item C<rel_lit_exprs> - C<Cat.RelLitExprNodeSet>
+
+These are expression nodes that define (|quasi-)relation literals.
+
+=item C<func_invo_exprs> - C<Cat.FuncInvoExprNodeSet>
+
+These are expression nodes that invoke (|inner )functions.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of all of a
+C<Cat.ExprNodeSet>'s attributes.  Its default value is empty.
+
+=head2 sys.Core.Type.Cat.ScaLitExprNodeSet
+
+A C<Cat.ScaLitExprNodeSet> is a C<Relation> that specifies a set of value
+expression nodes where each node is a hard-coded (|quasi-)scalar literal of
+one of a certain collection of system-defined core (|quasi-)scalar types
+(or subtype thereof).
+
+A C<Cat.ScaLitExprNodeSet> has these 3 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the expression node.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about either the expression node or
+the expression node (sub-)tree it is the root of.
+
+=item C<value> - C<Scalar>
+
+This is the actual literal value that the expression node represents.
+I<That is, any Scalar value could be used here, but in practice that is
+either dialect-defined (what literals are supported), and possibly
+implementation defined/limited.>
+
+=back
+
+A C<Cat.ScaLitExprNodeSet> has a unary (unique) key on the C<name>
+attribute.  Its default value is empty.
+
+=head2 sys.Core.Type.Cat.ScaPRLitExprNodeSet
+
+A C<Cat.ScaPRLitExprNodeSet> is a C<Relation> that specifies a set of value
+expression nodes where each node represents a (|quasi-)scalar literal of a
+type that has at least 1 possrep, and the literal is specified simply in
+terms of possrep attributes.
+
+A C<Cat.ScaPRLitExprNodeSet> has these 6 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the expression node.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about either the expression node or
+the expression node (sub-)tree it is the root of.
+
+=item C<is_quasi> - C<Bool>
+
+This is C<Bool:true> if the node denotes a quasi-scalar literal; it is
+C<Bool:false> if the node just denotes a scalar literal.
+
+=item C<type_name> - C<Cat.NameChain>
+
+This is the name of the type that the (|quasi-)scalar value belongs to.
+
+=item C<possrep_name> - C<Cat.Name>
+
+This is the name of the possrep, of the type named by C<scalar_type_name>,
+in terms of whose attributes the (|quasi-)scalar value is being selected.
+
+=item C<possrep_attrs> - C<Cat.NameExprMap>
+
+These are the attributes (names and values) of the C<possrep_name> possrep
+of the (|quasi-)scalar literal.
+
+=back
+
+A C<Cat.ScaPRLitExprNodeSet> has a unary (unique) key on the C<name>
+attribute.  Its default value is empty.
+
+=head2 sys.Core.Type.Cat.TupLitExprNodeSet
+
+A C<Cat.TupLitExprNodeSet> is a C<Relation> that specifies a set of value
+expression nodes where each node represents a (|quasi-)tuple literal.
+
+A C<Cat.TupLitExprNodeSet> has these 4 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the expression node.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about either the expression node or
+the expression node (sub-)tree it is the root of.
+
+=item C<is_quasi> - C<Bool>
+
+This is C<Bool:true> if the node denotes a quasi-tuple literal; it is
+C<Bool:false> if the node just denotes a tuple literal.
+
+=item C<attrs> - C<Cat.NameExprMap>
+
+These are the attributes (names and values) of the (|quasi-)tuple literal.
+
+=back
+
+A C<Cat.TupLitExprNodeSet> has a unary (unique) key on the C<name>
+attribute.  Its default value is empty.
+
+=head2 sys.Core.Type.Cat.RelLitExprNodeSet
+
+A C<Cat.RelLitExprNodeSet> is a C<Relation> that specifies a set of value
+expression nodes where each node represents a (|quasi-)relation literal.
+
+A C<Cat.RelLitExprNodeSet> has these 5 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the expression node.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about either the expression node or
+the expression node (sub-)tree it is the root of.
+
+=item C<is_quasi> - C<Bool>
+
+This is C<Bool:true> if the node denotes a quasi-relation literal; it is
+C<Bool:false> if the node just denotes a relation literal.
+
+=item C<head> - C<Cat.SetOfName>
+
+These are the names of all of this (|quasi-)relation literal's attributes.
+
+=item C<body> - C<Cat.SetOfNameExprMap>
+
+These are the (|quasi-)tuples of the (|quasi-)relation literal.
+
+=back
+
+A C<Cat.RelLitExprNodeSet> has a unary (unique) key on the C<name>
+attribute.  Its default value is empty.
+
+=head2 sys.Core.Type.Cat.FuncInvoExprNodeSet
+
+A C<Cat.FuncInvoExprNodeSet> is a C<Relation> that specifies a set of value
+expression nodes where each node represents the result of invoking a named
+(|inner )function with specific arguments.
+
+A C<Cat.FuncInvoExprNodeSet> has these 4 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the expression node.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about either the expression node or
+the expression node (sub-)tree it is the root of.
+
+=item C<function> - C<Cat.NameChain>
+
+This is the name of the (|inner )function being invoked.
+
+=item C<args> - C<Cat.NameExprMap>
+
+These are the arguments for the (|inner )function invocation.  Each element
+defines one argument value, with the element C<name> matching the invoked
+(|inner )function's parameter name, and the element C<expr> naming another
+local expression node which defines the value.
+
+=back
+
+A C<Cat.FuncInvoExprNodeSet> has a unary (unique) key on the C<name>
+attribute. Its default value is empty.
+
+=head2 sys.Core.Type.Cat.InnerUpdBody
+
+A C<Cat.InnerUpdBody> is a C<Tuple>.  It specifies the entire body or
+implementation of an inner updater (or the main body of a updater), besides
+the details that a C<Cat.UpdHead> has, one of which each
+C<Cat.InnerUpdBody> typically must be paired with.
+
+A C<Cat.InnerUpdBody> has these 3 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the (|inner )updater body.
+
+=item C<exprs> - C<Cat.ExprNodeSet>
+
+This defines the expression trees that are arguments to the update
+operators that C<stmt> invokes.  These expression trees must reference all
+of the parameters that the inner update operator has.
+
+=item C<stmt> - C<Cat.MultiUpdStmt>
+
+This defines the entire body of the (|inner )updater, which is composed of
+a single multi-update statement.  This multi-update statement must
+reference all of the parameters that the (|inner )updater has.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of all the
+attributes of C<exprs>; and if this C<Cat.InnerUpdBody> is paired with a
+C<Cat.UpdHead>, then the distributed key also extends over the head's
+parameter names.
+
+The default value of C<Cat.InnerUpdBody> directly corresponds to the
+default value of C<Cat.UpdHead> and unconditionally updates its C<topic>
+argument to the value C<Bool:false>.
+
+=head2 sys.Core.Type.Cat.MultiUpdStmt
+
+A C<Cat.MultiUpdStmt> is a C<Relation> that specifies a multi-update
+statement (of 1..N variables), which is the narrowest scope implicitly
+atomic component of procedural Muldis D code.  It is the most fundamental
+component of procedural Muldis D code.  The variables being updated are
+accessed via the host (|inner )updater's subject-to-update parameters.  All
+arbitrarily complex Muldis D value assignments, including relational
+assignments, are composed of just C<Cat.MultiUpdStmt>, either directly, or
+indirectly by way of (|inner )updater invocations, as each (|inner )updater
+body is itself composed entirely of 1 multi-update statement (plus
+supporting value expressions).  Only (|inner )updaters may contain
+C<Cat.MultiUpdStmt>, so for any procedures that would conceptually include
+them, those portions of the procedures need to be separated out and
+encapsulated by named (|inner )updaters.  Each tuple of a multi-update
+statement is a single update statement, which represents a single
+invocation of an (|inner )updater, and at least 1 tuple is required.
+
+A C<Cat.MultiUpdStmt> has these 4 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the single update statement as
+a whole.
+
+=item C<updater> - C<Cat.NameChain>
+
+This is the name of the (|inner )updater being invoked.
+
+=item C<upd_args> - C<Cat.NameExprMap>
+
+These are the 1..N subject-to-update arguments to the (|inner )updater
+invocation, as-per C<ro_args>.  But since each expression tree in
+C<upd_args> is binding to a subject-to-update parameter, the expression
+tree actually is defining a pseudo-variable / virtual-variable over 1..N
+containing routine subject-to-update parameters; in the most trivial (and
+common) case, the parameter is referenced directly.
+
+=item C<ro_args> - C<Cat.NameExprMap>
+
+These are the 0..N read-only arguments to the (|inner )updater invocation.
+Each element defines one argument value, with the element C<name> matching
+the invoked routine's parameter name, and the element C<expr> naming a
+local expression node (or parameter) which defines the value.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of
+C<upd_args> and C<ro_args>.
+
+The default value of C<Cat.MultiUpdStmt> directly corresponds to the
+default value of C<Cat.InnerUpdBody> and unconditionally updates its
+containing (|inner )updater's C<topic> argument to the value C<Bool:false>.
+
+=head2 sys.Core.Type.Cat.InnerProcBody
+
+A C<Cat.InnerProcBody> is a C<Tuple>.  It specifies the entire body or
+implementation of an inner procedure (or the main body of a procedure),
+besides the details that a C<Cat.ProcHead> has, one of which each
+C<Cat.InnerProcBody> typically must be paired with.
+
+A C<Cat.InnerProcBody> has these 3 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the (|inner )procedure body.
+
+=item C<vars> - C<Cat.NameTypeMap>
+
+This defines the 0..N (non-parameter) lexical variables of the (|inner
+)procedure; they initialize to the default values of their declared types.
+
+=item C<stmts> - C<Cat.SeqOfProcStmt>
+
+This defines the entire main body of the (|inner )procedure, which is
+composed of 0..N procedure statements.  These statements must reference all
+of the parameters and lexical variables that the (|inner )procedure has.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of all the
+attributes of C<vars>; and if this C<Cat.InnerProcBody> is paired with a
+C<Cat.ProcHead>, then the distributed key also extends over the head's
+parameter names.
+
+The default value of C<Cat.InnerProcBody> directly corresponds to the
+default value of C<Cat.ProcHead> and is a no-op, having zero statements.
+
+=head2 sys.Core.Type.Cat.SeqOfProcStmt
+
+A C<Cat.SeqOfProcStmt> is a C<Seq> whose C<value> attribute has a declared
+type of C<Cat.ProcStmt>.
+
+=head2 sys.Core.Type.Cat.ProcStmt
+
+A C<Cat.ProcStmt> is a C<Tuple>.  It specifies a generic statement from
+which non-implicitly-atomic procedural Muldis D code is composed.  Only
+(|inner )procedure may contain C<Cat.ProcStmt>.
+
+A C<Cat.ProcStmt> has these 4 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the statement as a whole.
+
+=item C<procedure> - C<Cat.NameChain>
+
+Every procedure statement is an invocation of some other procedural routine
+(eg, procedure, update operator, system service), either user-defined or
+system-defined; this is the name of that routine.
+
+=item C<upd_args> - C<Cat.NameExprMap>
+
+These are the 0..N subject-to-update arguments to the routine invocation,
+as-per C<ro_args>.
+
+=item C<ro_args> - C<Cat.NameExprMap>
+
+These are the 0..N read-only arguments to the routine invocation.  Each
+element defines one argument value, with the element C<name> matching the
+invoked routine's parameter name, and the element C<expr> naming a local or
+global variable or statement-containing routine parameter which defines the
+value.
+
+=back
+
+There is a distributed (unique) key over the C<name> attributes of
+C<upd_args> and C<ro_args>.
+
+The default value of C<Cat.ProcStmt> will invoke
+C<sys.Core.Universal.assign>, giving it arguments from same-named and typed
+parameters.
+
+=head1 SIMPLE GENERIC CATALOG COLLECTION TYPES
+
+=head2 sys.Core.Type.Cat.NameTypeMap
+
+A C<Cat.NameTypeMap> is a C<Relation>.  It defines a basic component list,
+meaning a set of names, with a declared data type name for each.  It forms
+the foundation for most componentized type definitions, including all tuple
+and relation types (for which it is named I<heading>), and it is used also
+for the components list of a scalar possrep.  It is also used to define
+parameter lists for routines.  A C<Cat.NameTypeMap> has 2 attributes,
+C<name> (a C<Cat.Name>) and C<type> (a C<Cat.NameChain>); the C<name> is
+the declared name of the attribute or parameter, and comprises a unary key;
+the C<type> is the declared data type of the attribute or parameter.  Its
+default value has zero tuples.
+
+=head2 sys.Core.Type.Cat.NameExprMap
+
+A C<Cat.NameExprMap> is a C<Relation>.  It defines a basic component-values
+list, meaning a set of names, with a declared local expression node (or
+parameter or variable) name for each.  It is used to define collection
+literals; one C<Cat.NameExprMap> defines a whole C<Tuple> value.  It is
+also used to define argument lists for routine invocations.  A
+C<Cat.NameExprMap> has 2 attributes, C<name> (a C<Cat.Name>) and C<expr> (a
+C<Cat.NameChain>); the C<name> is the name of the tuple/etc attribute or
+routine argument, and comprises a unary key; the C<expr> is the declared
+local name of the expression node (or parameter or variable) which defines
+the value for the attribute or argument.  Note that while the C<expr>
+attribute could conceivably just be a C<Cat.Name> because most of its
+allowed values would be in the C<lex> namespace, the C<Cat.NameChain> is
+used instead so that value expressions can take advantage of terse syntax
+for addressing value attributes.  Its default value has zero tuples.
+
+=head2 sys.Core.Type.Cat.AttrRenameMap
+
+A C<Cat.AttrRenameMap> is a C<Relation>.  It is used as a specification for
+how to rename attributes of some collection.  A C<Cat.AttrRenameMap> has 2
+attributes, C<before> and C<after>, each of those being a C<Cat.Name>, and
+each of those being a unary key.  Its default value has zero tuples.
+
+=head2 sys.Core.Type.Cat.SetOfName
+
+A C<Cat.SetOfName> is a C<Set> whose C<value> attribute has a declared type
+of C<Cat.Name>.
+
+=head2 sys.Core.Type.Cat.SetOfNameExprMap
+
+A C<Cat.SetOfNameExprMap> is a C<Set> whose C<value> attribute has a
+declared type of C<Cat.NameExprMap>.
+
+=head1 OLD TYPE DEFINITIONS TO REWRITE OR REPLACE
 
 =head2 sys.Core.Type.Cat.E_TK
 
@@ -238,37 +1433,6 @@ as explicit union|intersection|exclusion of other types),
 C<Cat.E_TDM:difference> (defined as explicit difference of 2 other types),
 C<Cat.E_TDM:negation> (defined as explicit negation of another type).  Its
 default value is C<Cat.E_TDM:alias>.
-
-=head2 sys.Core.Type.Cat.E_ENK
-
-A C<Cat.E_ENK> (expression node kind) is a scalar enumeration consisting of
-the 10 values
-C<Cat.E_ENK:(scalar|tuple|relation|quasi_scalar|quasi_tuple|quasi_relation)
-> (hard-coded literal
-scalar|tuple|relation|quasi-scalar|quasi-tuple|quasi-relation value),
-C<Cat.E_ENK:param> (value of expression-containing function parameter),
-C<Cat.E_ENK:upd_param> (on-entry value of expression-containing update
-operator subject-to-update parameter), C<Cat.E_ENK:ro_param> (value of
-expression-containing update operator read-only parameter),
-C<Cat.E_ENK:func> (result of function invocation, or inlining of function
-body).  Note that only C<upd_param> and C<func> (over C<upd_param>) can be
-used for a subject-to-update argument of an update operator, but all of
-these can be used elsewhere.  Its default value is C<Cat.E_ENK:scalar>.
-
-=head2 sys.Core.Type.Cat.E_PSAK
-
-A C<Cat.E_PSAK> (procedural statement argument kind) is a scalar
-enumeration consisting of the 4 values C<Cat.E_PSAK:upd_param> (current
-value of statement-containing procedure subject-to-update parameter),
-C<Cat.E_PSAK:ro_param> (value of statement-containing procedure read-only
-parameter), C<Cat.E_PSAK:inner_var> (current value of statement-containing
-procedure lexical variable, not param), C<Cat.E_PSAK:outer_var> (current
-value of a non-lexical variable).  Note that only C<upd_param> and
-C<(inner|outer)_var> can be used for a subject-to-update argument, but all
-of these can be used with a read-only argument.  Its default value is
-C<Cat.E_PSAK:ro_param>.
-
-=head1 SYSTEM-DEFINED CORE CATALOG TUPLE DATA TYPES
 
 =head2 sys.Core.Type.Cat.Type
 
@@ -374,653 +1538,19 @@ This is an optional programmer comment about the data type.
 
 The default value of C<Cat.Type> is an alias of C<Empty>.
 
-=head2 sys.Core.Type.Cat.ExprNode
-
-A C<Cat.ExprNode> is a C<Tuple>.  It specifies a named expression node,
-which is the majority component of functional Muldis D code.  All
-arbitrarily complex Muldis D expression trees, including relational
-queries, are composed of just C<Cat.ExprNode>, either directly, or
-indirectly by way of function invocations, as each function body is itself
-composed entirely of a single expression tree (of at least 1 node).  Only
-functions and update operators may contain C<Cat.ExprNode>, so for any
-procedures that would conceptually include them, those portions of the
-procedures need to be separated out and encapsulated by named functions or
-inner-functions or update operators or inner-update-operators.  Note that,
-while the general case has expression trees simply denoting a value, in
-some cases they may instead define a pseudo-variable / virtual variable;
-that only happens in update operators where the expression is used as an
-argument for a subject-to-update parameter of an update operator call; in
-that case the leaf nodes / only node of the expression must map to a
-subject-to-update parameter of the containing update operator.
-
-A C<Cat.ExprNode> has these 8 attributes:
-
-=over
-
-=item C<name> - C<Cat.Name>
-
-This is the declared name of the expression node; other Muldis D code that
-is composing this expression node into their own definitions would
-reference it with this name.
-
-=item C<kind> - C<Cat.E_ENK>
-
-This is the declared kind of expression that this node is; it says how to
-interpret the rest of the attributes and/or which of them have significant
-values.
-
-=item C<scal_lit> - C<Scalar>
-
-Iff C<kind> is C<Cat.E_ENK:scalar>, then the expression represents a
-hard-coded scalar literal of one of a certain collection of system-defined
-core scalar types (or subtype thereof), and this is that literal value.
-I<That is, any Scalar value could be used here, but in practice that is
-either dialect-defined (what literals are supported), and possibly
-implementation defined/limited.>
-
-=item C<coll_lit> - C<Cat.SetOfNameExprMap>
-
-Iff C<kind> is C<Cat.E_ENK:(|quasi_)(tuple|relation)>, then the expression
-represents a collection literal, and these are the values of its
-components.  Each element defines one tuple, and each sub-element of that
-element defines one attribute value for one tuple, with the sub-element
-C<name> matching the attribute name, and the sub-element C<expr> naming
-another local C<Cat.ExprNode> which defines the value.  The value of
-C<coll_lit> defines exactly one tuple when C<kind> specifies a tuple or
-quasi-tuple, and it defines 0..N tuples when C<kind> specifies a relation
-or quasi-relation.
-
-=item C<param> - C<Cat.Name>
-
-Iff C<kind> is C<Cat.E_ENK:param>, then the expression represents the value
-of the containing function's parameter which this names.  Or, if C<kind> is
-C<Cat.E_ENK:upd_param> or C<Cat.E_ENK:ro_param>, then the expression
-represents the on-entry value or value of the containing update operator's
-subject-to-update or read-only parameter, respectively.
-
-=item C<func> - C<Cat.NameChain>
-
-Iff C<kind> is C<Cat.E_ENK:func>, then the expression represents the result
-of invoking a named function with specific arguments, and this the name of
-that function.
-
-=item C<func_args> - C<Cat.NameExprMap>
-
-Iff C<func> is used, then these are the arguments for the function
-invocation.  Each element defines one argument value, with the element
-C<name> matching the parameter name, and the element C<expr> naming another
-local C<ExprNode> which defines the value.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about either the expression node or
-the expression node (sub-)tree it is the root of.
-
-=back
-
-The default value of C<Cat.ExprNode> has an empty name and represents the
-literal scalar value C<Bool:false>.
-
-=head2 sys.Core.Type.Cat.InnerFunc
-
-A C<Cat.InnerFunc> is a C<Tuple>.  It specifies a named C<inner_function>
-routine, which is the main component type of a complete routine; a complete
-function consists of at least one inner function, which is its main body,
-plus more when it would conceptually be using anonymous inline function
-definitions (to pass to function-valued function arguments), or when it
-would conceptually have self-referencing/cyclic expressions.
-
-A C<Cat.InnerFunc> has these 6 attributes:
-
-=over
-
-=item C<name> - C<Cat.Name>
-
-This is the declared name of the inner function within its parent complete
-function; other Muldis D code within said complete function would reference
-it with this name.
-
-=item C<result_type> - C<Cat.NameChain>
-
-This is the declared result data type of the inner function as a whole.
-
-=item C<is_recursive> - C<Bool>
-
-This is C<Bool:true> if the inner function might possibly invoke itself,
-either directly or indirectly; it is C<Bool:false> if it promises to never
-be recursive.  Note that the C<is_recursive> attribute does not make any
-claims regarding the actions of any anonymous functions that it is passed
-as function-valued arguments, which may cause this inner function to be
-involved in a recursion even if C<is_recursive> is C<Bool:false>.  I<Note
-that this may be changed later, or the attribute simply be eliminated.>
-
-=item C<params> - C<Cat.NameTypeMap>
-
-This is the declared parameter list of the inner function, which has 0..N
-named and typed parameters.
-
-=item C<expr> - C<Cat.ExprTree>
-
-This defines the entire body of the inner function, which is composed of a
-single expression tree, whose root node's name is the empty string.  This
-expression tree must reference all of the parameters that the inner
-function has.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the inner function as a whole.
-
-=back
-
-The default value of C<Cat.InnerFunc> has an empty name and unconditionally
-results in the literal scalar value C<Bool:false>.
-
-=head2 sys.Core.Type.Cat.Func
-
-A C<Cat.Func> is a C<Tuple>.  It specifies a named C<function> routine,
-which is conceptually a non-anonymous function that is generally invokable
-by the public (unless its parent package says otherwise).
-
-A C<Cat.Func> has these 3 attributes:
-
-=over
-
-=item C<name> - C<Cat.Name>
-
-This is the declared name of the function; other Muldis D code would
-reference it with this name.
-
-=item C<inner_funcs> - C<Cat.InnerFuncTree>
-
-This defines the entire body of the function (both its main body plus any
-conceptually expression-inlined anonymous functions), which is composed of
-one or more inner functions, plus its public interface / parameter list,
-which is defined by one of those.  The inner function defining the outer
-function's main body has the empty string as its name.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the function as a whole.
-
-=back
-
-The default value of C<Cat.Func> unconditionally results in the literal
-scalar value C<Bool:false> as per the default of C<Cat.InnerFunc>.
-
-=head2 sys.Core.Type.Cat.UpdStmt
-
-A C<Cat.UpdStmt> is a C<Tuple>.  It specifies a single update statement (of
-1..N variables), which is the most fundamental component of procedural
-Muldis D code, and is what the body of an update operator routine is
-composed of.  The variables being updated are accessed via the host
-routine's subject-to-update parameters.  All arbitrarily complex Muldis D
-value assignments, including relational assignments, are composed of just
-C<Cat.UpdStmt>, either directly, or indirectly by way of update operator
-invocations, as each update operator body is itself composed entirely of 1
-or more update statements (grouped as 1 multi-update).  Only update
-operators may contain C<Cat.UpdStmt>, so for any procedures that would
-conceptually include them, those portions of the procedures need to be
-separated out and encapsulated by named update operators or
-inner-update-operators.
-
-A C<Cat.UpdStmt> has these 4 attributes:
-
-=over
-
-=item C<updater> - C<Cat.NameChain>
-
-Every update statement is an invocation of some other update operator (or
-inner-update-operator), either a user-defined or system-defined one (the
-latter generally being the end of the call chain); this is the name of that
-update operator.
-
-=item C<upd_args> - C<Cat.NameExprMap>
-
-These are the 1..N subject-to-update arguments to the update operator
-invocation, as-per C<ro_args>.  But since each expression tree in
-C<upd_args> is binding to a subject-to-update parameter, the expression
-tree actually is defining a pseudo-variable / virtual-variable over 1..N
-containing routine subject-to-update parameters; in the most trivial (and
-common) case, such an expression tree is a single node that represents said
-parameter without any indirection at all.
-
-=item C<ro_args> - C<Cat.NameExprMap>
-
-These are the 0..N read-only arguments to the update operator invocation.
-Each element defines one argument value, with the element C<name> matching
-the parameter name, and the element C<expr> naming a local C<ExprNode>
-which defines the value.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the update statement as a
-whole.
-
-=back
-
-The default value of C<Cat.UpdStmt> will unconditionally update 1
-subject-to-update parameter of name C<topic> with the value C<Bool:false>.
-
-=head2 sys.Core.Type.Cat.InnerUpdater
-
-A C<Cat.InnerUpdater> is a C<Tuple>.  It specifies a named C<updater>
-routine, which is the main component type of a complete implicitly atomic
-procedural routine; a complete update operator consists of at least one
-inner update operator, which is its main body, likely plus more when it
-would conceptually be code refactored.
-
-A C<Cat.InnerUpdater> has these 7 attributes:
-
-=over
-
-=item C<name> - C<Cat.Name>
-
-This is the declared name of the inner update operator within its parent
-complete update operator; other Muldis D code within said complete update
-operator would reference it with this name.
-
-=item C<is_recursive> - C<Bool>
-
-This is C<Bool:true> if the inner update operator might possibly invoke
-itself, either directly or indirectly; it is C<Bool:false> if it promises
-to never be recursive.  I<Note that this attribute may be eliminated.>
-
-=item C<upd_params> - C<Cat.NameTypeMap>
-
-This is the declared subject-to-update parameter list of the inner update
-operator, which has 1..N named and typed such parameters.  It must have at
-least 1 element.
-
-=item C<ro_params> - C<Cat.NameTypeMap>
-
-This is the declared read-only parameter list of the inner update operator,
-which has 0..N named and typed such parameters.  There is a distributed
-(unique) key over the C<name> attributes of C<upd_params> and C<ro_params>.
-
-=item C<exprs> - C<Cat.ExprSet>
-
-This defines the expression trees that are arguments to the update
-operators that C<stmt> invokes.  These expression trees must reference all
-of the parameters that the inner update operator has.
-
-=item C<stmt> - C<Cat.MultiUpdStmt>
-
-This defines the entire body of the inner update operator, which is
-composed of a single multi-update statement.  This multi-update statement
-must reference all of the parameters that the inner update operator has.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the inner updater as a whole.
-
-=back
-
-The default value of C<Cat.InnerUpdater> has an empty name and has 1
-subject-to-update parameter named C<topic> and declared type C<Bool> and
-will unconditionally update it to the value C<Bool:false>; it has zero
-read-only parameters.
-
-=head2 sys.Core.Type.Cat.Updater
-
-A C<Cat.Updater> is a C<Tuple>.  It specifies a named C<update operator>
-routine, which is conceptually a non-anonymous update operator that is
-generally invokable by the public (unless its parent package says
-otherwise).
-
-A C<Cat.Updater> has these 4 attributes:
-
-=over
-
-=item C<name> - C<Cat.Name>
-
-This is the declared name of the update operator; other Muldis D code would
-reference it with this name.
-
-=item C<inner_updaters> - C<Cat.InnerUpdaterTree>
-
-This (save for C<inner_funcs>) defines the entire body of the update
-operator, which is composed of one or more inner update operators, plus its
-public interface / parameter list, which is defined by one of those.  The
-inner updater defining the outer updater's main body has the empty string
-as its name.
-
-=item C<inner_funcs> - C<Cat.InnerFuncSet>
-
-This also contributes to the body of the update operator.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the updater as a whole.
-
-=back
-
-The default value of C<Cat.Updater> is as per the default of
-C<Cat.InnerUpdater>.
-
-=head2 sys.Core.Type.Cat.ProcStmtArg
-
-A C<Cat.ProcStmtArg> is a C<Tuple>.  It specifies a named argument for a
-procedural routine invocation done as a procedure statement, and is
-composed into the C<Cat.ProcStmt> definition of said statement.
-
-A C<Cat.ProcStmtArg> has these 6 attributes:
-
-=over
-
-=item C<name> - C<Cat.Name>
-
-This is the declared name of the invoked procedural routine's parameter
-(either subject-to-update or read-only) that this argument is binding to.
-
-=item C<kind> - C<Cat.E_PSAK>
-
-This is the declared kind of value that this argument is; it says how to
-interpret the rest of the attributes and/or which of them have significant
-values.
-
-=item C<param> - C<Cat.Name>
-
-Iff C<kind> is C<Cat.E_PSAK:upd_param> or C<Cat.E_PSAK:ro_param>, then the
-argument is the current value or value of the containing procedure's
-subject-to-update or read-only parameter, respectively.
-
-=item C<inner_var> - C<Cat.Name>
-
-Iff C<kind> is C<Cat.E_PSAK:inner_var>, then the argument is the current
-value of a lexical variable that isn't a parameter.
-
-=item C<outer_var> - C<Cat.NameChain>
-
-Iff C<kind> is C<Cat.E_PSAK:outer_var>, then the argument is the current
-value of a non-lexical variable.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the statement argument.
-
-=back
-
-The default value of C<Cat.ProcStmtArg> will bind to a read-only parameter
-of name C<topic> with a value of the containing procedure's read-only
-parameter named C<topic>.
-
-=head2 sys.Core.Type.Cat.ProcStmt
-
-A C<Cat.ProcStmt> is a C<Tuple>.  It specifies a generic statement from
-which non-implicitly-atomic procedural Muldis D code is composed.  Only
-procedures (or inner procedures) may contain C<Cat.ProcStmt>.
-
-A C<Cat.ProcStmt> has these 4 attributes:
-
-=over
-
-=item C<proc> - C<Cat.NameChain>
-
-Every procedure statement is an invocation of some other procedural routine
-(eg, procedure, update operator, system service), either user-defined or
-system-defined; this is the name of that routine.
-
-=item C<upd_args> - C<Cat.ProcStmtArgSet>
-
-These are the 0..N subject-to-update arguments to the routine invocation,
-as-per C<ro_args>.
-
-=item C<ro_args> - C<Cat.ProcStmtArgSet>
-
-These are the 0..N read-only arguments to the routine invocation.  There is
-a distributed (unique) key over the C<name> attributes of C<upd_params> and
-C<ro_params>.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the statement as a whole.
-
-=back
-
-The default value of C<Cat.ProcStmt> will invoke
-C<sys.Core.Universal.assign>, giving it arguments from same-named and typed
-parameters.
-
-=head2 sys.Core.Type.Cat.InnerProc
-
-A C<Cat.InnerProc> is a C<Tuple>.  It specifies a named C<procedure>
-routine, which is the main component type of a complete procedure; a
-complete procedure consists of at least one inner procedure, which is its
-main body, likely plus more when it would conceptually be code refactored.
-
-A C<Cat.InnerProc> has these 7 attributes:
-
-=over
-
-=item C<name> - C<Cat.Name>
-
-This is the declared name of the inner procedure within its parent complete
-procedure; other Muldis D code within said complete procedure would
-reference it with this name.
-
-=item C<is_recursive> - C<Bool>
-
-This is C<Bool:true> if the inner procedure might possibly invoke
-itself, either directly or indirectly; it is C<Bool:false> if it promises
-to never be recursive.  I<Note that this attribute may be eliminated.>
-
-=item C<upd_params> - C<Cat.NameTypeMap>
-
-This is the declared subject-to-update parameter list of the inner
-procedure, which has 0..N named and typed such parameters.
-
-=item C<ro_params> - C<Cat.NameTypeMap>
-
-This is the declared read-only parameter list of the inner procedure,
-which has 0..N named and typed such parameters.  There is a distributed
-(unique) key over the C<name> attributes of C<upd_params> and C<ro_params>.
-
-=item C<vars> - C<Cat.NameTypeMap>
-
-This defines the 0..N (non-parameter) lexical variables of the inner
-procedure; they initialize to the default values of their declared types.
-
-=item C<stmts> - C<Cat.SeqOfProcStmt>
-
-This defines the entire main body of the inner procedure, which is composed
-of 0..N procedure statements.  These statements must reference all of the
-parameters and lexical variables that the inner procedure has.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the inner procedure as a
-whole.
-
-=back
-
-The default value of C<Cat.InnerProc> has an empty name and is a no-op; its
-C<name> has the default value of C<Cat.Name>, it has zero parameters, zero
-variables, and zero statements.
-
-=head2 sys.Core.Type.Cat.Proc
-
-A C<Cat.Proc> is a C<Tuple>.  It specifies a named C<procedure> routine,
-which is conceptually a non-anonymous procedure that is generally invokable
-by the public (unless its parent package says otherwise).
-
-A C<Cat.Proc> has these 5 attributes:
-
-=over
-
-=item C<name> - C<Cat.Name>
-
-This is the declared name of the procedure; other Muldis D code would
-reference it with this name.
-
-=item C<inner_procs> - C<Cat.InnerProcTree>
-
-This (save for C<inner_updaters> and C<inner_funcs>) defines the entire
-body of the procedure, which is composed of one or more inner procedures,
-plus its public interface / parameter list, which is defined by one of
-those.  The inner procedure defining the outer procedure's main body has
-the empty string as its name.
-
-=item C<inner_updaters> - C<Cat.InnerUpdaterSet>
-
-This also contributes to the body of the procedure.
-
-=item C<inner_funcs> - C<Cat.InnerFuncSet>
-
-This also contributes to the body of the procedure.
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the procedure as a whole.
-
-=back
-
-The default value of C<Cat.Proc> is as per the default of C<Cat.InnerProc>.
-
 =head2 sys.Core.Type.Cat.Exception
 
 I<TODO.>
-
-=head1 SYSTEM-DEFINED CORE CATALOG RELATION DATA TYPES
-
-=head2 sys.Core.Type.Cat.NameTypeMap
-
-A C<Cat.NameTypeMap> is a C<Relation>.  It defines a basic component list,
-meaning a set of names, with a declared data type name for each.  It forms
-the foundation for most componentized type definitions, including all tuple
-and relation types (for which it is named I<heading>), and it is used also
-for the components list of a scalar possrep.  It is also used to define
-parameter lists for routines.  A C<Cat.NameTypeMap> has 2 attributes,
-C<name> (a C<Cat.Name>) and C<type> (a C<Cat.NameChain>); the C<name> is
-the declared name of the attribute or parameter, and comprises a unary key;
-the C<type> is the declared data type of the attribute or parameter.  Its
-default value has zero tuples.
-
-=head2 sys.Core.Type.Cat.NameExprMap
-
-A C<Cat.NameExprMap> is a C<Relation>.  It defines a basic component-values
-list, meaning a set of names, with a declared local expression node name
-for each.  It is used to define collection literals; one C<Cat.NameExprMap>
-defines a whole C<Tuple> value.  It is also used to define argument lists
-for routine invocations.  A C<Cat.NameExprMap> has 2 attributes, C<name>
-and C<expr>, each of those being a C<Cat.Name>; the C<name> is the name of
-the tuple/etc attribute or routine argument, and comprises a unary key; the
-C<expr> is the declared local name of the expression node which defines the
-value for the attribute or argument.  Its default value has zero tuples.
-
-=head2 sys.Core.Type.Cat.AttrRenameMap
-
-A C<Cat.AttrRenameMap> is a C<Relation>.  It is used as a specification for
-how to rename attributes of some collection.  A C<Cat.AttrRenameMap> has 2
-attributes, C<before> and C<after>, each of those being a C<Cat.Name>, and
-each of those being a unary key.  Its default value has zero tuples.
-
-=head2 sys.Core.Type.Cat.ExprSet
-
-A C<Cat.ExprSet> is the same as a C<Cat.ExprTree> except that it can
-represent multiple trees rather than one, and there is no requirement for
-any node to be named with the empty string; this is realized in that more
-than one (rather than exactly one) member may have none of its peers as a
-parent node.  It so happens then that C<Cat.ExprTree> is a proper subtype
-of C<Cat.ExprSet>.
-
-=head2 sys.Core.Type.Cat.ExprTree
-
-A C<Cat.ExprTree> is a C<Relation> with the same heading as
-C<Cat.ExprNode>; it specifies a simple tree of named expression nodes,
-which are its tuples.  It has a unary (unique) key on the C<name>
-attribute, and it must have at least 1 member tuple.  All member tuples
-must define a simple expression node tree, such that every member except
-one (which is the root node) has one of its peers as a parent node, and no
-direct cycles between members are permitted (only indirect cycles based on
-function / inner-function invocations are allowed); the name of the root
-node must be the empty string.  The default value of C<Cat.ExprTree> has
-one tuple that is the default value of C<Cat.ExprNode>; the tree represents
-the literal scalar value C<Bool:false>.
-
-=head2 sys.Core.Type.Cat.InnerFuncSet
-
-A C<Cat.InnerFuncSet> is a C<Relation> with the same heading as
-C<Cat.InnerFunc>; it specifies a set of inner functions (that comprise
-parts of the same complete routine), which are its tuples.  It has a unary
-(unique) key on the C<name> attribute.  Its default value is empty, which
-may be applicable if the complete routine is not a function.
-
-=head2 sys.Core.Type.Cat.InnerFuncTree
-
-A C<Cat.InnerFuncTree> is a proper subtype of C<Cat.InnerFuncSet> which is
-likely to only be applicable if the complete routine is a function.  It
-must have at least 1 member tuple.  All member tuples must define a single
-invocation tree but that cycles are allowed, including any cycles that
-invoke what is conceptually the tree root (main function if applicable);
-the name of the root node must be the empty string.  The default value of
-C<Cat.InnerFuncTree> has one tuple that is the default value of
-C<Cat.InnerFunc>.
-
-=head2 sys.Core.Type.Cat.MultiUpdStmt
-
-A C<Cat.MultiUpdStmt> is a C<Relation> with the same heading as
-C<Cat.UpdStmt>; it is a multi-update statement, which is the narrowest
-scope implicitly atomic component of procedural Muldis D code.  One value
-of this type comprises the entire body of an update operator (or
-inner-update-operator).  It must have at least 1 member tuple.  The default
-value of C<Cat.MultiUpdStmt> has one tuple that is the default value of
-C<Cat.UpdStmt>.
-
-=head2 sys.Core.Type.Cat.InnerUpdaterSet
-
-A C<Cat.InnerUpdaterSet> is a C<Relation> with the same heading as
-C<Cat.InnerUpdater>; it specifies a set of inner update operators (that
-comprise parts of the same complete routine), which are its tuples.  It has
-a unary (unique) key on the C<name> attribute.  Its default value is empty,
-which may be applicable if the complete routine is not an update operator.
-
-=head2 sys.Core.Type.Cat.InnerUpdaterTree
-
-A C<Cat.InnerUpdaterTree> is a proper subtype of C<Cat.InnerUpdaterSet>
-which is likely to only be applicable if the complete routine is a update
-operator.  It must have at least 1 member tuple.  All member tuples must
-define a single invocation tree but that cycles are allowed, including any
-cycles that invoke what is conceptually the tree root (main update operator
-if applicable); the name of the root node must be the empty string.  The
-default value of C<Cat.InnerUpdaterTree> has one tuple that is the default
-value of C<Cat.InnerUpdater>.
-
-=head2 sys.Core.Type.Cat.ProcStmtArgSet
-
-A C<Cat.ProcStmtArgSet> is a C<Relation> with the same heading as
-C<Cat.ProcStmtArg>; it specifies a set of arguments to an invocation of a
-procedural routine.  It has a unary (unique) key on the C<name> attribute.
-Its default value is empty.
-
-=head2 sys.Core.Type.Cat.InnerProcTree
-
-A C<Cat.InnerProcTree> is to C<Cat.InnerProc> what C<Cat.InnerUpdaterTree>
-is to C<Cat.InnerUpdater>.
-
-=head2 sys.Core.Type.Cat.SetOfName
-
-A C<Cat.SetOfName> is a C<Set> whose C<value> attribute has a declared type
-of C<Cat.Name>.
 
 =head2 sys.Core.Type.Cat.SetOfSetOfName
 
 A C<Cat.SetOfSetOfName> is a C<Set> whose C<value> attribute has a declared
 type of C<Cat.SetOfName>.
 
-=head2 sys.Core.Type.Cat.SetOfNameExprMap
-
-A C<Cat.SetOfNameExprMap> is a C<Set> whose C<value> attribute has a
-declared type of C<Cat.NameExprMap>.
-
 =head2 sys.Core.Type.Cat.SetOfNameChain
 
 A C<Cat.SetOfNameChain> is a C<Set> whose C<value> attribute has a declared
 type of C<Cat.NameChain>.
-
-=head2 sys.Core.Type.Cat.SeqOfProcStmt
-
-A C<Cat.SeqOfProcStmt> is a C<Seq> whose C<value> attribute has a declared
-type of C<Cat.ProcStmt>.
 
 =head1 SYSTEM-DEFINED CORE QUASI-CATALOG PARAMETERIZED TYPES
 
@@ -1051,13 +1581,14 @@ values.
 
 A C<MaybeOfTuple> is an incompletely defined proper subtype of C<Maybe>
 whose C<value> attribute has a declared type of a C<Tuple> subtype; this is
-the parameter type of the C<sys.Core.Relation.maybe_reduction> operator.
+the parameter type of the C<sys.Nonscalar.Relation.maybe_reduction>
+operator.
 
 =item C<sys.Core.Type.QuasiCat.SeqOfSeq>
 
 A C<SeqOfSeq> is an incompletely defined proper subtype of C<Seq> whose
 C<value> attribute has a declared type of a C<Seq> subtype; this is the
-parameter type of the N-ary C<sys.Core.Seq.catenation> operator.
+parameter type of the N-ary C<sys.Sequence.catenation> operator.
 
 =item C<sys.Core.Type.QuasiCat.QuasiSetOf(Tuple|Relation)>
 
