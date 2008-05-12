@@ -9,7 +9,7 @@ Muldis D general purpose data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types version 0.22.1.
+This document is Muldis::D::Core::Types version 0.23.0.
 
 =head1 PREFACE
 
@@ -50,9 +50,6 @@ relationships:
 
         sys.std.Core.Type.Tuple
             sys.std.Core.Type.TupleD0
-            sys.std.Core.Type.SetElem
-            sys.std.Core.Type.SeqElem
-            sys.std.Core.Type.BagElem
             sys.std.Core.Type.Database
 
         sys.std.Core.Type.Relation
@@ -73,9 +70,6 @@ relationships:
 
         sys.std.Core.Type.QuasiTuple
             sys.std.Core.Type.QuasiTupleD0
-            sys.std.Core.Type.QuasiSetElem
-            sys.std.Core.Type.QuasiSeqElem
-            sys.std.Core.Type.QuasiBagElem
 
         sys.std.Core.Type.QuasiRelation
             sys.std.Core.Type.QuasiRelationD0
@@ -90,9 +84,6 @@ relationships:
 
         sys.std.Core.Type.Remnant
             sys.std.Core.Type.ScaTupRel
-
-Also for convenience are the regular set|maybe|seq|bag types
-C<sys.std.Core.Type.(Set|Maybe|Seq|Bag)OfBool>.
 
 Note that C<sys.std.Core.Universal.Empty> is a proper subtype of all of the
 other types in this graph, but every other type has only one immediate
@@ -238,23 +229,13 @@ its attribute types must be.
 A C<TupleD0> is a proper subtype of C<Tuple> that has zero attributes; its
 cardinality is 1, and its only value is also the default value of C<Tuple>.
 
-=head2 sys.std.Core.Type.SetElem
-
-A C<SetElem> is a C<Tuple> with the same heading as C<Set>.
-
-=head2 sys.std.Core.Type.SeqElem
-
-A C<SeqElem> is a C<Tuple> with the same heading as C<Seq>.
-
-=head2 sys.std.Core.Type.BagElem
-
-A C<BagElem> is a C<Tuple> with the same heading as C<Bag>.
-
 =head2 sys.std.Core.Type.Database
 
 A C<Database> is a proper subtype of C<Tuple> where all of its attributes
 are each of relation types or of database types (the leaves of this
-recursion are all relation types); it is otherwise the same.  It is also
+recursion are all relation types); it is otherwise the same.  The 4
+system-defined user-data variables named C<(fed|dep|sdp|pkg).data> are all
+of "just" the C<Database> type, or are of its proper subtypes.  It is also
 trivially a proper supertype of C<TupleD0>.
 
 =head2 sys.std.Core.Type.Relation
@@ -319,7 +300,10 @@ A C<Single> is a proper subtype of C<Maybe> that has exactly 1 element.
 Its default value's only tuple's only attribute has the value
 C<Bool:false>.  The C<Single> type is complementary to the C<Nothing> type
 under C<Maybe>; C<Nothing> consists of exactly 1 of C<Maybe>'s values, and
-C<Single> consists of all of C<Maybe>'s other values.
+C<Single> consists of all of C<Maybe>'s other values.  Subtypes of
+C<Single> are also used to implement data-carrying database objects that
+are conceptually scalars rather than relations; for example, the current
+state of a sequence generator might typically be one.
 
 =head2 sys.std.Core.Type.Seq
 
@@ -390,18 +374,6 @@ A C<QuasiTupleD0> is a proper subtype of C<QuasiTuple> in the
 corresponding manner to C<TupleD0> being a proper subtype of C<Tuple>.
 Its cardinality is 1.
 
-=head2 sys.std.Core.Type.QuasiSetElem
-
-A C<QuasiSetElem> is a C<QuasiTuple> with the same heading as C<QuasiSet>.
-
-=head2 sys.std.Core.Type.QuasiSeqElem
-
-A C<QuasiSeqElem> is a C<QuasiTuple> with the same heading as C<QuasiSeq>.
-
-=head2 sys.std.Core.Type.QuasiBagElem
-
-A C<QuasiBagElem> is a C<QuasiTuple> with the same heading as C<QuasiBag>.
-
 =head2 sys.std.Core.Type.QuasiRelation
 
 A C<QuasiRelation> is like a C<Relation> but that the declared types of its
@@ -468,24 +440,6 @@ The C<ScaTupRel> type is a union type over C<Scalar>, C<Tuple> and
 C<Relation>; it is mainly useful in describing the possible range of types
 of attributes of scalar possreps or tuples or relations.  Its default value
 is C<Bool:false>.
-
-=head1 SYSTEM-DEFINED CORE SPECIALIZED SUBTYPES
-
-These types are proper subtypes of other core types, and they are
-system-defined for convenience, as they are anticipated to be frequently
-used; in fact, most of them are used as the declared parameter types of
-various core operators.
-
-=over
-
-=item C<sys.std.Core.Type.(Set|Maybe|Seq|Bag)OfBool>
-
-A C<(Set|Maybe|Seq|Bag)OfBool> is a completely defined proper subtype of
-C<(Set|Maybe|Seq|Bag)> whose C<value> attribute has a declared type of a
-C<Bool> subtype.  The cardinalities of these 4 types are as follows:
-C<SetOfBool>, 4; C<MaybeOfBool>, 3; C<(Seq|Bag)OfBool>, infinite.
-
-=back
 
 =head1 SEE ALSO
 

@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_Tiny version 0.20.1.
+This document is Muldis::D::Dialect::PTMD_Tiny version 0.21.0.
 
 =head1 PREFACE
 
@@ -70,6 +70,28 @@ system-defined data-definition routines (their arguments are values to put
 in the system catalog), and later ones are then to user-defined routines
 that the earlier statements either loaded or defined.
 
+Now another quality of the C<PTMD_Tiny> dialect is that it is designed to
+work easily for a single-pass parser, or at least a single-pass lexer; all
+the context that one needs to know for how to parse or lex any arbitrary
+substring of code is provided by prior code.  Therefore, a C<PTMD_Tiny>
+parser can easily work on a streaming input like a file-handle where you
+can't go back earlier in the stream.  Often this means a parser can work
+with little RAM.
+
+Also the dialect is designed that any amount of whitespace can be added or
+omitted next to most non-alphanumeric characters (which happen to be next
+to alphanumeric tokens) without that affecting the meaning of the code at
+all, except obviously for within character string literals.  And long
+binary or character strings can be split into arbitrary-size substrings,
+without affecting the meaning.  And many elements are identified by name
+rather than ordinal position, so to some degree the order they appear has
+no effect on the meaning.  So programmers can easily format (separate,
+indent, linewrap, order) code how they like, and making an automated code
+reformatter shouldn't be difficult.  Often, named elements can also be
+omitted entirely for brevity, in which case the parser would use context to
+supply default values for those elements.  These qualities are all shared
+by the C<HDMD_Perl_Tiny> dialect too.
+
 =head1 GRAMMAR OF TINY PLAIN TEXT MULDIS D
 
 This grammar is formatted as a Perl 6 grammar which could be used to parse
@@ -77,12 +99,14 @@ it.  That said, it is only meant to be illustrative, as only some Muldis D
 implementations would actually be written in Perl 6 or understand Perl 6
 grammars.  The following Perl 6 code does successfully compile using the
 current Perl6::Pugs, though it has not yet been tested for correct
-execution.  Any remaining errors should be corrected as soon as possible.
+execution.  I<Actually, the last several versions were not even tested for
+being able to compile, but it is assumed they are close to being compilable
+at least.>  Any remaining errors should be corrected as soon as possible.
 
     use v6-alpha;
 
-    # grammar Muldis_D_PTMD_Tiny:auth<http://muldis.com>:ver<0.20.1>;
-    grammar Muldis_D_PTMD_Tiny-0.20.1-http://muldis.com;
+    # grammar Muldis_D_PTMD_Tiny:auth<http://muldis.com>:ver<0.21.0>;
+    grammar Muldis_D_PTMD_Tiny-0.21.0-http://muldis.com;
 
     token bootloader {
         (<language_name>)
@@ -99,7 +123,6 @@ execution.  Any remaining errors should be corrected as soon as possible.
         <ln_dialect>
         <spec_sep>
         <ln_extensions>
-        <statement_end>
     }
 
     token ln_authority { <quoted_text_str> }
@@ -116,14 +139,11 @@ execution.  Any remaining errors should be corrected as soon as possible.
         <procedure_name>
         <spec_sep>
         <procedure_args>
-        <statement_end>
     }
 
     token procedure_name { <cat_name_chain_body> }
 
     token procedure_args { <tuple_body> }
-
-    token statement_end { ';' \s* }
 
     token literal {
           <scalar_or_qv>
@@ -137,8 +157,6 @@ execution.  Any remaining errors should be corrected as soon as possible.
         | <cat_name_chain>
         | <cat_decl_name_chain>
         | <cat_comment>
-        | <cat_e_tk>
-        | <cat_e_tdm>
         | <rat>
         | <cat_e_rm>
     }
@@ -295,9 +313,9 @@ execution.  Any remaining errors should be corrected as soon as possible.
         <list_close>
     }
 
-    token list_open { '{' \s* }
+    token list_open { \s* '{' \s* }
 
-    token list_close { \s* '}' }
+    token list_close { \s* '}' \s* }
 
     token ord_list_open { \s* '[' \s* }
 
@@ -383,20 +401,6 @@ execution.  Any remaining errors should be corrected as soon as possible.
         <quoted_text_str>
     }
 
-    token cat_e_tk {
-        (Cat.E_TK)
-        <spec_sep>
-        (special|scalar|tuple|relation
-            |quasi_scalar|quasi_tuple|quasi_relation|remnant)
-    }
-
-    token cat_e_tdm {
-        (Cat.E_TDM)
-        <spec_sep>
-        (special|root|restriction|alias
-            |union|intersection|exclusion|difference|negation)
-    }
-
     token rat {
           rat_with_radix
         | rat_as_ratio
@@ -420,7 +424,7 @@ execution.  Any remaining errors should be corrected as soon as possible.
         <spec_sep>
         (<[1-9A-Z]>)
         <spec_sep>
-        ((0|\-?<[1-9A-Z]><[0-9A-Z]>*)\/(<[1-9A-Z]><[0-9A-Z]>*))
+        ((0|\-?<[1-9A-Z]><[0-9A-Z]>*) \s* \/ \s* (<[1-9A-Z]><[0-9A-Z]>*))
     }
 
     token rat_as_float {
@@ -431,9 +435,13 @@ execution.  Any remaining errors should be corrected as soon as possible.
         (<[1-9A-Z]>)
         <spec_sep>
         ((0|\-?<[1-9A-Z]><[0-9A-Z]>*)
+        \s*
         \*
+        \s*
         (<[2-9A-Z]><[0-9A-Z]>*)
+        \s*
         \^
+        \s*
         (0|\-?<[1-9A-Z]><[0-9A-Z]>*))
     }
 
@@ -590,10 +598,6 @@ The following are fragments of actual Plain Text Muldis D code.
     Cat.DeclNameChain:'.stats.samples_by_order.'
 
     Cat.Comment:'This does something.'
-
-    Cat.E_TK:scalar
-
-    Cat.E_TDM:alias
 
     Rat:radix:1:-1.1
 

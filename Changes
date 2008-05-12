@@ -1,6 +1,121 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-05-11  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.29.0 is released on CPAN as
+    Muldis-D-0.29.0.tar.gz.
+
+    * New file versions are: D.pm 0.29.0 and Types_Catalog.pod 0.25.0 and
+    Types.pod and Routines.pod and Integer.pod and Blob.pod and Text.pod
+    and Set.pod and Sequence.pod and Bag.pod and Rational.pod 0.23.0 and
+    Nonscalar.pod 0.22.0 and Basics.pod and PTMD_Tiny.pod 0.21.0 and
+    HDMD_Perl_Tiny.pod 0.18.0.  The other pre-existing versioned files are
+    unchanged.
+
+    * (Basics.pod)  Added new "User Namespace Correspondence" pod section
+    under ENTITY NAMES.  It says how the namespaces *.lib and *.data
+    inter-relate, for example when they need to have corresponding sections
+    and when they need to have non-conflicting ones.  Also, when a depot
+    has no subdepots or packages, then its "dep.data" is "just a database".
+
+    * (Basics.pod)  Added new "Referencing Data Types" pod section under
+    ENTITY NAMES.  It specifies a couple new language features, the first
+    of which lets you directly reference types that were baked into the
+    external interfaces of other entities like variables or routines, as if
+    they were normal explicitly declared types; also you can simply take
+    the corresponding tuple type for a relation type or vice-versa; the
+    second feature is that you can tersely declare simple collection types
+    inline, such as sets or sequences of Foo, saving the language and users
+    from a proliferation of explicitly declared simple (|quasi-)nonscalar
+    types like C<MaybeOfInt> or C<SeqOfText>.
+
+    * (Types.pod)  Removed the 6 explicitly declared tuple type factories
+    "(|Quasi)(Set|Seq|Bag)Elem", which are now superfluous as you should
+    now be able to use the "tuple_from" syntax on the
+    "(|Quasi)(Set|Seq|Bag)" type factories instead, if you need them.
+
+    * (Types.pod, Types_Catalog.pod, Integer.pod, Blob.pod, Text.pod,
+    Rational.pod)  Removed the 38 explicitly declared 'Of' types which are
+    now superfluous: 24
+    "(Set|Maybe|Seq|Bag)Of(Bool|Int|UInt|Blob|Text|Rat)", 4
+    "(Set|Bag)Of(Tuple|Relation)", SetOfBag, MaybeOfTuple, SeqOfSeq, 2
+    "QuasiSetOf(Tuple|Relation)", SeqOfProcStmt, 4
+    "SetOf(Name|NameExprMap|SetOfName|NameChain)".
+
+    * (Types_Catalog.pod, Routines.pod, Integer.pod, Blob.pod, Text.pod,
+    Nonscalar.pod, Set.pod, Sequence.pod, Bag.pod, Rational.pod)  Updated
+    all references to the aforementioned deleted 'Of' types, in type
+    attributes and routine signatures, to refer to the implicitly generated
+    '_of' versions instead.  In Types_Catalog.pod, this also means that the
+    whole SYSTEM-DEFINED CORE QUASI-CATALOG PARAMETERIZED TYPES pod section
+    was eliminated.
+
+    * (Types.pod)  Updated descriptions of the Database and Single types.
+
+    * (Types_Catalog.pod)  Updated the 4
+    "Cat.(System|Federation|Depot|Package)" types to ensure that they
+    actually are "Database" types and not "just Tuple" types, since each
+    "cat" variable is supposed to be a valid "database".  The only change
+    for each of the 4 types was to convert type of its "comment" attribute
+    from "Cat.Comment" (a scalar) to "single_of.Cat.Comment" (a relation);
+    the latter type was also added under the misc collection types section.
+    Also clarified that the "Cat.ExprNodeSet" type qualifies as a db type.
+
+    * (Types_Catalog.pod)  Updated the 4 "Cat.Sys(Nsp|Func|Upd|Proc)Set"
+    types to flesh out the definition of their 'parent' attributes (which
+    had been left 'TODO'), and expanded the description of the "namespaces"
+    attribute of the "Cat.System" type.
+
+    * (Types_Catalog.pod, PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Refactored
+    the catalog types for defining data types.  Previously, there was just
+    the single C<Cat.Type> main type, plus 2 supporting enumerated types,
+    that handled all of special types, root scalar and nonscalar types,
+    domain types and union etc types.  Now C<Cat.Type> has been replaced
+    with mainly these 9 types: Cat.(|Inner)(Scalar|Nonscalar|Domain)Type,
+    Cat.Possrep(|Map)Set, Cat.KeySet; they handle all of the aforementioned
+    but for special types.  There are 3 main type definition methods for
+    user-defined types, each of which is represented by an outer/inner
+    pair; the inners do all the work and outers are just wrappers for those
+    to make them explicit depot etc entities; multiple inners can be in an
+    outer, all but one playing support to the one, and inner types also can
+    be embedded in outer routines.  With Cat.Type gone, the 2 enumerated
+    types Cat.E_TK and Cat.E_TDM were no longer useful and were eliminated;
+    along with their types, the special literal syntax for Cat.E_TK and
+    Cat.E_TDM was eliminated from the 2 Tiny dialects.  Added the 9
+    Cat.(Sys|Dep|Pkg)(Sca|NonSca|Dom)TypeSet types and updated the
+    Cat.(System|Depot|Package) types to each have 3 corresponding
+    attributes, rather than each having a placeholder 'types' attribute.
+    Added the 3 Cat.Inner(Sca|NonSca|Dom)TypeSet types and updated the
+    Cat.(Func|Upd|Proc)Body types to each have 3 corresponding attributes,
+    rather than each having a placeholder 'inner_types' attribute; the 3
+    new outer type types each have the 3 corresponding attributes also.
+    Also added the 2 Cat.Sys(Spec|ScaNPR)TypeSet types and updated the
+    Sys.System type to have 2 corresponding attributes; these list the
+    special system-defined types of the kinds that users can't make.
+
+    * (Types_Catalog.pod)  Added 2 catalog types for defining dbvars, both
+    of the catalog and user data variety: Cat.DbVar, Cat.SysCatSet. Updated
+    the catalog types Cat.(System|Depot|Package) to have a 'catalog' or
+    'data' attribute each rather than a placeholder.  With this, all the
+    explicit TODO placeholders in Types_Catalog.pod are now gone.
+
+    * (Types_Catalog.pod)  The placeholder catalog type Cat.Exception was
+    not addressed yet, and for now has been removed; it will come back
+    later; so the whole OLD TYPE DEFINITIONS TO REWRITE OR REPLACE pod
+    section was eliminated.
+
+    * (PTMD_Tiny.pod)  The statement terminator semicolon no longer exists;
+    it was never needed to help parsing and its presence would probably
+    have confused people.  Also added whitespace allowance between main
+    parts of rational literals.
+
+    * (PTMD_Tiny.pod)  Added DESCRIPTION paragraph to point out that the
+    PTMD_Tiny dialect is designed for a single-pass parser or lexer, and so
+    it should be possible to parse such code simply and with little RAM;
+    also a paragraph about the flexibility programmers have for writing
+    code in the dialect, such as matters of whitespace.
+
 2008-05-09  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.28.1 is released on CPAN as
