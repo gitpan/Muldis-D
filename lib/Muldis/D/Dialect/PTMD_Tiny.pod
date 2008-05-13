@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_Tiny version 0.21.0.
+This document is Muldis::D::Dialect::PTMD_Tiny version 0.22.0.
 
 =head1 PREFACE
 
@@ -105,8 +105,8 @@ at least.>  Any remaining errors should be corrected as soon as possible.
 
     use v6-alpha;
 
-    # grammar Muldis_D_PTMD_Tiny:auth<http://muldis.com>:ver<0.21.0>;
-    grammar Muldis_D_PTMD_Tiny-0.21.0-http://muldis.com;
+    # grammar Muldis_D_PTMD_Tiny:auth<http://muldis.com>:ver<0.22.0>;
+    grammar Muldis_D_PTMD_Tiny-0.22.0-http://muldis.com;
 
     token bootloader {
         (<language_name>)
@@ -141,7 +141,7 @@ at least.>  Any remaining errors should be corrected as soon as possible.
         <procedure_args>
     }
 
-    token procedure_name { <cat_name_chain_body> }
+    token procedure_name { <name_chain_body> }
 
     token procedure_args { <tuple_body> }
 
@@ -153,12 +153,12 @@ at least.>  Any remaining errors should be corrected as soon as possible.
         | <text>
         | <tuple_or_qv>
         | <relation_or_qv>
-        | <cat_name>
-        | <cat_name_chain>
-        | <cat_decl_name_chain>
-        | <cat_comment>
+        | <name>
+        | <name_chain>
+        | <decl_name_chain>
+        | <comment>
         | <rat>
-        | <cat_e_rm>
+        | <rat_round_meth>
     }
 
     token scalar_or_qv {
@@ -171,9 +171,9 @@ at least.>  Any remaining errors should be corrected as soon as possible.
         <possrep_attrs>
     }
 
-    token scalar_type_name { <cat_name_chain_body> }
+    token scalar_type_name { <name_chain_body> }
 
-    token possrep_name { <cat_name> }
+    token possrep_name { <name> }
 
     token possrep_attrs { <tuple_body> }
 
@@ -222,7 +222,7 @@ at least.>  Any remaining errors should be corrected as soon as possible.
         ((Quasi)? Relation)
         <spec_sep>
         <list_open>
-            (((<cat_name>) <list_sep>)*)
+            (((<name>) <list_sep>)*)
         <list_close>
     }
 
@@ -238,7 +238,7 @@ at least.>  Any remaining errors should be corrected as soon as possible.
         ((Quasi)? Relation)
         <spec_sep>
         <ord_list_open>
-            (((<cat_name>) <list_sep>)*)
+            (((<name>) <list_sep>)*)
         <ord_list_close>
         <spec_sep>
         <list_open>
@@ -252,7 +252,7 @@ at least.>  Any remaining errors should be corrected as soon as possible.
 
     token tuple_body {
         <list_open>
-            (((<cat_name> <pair_sep> <literal>) <list_sep>)*)
+            (((<name> <pair_sep> <literal>) <list_sep>)*)
         <list_close>
     }
 
@@ -343,22 +343,22 @@ at least.>  Any remaining errors should be corrected as soon as possible.
 
     token text_char { ['\b'|'\q'|<-[\\\']>] }
 
-    token cat_name { <quoted_text_str> }
+    token name { <quoted_text_str> }
 
-    token cat_name_chain {
-        (Cat.NameChain)
+    token name_chain {
+        (NameChain)
         <spec_sep>
-        <cat_name_chain_body>
+        <name_chain_body>
     }
 
-    token cat_name_chain_body {
+    token name_chain_body {
           nc_seq
         | nc_flat
     }
 
     token nc_seq {
         <ord_list_open>
-            ((<cat_name>) (\s* <nc_elem_sep> \s* (<cat_name>))+)
+            ((<name>) (\s* <nc_elem_sep> \s* (<name>))+)
         <ord_list_close>
     }
 
@@ -372,20 +372,20 @@ at least.>  Any remaining errors should be corrected as soon as possible.
 
     token nc_char { ['\b'|'\q'|'\p'|<-[\\\'\.]>] }
 
-    token cat_decl_name_chain {
-        (Cat.DeclNameChain)
+    token decl_name_chain {
+        (DeclNameChain)
         <spec_sep>
-        <cat_decl_name_chain_body>
+        <decl_name_chain_body>
     }
 
-    token cat_decl_name_chain_body {
+    token decl_name_chain_body {
           dnc_seq
         | dnc_flat
     }
 
     token dnc_seq {
         <ord_list_open>
-            (((<cat_name>) (\s* <nc_elem_sep> \s* (<cat_name>))?)?)
+            (((<name>) (\s* <nc_elem_sep> \s* (<name>))?)?)
         <ord_list_close>
     }
 
@@ -395,8 +395,8 @@ at least.>  Any remaining errors should be corrected as soon as possible.
         <text_delim>
     }
 
-    token cat_comment {
-        (Cat.Comment)
+    token comment {
+        (Comment)
         <spec_sep>
         <quoted_text_str>
     }
@@ -445,8 +445,8 @@ at least.>  Any remaining errors should be corrected as soon as possible.
         (0|\-?<[1-9A-Z]><[0-9A-Z]>*))
     }
 
-    token cat_e_rm {
-        (Cat.E_RM)
+    token rat_round_meth {
+        (RatRoundMeth)
         <spec_sep>
         (half_down|half_up|half_even|to_floor|to_ceiling|to_zero|to_inf)
     }
@@ -589,15 +589,15 @@ The following are fragments of actual Plain Text Muldis D code.
 
     'First Name'
 
-    Cat.NameChain:['fed'.'data'.'the_db'.'gene'.'sorted_person_name']
+    NameChain:['fed'.'data'.'the_db'.'gene'.'sorted_person_name']
 
-    Cat.NameChain:'fed.data.the_db.stats.samples_by_order'
+    NameChain:'fed.data.the_db.stats.samples_by_order'
 
-    Cat.DeclNameChain:['gene'.'sorted_person_name']
+    DeclNameChain:['gene'.'sorted_person_name']
 
-    Cat.DeclNameChain:'.stats.samples_by_order.'
+    DeclNameChain:'.stats.samples_by_order.'
 
-    Cat.Comment:'This does something.'
+    Comment:'This does something.'
 
     Rat:radix:1:-1.1
 
@@ -619,7 +619,7 @@ The following are fragments of actual Plain Text Muldis D code.
 
     Rat:float:9:45207196*10^37
 
-    Cat.E_RM:half_up
+    RatRoundMeth:half_up
 
 =head1 SEE ALSO
 

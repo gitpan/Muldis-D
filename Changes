@@ -1,6 +1,58 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-05-12  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.30.0 is released on CPAN as
+    Muldis-D-0.30.0.tar.gz.
+
+    * New file versions are: D.pm 0.30.0 and Types_Catalog.pod 0.26.0 and
+    Integer.pod and Blob.pod and Rational.pod 0.24.0 and Types.pod 0.23.1
+    and PTMD_Tiny.pod 0.22.0 and HDMD_Perl_Tiny.pod 0.19.0 and
+    Conventions.pod 0.2.0.  The other pre-existing versioned files are
+    unchanged.
+
+    * (Types.pod, Types_Catalog.pod)  Fixed a few fossils.
+
+    * (Types_Catalog.pod)  Refactored the catalog types for defining outer
+    data types.  The oft-repeated attribute triple
+    "inner_(sca|non_sca|dom)_types" was factored out into the new tuple
+    (database) type Cat.InnerTypeSet, and a single "inner_types" attribute
+    of that type is now used in the outer routine and type defining types
+    rather than the triple.  The 3 "Cat.(Scalar|Nonscalar|Domain)Type"
+    types were combined into the 1 "Cat.Type" type; now an outer type must
+    have at least 1 inner type, which defines the outer type, and that
+    inner type has the empty string for its name; this arrangement is akin
+    to an expression node hierarchy.  Along with that, the 9
+    "Cat.(Sys|Dep|Pkg)(Sca|NonSca|Dom)TypeSet" types were combined into the
+    3 "Cat.(Sys|Dep|Pkg)TypeSet" types, and the corresponding 3 attributes
+    in each of "Cat.(System|Depot|Package)" were consolidated into 1
+    attribute for each.
+
+    * (Rational.pod, PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Renamed the
+    rational extension enumerated type "E_RM"/"Cat.E_RM" to just
+    "RatRoundMeth", and also updated its literal syntax in both Tiny
+    dialects likewise.
+
+    * (Rational.pod)  Updated the "RatRoundMeth" type so that it explicitly
+    has a possrep that wraps the Cat.Name type, rather than implicitly
+    having no possreps.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Abbreviated the literal syntax
+    for scalar catalog types in both Tiny dialects so that the literals no
+    longer have a leading "Cat."; this affects the 4 types: Name,
+    NameChain, DeclNameChain, Comment; but with Name it only affects the
+    documentation since its literals had no 'Name' prefix to begin with.
+
+    * (Integer.pod, Blob.pod, Rational.pod)  Updated the documentation so
+    that any types declared by these files which were referred to with a
+    "Cat." prefix now aren't; the affected types were "RatRoundRule" and
+    several "PInt\d\w+".
+
+    * (Conventions.pod)  Removed the suggestion about enumerated types
+    being named like E_FOO; for one thing, no system-defined enums do that
+    anymore; also that format may be too terse for general practice.
+
 2008-05-11  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.29.0 is released on CPAN as
