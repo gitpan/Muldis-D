@@ -9,7 +9,7 @@ Muldis D general purpose routines
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Routines version 0.23.0.
+This document is Muldis::D::Core::Routines version 0.24.0.
 
 =head1 PREFACE
 
@@ -88,6 +88,113 @@ doesn't exist in the virtual machine, either at compile or runtime
 depending whether the type is in the system or user namespace.  This
 function is conceptually implicitly used to provide default values for
 variables, so they always hold valid values of their declared type.
+
+=back
+
+=head1 SYSTEM-DEFINED GENERIC SCALAR-CONCERNING FUNCTIONS
+
+These functions are applicable to mainly scalar types, but are generic in
+that they typically work with any scalar types.  Now some of these
+functions (those with a parameter named C<possrep>) work only with scalar
+values that have possreps, and not with values of the 6 system-defined
+scalar types lacking any possreps: C<Bool>, C<Int>, C<Blob>, C<Text>,
+C<Cat.Name>, C<Cat.Comment>; other functions are not limited in that way,
+but may be limited in other ways.  Note that the terminology used to
+describe these functions is taking advantage of the fact that a scalar
+possrep looks just like a tuple.
+
+=over
+
+=item C<function sys.std.Core.Scalar.attr result ScaTupRel params {
+topic(Scalar), possrep(Cat.Name), name(Cat.Name) }>
+
+This function results in the scalar or nonscalar value of the possrep
+attribute of C<topic> where the possrep name is given by C<possrep> and the
+attribute name is given by C<name>.  This function will fail if C<possrep>
+specifies a possrep name that C<topic> doesn't have or C<name> specifies an
+attribute name that the named possrep of C<topic> doesn't have.
+
+=item C<function sys.std.Core.Scalar.update_attr result Scalar params {
+topic(Scalar), possrep(Cat.Name), name(Cat.Name), value(ScaTupRel) }>
+
+This function results in its C<topic> argument but that its possrep
+attribute whose possrep name is C<possrep> and whose attribute name is
+C<name> has been updated with a new scalar or nonscalar value given by
+C<value>.  This function will fail if C<possrep> specifies a possrep name
+that C<topic> doesn't have or C<name> specifies an attribute name that the
+named possrep of C<topic> doesn't have, or if the declared type of C<value>
+isn't a subtype of the declared type of the attribute.
+
+=item C<function sys.std.Core.Scalar.multi_update result Scalar params {
+topic(Scalar), possrep(Cat.Name), attrs(Tuple) }>
+
+This function is like C<sys.std.Core.Scalar.update_attr> except that it
+handles N scalar possrep attributes at once rather than just 1.  The
+heading of the C<attrs> argument must be a subset of the heading of the
+C<topic> argument's possrep named by C<possrep>; this function's result is
+C<topic> with all the possrep attribute values of C<attrs> substituted into
+it.  This function could alternately be named
+I<sys.std.Core.Scalar.static_substitution>.
+
+=item C<function sys.std.Core.Scalar.projection result Tuple params {
+topic(Scalar), possrep(Cat.Name), attrs(set_of.Cat.Name) }>
+
+This function results in the C<Tuple> that is the projection of the possrep
+(whose name is given in the C<possrep> argument) of its C<topic> argument
+that has just the subset of attributes of C<topic> which are named in its
+C<attrs> argument. As a trivial case, this function's result is the entire
+named possrep of C<topic> if C<attrs> lists all attributes of that possrep;
+or, it is the nullary tuple if C<attrs> is empty.  This function will fail
+if C<possrep> specifies a possrep name that C<topic> doesn't have or
+C<attrs> specifies any attribute names that C<topic> doesn't have.
+
+=item C<function sys.std.Core.Scalar.cmpl_projection result Tuple params {
+topic(Scalar), possrep(Cat.Name), attrs(set_of.Cat.Name) }>
+
+This function is the same as C<projection> but that it results in the
+complementary subset of possrep attributes of C<topic> when given the same
+arguments.
+
+=item C<function sys.std.Core.Scalar.Tuple_from_Scalar result Tuple params
+{ topic(Scalar), possrep(Cat.Name) }>
+
+This function results in the C<Tuple> that has all the same attributes of
+the possrep of C<topic> whose name is given in C<possrep>; in other words,
+the function results in the externalization of one of a scalar value's
+possreps.  This function will fail if C<possrep> specifies a possrep name
+that C<topic> doesn't have.
+
+=item C<function sys.std.Core.Scalar.Scalar_from_Tuple result Scalar
+params { topic(Tuple), type(Cat.NameChain), possrep(Cat.Name) }>
+
+This function results in the C<Scalar> value whose scalar root (|sub)type
+is named by C<type>, which has a possrep whose name matches C<possrep>, and
+whose complete set of attributes of that named possrep match the attributes
+of C<topic>.  This function can be used to select any scalar value at all
+that has a possrep.
+
+=item C<function sys.std.Core.Scalar.order result Cat.Order params {
+topic(Scalar), other(Scalar), assuming(Tuple) }>
+
+This function is the externalization of a scalar root type's type-default
+(total) C<order_determination> function.  This function results in
+C<Cat.Order:same> iff its C<topic> and C<other> arguments are exactly the
+same value, and otherwise it results in C<Cat.Order:increase> if the value
+of the C<other> argument is considered to be an increase (as defined by the
+type) over the value of the C<topic> argument, and otherwise it results in
+C<Cat.Order:decrease> as the reverse of the last condition would be true.
+This function's C<topic> and C<other> arguments must be of compatible
+declared types; in this case, 2 declared types are compatible iff they are
+both subtypes of a common scalar root type that declares a type-default
+C<order_determination> function.  Note that C<order_determination>
+functions are considered the only fundamental order-sensitive operators,
+and all others are defined over them.  This function also has a
+C<Tuple>-typed third parameter, named C<assuming>, which carries optional
+customization details for the order-determination algorithm; this permits
+the function to implement a choice between multiple (typically similar)
+ordering algorithms rather than just one, which reduces the number of
+functions needed for supporting that choice; if the algorithm is not
+customizable, then a tuple argument would be of degree zero.
 
 =back
 
@@ -637,10 +744,6 @@ C<B>; that is, C<A / B> is shorthand for C<A{X} - ((A{X} join B) - A){X}>.
 =back
 
 =head1 SYSTEM-DEFINED CORE GENERIC QUASI- FUNCTIONS
-
-I<This documentation is pending.>
-
-=head1 SYSTEM-DEFINED CORE CATALOG FUNCTIONS
 
 I<This documentation is pending.>
 

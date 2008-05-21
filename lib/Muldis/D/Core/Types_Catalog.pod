@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.26.0.
+This document is Muldis::D::Core::Types_Catalog version 0.27.0.
 
 =head1 PREFACE
 
@@ -57,6 +57,7 @@ more or less:
             sys.std.Core.Type.Cat.NameChain
             sys.std.Core.Type.Cat.DeclNameChain
             sys.std.Core.Type.Cat.Comment
+            sys.std.Core.Type.Cat.Order
 
         sys.std.Core.Type.Tuple
 
@@ -121,7 +122,7 @@ more or less:
             sys.std.Core.Type.Cat.NameExprMap
             sys.std.Core.Type.Cat.AttrRenameMap
 
-=head1 TYPES FOR DEFINING ENTITY NAMES AND COMMENTS
+=head1 SIMPLE GENERIC SCALAR TYPES
 
 =head2 sys.std.Core.Type.Cat.Name
 
@@ -134,7 +135,9 @@ be used instead to also qualify the reference with a namespace.
 C<Cat.Name> is the same as C<Text> in representation (each value as a
 string of characters) and cardinality though its values are distinct; it is
 specifically intended for use in naming DBMS entities rather than being for
-general-purpose user data.  The default value et al is as for C<Text>.
+general-purpose user data.  The default value et al is as for C<Text>.  The
+C<Cat.Name> type has a default ordering algorithm; it is the same as for
+C<Text>.
 
 =head2 sys.std.Core.Type.Cat.NameChain
 
@@ -166,6 +169,17 @@ most-generalized finite C<Cat.NameChain> subtype, you must specify a
 maximum number of sequence elements of its values, and each element must be
 of a finite C<Cat.Name> subtype.
 
+The C<Cat.NameChain> type has a default ordering algorithm; for 2 distinct
+C<Cat.NameChain> values, their order is determined as follows:  1.
+Eliminate any identical parent-most sequence elements as those alone would
+make the chains compare as same (if the remainder of both strings was the
+empty chain, then the chains are identical).  2.  Iff the remainder of just
+one chain is the empty chain, then that chain is ordered before the
+non-empty one.  3.  Compare the first element of each of the chain
+remainders; the chain with the first remaining element that is ordered
+first as per its own algorithm (that of C<Cat.Name>) is ordered before the
+other chain.
+
 =head2 sys.std.Core.Type.Cat.DeclNameChain
 
 A C<Cat.DeclNameChain> (scalar) is mostly the same as a C<Cat.NameChain>
@@ -176,7 +190,9 @@ sequence means a C<flat> possrep consisting of just a period.  A
 C<Cat.DeclNameChain> is used in declaring system catalogs where DBMS
 entities live under a potentially N-depth namespace, such as depot entities
 grouped in a subdepot hierarchy.  The default and minimum value of
-C<Cat.DeclNameChain> is a zero element sequence.
+C<Cat.DeclNameChain> is a zero element sequence.  The C<Cat.DeclNameChain>
+type has a default ordering algorithm; it is the same as for
+C<Cat.NameChain>.
 
 =head2 sys.std.Core.Type.Cat.Comment
 
@@ -188,7 +204,28 @@ its values are distinct; it is intended just for commenting Muldis D code.
 One main intended use of this type is to help preserve comments in code
 translated to or from other languages; though only a subset of those
 (FoxPro?) keep comments in the AST rather than discarding them.  The
-default value et al is as for C<Cat.Name>.
+default value et al is as for C<Cat.Name>.  The C<Cat.Comment> type has a
+default ordering algorithm; it is the same as for C<Cat.Name>.
+
+=head2 sys.std.Core.Type.Cat.Order
+
+A C<Cat.Order> (order determination) is a scalar enumeration consisting of
+the 3 values C<increase>, C<same>, C<decrease>.  When some context (such as
+within a list sort or range check operation) needs to know the relative
+order of 2 values according to some criteria, it can invoke a function that
+applies that criteria to those 2 values, which are its main/only arguments,
+and that function results in a C<Cat.Order> value for the context to make
+use of.  A C<Cat.Order> has 2 system-defined possreps, named C<name> and
+C<int>.  The C<name> possrep directly matches the conception of the type as
+an enumeration of 3 character string values; it consists of 1
+C<Cat.Name>-typed attribute whose name is the empty string.  The C<int>
+possrep consists of 1 C<Int>-typed attribute whose name is the empty string
+and whose value must be one of [C<-1>, C<0>, C<1>]; the 3 values of each
+possrep correspond in the same order as they are documented here.  The
+default value of C<Cat.Order> is C<same>; its minimum and maximum values
+are, respectively, C<increase> and C<decrease>.  The cardinality of this
+type is 3.  The C<Cat.Order> type has a default ordering algorithm;
+C<increase> is ordered before C<same>, and C<same> before C<decrease>.
 
 =head1 TYPES FOR DEFINING SYSTEM-DEFINED ENTITIES
 
@@ -1638,7 +1675,7 @@ representation that can handle every value of the (|sub)type it is defined
 with, and the Muldis D implementation may choose for itself which of these,
 or some other alternative, is the actual/physical representation.
 
-A C<Cat.InnerScalarType> has these 6 attributes:
+A C<Cat.InnerScalarType> has these 7 attributes:
 
 =over
 
@@ -1694,6 +1731,22 @@ This defines the entire (main) body of a function that results in the
 default (|quasi-)scalar value of the (|sub-)type; it has zero parameters
 and its result type is the same as the (|quasi-)scalar type whose
 declaration it is part of.
+
+=item C<order> - C<maybe_of.Cat.InnerFuncBody>
+
+A (|quasi-)scalar root type definition may optionally have a type-default
+total ordering function associated with it (a type being defined as a
+subtype may not); iff the type being defined qualifies and desires such an
+associated function, then C<order> is a C<Single> whose sole element
+defines the entire (main) body of a C<order_determination> function.  The
+implicit function heading that this goes with has 3 parameters; the first
+two parameters, named C<topic> and C<other>, each have declared types that
+are the same as the (|quasi-)scalar root type whose declaration the
+function is part of, and this function is said root type's type-default
+ordering function; the third parameter, named C<assuming>, is
+C<Tuple>-typed; the function's implicit result type is C<Cat.Order>.  Iff
+the type being defined is a subtype of some other type or does not desire
+the function, then C<order> is a C<Nothing>.
 
 =back
 
@@ -2064,7 +2117,7 @@ I<Transition constraints et al are still TODO.>
 The default value of C<Cat.DbVar> defines a variable that is "just a
 database" and has no extra constraints.
 
-=head1 SIMPLE GENERIC CATALOG COLLECTION TYPES
+=head1 SIMPLE GENERIC NONSCALAR TYPES
 
 =head2 sys.std.Core.Type.Cat.NameTypeMap
 

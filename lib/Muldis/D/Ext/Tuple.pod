@@ -1,0 +1,110 @@
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+Muldis::D::Ext::Tuple -
+Muldis D extension adding more generic tuple operators
+
+=head1 VERSION
+
+This document is Muldis::D::Ext::Tuple version 0.23.0.
+
+=head1 PREFACE
+
+This document is part of the Muldis D language specification, whose root
+document is L<Muldis::D>; you should read that root document
+before you read this one, which provides subservient details.
+
+=head1 DESCRIPTION
+
+Muldis D has a mandatory core set of system-defined (eternally available)
+entities, which is referred to as the I<Muldis D core> or the I<core>; they
+are the minimal entities that all Muldis D implementations need to provide;
+they are mutually self-describing and are used to bootstrap the language;
+any entities outside the core, called I<Muldis D extensions>, are
+non-mandatory and are defined in terms of the core or each other, but the
+reverse isn't true.
+
+This current C<Tuple> document describes the system-defined I<Muldis D
+Tuple Extension>, which consists of extra operators for generic tuples,
+adding to the minimum few defined in the language core.
+
+This current document does not describe the polymorphic operators that all
+types, or some types including core types, have defined over them; said
+operators are defined once for all types in L<Muldis::D::Core>.
+
+I<This documentation is pending.>
+
+=head1 SYSTEM-DEFINED GENERIC TUPLE-CONCERNING FUNCTIONS
+
+These functions are applicable to mainly tuple types, but are generic
+in that they typically work with any tuple types.
+
+=over
+
+=item C<function sys.std.Tuple.degree result UInt params { topic(Tuple) }>
+
+This function results in the degree of its argument (that is, the count of
+attributes it has).
+
+=item C<function sys.std.Tuple.attr_from_Tuple result ScaTupRel params {
+topic(Tuple) }>
+
+This function results in the scalar or nonscalar value of the sole
+attribute of its argument.  This function will fail if its argument is not
+of degree 1.
+
+=item C<function sys.std.Tuple.Tuple_from_attr result Tuple params {
+name(Cat.Name), value(ScaTupRel) }>
+
+This function results in the C<Tuple> value which has just one attribute
+whose name is given by C<name> and whose value is given by C<value>; the
+attribute's declared type is the same as that of C<value>.
+
+=item C<function sys.std.Tuple.substitution_in_default result Tuple params
+{ of(Cat.NameChain), subst(Tuple) }>
+
+This function results in the tuple value that is the default value of the
+tuple data type whose name is given in the C<of> argument, but that zero or
+more of its attribute values have been substituted by values given in the
+C<subst> argument.  This function is a short-hand for
+C<sys.std.Core.Tuple.multi_update> on the result of
+C<sys.std.Core.Universal.default>.  This function will fail if either
+C<default> would fail for the same C<of> argument, or if its result isn't a
+tuple type, or if the heading of C<subst> isn't a subset of the heading of
+the default.  The purpose of this function is to support greater brevity in
+Muldis D coding such that users can define just part of a desired tuple
+value and have the remainder filled in from defaults for them; particularly
+useful with tuples that conceptually have some optional attributes.
+
+=back
+
+=head1 SEE ALSO
+
+Go to L<Muldis::D> for the majority of distribution-internal
+references, and L<Muldis::D::SeeAlso> for the majority of
+distribution-external references.
+
+=head1 AUTHOR
+
+Darren Duncan (C<perl@DarrenDuncan.net>)
+
+=head1 LICENSE AND COPYRIGHT
+
+This file is part of the formal specification of the Muldis D language.
+
+Muldis D is Copyright © 2002-2008, Darren Duncan.
+
+See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
+
+=head1 TRADEMARK POLICY
+
+The TRADEMARK POLICY in L<Muldis::D> applies to this file too.
+
+=head1 ACKNOWLEDGEMENTS
+
+The ACKNOWLEDGEMENTS in L<Muldis::D> apply to this file too.
+
+=cut

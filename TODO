@@ -31,6 +31,17 @@ constraint or something, as per scalar possrep mapping functions.
 
 * Add other kinds of triggered routines.
 
+* Fix or replace the sys.std.Relation.(universal|negation)
+functions as they make more sense taking the name of a nonscalar heading
+def as an argument rather than a value, so that the correct declared types
+are used and/or the result is more predictable.  Similarly fix
+sys.std.Set.Maybe.attr_or_default as how would it know what the declared
+type is, when the MST of the Nothing attribute is Empty.  Also see if
+sys.std.Relation.outer_join_with_defaults has a similar problem.
+Also possibly tighten up the matter of default values in the face of
+subtypes, so we know which subtype's default value applies when some
+context desires a default value.
+
 * Add a system-defined function that will take a function name as a normal
 data argument and then turns around and invokes that function.  This is the
 fundamental function over which the generic relational restriction operator
@@ -41,6 +52,13 @@ their own operators that invoke based on data.  Similarly add a
 system-defined procedure, which is what try_catch et al works over for
 calling named procedures.
 
+* Consider adding catalog support for making some routine parameters
+optional; if no explicit arguments are given them, then implicit default
+argument values are used instead.  Examples of use are with order-sensitive
+functions, to make the 'func' and/or 'assuming' parameters optional, where
+they default to 'sys.std.Core.Scalar.order' and the D0 tuple respectively;
+but err on the side of making parameters non-optional for robustness.
+
 * Add some automatic code completion to the two Tiny dialects or as a
 general function, mainly so that tuples comprising catalogs don't have to
 be written out in full; attributes may be omitted by the coders but will be
@@ -50,16 +68,6 @@ far as the Muldis D catalog is concerned, the users had always written them
 out in full.  Specific use case example is that programmers can omit
 'comment' attributes, or empty sets of expression nodes that aren't used.
 
-* Take advantage of the fact that a scalar possrep looks just like a tuple.
-We need to add at least 6 generic sys.std.Core.Scalar.\w+ functions.  The
-first 2 respectively extract all possrep attrs at once as a tuple, or
-select a scalar value where the selector has a single tuple-typed parameter
-to specify all the possrep attrs.  Another 2 will respectively extract or
-update a single possrep attr, as per the Tuple.\w+ functions 'attr',
-'update_attr'.  Another 2 will extract|update an arbitrary subset of
-possrep attrs as per the Tuple.\w+ functions 'project', 'multi_update'.
-For that matter, add an analogue to Tuple.substitution_in_default as well.
-
 * Add a new extension, perhaps ext/Patterns.pod, which does
 pattern-sensitive search and/or replace in Text values, including both the
 full feature set of SQL's LIKE operator (not just the special case of
@@ -68,7 +76,7 @@ support such as grep or Perl et al support, or simple transliterations.
 This new extension is meant to be algorithm-agnositic and can both be
 plugged with new algorithms or have multiple system-defined ones, as per
 Perl 5.10 now supports plugins that substitute for its builtin regexp
-engines.
+engines.  Or these functions can just go in Text.pod instead.
 
 * Generalize the operator set for controlled character string degrading, of
 which upper/lower case folding is one example, and of which removing
@@ -83,16 +91,26 @@ don't simply treat non-identical things as being equal; you actually change
 them so they are.  These features are possibly useable not just with user
 data, but also database entity names on underlying systems that are eg not
 case sensitive but case preserving and we want to retain those semantics
-for some reason of backwards compatibility.
+for some reason of backwards compatibility.  Or these functions can just go
+in Text.pod instead.
 
-* Add relational operators for sorting and quota queries; that is,
-analogues to SQL's ORDER BY and LIMIT tasks, as well as order-significant
-aggregate operations on relation attributes (eg, catenate).  Consider
-overhauling the nature of the Ordered role and/or generic comparison or
-sorting operators.
+* Add functions for comparing or processing continuous ranges or intervals
+as per is_inside_range ... the tests are for eg if 2 ranges do or don't
+overlap, or whether an overlap is specifically between the start of one and
+the end of another, or whether ranges simply touch, or whether a range is
+entirely within another or not, etc ... some are analagous to set
+operations, but not so much as they talk about continous intervals, or as
+continuous such as the type in question supports ... useful particularly
+for use with date data types.  as for supporting non-continuous ranges,
+which are probably represented by sets of continuous ranges, that might be
+simple enough to support here too ... or some range stuff might go off to
+another extension perhaps or perhaps not.
 
 * Define more flow control operators like IF/ELSE, GIVEN/WHEN, etc.  Both
 functional and imperative versions.
+
+* Add catalog data types for controlling mounting/unmounting of depots as
+well as what externals they map to.
 
 * Define short-hand data definition procedures analagous to SQL's CREATE,
 ALTER, DROP etc.  Note that these are not short-hand for inserting records
@@ -100,7 +118,8 @@ into catalogs, at least when the code doing either is an updater or
 procedure.  Rather, these procedures are mainly for making bootloaders
 work, since those can not directly invoke variables such as the catalogs in
 order to insert into them.  Probably add new file Core/Routines_Catalog.pod
-at the same time, to house them.
+at the same time, to house them.  Also add sys.std.Core.Cat.Order_reverse
+function in that new file; or that function best goes elsewhere?
 
 * Flesh out and add system service operators like random numbers or current
 dates or simple generic I/O.

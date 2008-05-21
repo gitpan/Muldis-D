@@ -9,7 +9,7 @@ Muldis::D::Basics -
 
 =head1 VERSION
 
-This document is Muldis::D::Basics version 0.21.0.
+This document is Muldis::D::Basics version 0.22.0.
 
 =head1 PREFACE
 
@@ -186,8 +186,6 @@ will always be unacceptable, and the former usually happens just if a
 problem can likely not be caught at compile time.
 
 =back
-
-I<This documentation is pending.>
 
 =head1 INTERPRETATION OF THE RELATIONAL MODEL
 
@@ -1010,7 +1008,77 @@ is conceptually defined in terms of C<Int>.  And C<Rat> isn't needed for
 bootstrapping a minimal Muldis D implementation or the system catalog,
 whereas C<Int> is.
 
-I<This documentation is pending.>
+=head2 Ordered Types
+
+Data types in Muldis D are fundamentally unordered sets of values, and so
+in the general case, it does not make sense to use them in a context that
+requires some conception of values being mutually ordered.  However,
+potentially any type can externally have ordering algorithms (as defined by
+functions) applied to it in particular contexts, and so fake the type being
+ordered, in either one or multiple ways.  Moreover, many of the common use
+cases here have system-defined functionality to support them.
+
+To maximize code reuse and polymorphism in Muldis D, you should only need
+to define a single order-determination function per data type whose values
+you want to sort, in the general case.  If such a function is declared in
+the appropriate format and in the appropriate place, then the multiplicity
+of system-defined type-generic order-sensitive operators should be able to
+wrap this function and work with the data type.
+
+Examples of generic order-sensitive operators include tests of the relative
+order of 2 values, tests of whether a value is inside or outside of the
+range between 2 other values, querying the minimum or maximum value from a
+set of values, ranking a set of values based on their relative order, or
+sorting a set of values into a sequence that reflects such a ranking.
+
+A system-compatible fundamental order-determination function (fulfilled by
+the routine kind C<order_determination>) has 2 parameters named C<topic>
+and C<other>, where the declared types of the parameters are the same as
+the type whose values the function is to determine the order of, and it
+would be invoked with 2 of those values as its arguments; the result type
+of the function is a C<Cat.Order>.  This function results in
+C<Cat.Order:same> iff its 2 arguments are exactly the same value, and
+otherwise it results in C<Cat.Order:increase> if the value of the C<other>
+argument is considered to be an increase (as defined by the function's
+algorithm) over the value of the C<topic> argument, and otherwise it
+results in C<Cat.Order:decrease> as the reverse of the last condition would
+be true.  The function also has a C<Tuple>-typed third parameter, named
+C<assuming>, which carries optional customization details for the
+algorithm; this permits the function to implement a choice between multiple
+(typically similar) ordering algorithms rather than just one, which reduces
+the number of functions needed for supporting that choice; if the algorithm
+is not customizable, then a tuple argument would be of degree zero.
+
+In the general case, any context which wants to use a system-defined
+type-generic order-sensitive operator will specify the fully-qualified name
+of a system-compatible fundamental order-determination function to
+implement it over, by supplying the name of the latter function as an
+additional argument to the former.  However, as an option allowed for
+scalar root types, a default fundamental order-determination function can
+be included as part of the definition of that type, which is automatically
+applied when using values of that type with versions of order-sensitive
+operators that don't have the additional function-name-specifying
+parameter.  All ordered system-defined scalar root types have this
+type-default ordering function defined for them, especially all
+system-defined scalar types that don't have any possreps, so you don't need
+to define any yourself for these most-common cases.  Note that a nonscalar
+type can't have a default ordering function, and a subtype of a scalar type
+can't supply or replace one either, with the reasoning for this that any
+resulting behaviour from supporting such would be difficult to predict and
+easily introduce bugs, due for example to "action at a distance" or knowing
+what function applies to what values by default in the case of subtyping;
+by contrast, it is easy to predict behaviour when a type-default sorting
+function is attached to a scalar root type.
+
+Note that, for the present at least, a system-compatible fundamental
+order-determination function may only be totally ordered; that is, no 2
+distinct values of a type it is applied to may compare as C<same>.  In the
+future, Muldis D may have privileged support for partial ordering
+functions, which when applied to sort a set of values would result in a
+sequence of sets of compares-as-same values, rather than a straight
+sequence of values.  But in the meantime you can make a non-privileged
+partial sort function by combining a set folding function with a totally
+ordered order-determination function, and a relational group if applicable.
 
 =head1 ENVIRONMENT
 
@@ -1088,6 +1156,7 @@ substitutability:
             inner_function
             type_constraint
             transition_constraint
+            order_determination
         imperative
             deterministic
                 updater
@@ -1190,6 +1259,14 @@ update any variable's state, with the result of a value expression or
 otherwise; in the case of a multi-update statement, all the updates would
 happen simultaneously, so a transition failure for any update would prevent
 all that statement's updates from occurring.
+
+=item C<order_determination>
+
+A C<order_determination> is the same as a C<inner_function>, but that it is
+structured to fill the role of a I<system-compatible fundamental
+order-determination function>; see the L</Ordered Types> pod section in
+this file for more details.  A C<order_determination> has 3 arguments named
+[C<topic>, C<order>, C<assuming>] and results in a C<Cat.Order>.
 
 =item C<updater>
 
@@ -1332,8 +1409,6 @@ invoking C<procedure> are recommended instead.  As for non-updating
 trigger-routines, the type/transition constraint routines already perform
 that feature.  I<The feature in question may be directly supported later?>
 
-I<This documentation is pending.>
-
 =head1 USERS AND PRIVILEGES
 
 The Muldis D DBMS / virtual machine itself does not have its own set of
@@ -1358,8 +1433,6 @@ contents they are allowed to see / read from, what they are allowed to
 update, and what routines they are allowed to execute; it also controls
 other aspects of their possible activity.  The concerns here are analogous
 to privileges on a computer's file system, or a typical SQL database.
-
-I<This documentation is pending.>
 
 =head1 TRANSACTIONS AND CONCURRENCY
 
@@ -1547,8 +1620,6 @@ I<Muldis D lets you explicitly place locks on resources that you don't
 want external processes to change out from under you, and these locks do
 not automatically expire when transactions end; or maybe they do; this
 feature has to be thought out more.>
-
-I<This documentation is pending.>
 
 =head1 RESOURCE MODULARITY AND PERSISTENCE
 
