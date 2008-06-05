@@ -3,6 +3,100 @@
 
 2008-06-04  Darren Duncan <perl@DarrenDuncan.net>
 
+    * Muldis::D version 0.33.0 is released on CPAN as
+    Muldis-D-0.33.0.tar.gz.
+
+    * New file versions are: D.pm 0.33.0 and Types_Catalog.pod 0.29.0 and
+    Routines.pod 0.24.2 and Basics.pod 0.24.0.  The other pre-existing
+    versioned files are unchanged.
+
+    * (Basics.pod)  Added a short paragraph under TYPE SYSTEM that
+    clarifies Muldis D does subtyping using "specialization by constraint"
+    (not "by extension"), using those very terms.
+
+    * (Basics.pod)  Rewrote a portion of the "Scalar Types" subsection of
+    TYPE SYSTEM to bring it up to date concerning the nature of possreps,
+    possrep maps, and particularly of the nature of what operators are or
+    aren't built-in to types, and what are automatically system-defined.
+    Also made a few other small changes in Basics or TYPE SYSTEM.
+
+    * (Basics.pod, Types_Catalog.pod)  Specified that all possrep names of
+    all scalar types in a common hierarchy (under the same root type) must
+    have distinct names regardless of whether they share values, so to keep
+    diamond inheritence more simple and deterministic.
+
+    * (Types_Catalog.pod)  Added initial complement of catalog types that
+    define controls for mounting and unmounting depots, in the new main pod
+    section "TYPES FOR DEFINING MOUNT CONTROLS"; this consists of the 2 new
+    types "Cat.MountControl(Cat|Set)".  This fills in one of the arguably
+    very few remaining gaps in essential language functionality.  Some
+    standard customizations per depot mount include readonly vs updateable,
+    temporary or not, create on mount or not; most customizations are left
+    to implementation-specific 'details' though, such as file names or
+    authentication credentials.
+
+    * (Basics.pod, Types_Catalog.pod, Routines.pod)  Added new routine kind
+    "type_default" in the ROUTINES main section, so to formalize the
+    concept of a zero-parameter function that always results in a certain
+    value of a type.  Updated documentation for the 'Universal.default'
+    function, and for catalog type attributes of that kind of function, to
+    use that name.
+
+    * (Basics.pod, Types_Catalog.pod)  Added new routine kind "possrep_map"
+    in the ROUTINES main section, so to formalize the concept of a 1:1
+    mapping function used in scalar type definitions; updated the relevant
+    type-defining catalog type docs accordingly.
+
+    * (Types_Catalog.pod)  Updated the 'Cat.PossrepSet' type so that its
+    'constraint' attribute may be less restricting than otherwise when
+    there are multiple possreps in the same scalar (|sub)type; the total
+    constraint on a type is the 'and'-ing of all of its possrep
+    constraints, so each individual one in general only needs to restrict
+    enough that inter-possrep map funcs can work, and the other constraints
+    can be applied too.  (This detail is subject to revision.)  Also
+    updated all of the inner types to specify that their '*constraint'
+    attributes default to be unconditionally true, unlike the inner-func
+    default of unconditionally false.
+
+    * (Types_Catalog.pod)  Updated the 'Cat.InnerDomainType' type so that
+    it must have at least 1 source type rather than at least none, and
+    updated the handling of filter types so they default to union rather
+    than intersect; also renamed the is_filter_union attribute to
+    is_filter_intersection; also clarified that it is invalid to declare a
+    domain type that is an alias of 'Empty' due to needing a default value.
+
+    * (Basics.pod)  In a reversal of one aspect of release 0.9.0, updated
+    ROUTINES to bring back the distinct 'state_constraint' routine kind,
+    and rewrote it so it is now the same as a 'type_constraint', being a
+    pure function with 1 parameter rather than a routine that can see
+    globals.  Also updated the definitions of 'type_constraint' and
+    'transition_constraint' to conform to recent catalog formalizations;
+    the first one now always just takes the single 'topic' parameter.  And
+    all constraints must not unconditionally result in Bool:false.  Note
+    that the catalog still doesn't define how to apply state or transition
+    constraints to variables; such an update is pending.
+
+    * (Types_Catalog.pod)  Added new type 'Cat.ConstraintSet' which defines
+    a set of named generalized constraints (type or state or transition
+    etc; technically its a named set of InnerFuncBody).  Updated the 2
+    types 'Cat.Inner(Nonscalar|Domain)Type' to pluralize the names of their
+    generic constraint attributes, and those attributes' types are now the
+    ConstraintSet type rather than the InnerFuncBody type.  The net result
+    of these changes is that type constraints, on particularly
+    tuple|relation|database types, can now be split into N named pieces,
+    which should make them easier to write when complicated, and make
+    debugging or input validation easier since the name of each smaller
+    constraint would be in the exception resulting from its failure.
+
+    * (Types_Catalog.pod)  Added support for an abstraction for defining
+    distributed (unique) keys over relation-valued attributes of a
+    tuple/database type.  Added 3 new types Cat.DistribKeySet,
+    Cat.DKMemRelAttrMap, Cat.DKRelAttrKeyAttrMap which define distributed
+    keys, and added 1 new DistribKeySet-typed attribute named
+    'distrib_keys' to the 'Cat.InnerNonscalarType' type.
+
+2008-06-04  Darren Duncan <perl@DarrenDuncan.net>
+
     * Muldis::D version 0.32.0 is released on CPAN as
     Muldis-D-0.32.0.tar.gz.
 

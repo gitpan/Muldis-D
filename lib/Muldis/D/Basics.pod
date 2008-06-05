@@ -9,7 +9,7 @@ Muldis::D::Basics -
 
 =head1 VERSION
 
-This document is Muldis::D::Basics version 0.23.0.
+This document is Muldis::D::Basics version 0.24.0.
 
 =head1 PREFACE
 
@@ -526,6 +526,15 @@ I<T2>, and I<T2> is an I<immediate subtype> of I<T1>.  Note that the
 Muldis D type system supports multiple inheritance, so types can form a
 lattice rather than a tree.
 
+Subtyping in Muldis D, as in any B<D> language, takes the form of
+I<specialization by constraint>, not I<specialization by extension>.  So
+conceptually speaking, a "circle" value is an "ellipse" value, but a
+"colored circle" is neither a "circle" value nor a "colour" value; the type
+"circle" is a subtype of "ellipse", and "colored circle" is neither a
+subtype of "circle" nor of "colour".  Rather, for example, a "colored
+circle" is a multi-component type which has components of type "circle" and
+"colour", but composition like this does not a subtype make.
+
 Every value conceptually has exactly one I<most specific type> (or I<MST>),
 which is cited as the general answer to the question "what is this value's
 type".  The MST of a value is the data type containing that value which has
@@ -684,19 +693,18 @@ said possreps can differ from each other in arbitrarily large ways, but
 every one is individually capable of representing all of the type's values;
 any possrep could be used exclusively by a user when they work with its
 type, without diminishing what they can do.  A single possrep is specific
-to one and only one type, so it is possible to refer to a type by simply
-referring to the name of one of its possreps.
+to one and only one type.
 
-Taking for example an integer data type, one of its possreps could
-represent an integer value as a string of binary digits, while another
-possrep could represent an integer value as a string of decimal digits.  Or
-taking for example a temporal data type, one of its possreps could
-represent a date as an ISO 8601 formatted character string in the Gregorian
-calendar, and another possrep could represent it as a number of seconds
-since the UNIX epoch.  Or taking for example a spatial data type that is a
-rectangle, one possrep could specify the 4 vertices as 4 (or 3) point
-values, and another possrep could specify fewer vertices and also specify
-the rectangle's width and height as numeric values.
+Taking for example a conceptual integer data type, one of its possreps
+could represent an integer value as a string of binary digits, while
+another possrep could represent an integer value as a string of decimal
+digits.  Or taking for example a conceptual temporal data type, one of its
+possreps could represent a date as an ISO 8601 formatted character string
+in the Gregorian calendar, and another possrep could represent it as a
+number of seconds since the UNIX epoch.  Or taking for example a spatial
+data type that is a rectangle, one possrep could specify the 4 vertices as
+4 (or 3) point values, and another possrep could specify fewer vertices and
+also specify the rectangle's width and height as numeric values.
 
 A possrep additionally has a defined boolean-valued constraint expression
 (which is simply I<true> in the trivial case), that restricts what values
@@ -704,41 +712,44 @@ the possrep components can have within the context of their fellows.
 Taking for example a "medium polygon" data type, there could be a
 constraint that the area of the polygon is between 5 and 10 units.
 
-Each possrep comprises exactly one selector operator whose named parameter
-set exactly matches that possrep's set of named attributes, and you
-select a value of the type by invoking the selector with a full set of
-values for the possible attributes.  Each possrep also comprises an
-accessor operator for each of its attributes, with which users can extract
-the possible attribute's value.
+Generic system-defined selector and possrep attribute accessor operators
+exist that automatically work with all scalar types (that have possreps,
+which all user-defined scalar root types do), so such do not need to be
+explicitly defined per such type.  They are all in the
+C<sys.std.Core.Scalar.\w+> namespace.  These generic operators take
+advantage of the fact that each scalar possrep looks like a tuple, and they
+look like basic tuple operators but for taking an extra argument to say
+which possrep we're dealing with, and possibly a second extra attribute to
+say what type, in the case of the generic scalar value selector.
 
-TODO: EDIT THE ABOVE TO REFLECT THE ACTUAL sys.std.Core.Scalar.\w+
-FUNCTIONS; FOR EXAMPLE, THERE ARE NOT SEPARATE FUNCTIONS OR PARAMETERS FOR
-EACH ATTRIBUTE OF EACH SCALAR TYPE'S POSSREP; RATHER THE ATTRIBUTE NAMES
-ARE ARGUMENTS FOR PARAMETERS OF JUST A HANDFUL OF GENERIC FUNCTIONS.
+No data type has any operators built-in to its definition except for
+certain implicitly system-defined operators that are automatically
+generated from their structure/etc definitions, such as the aforementioned
+implicitly system-defined selectors and accessors (or certain other
+explicitly defined operators whose public interfaces are still implicitly
+system-defined).  All other operators that are used with a data type are
+expressly I<not> built-in to the type (even if they are system-defined);
+the other operators do not have any access to the data type's internals,
+and must be defined (directly or indirectly) in terms of (that is, layered
+on top of) the few that are built-in, though the built-ins from any or all
+possreps of the type can be utilized.
 
-No data type has any operators built-in to its definition except for the
-aforementioned selectors and accessors.  All other operators that are used
-with a data type are expressly I<not> built-in to the type (even if they
-are system-defined); the other operators do not have any access to the data
-type's internals, and must be defined (directly or indirectly) in terms of
-(that is, layered on top of) the few that are built-in, though the
-built-ins from any or all possreps of the type can be utilized.
+With a user-defined scalar type, if the type has multiple possreps, then
+each distinct pair of possreps for the type has a mapping function plus its
+inverse function defined, permitting every value of the type which is first
+expressed using one possrep to be translated for expression in the other.
+The entire complement of possreps of a type must be linked together by
+explicit mapping functions, but not every pair has to be; if the possreps
+are arranged as nodes on a directed graph, with an explicit mapping
+function being a side, there just needs to be a path from every possrep to
+every other one; every path then has at least an implicit mapping function.
 
-With a user-defined scalar type, if the type is to have multiple possreps,
-then just one possrep is defined as the fundamental one, and the other
-possreps are defined in terms of the first, by which means the mappings
-between them is done.  The type-defining user can later come back and
-redefine the type if they wish, using a different possrep as the
-fundamental, but assuming the redefinition has all the same values,
-non-defining users of the type won't know any different.
-
-The Muldis D implementation can choose for itself as to how the scalar
-type is physically represented behind the scenes, either picking between
-any of the user-provided possreps (assuming enough information is present
-to derive all needed inverse functions as applicable) or using yet another
-one or several of its own; the implementation can work how it knows best to
-achieve an efficient system, and this is all hidden away from the users,
-who simply perceive in it what they requested.
+The Muldis D implementation can choose for itself as to how the scalar type
+is physically represented behind the scenes, either picking between any of
+the user-provided possreps or using yet another one or several of its own;
+the implementation can work how it knows best to achieve an efficient
+system, and this is all hidden away from the users, who simply perceive in
+it what they requested.
 
 In the context of scalar subtype/supertype relationships, the definition of
 a subtype can add additional possreps that are only valid for the subtype,
@@ -754,6 +765,15 @@ comprises a center point plus its length.
 As a corollary to this, all union types have none of the possreps defined
 by their subtypes.  So the system-defined C<Scalar> type has no possreps at
 all, and hence has no selectors or accessors defined for it.
+
+Note that, to keep things simple and deterministic under the possibility of
+diamond subtype/supertype relationships (such that the generic
+system-defined scalar possrep attribute accessors can work), Muldis D
+requires all of the possreps of all scalar types having a common scalar
+root type to have mutually distinct names, regardless of whether any
+subtypes have values in common; this can be enforced at
+type-definition-in-catalog time since all types that can interact are in
+the same depot.
 
 =head2 Tuple Types and Relation Types
 
@@ -774,8 +794,9 @@ definition defines every tuple in the relation, and also but that relation
 types can additionally have I<keys> defined which indicate that a subset of
 its attributes' values are distinct between all tuples in the relation.
 
-Generic selector and accessor operators exist that work with all tuple and
-relation types, so they do not need to be defined per such type.
+Generic system-defined selector and accessor operators exist that
+automatically work with all tuple and relation types, so they do not need
+to be defined per such type.
 
 The system-defined types C<Tuple> and C<Relation> (and their system-defined
 subtypes) are technically generic factory types, such that they themselves
@@ -1158,7 +1179,10 @@ substitutability:
             function
             inner_function
             type_constraint
+            state_constraint
             transition_constraint
+            type_default
+            possrep_map
             order_determination
         imperative
             deterministic
@@ -1204,15 +1228,16 @@ typical database "select" query out of.
 =item C<inner_function>
 
 A C<inner_function> is the same as a C<function>, but that it is
-quasi-lexically scoped within another, non-lexical routine, and it is only
-visible within or invokable by either its parent routine or its sibling
-C<inner_function>.  Conceptually speaking, a C<inner_function> is part of
-the definition of the body of the parent routine (like a value expression
-in general), but is isolated into a named C<function>-like entity for
-technical / language design reasons.  For example, it is used to implement
-what would conceptually be an anonymous function defined within its parent
-routine for use as a function-valued argument of some other routine call;
-or to implement what is conceptually a self-referencing/cyclic expression.
+quasi-lexically scoped within another, non-lexical routine or type
+definition, and it is only visible within or invokable by either its parent
+routine or its sibling routines.  Conceptually speaking, a
+C<inner_function> is part of the definition of the body of the parent
+routine or type (like a value expression in general), but is isolated into
+a named C<function>-like entity for technical / language design reasons.
+For example, it is used to implement what would conceptually be an
+anonymous function defined within its parent routine for use as a
+function-valued argument of some other routine call; or to implement what
+is conceptually a self-referencing/cyclic expression.
 
 =item C<type_constraint>
 
@@ -1227,30 +1252,55 @@ C<Bool:true> if the described value would be a member of the data type, or
 C<Bool:false> if not; in the latter case, the DBMS would then throw a
 type-constraint-violation exception (resulting in a transaction rollback
 where applicable), or in the former case, it would consider the selection a
-success.  If the data type being selected of is defined as a scalar root
-type, then the parameter list matches its initial/core possrep's component
-attributes list (their names and declared types), and the arguments are the
-candidate values for those attributes; or, if the data type being selected
-of is defined as a restriction of one other data type, then the parameter
-list has exactly one parameter whose name is C<topic> and whose declared
-type is that other data type.  Note that, because Muldis D requires dbvars
-to be defined over named data types, all I<state constraints> for a
-database, including uniqueness keys or foreign keys or other
-state-constraining business rules, are normally defined as the
-C<type_constraint> for the type which that database is.  Conceptually
-speaking, a C<type_constraint> will execute as the beginning part of a
-statement, prior to any attempt to update any variable's state or affect
-the environment.
+success.  A C<type_constraint> has exactly 1 parameter whose name is
+C<topic>.  If the data type being selected is a scalar type or subtype with
+possreps, then each possrep has its own C<type_constraint>, and the
+declared type of the C<topic> parameter for each is a tuple where the
+attributes of the tuple match those of the possrep; such a tuple argument
+provides the candidate components of the scalar value being selected.  Or,
+if the data type being selected of is defined as a restriction of one other
+data type, then the declared type of the C<topic> parameter is that other
+data type.  Or, if the data type being selected of is defined over a union
+of multiple other data types, then the declared type of the C<topic>
+parameter is C<Universal>.  Note that it is not valid to define a type
+(other than C<Empty>) with a C<type_constraint> that unconditionally
+results in C<Bool:false>, as such a type could not also have a default
+value.  Note that, because Muldis D requires dbvars to be defined over
+named data types, all I<state constraints> for a database, including
+uniqueness keys or foreign keys or other state-constraining business rules,
+are normally defined as the C<type_constraint> for the type which that
+database is.  Conceptually speaking, a C<type_constraint> will execute as
+the beginning part of a statement, prior to any attempt to update any
+variable's state or affect the environment.
+
+=item C<state_constraint>
+
+A C<state_constraint> is the same as a C<type_constraint> except that it is
+not part of the definition of a data type, but rather it is associated with
+a variable (or pseudo-variable); it is invoked automatically by the DBMS
+when that variable is being updated, and it asserts that the variable would
+be in a valid state after the update (it results in C<Bool:true> for yes
+and C<Bool:false> for no).  The C<topic> parameter of a C<state_constraint>
+has a declared type that is the same as that of the variable; its argument
+carries the value that the variable would have post-update.  The purpose of
+having the distinct C<state_constraint> routine kind when
+C<type_constraint> would otherwise do, is to make it easier for users to
+independently and externally apply multiple (named) state constraints to
+the same variable (typically a dbvar or relvar) rather than having to
+update the existing internal explicit type constraint of the declared type
+of the variable, and other users of that type aren't affected.  When
+multiple C<state_constraint> are applied to the same variable, then a
+I<total state constraint> is in effect on the variable equivalent to the
+logical C<and> of the individual constraints.  Conceptually speaking, a
+C<state_constraint> will execute after all C<type_constraint> and before
+all C<transition_constraint>.
 
 =item C<transition_constraint>
 
-A C<transition_constraint> is the same as a C<type_constraint> except that
-it is part of the definition of a variable (or pseudo-variable) rather than
-of a data type, and it is invoked automatically by the DBMS when that
-variable is being updated.  A C<transition_constraint> takes exactly 2
-parameters, whose names are C<before> and C<after>, and whose declared
-types are both the same as that of the variable; it returns C<Bool:true> if
-the variable is allowed (according to current business rules) to transition
+A C<transition_constraint> is the same as a C<state_constraint> except that
+rather than 1 C<topic> parameter, it takes exactly 2 same-typed parameters
+whose names are C<before> and C<after>; it returns C<Bool:true> if the
+variable is allowed (according to current business rules) to transition
 directly from the C<before> state to the C<after> state, or C<Bool:false>
 if not; in the latter case, the DBMS would then throw a
 transition-constraint-violation exception (resulting in a transaction
@@ -1262,6 +1312,27 @@ update any variable's state, with the result of a value expression or
 otherwise; in the case of a multi-update statement, all the updates would
 happen simultaneously, so a transition failure for any update would prevent
 all that statement's updates from occurring.
+
+=item C<type_default>
+
+A C<type_default> is the same as a C<inner_function>, but that it is part
+of the definition of a (not-C<Empty>) data type rather than a routine, and
+it is invoked automatically in situations where the default value of the
+type whose declaration it is part of is needed, such as when initializing a
+variable whose declared type is that type (a variable must always hold a
+valid value of its declared type).  A C<type_default> has zero parameters
+and unconditionally results in the same value of the type.
+
+=item C<possrep_map>
+
+A C<possrep_map> is the same as a C<inner_function>, but that it is part of
+the definition of a (|quasi-)scalar data type, and it is used to convert a
+value from one of that type's possreps to another.  A C<possrep_map> has a
+single C<topic> parameter whose declared type is a tuple whose attributes
+match those of the possrep being converted from, and its result type is a
+tuple whose attributes match those of the possrep being converted to.  Note
+that every distinct argument (domain) value of this function must have a
+distinct result (range) value, as it is a 1:1 mapping function.
 
 =item C<order_determination>
 

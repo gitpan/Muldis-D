@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.28.0.
+This document is Muldis::D::Core::Types_Catalog version 0.29.0.
 
 =head1 PREFACE
 
@@ -84,6 +84,7 @@ more or less:
                 # The following are all regular database types.
 
                 sys.std.Core.Type.Cat.System
+                sys.std.Core.Type.Cat.MountControlCat
                 sys.std.Core.Type.Cat.Federation
                 sys.std.Core.Type.Cat.Depot
                 sys.std.Core.Type.Cat.Package
@@ -100,6 +101,7 @@ more or less:
             sys.std.Core.Type.Cat.SysScaNPRTypeSet
             sys.std.Core.Type.Cat.SysTypeSet
             sys.std.Core.Type.Cat.SysCatSet
+            sys.std.Core.Type.Cat.MountControlSet
             sys.std.Core.Type.Cat.DepotMountSet
             sys.std.Core.Type.Cat.SubdepotSet
             sys.std.Core.Type.Cat.PackageSet
@@ -117,7 +119,11 @@ more or less:
             sys.std.Core.Type.Cat.Inner(Sca|NonSca|Dom)TypeSet
             sys.std.Core.Type.Cat.PossrepSet
             sys.std.Core.Type.Cat.PossrepMapSet
+            sys.std.Core.Type.Cat.ConstraintSet
             sys.std.Core.Type.Cat.KeySet
+            sys.std.Core.Type.Cat.DistribKeySet
+            sys.std.Core.Type.Cat.DKMemRelAttrMap
+            sys.std.Core.Type.Cat.DKRelAttrKeyAttrMap
             sys.std.Core.Type.Cat.NameTypeMap
             sys.std.Core.Type.Cat.NameExprMap
             sys.std.Core.Type.Cat.AttrRenameMap
@@ -497,6 +503,147 @@ This is the definition of the catalog dbvar.
 
 A C<Cat.SysCatSet> has a unary (unique) key on the C<name> attribute.  Its
 default value is empty.
+
+=head1 TYPES FOR DEFINING MOUNT CONTROLS
+
+=head2 sys.std.Core.Type.Cat.MountControlCat
+
+A C<Cat.MountControlCat> is a C<Database>.  It specifies the control
+interface for mounting and unmounting (and creating and deleting) depots
+within the current in-DBMS process.  The scope of these controls includes
+specifying what name the depot is mounted with, whether the mount is
+readonly vs updateable, or is temporary vs persistant, and implementation
+specific details like storage file names or network login credentials.
+Updates to this catalog have side-effects in what other user-updateable
+catalogs exist, making them appear or disappear.  This catalog may only be
+updated when the current process has no active transaction.  The system
+catalog variable named C<mnt.cat> is of the C<Cat.MountControlCat> type.
+
+A C<Cat.MountControlCat> has these 2 attributes:
+
+=over
+
+=item C<comment> - C<single_of.Cat.Comment>
+
+This is an optional programmer comment about the depot mount control
+catalog as a whole.
+
+=item C<mounts> - C<Cat.MountControlSet>
+
+These are the controls for the current depot mounts.
+
+=back
+
+The default value of C<Cat.MountControlCat> has zero depot mount controls.
+
+=head2 sys.std.Core.Type.Cat.MountControlSet
+
+A C<Cat.MountControlSet> is a C<Relation> that specifies a set of controls
+per depot mounts, such that each tuple is a single control for a depot
+mount, and each depot mount has 1 mount control.  Inserting a tuple will
+result in either an existing depot being mounted or a new depot being
+created (if possible) and mounted; updating a tuple will change some
+details of that depot mount's status, such as making it readonly or
+updateable; deleting a tuple will result in a mounted depot being either
+unmounted or unmounted plus deleted (if possible).
+
+A C<Cat.MountControlSet> has these 7 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the depot mount; other Muldis D code would
+reference it with this name.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about this specific mount of the
+depot.
+
+=item C<is_temporary> - C<Bool>
+
+This is C<Bool:true> if the depot mount is for a transient depot that would
+automatically be created when mounted I<and> automatically be deleted when
+unmounted, because it is only intended for use as the application's current
+working memory, and its maximum lifetime is the lifetime of the in-DBMS
+process.  This is C<Bool:false> (the default) if the depot mount is for a
+depot that either should already exist before being mounted, I<or> that
+should continue to exist after being unmounted, because it is intended for
+persistent data.  Note that the C<is_temporary> status is orthogonal to
+whether the depot's storage is in volatile memory (eg, RAM) or in stable
+memory (eg, on disk); a I<not-temporary> depot is simply one that is meant
+to be reusable by multiple depot mounts or processes.  The C<is_temporary>
+status may not be updated on an existing depot mount control.  I<These
+details are subject to revision.>
+
+=item C<create_on_mount> - C<Bool>
+
+This is C<Bool:true> if the depot mount must represent a depot that was
+newly created at the time the depot mount was created, where the depot
+creation is a direct side-effect of the mount operation.  This is
+C<Bool:false> (the default) if the depot being mounted must already exist
+without the mounting process having any hand in creating it.  Note that
+there is no option provided to conditionally create a depot depending on
+whether it already exists, as a perceived safety feature (this detail is
+subject to change); to get that behaviour, first try creating the depot
+mount control with this attribute C<Bool:false>, and if that fails due to
+nonexistence, then try again with it set to C<Bool:true>.  This attribute
+is ignored / not applicable when C<is_temporary> is true.
+
+=item C<delete_on_unmount> - C<Bool>
+
+This is C<Bool:true> if the depot should be deleted at the same time it is
+unmounted, that is, when this depot mount control tuple is deleted.  This
+is C<Bool:false> (the default) if the depot should not be deleted as part
+of the unmount process.  This attribute is ignored / not applicable when
+C<is_temporary> is true.
+
+=item C<we_may_update> - C<Bool>
+
+This is C<Bool:true> if the depot mount will permit the current in-DBMS
+process to make any kind of update to the depot, such as data manipulation,
+data definition, or creating/deleting it.  This is C<Bool:false> (the
+default) if the depot mount is only providing readonly access to the depot.
+When a depot mount is readonly, any attempt to update the depot through it
+will throw a runtime exception.  The C<we_may_update> attribute may be set
+to C<Bool:false> at any time (when there is no active transaction), but it
+may only be set to C<Bool:true> at the time the depot is mounted; this is
+for safety, such that if a depot mount won't let you update the depot now,
+there's no way it will let you update it later, save by unmounting and
+remounting the depot (the result of which is a different depot mount).
+Note that the C<we_may_update> status is orthogonal to the depot locking
+mechanism; it won't block any other process from reading or updating that
+depot, so unless you have locks on the depot using some other means, it may
+still be updated by others while mounted readonly for you, so consistent
+reads between distinct statements outside of transactions are not
+guaranteed.  I<These details are subject to revision, such as in regards to
+what autonomous child processes of the current process may do.>
+
+=item C<details> - C<Cat.ScaLitExprNodeSet>
+
+These are the 0..N other miscellaneous details that define this depot mount
+control.  Each tuple in C<details> specifies an implementation-specific
+attribute name and (scalar) value.  Example such implementation-specific
+details include the name of a local file that the depot is stored as, or
+the name of a DBMS server on the network plus authentication credentials to
+connect to it with.  See each Muldis D implementation for details.  Note
+that C<details> generally corresponds to the Perl DBI's concept of a data
+source name or connection string.  But C<details> can also have other
+details like customizations on how to map a foreign DBMS' concepts to
+native Muldis D equivalents, or maybe information on where to find extra
+meta-data that has such info, or info to instruct a Muldis D interface to
+fill in functionality missing in the actual depot of a less capable DBMS,
+like constraints or stored invokable routines.
+
+=back
+
+A C<Cat.MountControlSet> has a unary (unique) key on the C<name> attribute.
+Its default value is empty.  It also has a transition constraint that
+prevents changing some attributes of a depot mount control once set.  Note
+that the 3 attributes [C<is_temporary>, C<create_on_mount>,
+C<delete_on_unmount>] may be merged into a single enumerated-typed
+attribute or otherwise be reorganized.
 
 =head1 TYPES FOR DEFINING FEDERATIONS
 
@@ -1708,10 +1855,15 @@ collective values whereby it defines a representation of all values of this
 type.  Note that if multiple (|quasi-)scalar types are related to each
 other such that more than one declares possreps for at least one common
 value, then the C<name> attribute of the C<possreps> attributes of all of
-those types' definitions have a distributed (unique) key over them.
-I<Details of this policy are subject to be revised, but it must still
-ensure that diamond subtype/supertype relationships are taken properly into
-account.>
+those types' definitions have a distributed (unique) key over them.  Note
+that, to keep things simple and deterministic under the possibility of
+diamond subtype/supertype relationships (such that the generic
+system-defined scalar possrep attribute accessors can work), Muldis D
+requires all of the possreps of all scalar types having a common scalar
+root type to have mutually distinct names, regardless of whether any
+subtypes have values in common; this can be enforced at
+type-definition-in-catalog time since all types that can interact are in
+the same depot.
 
 =item C<possrep_maps> - C<Cat.PossrepMapSet>
 
@@ -1727,10 +1879,10 @@ mapping functions are defined with the subtype.
 
 =item C<default> - C<Cat.InnerFuncBody>
 
-This defines the entire (main) body of a function that results in the
-default (|quasi-)scalar value of the (|sub-)type; it has zero parameters
-and its result type is the same as the (|quasi-)scalar type whose
-declaration it is part of.
+This defines the entire (main) body of a C<type_default> function that
+results in the default (|quasi-)scalar value of the (|sub-)type; it has
+zero parameters and its result type is the same as the (|quasi-)scalar type
+whose declaration it is part of.
 
 =item C<order> - C<maybe_of.Cat.InnerFuncBody>
 
@@ -1785,12 +1937,22 @@ with has a single C<topic> parameter whose declared type is a tuple whose
 attributes match those declared by C<attrs> and whose argument denotes the
 value to test; the function's implicit result type is C<Bool>.  If the
 function unconditionally results in C<Bool:true>, then all possible
-combinations of attribute-allowable values are collectively allowed.
+combinations of attribute-allowable values are collectively allowed.  Note
+that, strictly speaking, any constraint defined as part of a possrep (where
+there are multiple possreps) may actually be less restrictive than the
+total constraint of (|sub-)type as a whole, because the total constraint is
+defined by I<and>-ing the constraints of all the possreps of the
+(|sub-)type; therefore, mainly any given possrep's constraints need to be
+just restricting enough so that the inter-possrep mapping functions can
+handle the arguments that it accepts, so it is possible to apply the other
+possreps' constraints.
 
 =back
 
 A C<Cat.PossrepSet> has a unary (unique) key on the C<name> attribute.  Its
-default value is empty.
+default value is empty.  The default value of a tuple of C<Cat.PossrepSet>
+has a C<name> that is the empty string, its C<attrs> is empty, and its
+C<constraint> unconditionally results in C<Bool:true>.
 
 =head2 sys.std.Core.Type.Cat.PossrepMapSet
 
@@ -1819,21 +1981,23 @@ constraint defines a C<Cat.PossrepMapSet>'s canonical form.
 
 =item C<p2_from_p1> - C<Cat.InnerFuncBody>
 
-This defines the entire (main) body of a mapping function that derives the
-representation of the possrep named by C<p2> from that of the possrep named
-by C<p1>.  The implicit function heading that this goes with has a single
-C<topic> parameter whose declared type is a tuple whose attributes match
-those of C<p1>; the function's implicit result type is a tuple whose
-attributes match those of C<p2>.  Note that every distinct argument
-(domain) value of this function must have a distinct result (range) value.
+This defines the entire (main) body of a C<possrep_map> function that
+derives the representation of the possrep named by C<p2> from that of the
+possrep named by C<p1>.  The implicit function heading that this goes with
+has a single C<topic> parameter whose declared type is a tuple whose
+attributes match those of C<p1>; the function's implicit result type is a
+tuple whose attributes match those of C<p2>.  Note that every distinct
+argument (domain) value of this function must have a distinct result
+(range) value.
 
 =item C<p1_from_p2> - C<Cat.InnerFuncBody>
 
-This defines the entire (main) body of the inverse mapping function to that
-of C<p2_from_p1>.  I<Note that it would often be feasible for a Muldis D
-implementation to automatically infer a reverse function, but for now we
-still require it to be explicitly stated; the explicitly stated inverse
-function could be generated though.  This design is subject to change.>
+This defines the entire (main) body of the inverse C<possrep_map> function
+to that of C<p2_from_p1>.  I<Note that it would often be feasible for a
+Muldis D implementation to automatically infer a reverse function, but for
+now we still require it to be explicitly stated; the explicitly stated
+inverse function could be generated though.  This design is subject to
+change.>
 
 =back
 
@@ -1853,7 +2017,7 @@ Note that you can not use a C<Cat.InnerNonscalarType> to declare or
 subtype an incomplete type, as it (or its supertype) must specify a
 complete set of attributes.
 
-A C<Cat.InnerNonscalarType> has these 10 attributes:
+A C<Cat.InnerNonscalarType> has these 11 attributes:
 
 =over
 
@@ -1903,6 +2067,28 @@ is indeed valid for a (|quasi-)nonscalar type to have zero attributes; in
 this case, a tuple type consists of exactly one value, and a relation type
 consists of exactly two values.
 
+=item C<tuple_constraints> - C<Cat.ConstraintSet>
+
+This defines the entire (main) bodies of 0..N C<type_constraint> functions
+that (when I<and>-ed together) determine what combinations of tuple
+attribute values denote values of the (|sub-)type, besides the restrictions
+imposed by the declared types of the attributes individually; they are
+generalized type constraints that together validate a tuple as a whole.
+The implicit function heading that each of these goes with has a single
+C<topic> parameter whose declared type is a tuple whose attributes match
+those declared by C<attrs> and whose argument denotes the value to test;
+the function's implicit result type is C<Bool>.  If the functions
+unconditionally result in C<Bool:true>, then all possible combinations of
+attribute-allowable values are collectively allowed.  Each function is
+invoked either once to test a tuple value, or multiple times to
+individually test every tuple in a relation value.
+
+=item C<relation_constraints> - C<Cat.ConstraintSet>
+
+This is like C<tuple_constraint> but that each function's parameter is
+relation-typed rather than tuple-typed; each is a generalized type
+constraint that validates a relation as a whole.
+
 =item C<keys> - C<Cat.KeySet>
 
 These are the 0..N explicit (unique) keys that are applicable to relation
@@ -1917,53 +2103,81 @@ moreover no key's attributes may be a proper subset of any other key's
 attributes; if 2 such candidates appear, just use the one that has the
 subset.  It is valid for a key to consist of zero attributes; in this case,
 that key is the only key of the type, and values of the type may each
-consist of no more than one tuple.  Note that C<keys> is logically a
-short-hand syntax (the canonical simplest form) for a particular kind of
+consist of no more than one tuple.  Note that C<keys> is logically an
+abstraction syntax (the canonical simplest form) for a particular kind of
 C<relation_constraint> of the type being defined, one that compares the
 cardinality of a projection of a relation on its key attributes with the
-cardinality of the original relation; the attributes are a key if the
-cardinalities are equal.
+cardinality of the original relation; the attribute values comprise a key
+if the cardinalities are equal.
 
-=item C<tuple_constraint> - C<Cat.InnerFuncBody>
+=item C<distrib_keys> - C<Cat.DistribKeySet>
 
-This defines the entire (main) body of a C<type_constraint> function that
-determines what combinations of tuple attribute values denote values of the
-(|sub-)type, besides the restrictions imposed by the declared types of the
-attributes individually; it is a generalized type constraint that validates
-a tuple as a whole.  The implicit function heading that this goes with has
-a single C<topic> parameter whose declared type is a tuple whose attributes
-match those declared by C<attrs> and whose argument denotes the value to
-test; the function's implicit result type is C<Bool>.  If the function
-unconditionally results in C<Bool:true>, then all possible combinations of
-attribute-allowable values are collectively allowed.  This function is
-invoked either once to test a tuple value, or multiple times to
-individually test every tuple in a relation value.
-
-=item C<relation_constraint> - C<Cat.InnerFuncBody>
-
-This is like C<tuple_constraint> but that the function's parameter is
-relation-typed rather than tuple-typed; it is a generalized type constraint
-that validates a relation as a whole.
+These are the 0..N explicit simple distributed keys that are applicable to
+tuple/database values of the type being defined, that range over specified
+relation-typed attributes of it.  Note that C<distrib_keys> is logically an
+abstraction syntax (the canonical simplest form) for a particular kind of
+C<tuple_constraint> of the type being defined, one that compares the
+cardinality of the union of the projection of distributed key attributes of
+all key-participating relation-valued attributes, with the sum of
+cardinalities of the source relation-valued attributes; the attribute
+values comprise a distributed key if the cardinalities are equal.
 
 =item C<default_tuple> - C<Cat.InnerFuncBody>
 
-This defines the entire (main) body of a function that results in the
-default (|quasi-)tuple value of the (|sub-)type; it has zero parameters and
-its result type is the same as the (|quasi-)tuple type whose declaration it
-is part of.
+This defines the entire (main) body of a C<type_default> function that
+results in the default (|quasi-)tuple value of the (|sub-)type; it has zero
+parameters and its result type is the same as the (|quasi-)tuple type whose
+declaration it is part of.
 
 =item C<default_relation> - C<Cat.InnerFuncBody>
 
-This defines the entire (main) body of a function that results in the
-default (|quasi-)relation value of the (|sub-)type; it has zero parameters
-and its result type is the same as the (|quasi-)relation type whose
-declaration it is part of.
+This defines the entire (main) body of a C<type_default> function that
+results in the default (|quasi-)relation value of the (|sub-)type; it has
+zero parameters and its result type is the same as the (|quasi-)relation
+type whose declaration it is part of.
 
 =back
+
+There is a distributed (unique) key over the C<name> attributes of
+C<(tuple|relation)_constraint> and C<keys> and C<distrib_keys>.
 
 The default value of C<Cat.InnerNonscalarType> defines a relation type that
 is the same as C<RelationD0>, having zero attributes, whose default value
 is the one with zero tuples.
+
+=head2 sys.std.Core.Type.Cat.ConstraintSet
+
+A C<Cat.ConstraintSet> is a C<Relation> that specifies a set of named
+generic constraints for data types or variables; each tuple is one named
+constraint.  Each constraint in the set can be either a C<type_constraint>
+or C<state_constraint> or C<transition_constraint>, but when a set has
+multiple constraints, all of them must be the same kind, and they must all
+correspond to the same implicit function heading.  One or more (possibly
+empty) C<Cat.ConstraintSet> is composed into the definition each nonscalar
+type and domain type and dbvar.
+
+A C<Cat.ConstraintSet> has these 3 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the constraint function.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the constraint as a whole.
+
+=item C<body> - C<Cat.InnerFuncBody>
+
+This defines the entire (main) body of the constraint function.
+
+=back
+
+A C<Cat.ConstraintSet> has a unary (unique) key on the C<name> attribute.
+Its default value is empty.  The default value of a tuple of
+C<Cat.ConstraintSet> has a C<name> that is the empty string, and its
+C<body> unconditionally results in C<Bool:true>.
 
 =head2 sys.std.Core.Type.Cat.KeySet
 
@@ -2006,8 +2220,95 @@ used as the target of generated foreign keys.
 
 =back
 
-A C<Cat.KeySet> has a unary (unique) key on the C<name> attribute.  Its
-default value is empty.
+A C<Cat.KeySet> has a unary (unique) key on the C<name> attribute, and
+another on its C<attrs> attribute.  Its default value is empty.
+
+=head2 sys.std.Core.Type.Cat.DistribKeySet
+
+A C<Cat.DistribKeySet> is a C<Relation> that specifies a set of candidate
+distributed (unique) keys over relation-valued attributes of a
+tuple/database; each tuple specifies one distributed (unique) key.
+
+A C<Cat.DistribKeySet> has these 5 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the distributed (unique) key.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the distributed (unique) key
+as a whole.
+
+=item C<attrs> - C<set_of.Cat.Name>
+
+This declares the 0..N attributes comprising the distributed (unique) key.
+If this set is empty, then we have a nullary key which restricts all of the
+relations participating in the distributed key to have a maximum of 1 tuple
+between them.  Note that the distributed key attribute names don't have to
+match the names of any participating relation attributes.
+
+=item C<relations> - C<Cat.DKMemRelAttrMap>
+
+This names the 0..N relation-valued attributes of the host tuple/database
+type that are participating in the distributed key, and says which of each
+of their attributes maps to the attributes of the distributed key itself.
+If this set is empty, then the distributed key has no effect.  The unary
+projection of every tuple of the C<key_attr> attribute of C<relations> must
+be identical to C<attrs>.
+
+=item C<is_primary> - C<Bool>
+
+This has the same meaning as C<is_primary> of C<Cat.KeySet> but for being
+distributed as if the relations distributed over were one relation.
+
+=back
+
+A C<Cat.DistribKeySet> has a unary (unique) key on the C<name> attribute,
+and another on its C<relations> attribute.  Its default value is empty.
+
+=head2 sys.std.Core.Type.Cat.DKMemRelAttrMap
+
+A C<Cat.DKMemRelAttrMap> is a C<Relation> that names the 0..N
+relation-valued attributes of a host tuple/database type that are
+participating in a distributed key, and says which of each of their
+attributes maps to the attributes of the distributed key itself.
+
+A C<Cat.DKMemRelAttrMap> has these 3 attributes:
+
+=over
+
+=item C<rel_name> - C<Cat.Name>
+
+This is the name of the relation-valued attribute that is participating
+in the distributed key.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the participation.
+
+=item C<attr_map> - C<Cat.DKRelAttrKeyAttrMap>
+
+This maps 0..N attributes of the relation with the same number of
+attributes of the distributed key.  Every tuple of C<attr_map> must have an
+identical value for the unary projection on its C<key_attr> attribute; in
+other words, they must all map with the same distributed key attributes.
+
+=back
+
+A C<Cat.DKMemRelAttrMap> has a unary (unique) key on the C<rel_name>
+attribute.  Its default value is empty.
+
+=head2 sys.std.Core.Type.Cat.DKRelAttrKeyAttrMap
+
+A C<Cat.DKRelAttrKeyAttrMap> is a C<Relation>.  It maps 0..N attributes of
+a relation-valued attribute of a host tuple/database type participating in
+a distributed key, to the same number of attributes of the distributed key
+itself.  A C<Cat.DKRelAttrKeyAttrMap> has 2 attributes, C<rel_attr> and
+C<key_attr>, each of those being a C<Cat.Name>, and each of those being a
+unary key.  Its default value has zero tuples.
 
 =head2 sys.std.Core.Type.Cat.InnerDomainType
 
@@ -2038,57 +2339,61 @@ whole.
 
 =item C<sources> - C<set_of.Cat.NameChain>
 
-These are the names of the 0..N other types that all the values of the new
-data type are drawn from; the complete set of source values is determined
-by either unioning (the default) or intersecting the values of these types.
+These are the names of the 1..N other not-C<Empty> types that all the
+values of the new data type are drawn from; the complete set of source
+values is determined by either unioning (the default) or intersecting the
+values of these types.
 
 =item C<is_source_intersection> - C<Bool>
 
 Iff this is C<Bool:true> then the set of source data types will be
-intersected to determine the complete set of source values, and if
-C<sources> has no elements then the source set is just C<Empty>; iff this
-is C<Bool:false> then the set of source data types will be unioned to
-determine the complete set of source values, and if C<sources> has no
-elements then the source set is just C<Universal>.
+intersected to determine the complete set of source values; iff this is
+C<Bool:false> then the set of source data types will be unioned to
+determine the complete set of source values.
 
 =item C<filters> - C<set_of.Cat.NameChain>
 
 These are the names of the 0..N other types (which are generally subtypes
 of those of C<sources>) that determine values which the new data type will
 I<not> contain; the complete set of filter values is determined by either
-intersecting (the default) or unioning the values of these types.
+unioning (the default) or intersecting the values of these types.
 
-=item C<is_filter_union> - C<Bool>
+=item C<is_filter_intersection> - C<Bool>
 
-Iff this is C<Bool:true> then the set of filter data types will be unioned
-to determine the complete set of filter values, and if C<filters> has no
-elements then the filter set is just C<Universal>; iff this is
-C<Bool:false> then the set of filter data types will be intersected to
+Iff this is C<Bool:true> then the set of filter data types will be
+intersected to determine the complete set of filter values, and if
+C<filters> has no elements then the filter set is just C<Universal>; iff
+this is C<Bool:false> then the set of filter data types will be unioned to
 determine the complete set of filter values, and if C<filters> has no
 elements then the filter set is just C<Empty>.
 
-=item C<constraint> - C<Cat.InnerFuncBody>
+=item C<constraints> - C<Cat.ConstraintSet>
 
-This defines the entire (main) body of a C<type_constraint> function that
-determines what filter-type-passing source-type values are part of the
-domain type.  The implicit function heading that this goes with has a
-single C<topic> parameter whose declared type is C<Universal>, unless there
-is exactly 1 C<sources> element whereupon the declared type is the same as
-the source type, and whose argument is the value to test; the function's
-implicit result type is C<Bool>.  If the function unconditionally results
-in C<Bool:true>, then all filter-type-passing values are allowed.
+This defines the entire (main) bodies of 0..N C<type_constraint> functions
+that (when I<and>-ed together) determine what filter-type-passing
+source-type values are part of the domain type.  The implicit function
+heading that each of these goes with has a single C<topic> parameter whose
+declared type is C<Universal>, unless there is exactly 1 C<sources> element
+whereupon the declared type is the same as the source type, and whose
+argument is the value to test; the function's implicit result type is
+C<Bool>.  If the functions unconditionally result in C<Bool:true>, then all
+filter-type-passing values are allowed.
 
 =item C<default> - C<Cat.InnerFuncBody>
 
-This defines the entire (main) body of a function that results in the
-default value of the subtype; it has zero parameters and its result type is
-the same as the domain type whose declaration it is part of.
+This defines the entire (main) body of a C<type_default> function that
+results in the default value of the (sub|union)type; it has zero parameters
+and its result type is the same as the domain type whose declaration it is
+part of.
 
 =back
 
 The default value of C<Cat.InnerDomainType> defines an alias for
-C<Universal>, with the same default value; the C<base_type> is that type,
-C<constraint> is unconditionally C<Bool:true>.
+C<Universal>, with the same default value; it has just the source type
+C<Universal> and zero filter types, both type lists are unioned, and
+C<constraint> is unconditionally C<Bool:true>.  Note that there is no valid
+combination of C<Cat.InnerDomainType> attribute values that would result in
+an alias for the C<Empty> type, due to C<default> being mandatory.
 
 =head1 TYPES FOR DEFINING DBVARS
 
