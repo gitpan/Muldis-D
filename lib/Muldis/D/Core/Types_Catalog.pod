@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.27.0.
+This document is Muldis::D::Core::Types_Catalog version 0.28.0.
 
 =head1 PREFACE
 
@@ -146,12 +146,12 @@ referring to a DBMS entity, when its name needs to be qualified with a
 namespace.  A C<Cat.NameChain> is conceptually a sequence of 2..N
 C<Cat.Name>, the 2..N elements being ordered from parent-most to child-most
 component name.  A C<Cat.NameChain> has 2 system-defined possreps, named
-C<seq> and C<flat>, both of which are defined over C<Cat.Name>.
+C<array> and C<flat>, both of which are defined over C<Cat.Name>.
 
-The C<seq> possrep directly matches the conception of the type; it consists
-of 1 attribute whose name is the empty string; the attribute is a C<Seq>
-whose C<value> attribute has a declared type of C<Cat.Name> and that must
-have at least 2 elements.
+The C<array> possrep directly matches the conception of the type; it
+consists of 1 attribute whose name is the empty string; the attribute is an
+C<Array> whose C<value> attribute has a declared type of C<Cat.Name> and
+that must have at least 2 elements.
 
 The C<flat> possrep consists of 1 attribute whose name is the empty string;
 the attribute is a C<Cat.Name>, its value being identical to when the
@@ -1177,7 +1177,7 @@ C<Bool:false>.
 
 A C<Cat.ExprNodeSet> is a C<Database> that specifies a set of named value
 expression nodes.  It is typically composed into a (|inner
-)(function|updater). Each tuple of a C<Cat.ExprNodeSet> attribute is a
+)(function|updater).  Each tuple of a C<Cat.ExprNodeSet> attribute is a
 named expression node, which is the majority component of functional Muldis
 D code.  All arbitrarily complex Muldis D expression trees, including
 relational queries, are composed of just expression nodes, either directly,
@@ -1403,7 +1403,7 @@ local expression node which defines the value.
 =back
 
 A C<Cat.FuncInvoExprNodeSet> has a unary (unique) key on the C<name>
-attribute. Its default value is empty.
+attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.InnerUpdBody
 
@@ -1519,7 +1519,7 @@ This is an optional programmer comment about the (|inner )procedure body.
 This defines the 0..N (non-parameter) lexical variables of the (|inner
 )procedure; they initialize to the default values of their declared types.
 
-=item C<stmts> - C<seq_of.Cat.ProcStmt>
+=item C<stmts> - C<array_of.Cat.ProcStmt>
 
 This defines the entire main body of the (|inner )procedure, which is
 composed of 0..N procedure statements.  These statements must reference all

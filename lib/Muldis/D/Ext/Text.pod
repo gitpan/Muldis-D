@@ -9,7 +9,7 @@ Muldis D extension for character string data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Text version 0.23.0.
+This document is Muldis::D::Ext::Text version 0.24.0.
 
 =head1 PREFACE
 
@@ -46,7 +46,7 @@ These functions implement commonly used character string operations.
 =over
 
 =item C<function sys.std.Text.catenation result Text params {
-topic(seq_of.Text) }>
+topic(array_of.Text) }>
 
 This function results in the catenation of the N element values of its
 argument; it is a reduction operator that recursively takes each

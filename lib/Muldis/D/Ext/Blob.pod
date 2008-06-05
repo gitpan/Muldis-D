@@ -9,7 +9,7 @@ Muldis D extension for bit string data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Blob version 0.24.0.
+This document is Muldis::D::Ext::Blob version 0.25.0.
 
 =head1 PREFACE
 
@@ -76,7 +76,7 @@ These functions implement commonly used binary string operations.
 =over
 
 =item C<function sys.std.Blob.catenation result Blob params {
-topic(seq_of.Blob) }>
+topic(array_of.Blob) }>
 
 This function results in the catenation of the N element values of its
 argument; it is a reduction operator that recursively takes each
