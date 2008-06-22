@@ -1,6 +1,94 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-06-21  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.35.0 is released on CPAN as
+    Muldis-D-0.35.0.tar.gz.
+
+    * New file versions are: D.pm 0.35.0 and Blob.pod and Array.pod and
+    Rational.pod 0.26.0 and Basics.pod and Routines.pod and PTMD_Tiny.pod
+    and Integer.pod 0.25.0 and Ordered.pod and Tuple.pod and Relation.pod
+    and Set.pod 0.24.0 and HDMD_Perl_Tiny.pod 0.22.0 and Temporal.pod
+    0.8.1.  The other pre-existing versioned files are unchanged.
+
+    * (Basics.pod)  Added new "Type Safety" pod section under TYPE SYSTEM,
+    which says such things that Muldis D is type safe, it is hybrid
+    static/dynamic, some other things.  Also it declares that Muldis D now
+    has a concept of "warnings" and some things that used to be fatal
+    errors are now by default warnings instead; mainly this concerns
+    fatalism concerning 'incompatible' declared types in contexts where the
+    values in question are valid for the contexts.  Also updated some other
+    sections under TYPE SYSTEM, and a few other spots in the file.  Also
+    added new term 'warn' to the NOTES ON TERMINOLOGY section, which is
+    related to but distinguished from 'fail'.
+
+    * (Routines.pod, Ordered.pod, Tuple.pod, Relation.pod, Set.pod,
+    Array.pod)  Updated the documentation for several routines that stated
+    failure conditions so that some of those are now warning conditions
+    instead.  The primary change here is that "is_identical" now will
+    always warn (and probably result in false) where it used to fail, and
+    there are now no conditions where it will fail; so now the system will
+    let you compare any value to any value regardless of the declared types
+    of their sources; but declared types will have an affect on whether
+    there is a warning or not, in case you want to be told when you compare
+    an integer to a string.  Also, "assign" will now only fail if the value
+    to assign isn't of the declared type of the target; it will now warn
+    instead of fail if the declared type of the value isn't compatible.  A
+    lot of other changes related to tuple or relation values versus
+    declared types, and various other fall-out from the is-identical
+    change.
+
+    * (Relation.pod, Set.pod)  Updated the 'outer_join_with_defaults' and
+    'attr_or_default' functions so that each now has an extra
+    Cat.NameChain-typed argument that specifies the type to use the default
+    value of; the functions no longer use the declared type of some other
+    of their arguments to use the default of, since that is unreliable.
+
+    * (Routines.pod, Relation.pod, Blob.pod)  Updated the 7 functions
+    ['union', 'disjoint_union', 'intersection'; 'exclusion'; 'and', 'or',
+    'xor'] so that they now fail when given zero input elements rather than
+    result in an identity value; while such identities conceptually exist,
+    an empty input element list lacks the information to make one, so for
+    these functions the best general solution is to make the caller work
+    around the zero element limitation as it sees fit (such as adding an
+    identity value to the input list); adding an identity parameter instead
+    was rejected as that makes the most common use cases more verbose.
+
+    * (Relation.pod)  Deleted the 2 functions ['universal', 'negation']
+    since they wouldn't have worked in the current forms; they depend on
+    knowing a declared type which isn't reliably obtainable without being
+    explicitly given in an extra parameter; moreover most universal
+    relations would be too large to handle or infinite.  Also updated the
+    'empty' function description.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Fixed a bug in the grammar of
+    the 'radix' format for specifying a Rat literal; the bug was such that
+    one couldn't select a non-zero rational value between -1 and +1
+    exclusive; that is, one couldn't say something like "0.N".
+
+    * (PTMD_Tiny.pod)  Refactored the grammar concerning integers and
+    rationals to factor out the 3 new tokens int_max_col_val, int_body,
+    pint_body.  Affected older tokens were 'int', 'count', 'rat_\w+'.
+
+    * (Ordered.pod)  Updated the 2 "is_(in|out)side_range" functions to
+    rename each of their 2 "m(in|ax)_is_inside" parameters to
+    "m(in|ax)_is_outside"; and now the min|max values are included in the
+    range to check against rather than being excluded.
+
+    * (Integer.pod, Rational.pod)  Added 1 system service routine to each
+    file named "sys.std.(Integer|Rational).fetch_random", respectively,
+    which generates a random number using some implementation-defined
+    method, which may be anywhere from truly random to pseudo-random.  The
+    routines take parameters to specify the domain the generated number
+    must be in, which consists of range endpoints for both routines, as
+    well as a maximum precision specifier for the rational one.  In the
+    future, these routines may be replaced by more that give the user some
+    control over what algorithm is used to produce the random numbers, or
+    to specify a seed where applicable.
+
+    * (Temporal.pod)  Made a few typo fixes in routine signatures.
+
 2008-06-13  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.34.0 is released on CPAN as
