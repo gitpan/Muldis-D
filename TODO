@@ -24,6 +24,8 @@ specifically [result, params, update, read], to something better sounding.
 * Expand the catalog types for defining nonscalar types so to add
 short-hand syntax for foreign key constraints.
 
+* Add catalog types that represent thrown exceptions.
+
 * Add virtual relvars aka virtual dbvar attributes, that resemble a type
 constraint or something, as per scalar possrep mapping functions.
 
@@ -41,13 +43,6 @@ their own operators that invoke based on data.  Similarly add a
 system-defined procedure, which is what try_catch et al works over for
 calling named procedures.
 
-* Consider adding catalog support for making some routine parameters
-optional; if no explicit arguments are given them, then implicit default
-argument values are used instead.  Examples of use are with order-sensitive
-functions, to make the 'func' and/or 'assuming' parameters optional, where
-they default to 'sys.std.Core.Scalar.order' and the D0 tuple respectively;
-but err on the side of making parameters non-optional for robustness.
-
 * Add some automatic code completion to the two Tiny dialects or as a
 general function, mainly so that tuples comprising catalogs don't have to
 be written out in full; attributes may be omitted by the coders but will be
@@ -57,31 +52,9 @@ far as the Muldis D catalog is concerned, the users had always written them
 out in full.  Specific use case example is that programmers can omit
 'comment' attributes, or empty sets of expression nodes that aren't used.
 
-* Add a new extension, perhaps ext/Patterns.pod, which does
-pattern-sensitive search and/or replace in Text values, including both the
-full feature set of SQL's LIKE operator (not just the special case of
-matching a static substring once), as well as full regular expression
-support such as grep or Perl et al support, or simple transliterations.
-This new extension is meant to be algorithm-agnositic and can both be
-plugged with new algorithms or have multiple system-defined ones, as per
-Perl 5.10 now supports plugins that substitute for its builtin regexp
-engines.  Or these functions can just go in Text.pod instead.
-
-* Generalize the operator set for controlled character string degrading, of
-which upper/lower case folding is one example, and of which removing
-accents or combining characters with base characters is another, and of
-which trimming or normalizing runs of whitespace is another.  Yet another
-is converting data from a larger character repetoire to a smaller one eg,
-anything to ASCII, where we want for example range-external characters to
-be either deleted or changed to certain other characters.  Any
-features-to-be like case-insensitive or accent-insensitive comparisons
-(over which keys or indexes could be built) needs to be done this way; you
-don't simply treat non-identical things as being equal; you actually change
-them so they are.  These features are possibly useable not just with user
-data, but also database entity names on underlying systems that are eg not
-case sensitive but case preserving and we want to retain those semantics
-for some reason of backwards compatibility.  Or these functions can just go
-in Text.pod instead.
+* Update Text.pod (or add other extensions) to add general search and
+replace or transliteration or regular expression et al functionality,
+besides the bare minimum SQL-LIKE-alike currently provided.
 
 * Add functions for comparing or processing continuous ranges or intervals
 as per is_inside_range ... the tests are for eg if 2 ranges do or don't

@@ -9,7 +9,7 @@ Muldis D extension for character string data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Text version 0.24.0.
+This document is Muldis::D::Ext::Text version 0.25.0.
 
 =head1 PREFACE
 
@@ -85,7 +85,7 @@ This function results in the length of its argument in Unicode
 Normalization Form C code points.
 
 =item C<function sys.std.Text.is_substr result Bool params { look_in(Text),
-look_for(Text), fixed_start(Bool), fixed_end(Bool) }>
+look_for(Text), fixed_start(Bool)?, fixed_end(Bool)? }>
 
 This function results in C<Bool:true> iff its C<look_for> argument is a
 substring of its C<look_in> argument as per the optional C<fixed_start> and
@@ -93,33 +93,126 @@ C<fixed_end> constraints, and C<Bool:false> otherwise.  If C<fixed_start>
 or C<fixed_end> are C<Bool:true>, then C<look_for> must occur right at the
 start or end, respectively, of C<look_in> in order for C<contains> to
 result in C<Bool:true>; if either flag is C<Bool:false>, its additional
-constraint doesn't apply.
+constraint doesn't apply.  Each of the C<fixed_(start|end)> parameters is
+optional and defaults to C<Bool:false> if no explicit argument is given to
+it.  Note that C<is_substr> will handle the common special cases of SQL's
+"LIKE" operator for patterns like ['foo', '%foo', 'foo%', '%foo%'], but see
+also the C<is_match_using_like> function which provides the full generality
+of SQL's "LIKE", such as 'foo%bar%baz'.
 
 =item C<function sys.std.Text.is_not_substr result Bool params {
-look_in(Text), look_for(Text), fixed_start(Bool), fixed_end(Bool) }>
+look_in(Text), look_for(Text), fixed_start(Bool)?, fixed_end(Bool)? }>
 
 This function is exactly the same as C<sys.std.Text.is_substr> except that
 it results in the opposite boolean value when given the same arguments.
 
+=back
+
+=head1 FUNCTIONS FOR TEXT NORMALIZATION
+
+These functions implement commonly used text normalization operations which
+are relatively simple or whose details are fully specified by the Unicode
+standard; examples are folding letters to lower or upper case, removing
+combining characters like accent marks and other diacritics from base
+letters, or removing or normalizing whitespace, or that convert text from a
+larger to a smaller character repertoire such as to ASCII.  By contrast,
+operations such as stemming or removing common words or expanding
+abbreviations are not done by these functions and are best implemented by a
+third party language extension or library.  You can use these functions as
+a basis for making comparison or ranking or collation operators that ignore
+some distinctions between values such as their case or accents, such as to
+do case-insensitive or accent-insensitive or whitespace-insensitive
+matching or indexing or sorting; the actual system-defined matching
+operators are still sensitive to case et al, but you can pretend they're
+not by having them work with the results of these normalization functions
+rather than on the inputs to these functions.  This is useful when you want
+to emulate the semantics of insensitive though possibly preserving systems
+over Muldis D.
+
+=over
+
 =item C<function sys.std.Text.case_folded_to_upper result Text {
 topic(Text) }>
 
-This function results in the transformation of its argument where any
+This function results in the normalization of its argument where any
 letters considered to be (small) lowercase are folded to (capital)
 uppercase.
 
 =item C<function sys.std.Text.case_folded_to_lower result Text {
 topic(Text) }>
 
-This function results in the transformation of its argument where any
+This function results in the normalization of its argument where any
 letters considered to be (capital) uppercase are folded to (small)
 lowercase.
+
+=item C<function sys.std.Text.accents_stripped result Text { topic(Text) }>
+
+This function results in the normalization of its argument where any accent
+marks or diacritics are removed from letters, leaving just the primary
+letters.
+
+=item C<function sys.std.Text.ASCII result Text { topic(Text), mark(Text)?
+}>
+
+This function results in the normalization of its C<topic> argument where
+any characters not in the 7-bit ASCII repertoire are stripped out, where
+each non-ASCII character is replaced with the common ASCII character string
+specified by its C<mark> argument; if C<mark> is the empty string, then the
+non-ASCII characters are simply stripped.  This function is quite simple
+and does not do a smart replace with sequences of similar looking ASCII
+characters.  The C<mark> parameter is optional and defaults to the empty
+string if no explicit argument is given to it.
 
 =item C<function sys.std.Text.whitespace_trimmed result Text { topic(Text)
 }>
 
-This function results in the value of its argument but that any leading or
-trailing whitespace characters are trimmed.
+This function results in the normalization of its argument where any
+leading or trailing whitespace characters are trimmed.
+
+=back
+
+=head1 FUNCTIONS FOR PATTERN MATCHING AND TRANSLITERATION
+
+These functions implement commonly used operations for matching text
+against a pattern or performing substitutions of characters for others;
+included are both the functionality of SQL's simple "LIKE" pattern matching
+operator but also support for Perl 5's regular expressions and Perl 6's
+rules.  All of these functions are case-sensitive et al as per
+C<is_identical> unless explicitly given flags to do otherwise, where
+applicable; or just use them to search results of normalization functions
+if you need to.  Note that Perl 5.10+ is also an inspiration such that its
+regular expression feature is algorithm-agnositic and can both be plugined
+with new algorithms or have multiple system-defined ones.  I<Note that a
+lot of this section is still TODO, with several useful functions missing,
+or more complicated parts like the Perl pattern matching may be separated
+off into their own language extensions later.>
+
+=over
+
+=item C<function sys.std.Text.is_match_using_like result Bool params {
+look_in(Text), look_for(Text), escape(Text) }>
+
+This function results in C<Bool:true> iff its C<look_in> argument is
+matched by the pattern given in its C<look_for> argument, and C<Bool:false>
+otherwise.  This function implements the full generalization of SQL's
+simple "LIKE" pattern matching operator.  Any characters in C<look_for> are
+matched literally except for the 2 wildcard characters C<_> (match any
+single character) and C<%> (match any string of 0..N characters); the
+preceeding assumes that the C<escape> argument is the empty string.  If
+C<escape> is a character, then that character is also special and its lone
+occurrence in C<look_for> will no longer match itself as per the 2 wildcard
+characters; rather it will be used in C<look_for> to indicate when the
+pattern wishes to match a literal C<_> or C<%> or the escape character
+itself literally.  For example, if C<\> is used as the escape character,
+then you use C<\_>, C<\%>, C<\\> to match the literal wildcard characters
+or itself, respectively.
+
+=item C<function sys.std.Text.is_not_match_using_like result Bool params {
+look_in(Text), look_for(Text), escape(Text) }>
+
+This function is exactly the same as C<sys.std.Text.is_match_using_like>
+except that it results in the opposite boolean value when given the same
+arguments; it implements SQL's "NOT LIKE".
 
 =back
 
