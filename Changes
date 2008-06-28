@@ -1,6 +1,57 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-06-28  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.37.0 is released on CPAN as
+    Muldis-D-0.37.0.tar.gz.
+
+    * New file versions are: D.pm 0.37.0 and Types_Catalog.pod 0.31.0 and
+    Routines.pod 0.27.0.  The other pre-existing versioned files are
+    unchanged.
+
+    * (Types_Catalog.pod)  Renamed the catalog type 'InnerDomainType' to
+    'InnerUnionType' and added new catalog type 'InnerRestrType'; the
+    latter is now a more terse way to specify the common kind of type that
+    is a simple subset of a single other type, either a proper subtype or a
+    non-proper one that has a different default value.  Also renamed the
+    'InnerDomTypeSet' type to 'InnerUniTypeSet' and added the new
+    'InnerRestrTypeSet' type.  Also renamed the 'InnerNonScaTypeSet' to
+    lowercase the first 'S'.  Also 'InnerTypeSet' now has 4 attributes.
+    Any other catalog types which had attributes of any of the above types
+    were also appropriately updated.
+
+    * (Types_Catalog.pod)  Added 4 new catalog types ['IfElseExprNodeSet',
+    'IfThenExprMap', 'GivenWhenDefExprNodeSet', 'WhenThenExprMap'] which
+    collectively define N-way if-else and given-when-default control flow
+    expressions.  This control flow functionality is implemented using
+    special catalog types rather than generically as routines because they
+    carry special short-circuit semantics such that some of their operands
+    are only conditionally evaluated (which isn't true with routines in
+    general), generally because some operands are determining whether we
+    even know it is legal to evaluate some other operands.  Also added 2
+    attributes to the 'ExprNodeSet' catalog type, ['if_else_exprs',
+    'given_when_def_exprs'].
+
+    * (Routines.pod)  Renamed or grouped the headings of a few pod
+    sections, added a few as well.
+
+    * (Routines.pod)  Added new function 'sys.std.Core.Universal.assertion'
+    which is like 'treated' but that rather than a type name argument it
+    takes a boolean argument; it passes through the main value argument if
+    the boolean is true, and throws an exception otherwise.  This function
+    exists to support arbitrary condition assertions in pure functions
+    potentially at runtime or compile time without the necessesity of
+    defining superfluous new types with type constraints.
+
+    * (Routines.pod)  Added 3 new control-flow routines named
+    'sys.std.Core.Control.(func|upd|proc)_invo', each of which takes a
+    routine name as an argument and then invokes it with arguments given as
+    another argument.  These are the fundamental routines over which other
+    routines that want to invoke a routine whose name or parameters they
+    might not know until runtime would do it, such as generic relational
+    restriction or the map or reduction operators or try_catch.
+
 2008-06-24  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.36.0 is released on CPAN as
