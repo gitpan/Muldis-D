@@ -26,6 +26,9 @@ short-hand syntax for foreign key constraints.
 
 * Add catalog types that represent thrown exceptions.
 
+* Also study SQL concept of conditions and handlers, looks sort of like
+something between exception handling, signals; or it is their exceptions.
+
 * Add virtual relvars aka virtual dbvar attributes, that resemble a type
 constraint or something, as per scalar possrep mapping functions.
 
@@ -47,7 +50,8 @@ out in full.  Specific use case example is that programmers can omit
 
 * Update Text.pod (or add other extensions) to add general search and
 replace or transliteration or regular expression et al functionality,
-besides the bare minimum SQL-LIKE-alike currently provided.
+besides the bare minimum SQL-LIKE-alike currently provided.  Also add
+functions for splitting strings on delimiters or catenating them with such.
 
 * Add functions for comparing or processing continuous ranges or intervals
 as per is_inside_range ... the tests are for eg if 2 ranges do or don't
@@ -61,9 +65,25 @@ which are probably represented by sets of continuous ranges, that might be
 simple enough to support here too ... or some range stuff might go off to
 another extension perhaps or perhaps not.
 
-* Define imperative versions of the functional control flow constructs
-if-else, given-when-default, and add new imperative looping controls
-(functional versions aren't needed given we have relational operators).
+* Consider supplementing the current generic infinite-loop-until-leave
+statement with alternatives that use boolean control variables, such as
+'while' or 'repeat-while'.
+
+* Consider adding an imperative for-each looping statement; the main
+question here is whether it should work on any (unordered) relation or just
+on an Array (in which case it iterates through the tuples in sequence by
+index); the question is what tasks the for-each would be used for; perhaps
+both versions are useful; presumably the main reason to have for-each at
+all is when I/O is involved and some derivative needs to be output either
+where order matters or where order does not matter; but perhaps only a
+routine is needed here such as a catenate function plus normal I/O output.
+
+* Consider converting the try-catch routine into a statement node, an
+optional part of which is to make the insides of the try/catch blocks part
+of the same lexical scope as the invoking routine.  But there is still a
+lot to like about having each of the try/catch blocks being a separate
+(inner) routine with its own lexical scope, such as in predicting what a
+rollback would affect, and it might be easier to implement as-is.
 
 * Add generic I/O routines.
 
@@ -96,6 +116,13 @@ dialects.  Also, it reduces bias away from third-party temporal extensions.
 
 * Provide operators for the spatial data types, maybe overhaul the types.
 
+* Update the system catalog concerning managing shared|exclusive locks or
+looking for consistent reads between statements, etc.
+
 * Update the system catalog to deal with database users and privileges etc.
+
+* Flesh out matters related to starting or communicating between multiple
+autonomous in-DBMS processes, in general, besides the special case about
+sequence generators.
 
 * Whatever else needs doing, such as, fixing bugs.

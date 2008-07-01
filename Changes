@@ -1,6 +1,53 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-06-30  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.38.0 is released on CPAN as
+    Muldis-D-0.38.0.tar.gz.
+
+    * New file versions are: D.pm 0.38.0 and Types_Catalog.pod 0.32.0.  The
+    other pre-existing versioned files are unchanged.
+
+    * (Types_Catalog.pod)  Split up the catalog type 'ProcStmt' 3 ways into
+    the catalog types ['StmtNodeSet', 'CompoundStmtNodeSet',
+    'ProcInvoStmtNodeSet']; also updated the 'InnerProcBody' type to rename
+    its 'stmts' attribute to 'stmt' and retype that attribute from
+    'array_of.ProcStmt' to 'StmtNodeSet'.  So now the main body of a
+    procedure has been restructured to be more like the main body of a
+    function, such that the procedure body is now a tree of statement nodes
+    rather than a flat sequence of statements; now each tree node is a code
+    block grouping its child nodes.  This restructuring has resulted in 2
+    initial kinds of statement nodes; a compound statement node is a
+    sequence of other statements; a procedure invocation node invokes a
+    named procedural routine.
+
+    * (Types_Catalog.pod)  Added new catalog type 'LeaveStmtNodeSet' which
+    represents an abnormal exit from a statement block or a return from a
+    procedure ('abnormal' meaning not running to the end).  Also made
+    corresponding attribute addition to 'StmtNodeSet' type.
+
+    * (Types_Catalog.pod)  Renamed the 2 catalog types ['IfThenExprMap',
+    'WhenThenExprMap'] to ['IfThenMap', 'WhenThenMap'] and generalized
+    their descriptions so they apply to both control flow statements as
+    well as control flow expressions.  Also moved those into the "SIMPLE
+    GENERIC NONSCALAR TYPES" section from the "TYPES FOR DEFINING INNER
+    ROUTINE BODIES" section.
+
+    * (Types_Catalog.pod)  Added 2 new catalog types ['IfElseStmtNodeSet',
+    'GivenWhenDefStmtNodeSet'] which (together with the aforementioned 2
+    renamed 'Map' types) define N-way if-else and given-when-default
+    control flow statement nodes.  They are like the similarly named
+    expression node kinds but for being imperative.  Also made
+    corresponding attribute additions to 'StmtNodeSet' type.
+
+    * (Types_Catalog.pod)  Added new catalog type 'LoopStmtNodeSet' which
+    implements a generic looping block statement; the looping block is an
+    infinite loop save for exiting when an appropriate 'LeaveStmtNodeSet'
+    is invoked within it.  Also added new catalog type 'IterateStmtNodeSet'
+    which will jump to the start of the next iteration of a current loop.
+    Also made corresponding attribute additions to 'StmtNodeSet' type.
+
 2008-06-28  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.37.0 is released on CPAN as
