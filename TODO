@@ -21,16 +21,17 @@ nicely rendered documentation.
 * Consider changing the keywords in system-defined routine signatures,
 specifically [result, params, update, read], to something better sounding.
 
-* Expand the catalog types for defining nonscalar types so to add
-short-hand syntax for foreign key constraints.
-
 * Add catalog types that represent thrown exceptions.
 
 * Also study SQL concept of conditions and handlers, looks sort of like
 something between exception handling, signals; or it is their exceptions.
 
-* Add virtual relvars aka virtual dbvar attributes, that resemble a type
-constraint or something, as per scalar possrep mapping functions.
+* Update the virtual attributes maps so there is a way to manually specify
+a reverse function, as meanwhile all the virtuals don't have to be either
+read-only or updatable due to an automatically generated reverse function,
+which might vary by implementation, which may be considered broken.  Note
+that the reverse functions might have to be defined as per-tuple
+operations, separately for insert/substitute/delete.
 
 * Add transition constraints.  The initial version would simply take a
 'before' and an 'after' state argument.  But it may be good to provide an
@@ -114,6 +115,11 @@ value selectors), or want to use a different terse format than any the Tiny
 could pick.  It's better to leave special temporal value syntax to non-Tiny
 dialects.  Also, it reduces bias away from third-party temporal extensions.
 
+* Consider generalizing the canonical abstraction for distributed and
+foreign key constraints so that participant relation valued attributes
+don't have to be direct sibling attributes (but the currently supported
+direct siblings is the most common use case).
+
 * Provide operators for the spatial data types, maybe overhaul the types.
 
 * Update the system catalog concerning managing shared|exclusive locks or
@@ -124,5 +130,7 @@ looking for consistent reads between statements, etc.
 * Flesh out matters related to starting or communicating between multiple
 autonomous in-DBMS processes, in general, besides the special case about
 sequence generators.
+
+* Consider some more elegant solution about matters of closures et al.
 
 * Whatever else needs doing, such as, fixing bugs.

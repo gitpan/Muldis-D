@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.32.0.
+This document is Muldis::D::Core::Types_Catalog version 0.33.0.
 
 =head1 PREFACE
 
@@ -29,7 +29,7 @@ These core data types are more special-purpose in nature and are intended
 for use in defining or working with the system catalog.  Those types that
 are nonscalar are completely defined types.
 
-Note that whenever an attribute of one of the tuple types isn't
+Note that whenever an attribute of one of the nonscalar types isn't
 significant, given the context (determined by other attributes of the same
 type), and should be ignored, its value is the default for its type.
 
@@ -120,6 +120,8 @@ more or less:
             sys.std.Core.Type.Cat.FuncInvoExprNodeSet
             sys.std.Core.Type.Cat.IfElseExprNodeSet
             sys.std.Core.Type.Cat.GivenWhenDefExprNodeSet
+            sys.std.Core.Type.Cat.(Func|Proc|Type)RefLitExprNodeSet
+            sys.std.Core.Type.Cat.OrdDetFuncRefLitExprNodeSet
             sys.std.Core.Type.Cat.MultiUpdStmt
             sys.std.Core.Type.Cat.LeaveStmtNodeSet
             sys.std.Core.Type.Cat.CompoundStmtNodeSet
@@ -131,15 +133,36 @@ more or less:
             sys.std.Core.Type.Cat.Inner(Sca|Nonsca|Uni|Restr)TypeSet
             sys.std.Core.Type.Cat.PossrepSet
             sys.std.Core.Type.Cat.PossrepMapSet
+            sys.std.Core.Type.Cat.VirtualAttrMapSet
             sys.std.Core.Type.Cat.ConstraintSet
             sys.std.Core.Type.Cat.KeySet
             sys.std.Core.Type.Cat.DistribKeySet
             sys.std.Core.Type.Cat.DKMemRelAttrMap
             sys.std.Core.Type.Cat.DKRelAttrKeyAttrMap
+            sys.std.Core.Type.Cat.ForeignKeySet
+            sys.std.Core.Type.Cat.ForeignDistribKeySet
+            sys.std.Core.Type.Cat.FKChildAttrParentAttrMap
             sys.std.Core.Type.Cat.NameTypeMap
             sys.std.Core.Type.Cat.NameExprMap
+            sys.std.Core.Type.Cat.NameDNCMap
             sys.std.Core.Type.Cat.AttrRenameMap
             sys.std.Core.Type.Cat.WhenThenMap
+
+These system-defined subtypes can never be used as components of a system
+catalog, or any database, but they may be used temporarily at runtime:
+
+    sys.std.Core.Type.Universal
+
+        sys.std.Core.Type.Empty
+
+        sys.std.Core.Type.QuasiScalar
+
+            # The following are special-purpose quasi-scalar types.
+
+            sys.std.Core.Type.Cat.FuncRef
+            sys.std.Core.Type.Cat.ProcRef
+            sys.std.Core.Type.Cat.TypeRef
+            sys.std.Core.Type.Cat.OrdDetFuncRef
 
 =head1 SIMPLE GENERIC SCALAR TYPES
 
@@ -251,10 +274,10 @@ C<increase> is ordered before C<same>, and C<same> before C<decrease>.
 The C<Cat.OrdDetFuncNameChain> type is defined as a non-proper / identical
 subtype of the C<Cat.NameChain> type that has a different default value,
 which is C<sys.std.Core.Scalar.order> rather than C<.>.  This type is
-intended for use as the declared type of a routine parameter that would
-take the name of an C<order_determination> function, but that parameter is
-optional and should default to the system-defined scalar ordering function
-when no argument is given to it.
+conceptually intended for use as the declared type of a routine parameter
+that would take the name of an C<order_determination> function, but that
+parameter is optional and should default to the system-defined scalar
+ordering function when no argument is given to it.
 
 =head1 TYPES FOR DEFINING SYSTEM-DEFINED ENTITIES
 
@@ -1392,7 +1415,7 @@ for a subject-to-update parameter of an (|inner )update operator call; in
 that case the leaf nodes / only node of the expression must map to a
 subject-to-update parameter of the containing (|inner )update operator.
 
-A C<Cat.ExprNodeSet> has these 7 attributes:
+A C<Cat.ExprNodeSet> has these 11 attributes:
 
 =over
 
@@ -1428,6 +1451,13 @@ These are expression nodes that represent if-else control flow expressions.
 
 These are expression nodes that represent given-when-default control flow
 expressions.
+
+=item C<(func|proc|type|ord_det_func)_ref_lit_exprs> -
+C<Cat.(Func|Proc|Type|OrdDetFunc)RefLitExprNodeSet>
+
+These are expression nodes that define
+function|imperative-routine|type|order-determination-function reference
+literals.
 
 =back
 
@@ -1720,6 +1750,38 @@ given-when-default.
 =back
 
 A C<Cat.GivenWhenDefExprNodeSet> has a unary (unique) key on the C<name>
+attribute.  Its default value is empty.
+
+=head2 sys.std.Core.Type.Cat.(Func|Proc|Type|OrdDetFunc)RefLitExprNodeSet
+
+A C<Cat.(Func|Proc|Type|OrdDetFunc)RefLitExprNodeSet> is a C<Relation> that
+specifies a set of expression nodes where each node represents a value of
+the special C<sys.std.Core.Type.Cat.(Func|Proc|Type|OrdDetFunc)Ref> type.
+
+A C<Cat.(Func|Proc|Type|OrdDetFunc)RefLitExprNodeSet> has these 3
+attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the expression node.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the expression leaf node.
+
+=item C<referencing> - C<Cat.NameChain>
+
+This is the name, from the point of view of the routine embedding this
+expression node, of the
+function|imperative-routine|type|order-determination-function that the new
+special reference value is supposed to facilitate portable invoking of.
+
+=back
+
+A C<Cat.(Func|Proc|Type|OrdDetFunc)RefLitExprNodeSet> has a unary (unique)
+key on the C<name> attribute, plus another such key on the C<referencing>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.InnerUpdBody
@@ -2486,7 +2548,7 @@ Note that you can not use a C<Cat.InnerNonscalarType> to declare or
 subtype an incomplete type, as it (or its supertype) must specify a
 complete set of attributes.
 
-A C<Cat.InnerNonscalarType> has these 11 attributes:
+A C<Cat.InnerNonscalarType> has these 14 attributes:
 
 =over
 
@@ -2536,6 +2598,13 @@ is indeed valid for a (|quasi-)nonscalar type to have zero attributes; in
 this case, a tuple type consists of exactly one value, and a relation type
 consists of exactly two values.
 
+=item C<virtual_attr_maps> - C<Cat.VirtualAttrMapSet>
+
+This defines the proper subset of this type's attributes that are virtual,
+and how they are defined in terms of the rest of this type's attributes.
+Note that the special functional dependencies between attributes defined
+herein mean that some kinds of tuple constraints would be redundant.
+
 =item C<tuple_constraints> - C<Cat.ConstraintSet>
 
 This defines the entire (main) bodies of 0..N C<type_constraint> functions
@@ -2581,15 +2650,48 @@ if the cardinalities are equal.
 
 =item C<distrib_keys> - C<Cat.DistribKeySet>
 
-These are the 0..N explicit simple distributed keys that are applicable to
-tuple/database values of the type being defined, that range over specified
-relation-typed attributes of it.  Note that C<distrib_keys> is logically an
+These are the 0..N explicit simple distributed (unique) keys that are
+applicable to tuple/database values of the type being defined, that range
+over specified relation-typed attributes of it.  Note that C<distrib_keys>
+is logically an abstraction syntax (the canonical simplest form) for a
+particular kind of C<tuple_constraint> of the type being defined, one that
+compares the cardinality of the union of the projection of distributed key
+attributes of all key-participating relation-valued attributes, with the
+sum of cardinalities of the source relation-valued attributes; the
+attribute values comprise a distributed key if the cardinalities are equal.
+
+=item C<foreign_keys> - C<Cat.ForeignKeySet>
+
+These are the 0..N explicit simple foreign (non-distributed) keys that are
+applicable to tuple/database values of the type being defined, that range
+over and relate tuples of specified relation-typed attributes of it; they
+are a kind of referential constraint.  Each tuple of a child attribute must
+have a corresponding tuple in a specific single parent attribute, where
+they correspond on the attributes of the parent attribute that comprise a
+(unique) key of the latter.  Note that C<foreign_keys> is logically an
 abstraction syntax (the canonical simplest form) for a particular kind of
-C<tuple_constraint> of the type being defined, one that compares the
-cardinality of the union of the projection of distributed key attributes of
-all key-participating relation-valued attributes, with the sum of
-cardinalities of the source relation-valued attributes; the attribute
-values comprise a distributed key if the cardinalities are equal.
+C<tuple_constraint> of the type being defined, one that tests if the
+relational difference, where a projection of the parent relation is
+subtracted from a corresponding projection of the child relation (with
+attribute renaming if necessary), is an empty relation; if the difference
+is an empty relation, then the foreign key is satisfied; otherwise, any
+difference tuples are from child tuples that violate the foreign key.
+
+=item C<foreign_distrib_keys> - C<Cat.ForeignDistribKeySet>
+
+These are the 0..N explicit simple foreign distributed keys that are
+applicable to tuple/database values of the type being defined, that range
+over and relate tuples of specified relation-typed attributes of it; they
+are a kind of referential constraint.  Each tuple of a child attribute must
+have a corresponding tuple in one member of a specific set of
+parent-alternative attributes (that have a distributed key ranging over
+them), where they correspond on the attributes of the parent-alternative
+attribute that comprise a distributed key on the latter.  Note that
+C<foreign_distrib_keys> is logically an abstraction syntax (the canonical
+simplest form) for a particular kind of C<tuple_constraint> of the type
+being defined; it is as per C<foreign_keys> except that the parent relation
+is the result of unioning appropriately renamed projections of the member
+relations of the distributed key.
 
 =item C<default_tuple> - C<Cat.InnerFuncBody>
 
@@ -2608,11 +2710,151 @@ type whose declaration it is part of.
 =back
 
 There is a distributed (unique) key over the C<name> attributes of
-C<(tuple|relation)_constraint> and C<keys> and C<distrib_keys>.
+C<(tuple|relation)_constraint> and C<(|foreign_)(|distrib_)keys>.
 
 The default value of C<Cat.InnerNonscalarType> defines a relation type that
 is the same as C<RelationD0>, having zero attributes, whose default value
 is the one with zero tuples.
+
+=head2 sys.std.Core.Type.Cat.VirtualAttrMapSet
+
+A C<Cat.VirtualAttrMapSet> is a C<Relation> that defines special functional
+dependencies between attributes of a (|quasi-)nonscalar data type, such
+that, on a per-tuple basis, some attributes can be generated purely from
+other attributes, and hence the former attributes may be virtual.  Each
+tuple of a C<Cat.VirtualAttrMapSet> specifies 2 disjoint subsets of the
+(|quasi-)nonscalar's attributes, which are I<determinant> and I<dependent>
+attributes respectively, where the values of the second set are generated
+from the first using a C<virtual_attr_map> function.  Whether I<dependent>
+attributes are computed when needed or pre-computed and stored (a trade-off
+of storage space for speed) is implementation dependent, though users may
+give hints to govern that performance decision.
+
+The main reason for virtual attributes to exist is to provide a fundamental
+feature of a relational database where multiple perceptions of the same
+data can exist at once; each user can perceive the same data being
+organized according to their own preferences, and even if the actual means
+of storing the data changes over time, the users continue to be able to
+perceive it in the same ways as before the change.
+
+The most important use case of virtual attributes is when the data type
+having them is a database type, all of whose attributes are relations (or
+databases); and so these attributes define database relvars, with
+non-virtual and virtual attributes being base and virtual relvars,
+respectively (which correspond to the SQL concepts of base tables and
+views, respectively).  The idea in general is that users can work with any
+relvar without knowing whether it is base or virtual, and so if
+implementations change later such that real relvars become virtual or
+vice-versa, users could continue as if nothing changed.
+
+A less common use case of virtual attributes is in (typically non-database)
+nonscalar types when users want to treat non-identical values as being
+distinct in some situations and non-distinct in others.  For example they
+want to do case-insensitive matching of character data, or alternately they
+want a case-insensitive (unique) key constraint on such, but either way
+they want the case of the data preserved.  In this situation, a base
+attribute can exist with the original case-preserved data, and a dependent
+virtual attribute can exist with the first's values folded to uppercase
+(eliminating any case differences); so then the key constraint can be
+placed on the virtual attribute to get the desired semantics, and the
+matching can be done against the same.
+
+All permissable operations on virtual (|pseudo-)variables are such that the
+semantics of updating them is the same as for updating base
+(|pseudo-)variables, with respect to I<The Assignment Principle>: Following
+assignment of a value C<v> to a variable C<V>, the comparison C<v = V>
+evaluates to TRUE.  Just as an update to determinant variables will have
+the cascade effect of updating their dependent variables such that the
+functional dependency between them continues to hold, the reverse also must
+happen.  Any update to dependent variables must have the side effect of
+updating their determinant variables.  Specifically, the implementing code
+of an update to dependents must be rewritten behind the scenes to become
+instead an update to their determinants, as if the latter was what the
+users had actually written, such that following the then-first update of
+the determinants, the cascading update to the dependents by the functional
+dependency must result in the same dependents' values that they would have
+had if the dependents were just base variables being updated by the
+original code.  If such a code rewrite can not be done, such as due to
+information lost in the functional dependency, then the operation
+attempting to update the dependent attributes must fail.  Sometimes the
+code rewrite can be done automatically by the DBMS, and sometimes it can
+succeed if the map definer gives explicit details on how to accomplish it.
+
+Because Muldis D requires a strong degree of determinism in the whole
+system, sometimes users have to provide explicit details on how to
+accomplish a reverse mapping, even if it is possible to automatically
+generate such, because there may be multiple ways to do a reverse map that
+satisfy I<The Assignment Principle>, so the explicitness would be to pick
+exactly one of those, so that how determinants are updated is predictable
+in an implementation-portable manner.  For example, if a virtual relvar
+C<V> is defined as the simple relational union of 2 other relvars C<R1> and
+C<R2>, then a tuple insertion into C<V> could be rewritten at least 3 ways,
+which are an insertion into just C<R1>, or into just C<R2>, or into both
+C<R1> and C<R2>; so for predictability's sake, the map should specify which
+option to do (which can vary on a case-by-case basis).
+
+I<This all being said, for the moment the C<Cat.VirtualAttrMapSet> type
+does not give a way to manually specify a reverse function, so for now all
+the virtuals are either read-only or updatable due to an automatically
+generated reverse function, which might vary by implementation.  Fixing
+this matter is TODO.  Note that the reverse functions might have to be
+defined as per-tuple operations, separately for insert/substitute/delete.>
+
+A C<Cat.VirtualAttrMapSet> has these 5 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about this virtual attribute map.
+
+=item C<determinant_attrs> - C<Cat.NameDNCMap>
+
+These are the names of the determinant attributes.  Each name is given in 2
+forms, called C<name> and C<dnc>; C<dnc> is the actual name of the
+attribute as existing in the host type, and it may actually be a component
+attribute of a host type attribute to any recursive depth (a single C<dnc>
+element means it is the actual host type element); C<name> is an alias by
+which the attribute will be known in the C<virtual_attr_map> function; this
+mapping exists so to make the determinant attributes look like direct
+sibling attributes whereas in reality they can be further-away relatives,
+just common components somewhere under the host type.
+
+=item C<dependent_attrs> - C<Cat.NameDNCMap>
+
+These are the names of the dependent attributes; the structure of
+C<dependent_attrs> is as per C<determinant_attrs>; none of these may be the
+same as the names of the determinant attributes, since a virtual attribute
+can't be defined in terms of itself.
+
+=item C<virtual_attr_map> - C<Cat.InnerFuncBody>
+
+This defines the entire (main) body of a C<virtual_attr_map> function that
+derives a tuple of dependent attribute values from a tuple of determinant
+attribute values.  The implicit function heading that this goes with has a
+single C<topic> parameter whose declared type is a tuple whose attributes
+match those of C<determinant_attrs>; the function's implicit result type is
+a tuple whose attributes match those of C<dependent_attrs>.  Note that the
+range of this function is typically smaller than its domain, though it
+might not be.
+
+=item C<is_updateable> - C<Bool>
+
+This is C<Bool:true> if all of the dependent attributes should be treated
+as updateable, because they have enough information to map any kinds of
+updates (all of tuple insert/substitute/delete) back to their determinant
+attributes, and the system should try to support updates against them.
+This is C<Bool:false> if all of the dependent attributes should not be
+considered updateable, either because it is known they don't have enough
+information, or because we expect users will never try to update them, so
+don't go to the trouble of supporting updates.
+
+=back
+
+A C<Cat.VirtualAttrMapSet> has a binary (unique) key on the
+C<determinant_attrs> plus C<dependent_attrs> attributes; it also has a
+distributed (unique) key over the C<dependent_attrs> attribute of all
+tuples.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.ConstraintSet
 
@@ -2749,10 +2991,13 @@ A C<Cat.DKMemRelAttrMap> has these 3 attributes:
 
 =over
 
-=item C<rel_name> - C<Cat.Name>
+=item C<rel_name> - C<Cat.DeclNameChain>
 
-This is the name of the relation-valued attribute that is participating
-in the distributed key.
+This is the name of the relation-valued attribute that is participating in
+the distributed key.  But the attribute named by C<rel_name> is only a
+direct attribute of the host type if C<rel_name> has 1 chain element; if it
+has more, then the host type attribute is a tuple/database and any further
+elements serve to make C<rel_name> actually address a component of said.
 
 =item C<comment> - C<Cat.Comment>
 
@@ -2778,6 +3023,129 @@ a distributed key, to the same number of attributes of the distributed key
 itself.  A C<Cat.DKRelAttrKeyAttrMap> has 2 attributes, C<rel_attr> and
 C<key_attr>, each of those being a C<Cat.Name>, and each of those being a
 unary key.  Its default value has zero tuples.
+
+=head2 sys.std.Core.Type.Cat.ForeignKeySet
+
+A C<Cat.ForeignKeySet> is a C<Relation> that specifies a set of foreign
+(non-distributed) keys over relation-valued attributes of a tuple/database;
+each tuple specifies one foreign key, which is a kind of referential
+constraint, that relates tuples of such attributes.  Each tuple of a child
+attribute must have a corresponding tuple in a specific single parent
+attribute, where they correspond on the attributes of the parent attribute
+that comprise a (unique) key of the latter.  Note that it is valid to
+define a foreign key involving zero attributes, but its effect would be a
+no-op / a constraint that rejects nothing.
+
+A C<Cat.ForeignKeySet> has these 6 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the foreign key.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the foreign key as a whole.
+
+=item C<parent> - C<Cat.DeclNameChain>
+
+This is the name of the relation-valued attribute that is the parent in the
+foreign (non-distributed) key relationship.  But the attribute named by
+C<parent> is only a direct attribute of the host type if C<parent> has 1
+chain element; if it has more, then the host type attribute is a
+tuple/database and any further elements serve to make C<parent> actually
+address a component of said.
+
+=item C<parent_key> - C<Cat.Name>
+
+This is the name of the explicitly declared candidate key or unique key
+constraint of C<parent> which defines the attributes of C<parent> that are
+being matched on in the foreign key.
+
+=item C<child> - C<Cat.DeclNameChain>
+
+This is the name of the relation-valued attribute that is the child in the
+foreign (non-distributed) key relationship; its structure is as per
+C<parent>.  Note that C<child> and C<parent> are allowed to be one and the
+same.
+
+=item C<attr_map> - C<Cat.FKChildAttrParentAttrMap>
+
+This maps 0..N attributes of the child relation with the same number of
+attributes of the parent relation; the mapped attribute names may or may
+not be the same.
+
+=back
+
+A C<Cat.ForeignKeySet> has a unary (unique) key on the C<name> attribute.
+Its default value is empty.
+
+=head2 sys.std.Core.Type.Cat.ForeignDistribKeySet
+
+A C<Cat.ForeignDistribKeySet> is a C<Relation> that specifies a set of
+foreign distributed keys over relation-valued attributes of a
+tuple/database; each tuple specifies one foreign key, which is a kind of
+referential constraint, that relates tuples of such attributes.  Each tuple
+of a child attribute must have a corresponding tuple in one member of a
+specific set of parent-alternative attributes (that have a distributed key
+ranging over them), where they correspond on the attributes of the
+parent-alternative attribute that comprise a distributed key on the latter.
+Note that it is valid to define a foreign key involving zero attributes,
+but its effect would be a no-op / a constraint that rejects nothing.
+
+A C<Cat.ForeignDistribKeySet> has these 5 attributes:
+
+=over
+
+=item C<name> - C<Cat.Name>
+
+This is the declared name of the foreign key.
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about the foreign key as a whole.
+
+=item C<parent_distrib_key> - C<Cat.DeclNameChain>
+
+This is the name of the explicitly declared distributed (unique) key that
+is the parent in the foreign distributed key relationship; it defines by
+proxy the attributes that are being matched on in the foreign key.  But the
+distributed key named by C<parent_distrib_key> may not be directly declared
+by the host type of this foreign key; it might be declared by the type of
+an attribute of the host type, if said attribute is a tuple/database; so
+the only or last C<parent_distrib_key> chain element is a key name, and any
+preceeding names are attribute names.
+
+=item C<child> - C<Cat.DeclNameChain>
+
+This is the name of the relation-valued attribute that is the child in the
+foreign distributed key relationship.  But the attribute named by C<child>
+is only a direct attribute of the host type if C<child> has 1 chain
+element; if it has more, then the host type attribute is a tuple/database
+and any further elements serve to make C<child> actually address a
+component of said.
+
+=item C<attr_map> - C<Cat.FKChildAttrParentAttrMap>
+
+This maps 0..N attributes of the child relation with the same number of
+attributes of the parent distributed key; the mapped attribute names may or
+may not be the same.
+
+=back
+
+A C<Cat.ForeignDistribKeySet> has a unary (unique) key on the C<name>
+attribute.  Its default value is empty.
+
+=head2 sys.std.Core.Type.Cat.FKChildAttrParentAttrMap
+
+A C<Cat.FKChildAttrParentAttrMap> is a C<Relation>.  It maps 0..N
+attributes of a child relation-valued attribute of a host tuple/database
+type participating in a foreign non-distributed or distributed key, to the
+same number of attributes of a parent such attribute or a distributed key
+of the host.  A C<Cat.FKChildAttrParentAttrMap> has 2 attributes,
+C<child_attr> and C<parent_attr>, each of those being a C<Cat.Name>, and
+each of those being a unary key.  Its default value has zero tuples.
 
 =head2 sys.std.Core.Type.Cat.InnerUnionType
 
@@ -2983,6 +3351,14 @@ allowed values would be in the C<lex> namespace, the C<Cat.NameChain> is
 used instead so that value expressions can take advantage of terse syntax
 for addressing value attributes.  Its default value has zero tuples.
 
+=head2 sys.std.Core.Type.Cat.NameDNCMap
+
+A C<Cat.NameDNCMap> is a C<Relation>.  It defines an association of a short
+name with a declaration name chain, to be used for aliasing the latter with
+the former in a particular context.  A C<Cat.NameDNCMap> has 2 attributes,
+C<name> (a C<Cat.Name>) and C<dnc> (a C<Cat.DeclNameChain>); each of those
+is a unary key.  Its default value has zero tuples.
+
 =head2 sys.std.Core.Type.Cat.AttrRenameMap
 
 A C<Cat.AttrRenameMap> is a C<Relation>.  It is used as a specification for
@@ -3021,6 +3397,97 @@ C<then> node is evaluated and its result is the result of the whole g-w-d
 expression; otherwise, C<then> is not evaluated.  For a g-w-d statement, if
 a C<when> value is matched, then the C<then> statement node is invoked;
 otherwise, C<then> is not invoked.  Its default value has zero tuples.
+
+=head1 TYPES FOR SPECIAL ENTITY REFERENCES
+
+Muldis D needs to support the concept of a closure or higher-order
+function, mainly for functions but also to a smaller extent for imperative
+routines.  For example, the generic relational restriction operator is
+designed to conceptually take a function as an argument and then invoke
+that function on each tuple of a relation it is filtering, and the function
+has the criteria for whether the tuple passes the filter.
+
+Conceptually, all that is needed is to pass the fully-qualified name of the
+routine as such an argument, which in the system catalog is represented as
+a C<Cat.NameChain>.  But using an actual C<Cat.NameChain> frequently
+doesn't work to support closures because the typical closure is defined as
+an I<inner routine> and those are expressly private to the context of the
+outer entity that the inner is embedded in.  There is no valid
+C<Cat.NameChain> value for referencing it from outside that context
+(likewise for routines declared private to a package), and outside that
+context is typically where the routines that take closures as arguments
+would live.  For example, if public function C<dep.mymain> had an inner
+function C<inn.mytest> and C<dep.myfoo> invoked the public function
+C<dep.myfilter> with an argument value of C<inn.mytest>, then if
+C<dep.myfilter> tried to invoke the function it was passed, it would
+actually be trying to invoke an inner function of C<dep.myfilter> named
+C<inn.mytest>, which won't work.  Conceptually, a solution to this problem
+is to actually pass a routine name in a more fully-qualified form,
+conceptually like C<dep.mymain.mytest>, which then C<dep.myfilter> could
+correctly invoke.  However, if that was made to work literally with a
+C<Cat.NameChain>, then this could cause problems where anything could
+invoke C<mytest> directly without being given permission from C<mymain>.
+
+As an at-least-initial solution to this problem, here are a few black box
+data types (specifically, quasi-scalar types with no possreps) which will
+provide fully-qualified identifiers for routines, useful as alternatives to
+C<Cat.NameChain> values, so any routine may be correctly invoked from any
+other routine, without losing privacy.  Values of these types work their
+magic by embedding knowledge about the lexical-et-al context in which they
+were selected, so that when routines are to be invoked by way of those
+values, the invocation of the capture effectively takes place within the
+same context where the special type values were selected, as users would
+conceptually expect.  Selecting one of these special values involves a
+C<Cat.NameChain> argument, and the identity of the selected special value
+is based on the combination of the argument and the context of selection,
+more or less.  At the same time, every one of these values may incorporate
+a meaningless random element to make every selection produce a distinct
+value, even if more than one would have the same semantics.  However,
+normal value assignment et al will preserve the same value of course, so
+identity comparison of a C<V> with a C<v> that was previously assigned to
+it would result in TRUE.  Currently, selecting these special values can not
+be done with an ordinary routine, but only with a special catalog type for
+an expression or statement node, due to the unusualness of this.  It is
+also not possible to map one of these special values to another type.
+There are no defined sorting orders for values of these types.  There are
+default values for these types (of course), and those defaults are to
+system-defined routines, for which incidentally the C<Cat.NameChain>
+solution would always have worked.  These types are all infinite.
+
+There are also similar special types here for referencing data types, but
+not for as many of the reasons.  Maybe another advantage of all of the
+above is that this can help compile-time type checking.
+
+=head2 sys.std.Core.Type.Cat.FuncRef
+
+A C<Cat.FuncRef> (quasi-scalar) is functionally like a smart
+C<Cat.NameChain> that holds a function name but it remembers the context of
+its creation.  It is used to implement a higher-order function or a
+functional closure.  Its default value is a reference to the
+C<sys.std.Core.Universal.is_identical> function.
+
+=head2 sys.std.Core.Type.Cat.ProcRef
+
+A C<Cat.ProcRef> (quasi-scalar) is functionally like a smart
+C<Cat.NameChain> that holds an imperative routine name but it remembers the
+context of its creation.  It is used to implement an imperative closure.
+Its default value is a reference to the C<sys.std.Core.Universal.assign>
+updater.
+
+=head2 sys.std.Core.Type.Cat.TypeRef
+
+A C<Cat.TypeRef> (quasi-scalar) is functionally like a smart
+C<Cat.NameChain> that holds a data type name but it remembers the context
+of its creation.  It is used in places where the name of a data type to
+'use' would be taken as a routine argument.  Its default value is a
+reference to the C<sys.std.Core.Type.Bool> data type.
+
+=head2 sys.std.Core.Type.Cat.OrdDetFuncRef
+
+A C<Cat.OrdDetFuncRef> (quasi-scalar) is to a C<Cat.OrdDetFuncNameChain>
+what a C<Cat.FuncRef> is to a C<Cat.NameChain>; it implements a functional
+closure but its default value is a reference to to the
+C<sys.std.Core.Scalar.order> function.
 
 =head1 SEE ALSO
 
