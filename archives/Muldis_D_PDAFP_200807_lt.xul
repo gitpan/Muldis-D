@@ -1,0 +1,1026 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="takahashi.css" type="text/css"?>
+
+<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    id="presentation" xmlns:html="http:/www.w3.org/1999/xhtml"
+    orient="vertical" onkeypress="Presentation.onKeyPress(event);">
+
+<html:textarea id="builtinCode" style="visibility: collapse">
+
+<![CDATA[
+Muldis D -
+Portable Databases
+At Full Power
+(2008 July Edition)
+(Live Talk Version)
+----
+Darren Duncan
+Muldis Data Systems
+****
+Victoria, BC, Canada
+****
+Database Software
+Products and Services
+(Perl by Default)
+----
+Miss something?
+http://muldis.com
+has a copy of this talk,
+plus a Stand Alone version,
+and a list of all urls
+----
+ Introducing "Muldis D":
+  * New language for truly relational databases
+  * See official spec on CPAN
+  * Or at http://muldis.com
+  * Mostly done
+  * Ask if you can't find something
+----
+ Reference implementation "Muldis Rosetta":
+  * Mostly incomplete
+  * You can't run Muldis D code yet
+  * But soon
+----
+ Muldis D is effectively:
+  * Generalization of all SQL dialects
+  * Modernization
+  * Not hobbled by ill-conceived features
+----
+ Intermediate language for translating DB code:
+  * Between SQL dialects
+  * Non-SQL languages
+  * While accurately preserving all semantics
+----
+ Features:
+  * Homoiconic
+  * Declarative
+  * Write code by writing data
+  * Code manipulatable by code
+----
+ Grammar:
+  * Fundamentally abstract
+  * Formed as an AST
+  * Any number of concrete grammars equivalent
+  * Plain text grammars
+  * Hosted data grammars - no SQL injection
+  * Treat all examples as pseudo-code
+  * But "Tiny" grammars defined
+----
+ Scalar literals in PTMD_Tiny dialect:
+  Bool:true
+  Int:9:42
+  Blob:F:A705E
+  Text:'サンプル'
+  Rat:radix:9:3.14159
+  Rat:ratio:9:1/43
+----
+ Same scalar literals in HDMD_Perl_Tiny dialect:
+  [ 'Bool', 'perl_bool', Bool::True ] # Perl 6 only
+  [ 'Bool', 'perl_bool', (1 == 1) ]  # alternative
+  [ 'Int', 'perl_int', 42 ]
+  [ 'Blob', 'md_blob', 'F', 'A705E' ]
+  [ 'Text', 'サンプル' ]
+  [ 'Rat', 'perl_rat', 3.14159 ]
+  [ 'Rat', 'perl_int_ratio', [ 1, 43 ] ]
+----
+ Toolkit for:
+  * Better database wrappers
+  * Persistence tools
+  * Abstraction frameworks
+  * Migration tools
+  * ORMs
+  * In any general purpose language
+----
+ Use for:
+  * Internal AST for schemas, queries, data
+  * Interchange format for same
+  * Rather than proprietary
+  * Likewise for actual DBMSs
+  * Or as public query language
+----
+ Talk format:
+  * Muldis D fundamentally verbose like AST
+  * We'll just have trivial code examples
+  * Explain most features in words
+  * Mostly compare/contrast with SQL
+----
+ Not DWIM where DWIM means guessing:
+  * Implicit semantic diffs made explicit
+  * Number rounding
+  * Text comparisons
+  * Behaviour specified neutral as possible
+  * Numbers radix-agnostic
+----
+ A "D" language:
+  * As defined by "Databases, Types, and
+    The Relational Model:
+    The Third Manifesto" (TTM)
+  * Book by Hugh Darwen and Christopher J. Date
+  * Free chapter 4 at http://thethirdmanifesto.com
+----
+ Name:
+  * The "D" of "Muldis D" refers to "D language"
+  * Not my name
+  * "Muldis" means "Multiverse of Discourse"
+----
+ Basic relational terms:
+  attribute : field/column
+  tuple     : row
+  relation  : rowset
+  relvar    : table
+  dbvar     : database
+----
+ OO vs relational terms:
+  * "object" not used
+  * "value" and "variable" instead
+  * Say "selector" rather than "constructor"
+----
+ Data type:
+  * A set of values
+  * Subtype/supertype means sub/superset
+  * Union/intersection types
+  * "specialization by constraint"
+  * Not "specialization by extension"
+----
+ Example:
+  * "circle" is a subtype of "ellipse"
+  * "coloured circle" not of "circle", "colour"
+  * "coloured circle" is multi-component type
+----
+ Type categories:
+  * Scalar or nonscalar (tuple or relation) in DB
+  * Quasi-variants for params, lexicals
+----
+ Tuple and relation types:
+  * non-encapsulated
+  * fundamental hetero/homogeneous collections
+----
+ Tuple like row but:
+ * Attrs all named
+ * Names all distinct
+ * Attrs not ordered, only ref by name
+ * May have zero attrs
+----
+ Relation like rowset as tuple/row but:
+  * Set of tuples
+  * No duplicates
+  * Never ordered
+----
+ Tuples in PTMD_Tiny dialect:
+   Tuple:{}
+   Tuple:{
+     'login_name' => Text:'hartmark',
+     'login_pass' => Text:'letmein',
+     'is_special' => Bool:true,
+   }
+   Tuple:{
+     'name' => Text:'Michelle',
+     'age'  => Int:9:17,
+   }
+----
+ Same in PTMD_Perl_Tiny dialect:
+   [ 'Tuple', {} ]
+   [ 'Tuple', {
+     'login_name' => [ 'Text', 'hartmark' ],
+     'login_pass' => [ 'Text', 'letmein' ],
+     'is_special' => [ 'Bool', 'md_enum', 'true' ],
+   } ]
+   [ 'Tuple', {
+     'name' => [ 'Text', 'Michelle' ],
+     'age'  => [ 'Int', 'perl_int', 17 ],
+   } ]
+----
+ Relations in PTMD_Tiny dialect:
+   Relation:{}
+   Relation:{ {}, }
+   Relation:{ 'x', 'y', 'z', }
+   Relation:{
+     {
+       'login_name' => Text:'hartmark',
+       'login_pass' => Text:'letmein',
+       'is_special' => Bool:true,
+     },
+   }
+   Relation:[ 'name', 'age', ]:{
+     [ Text:'Michelle', Int:9:17, ],
+   }
+----
+ Same in PTMD_Perl_Tiny dialect:
+   [ 'Relation', [] ]
+   [ 'Relation', [ {}, ] ]
+   [ 'Relation', [ 'x', 'y', 'z', ] ]
+   [ 'Relation', [
+     {
+       'login_name' => [ 'Text', 'hartmark' ],
+       'login_pass' => [ 'Text', 'letmein' ],
+       'is_special' => [ 'Bool', 'md_enum', 'true' ],
+     },
+   ] ]
+   [ 'Relation', [ 'name', 'age', ], [
+     [ [ 'Text', 'Michelle' ], [ 'Int', 'perl_int', 17 ], ],
+   ] ]
+----
+ More:
+  * Canonical Set, Array, Bag
+  * Just relations with pre-def attrs
+  * Tiny dialects have special syntax
+----
+ Scalar types:
+  * Encapsulated
+  * Like OO languages' object classes
+  * All their attrs private
+  * Only accessible indirectly
+----
+ Scalar type comprises "possreps":
+ * "possible representations"
+ * Each looks like a tuple
+ * Possrep like OO "role" or "interface"
+----
+ PTMD_Tiny dialect:
+   Scalar:'fed.lib.the_db.WeekDay':'name':{
+     '' => Text:'monday',
+   }
+   Scalar:'fed.lib.the_db.WeekDay':'number':{
+     '' => Int:9:5,
+   }
+ HDMD_Perl_Tiny dialect:
+   [ 'Scalar', 'fed.lib.the_db.WeekDay', 'name', {
+     '' => [ 'Text', 'monday' ],
+   } ]
+   [ 'Scalar', 'fed.lib.the_db.WeekDay', 'number', {
+     '' => [ 'Int', 'perl_int', 5 ],
+   } ]
+----
+ Some scalar types special:
+  * Bool, Int, Blob, Text
+  * No possreps
+  * Others not for general purpose use
+  * All are "big" as applicable
+----
+Boolean types
+----
+ Muldis D:
+   Bool
+ SQL:
+   BOOLEAN, TINYINT(1),
+   INTEGER, NUMBER(1), ...
+----
+Numeric types
+----
+ Muldis D:
+   Int, Rat
+ SQL:
+   TINYINT, SMALLINT,
+   MEDIUMINT, INTEGER,
+   BIGINT, NUMERIC, NUMBER,
+   DECIMAL, REAL, FLOAT,
+   DOUBLE, BIT, PLS_INTEGER,
+   BINARY_INTEGER, ...
+----
+ Numeric types:
+  * All bigints / bignums
+  * Radix agnostic
+  * Exact precision
+  * For all rationals
+  * Fixed and floating-point
+  * Int has no possrep
+  * Rat has 2 possreps
+----
+Binary string types
+----
+ Muldis D:
+   Blob
+ SQL:
+   BIT, BINARY, VARBINARY,
+   TINYBLOB, BLOB,
+   MEDIUMBLOB, LONGBLOB,
+   BYTEA, RAW, LONG RAW, ...
+----
+Character string types
+----
+ Muldis D:
+   Text
+ SQL:
+   CHAR, VARCHAR, TINYTEXT,
+   TEXT, MEDIUMTEXT,
+   LONGTEXT, CLOB,
+   NATIONAL variants,
+   VARCHAR2, LONG, ...
+----
+ All Muldis D character string types are Unicode
+----
+ Also:
+  * Temporals - dates, times, durations
+  * Spatials - 2D geometrics, GIS
+  * They're incomplete
+----
+ Routines:
+  * 3 main kinds
+  * functions
+  * updaters
+  * procedures
+----
+Functions
+----
+ create in fed.myapp
+ function cube {
+   result sys.std.Core.Type.Int
+   params { topic(sys.std.Core.Type.Int) }
+   exprs {
+     exp(sca_lit Int:9:3),
+     ''(func_invo sys.std.Integer.power
+       args { radix(lex.topic), exponent(lex.exp) }
+     ),
+   }
+ }
+ ;
+ ;
+ ;
+----
+ Functions:
+  * Pure
+  * Only invoke in value expressions
+  * Just read-only params
+  * Just has value expression
+  * Only invokes functions
+----
+Updaters
+----
+ create in fed.myapp
+ updater chop_sign {
+   upd_params { topic(sys.std.Core.Type.Int) }
+   exprs {
+     abs_val(func_invo sys.std.Integer.abs
+       args { topic(lex.topic) }
+     ),
+   }
+   stmt {
+     sys.std.Core.Universal.assign
+       upd_args { target(lex.topic) }
+       ro_args { v(lex.abs_val) },
+   }
+ }
+----
+ Updaters:
+  * Imperative
+  * All statements simultaneous
+  * May update multiple subject-to-update params
+----
+ Functions and updaters:
+  * Fully deterministic
+  * No lexical vars
+  * Can't see globals
+  * Implicitly atomic
+  * Safe to implicitly refactor
+  * Have value exprs of named nodes
+  * Helps docs, common sub-expr refactor
+----
+Procedures
+----
+ create in fed.myapp
+ procedure fetch_all_people {
+   upd_params { people(type.var.fed.mydb.people) }
+   stmts [
+     proc_invo sys.std.Core.Universal.assign
+       upd_args { target(lex.people) }
+       ro_args { v(fed.mydb.people) },
+   ]
+ }
+ ;
+ ;
+ ;
+ ;
+ ;
+----
+ Procedures:
+  * Imperative
+  * Can see/update globals
+  * Have lexicals
+  * Seq of ordered statements
+  * May be non-deterministic
+  * May have side-effects in non-args
+  * Pure imperative
+  * Updaters bridge gap
+----
+ Inner routines:
+  * For all routine kinds
+  * Don't have to externalize parts
+  * Like SQL WITH in general
+  * Support internal recursion
+----
+ For example, to represent a
+ SQL procedure like this:
+   CREATE PROCEDURE count_people
+       (INOUT p_count INT)
+     SELECT COUNT(*)
+     INTO p_count
+     FROM mydb.people;
+ ... a Muldis DB procedure would
+ use an inner updater to hold the
+ "COUNT(*) FROM people" portion,
+ which is a value expression
+----
+ create in fed.myapp
+ procedure count_people {
+   upd_args { p_count(sys.std.Core.Type.UInt) }
+   stmts [
+     proc_invo inn.icount
+       upd_args { p_count(lex.p_count) }
+       ro_args { the_db(fed.mydb) },
+   ]
+   updater icount {
+     upd_params { p_count(sys.std.Core.Type.UInt) }
+     ro_params { the_db(type.var.fed.mydb) }
+     exprs {
+       pc(func_invo sys.std.Core.Relation.cardinality
+         args { topic(lex.the_db.people) }
+       ),
+     }
+     stmt {
+       sys.std.Core.Universal.assign
+         upd_args { target(lex.p_count) }
+         ro_args { v(lex.pc) },
+     }
+   }
+ }
+----
+ Routines:
+  * All params named, not positional
+  * All args marked updateable or not
+  * Helps self-documentation
+----
+ Merger:
+  * Generic N-ary operator
+  * SQL aggregate operator
+  * Any built-ins possible are N-ary
+  * Can be used in summary
+----
+ Examples:
+  * Boolean and, or, xor
+  * Ordinal min, max
+  * Numeric sum, product
+  * String catenate
+  * Relational join, product, union, intersect
+  * All these are associative
+  * All but catenate are commutative
+----
+Nonscalar attributes
+----
+ Data types and relational model orthogonal
+  * Attr may be tuple or relation
+  * Not just scalar
+  * All relational ops work with them
+  * No distinction of SQL MULTISET vs table
+  * Consistency is good
+  * Support for TVAs, RVAs mandatory in "D"
+  * Extremely useful
+----
+ RVA means:
+  * Parent+child in single query
+  * No redundancy
+  * Child tuples in RVA of parents
+  * Very natural for multi-level report
+  * No many-to-many assoc tables needed
+  * No need to split relvar to normalize
+----
+ Relation:[ 'order_id', 'cust_id', 'order_item' ]:{
+   [ Int:9:5073, Int:9:209, Relation:{
+     { 'prod_id' => Text:'paint',  'qty' => Int:9:3 },
+   } ],
+   [ Int:9:5074, Int:9:332, Relation:{
+     { 'prod_id' => Text:'axle',  'qty' => Int:9:20 },
+     { 'prod_id' => Text:'lever', 'qty' => Int:9:50 },
+     { 'prod_id' => Text:'paint', 'qty' => Int:9:8 },
+   } ],
+   [ Int:9:5075, Int:9:17, Relation:{
+     { 'prod_id' => Text:'banana', 'qty' => Int:9:100 },
+     { 'prod_id' => Text:'orange', 'qty' => Int:9:160 },
+   } ],
+ }
+----
+Values in logic
+----
+ Native 2-valued logic:
+  * No SQL 3+VL NULL where NULL<>itself
+  * All Muldis D values equal themselves
+  * Alternate canon for "N/A"/"unknown" with 2VL
+----
+ To make attr conceptually nullable:
+  * Make it an RVA
+  * Or a Maybe (Set with 0..1 tuples)
+  * IS (NOT) NULL becomes is (not) Maybe/RVA empty
+  * Empty means IS NULL
+  * Non-empty means IS NOT NULL
+  * Tuple's attribute is the known value
+  * Brings consistency for outer-joins
+----
+Identity matters
+----
+ "is_identical", "assign" operators:
+  * Work for all types, including nonscalars
+  * Compare/assign whole relations, no contriving
+  * Text case/accents/ws diffs significant
+  * Derived ops (joins etc) act the same
+  * Floating point nums treated as exact
+  * Unicode graphemes significant, codepoints not
+  * Tuples in relation always ident by value
+  * No implicit extra attrs like SQL "row id"
+----
+ Type safety
+  * Strong typing
+  * No implicit sideways type conversion/casting
+----
+Virtual reality
+----
+ Views:
+  * A var attr is a var too
+  * A whole database is a tuple var
+  * Database relvars are virtual
+  * SQL schemas are databases in databases
+  * Hierarchy with relation leaves
+----
+ Merger:
+  * SQL viewed tables
+  * SQL generated columns
+  * Special functional dependencies between attrs
+  * Virtual attrs gen from other attrs
+  * Mapping functions say how
+  * Virtuals updateable if possible
+  * Case-insensitive key example
+----
+System Catalog
+----
+ System catalog:
+  * Represents SQL "information schema"
+  * Is special dbvar
+  * Separate from user data dbvar
+  * Is updateable
+----
+ Updating system catalog:
+  * Fundamental means of data definition
+  * DD-specific routines just abstraction
+  * Put desc of relvar into it to create
+  * Put code-as-data in to make routines, types
+  * Compiles, becomes runnable as side-effect
+  * Even connect/disconnect a DBMS
+  * Do all DBMS ops with just queries, DML
+----
+ Catalog contents:
+  * Abstract AST-like data structures
+  * Actually tuples and relations
+  * Not code strings
+  * Easy for DB wrapper to introspect a DB
+  * Even its stored routines
+  * System-defined entities too
+----
+Depots
+----
+ A depot:
+  * Local abstract of typically external storage
+  * Holds a user data dbvar, related catalog dbvar
+  * Maybe details to map reality
+  * Represents SQL concept of "the database"
+  * Packages user data, user-def types, routines
+  * May just have code - a dynamic loaded lib
+  * Persistent or transient, read-only or not
+----
+ Multiple depots:
+  * Mountable by DBMS at once
+  * Have own namespaces like filesystem
+  * Perform cross-database queries or updates
+  * They're like one database then
+  * Cloning a database just a variable assignment
+----
+ A depot is a completely independent unit:
+  * All types, constraints for dbvar kept together
+  * Likewise for routines etc
+  * No ext dependencies to understand its contents
+  * No inter-depot constraints
+----
+ DB authentication details:
+  * Such as DB user/pass
+  * Apply per depot mount, not on whole DBMS
+----
+Entity Names
+----
+ All DBMS entities in one namespace:
+  * Hierarchical
+  * System and user defined
+  * Depots, variables, types, routines
+  * Entities always invoked fully-qualified
+  * No name search ambiguity
+  * No subtle code breaks due to new entities
+----
+ Organization:
+  sys - system-defined entities
+    sys.std - official Muldis D features
+    sys.imp - extra implementation-specifics
+  mnt - depot mount controls
+  fed - user-def entities in all depots
+  dep - in just current depot
+  sdp - current subdepot/schema
+  pkg - current Oracle-concept package
+  inn - local inner types/routines
+  lex - lexical param args, vars, expr nodes
+----
+ Special features:
+  * Special suffixes for drilling into attrs
+  * Special prefixes for taking type of something
+  * or avoiding type def explosions
+----
+ Entity names:
+  * As per delimited SQL identifiers
+  * Case/etc sensitive
+  * No reserved words
+  * Unicode
+  * May be the empty string
+  * Users have complete freedom
+----
+Code comparisons
+----
+ Muldis D:
+   'x'
+ SQL (as a scalar query):
+   (SELECT 'x')
+ or:
+   (SELECT 'x' FROM dual)
+----
+ Muldis D:
+   tab1
+ SQL:
+   SELECT * FROM tab1
+----
+ Muldis D:
+   sys.std.Core.Relation.cardinality(
+     topic(tab1)
+   )
+ SQL (as a scalar query):
+   (SELECT COUNT(*) FROM tab1)
+----
+ Muldis D:
+   sys.std.Core.Relation.projection(
+     topic(tab1),
+     attrs(Set:{ 'col1', 'col2' }),
+   )
+ SQL:
+   SELECT DISTINCT col1, col2
+   FROM tab1
+----
+ Muldis D:
+   sys.std.Core.Relation.semijoin(
+     source(tab1),
+     filter(Relation:{
+       { col1(Text:'hello'), col2(Int:9:5) },
+       { col1(Text:'world'), col2(Int:9:7) },
+     }),
+   )
+ ;
+ ;
+ ;
+ ;
+ ;
+ ;
+----
+ SQL:
+   SELECT *
+   FROM tab1
+   WHERE (col1, col2) IN (
+     SELECT 'hello' AS col1, 5 AS col2
+     UNION
+     SELECT 'world' AS col1, 7 AS col2
+   )
+ ;
+ ;
+ ;
+ ;
+ ;
+ ;
+----
+ or:
+   SELECT *
+   FROM tab1
+   WHERE col1 = 'hello' AND col2 = 5
+      OR col1 = 'world' AND col2 = 7
+ ;
+ ;
+ ;
+ ;
+ ;
+ ;
+ ;
+ ;
+ ;
+----
+ The next example is a
+ natural join of 2 relations
+ whose attrs are as follows:
+ tab1(col1,col2,col3),
+ tab2(col2,col3,col4), such
+ that the result is
+ tab(col1,col2,col3,col4)
+----
+ Muldis D:
+   sys.std.Core.Relation.join(
+     topic(QuasiSet:{ tab1, tab2 }),
+   )
+ SQL:
+   SELECT DISTINCT tab1.*, tab2.col4
+   FROM tab1 NATURAL INNER JOIN tab2
+ or:
+   SELECT DISTINCT tab1.*, tab2.col4
+   FROM tab1 INNER JOIN tab2 USING (col2, col3)
+ or:
+   SELECT DISTINCT tab1.*, tab2.col4
+   FROM tab1 INNER JOIN tab2
+     ON tab2.col2 = tab1.col2 AND tab2.col3 = tab1.col3
+ ;
+ ;
+----
+ Muldis D:
+   sys.std.Core.Relation.rename(
+     topic(tab1),
+     map(Relation:['before','after']:{
+       ['col1', 'foo'],
+       ['col3', 'bar'],
+     }),
+   )
+ SQL:
+   SELECT col1 AS foo, col2, col3 AS bar
+   FROM tab1
+----
+ Muldis D:
+   with { function myext {
+       result sys.std.Core.Type.Tuple
+       params { topic(sys.std.Core.Type.Tuple) }
+       body { Tuple:{
+         a => Text:'x',
+         b => sys.std.Integer.difference(
+           minuend(lex.topic.m),
+           subtrahend(lex.topic.n)
+         ), } }
+   }, }
+   sys.std.Core.Relation.extension(
+     topic(tab1), func(inn.myext), )
+ SQL:
+   SELECT tab1.*, 'x' AS a, (tab1.m - tab1.n) AS b FROM tab1
+ ;
+ ;
+----
+Database constraints
+----
+ Merger:
+  * SQL's CHECK constraint
+  * Some kinds of SQL triggers
+  * Generic constraint function
+  * Takes value as input, results in boolean
+  * Apply per whole DB, or relvar, or per-tuple
+  * Commonly expressed as type constraints
+  * Whole database has a type
+----
+ Database constraints:
+  * Automatically apply at end of each statement
+  * Throws exception if any result in FALSE
+  * Can't be deferred
+  * No "domain check override"
+  * Database always in a valid state
+  * But this isn't a problem
+  * You can update multiple vars simultaneously
+  * Bank account credit/debit example
+----
+ Canonical abstractions:
+  * For SQL's unique, foreign key constraints
+  * Unique key on a relation
+  * Foreign key between db attrs
+  * Muldis D adds distributed unique/foreign keys
+  * Library books and DVDs example
+  * Multi-attribute keys supported
+----
+ Transition constraints:
+  * Apply to vars, not types
+  * Check how a var value may directly change
+----
+Transactions
+----
+ All "D" languages are ACID compliant
+----
+ Nested transactions:
+  * All "D" languages support
+  * Arbitrary depth
+  * Start a transaction within another one
+  * Let code be atomic, no worry about callers
+  * Only parent-most does actual commit
+  * Easy to rollback just part of overall trans
+----
+ Transactions:
+  * All depots commit or rollback as a unit
+  * Explicitly tied to lexical scopes
+  * And to the exception mechanism
+  * "try" block entry begins a child
+  * "try" success / normal end commits
+  * "try" catches exception, rollback
+  * Easy to get right even with multiple exits
+  * No worry about mis-matched start/end
+  * DBMS must auto-rollback on disconnect
+----
+Muldis Rosetta
+----
+ Introducing "Muldis Rosetta":
+  * Reference implementation of Muldis D
+  * Is a DBMS
+  * Mostly incomplete
+  * Should be working soon
+----
+ Concepts:
+  * DBMS is a virtual machine
+  * DBMS embedded in your dev environment
+  * DBMS needn't be external program from your app
+  * DBMS is like module in your app
+  * Provides relational ops for munging app vars
+  * State managing solution for relvars/dbvars
+  * Actual embed or external, you code same way
+  * Like local vs remote procedure calls
+  * Write queries as named rtns to invoke later
+----
+ Implemented in Perl:
+  * Lots of fundamental features built in
+  * Can invoke compiler at runtime
+  * Just gen Perl code from MD, let Perl do work
+  * Automatic garbage collection
+  * Text is Unicode, unlimited length
+  * Bigint/bignum built-in
+  * Ad-hoc multi-dimensional data structures
+  * Extensive meta-model
+  * Closures, higher-order functions, map, grep
+----
+ Structure:
+  * A Perl framework like DBI; sep intf, engines
+  * Develop/test on one DBMS, deploy on another
+  * Standalone Example Engine bundled with intf
+  * Develop/test a DBMS app without "real" DBMS
+  * Example just demos semantics, doesn't scale
+  * Most Engines likely bridge to existing DBMSs
+  * Keeps all features, speed of underlying DBMS
+  * Develop/test on one DBMS, deploy on another
+  * Common test suite for all Engines
+----
+Thank you!
+----
+Copyright © 2008,
+Darren Duncan
+****
+http://muldis.com
+for email, see above
+----
+This slideshow text is
+free documentation for software;
+you can redistribute it and/or
+modify it under the terms of the
+GNU General Public License (GPL) as
+published by the Free Software Foundation
+(http://www.fsf.org/); either
+version 3 of the License,
+or (at your option) any later version.
+]]>
+</html:textarea>
+
+<deck flex="1" id="deck">
+
+<vbox flex="1" onmousemove="Presentation.onMouseMoveOnCanvas(event);">
+  <toolbox id="canvasToolbar">
+    <toolbar>
+      <toolbarbutton oncommand="Presentation.home()" label="|&lt;&lt;"
+        observes="canBack"/>
+      <toolbarbutton oncommand="Presentation.back()" label="&lt;"
+        observes="canBack"/>
+      <toolbarbutton oncommand="Presentation.forward()" label="&gt;"
+        observes="canForward"/>
+      <toolbarbutton oncommand="Presentation.end()" label="&gt;&gt;|"
+        observes="canForward"/>
+      <toolbarseparator/>
+      <hbox align="center">
+        <textbox id="current_page" size="4"
+          oninput="if (this.value) Presentation.showPage(parseInt(this.value)-1);"/>
+        <description value="/"/>
+        <description id="max_page"/>
+      </hbox>
+      <toolbarseparator/>
+      <vbox flex="2">
+        <spacer flex="1"/>
+        <scrollbar id="scroller"
+          align="center" orient="horizontal"
+          oncommand="Presentation.showPage(parseInt(event.target.getAttribute('curpos')));"
+          onclick="Presentation.showPage(parseInt(event.target.getAttribute('curpos')));"
+          onmousedown="Presentation.onScrollerDragStart();"
+          onmousemove="Presentation.onScrollerDragMove();"
+          onmouseup="Presentation.onScrollerDragDrop();"/>
+        <spacer flex="1"/>
+      </vbox>
+      <toolbarseparator/>
+      <spacer flex="1"/>
+      <toolbarseparator/>
+      <toolbarbutton id="toggleEva" label="Eva"
+        type="checkbox"
+        autoCheck="false"
+        oncommand="Presentation.toggleEvaMode();"/>
+      <toolbarseparator/>
+      <toolbarbutton label="Edit"
+        oncommand="Presentation.toggleEditMode();"/>
+      <toolbarbutton oncommand="Presentation.reload();" label="Reload"/>
+    </toolbar>
+  </toolbox>
+  <vbox flex="1" id="canvas"
+    onclick="Presentation.onPresentationClick(event);">
+    <spacer flex="1"/>
+    <hbox flex="1">
+      <spacer flex="1"/>
+      <vbox id="content"/>
+      <spacer flex="1"/>
+    </hbox>
+    <spacer flex="1"/>
+  </vbox>
+</vbox>
+
+<vbox flex="1" id="edit">
+  <toolbox>
+    <toolbar>
+      <toolbarbutton label="New Page"
+        oncommand="Presentation.addPage()"/>
+      <spacer flex="1"/>
+      <toolbarseparator/>
+      <toolbarbutton label="View"
+        oncommand="Presentation.toggleEditMode();"/>
+      <toolbarbutton oncommand="Presentation.reload();" label="Reload"/>
+    </toolbar>
+  </toolbox>
+  <textbox id="textField" flex="1" multiline="true"
+    oninput="Presentation.onEdit()"/>
+  <hbox collapsed="true">
+    <iframe id="dataLoader" onload="if (window.Presentation) Presentation.onDataLoad();"/>
+  </hbox>
+</vbox>
+
+</deck>
+
+<broadcasterset>
+  <broadcaster id="canBack"/>
+  <broadcaster id="canForward"/>
+</broadcasterset>
+
+<commandset>
+  <command id="cmd_forward"
+    oncommand="if (Presentation.isPresentationMode) Presentation.forward();"/>
+  <command id="cmd_back"
+    oncommand="if (Presentation.isPresentationMode) Presentation.back();"/>
+  <command id="cmd_home"
+    oncommand="if (Presentation.isPresentationMode) Presentation.home();"/>
+  <command id="cmd_end"
+    oncommand="if (Presentation.isPresentationMode) Presentation.end();"/>
+</commandset>
+
+<keyset>
+  <key keycode="VK_ENTER"    command="cmd_forward"/>
+  <key keycode="VK_RETURN"   command="cmd_forward"/>
+  <key keycode="VK_PAGE_DOWN"  command="cmd_forward"/>
+  <key keycode="VK_RIGHT"    command="cmd_forward"/>
+  <key keycode="VK_DOWN"     command="cmd_forward"/>
+  <!-- key keycode="VK_BACK_SPACE" command="cmd_back"/-->
+  <key keycode="VK_PAGE_UP"  command="cmd_back"/>
+    <!-- <key keycode="VK_BACK_UP"  command="cmd_back"/>-->
+    <!-- <key keycode="VK_BACK_LEFT"  command="cmd_back"/>-->
+  <key keycode="VK_HOME"     command="cmd_home"/>
+  <key keycode="VK_END"    command="cmd_end"/>
+  <key key="n" modifiers="accel" oncommand="Presentation.addPage();"/>
+  <key key="r" modifiers="accel" oncommand="window.location.reload();"/>
+  <key key="e" modifiers="accel" oncommand="Presentation.toggleEditMode();"/>
+  <key key="a" modifiers="accel" oncommand="Presentation.toggleEvaMode();"/>
+</keyset>
+
+<script src="takahashi.js" type="application/x-javascript" />
+
+</page>
+
+<!-- ***** BEGIN LICENSE BLOCK *****
+   - Version: MPL 1.1
+   -
+   - The contents of this file [except for the slideshow text in the CDATA
+   - block, which is independent user data to display by the rest of the file]
+   - are subject to the Mozilla Public License Version
+   - 1.1 (the "License"); you may not use this file except in compliance with
+   - the License. You may obtain a copy of the License at
+   - http://www.mozilla.org/MPL/
+   -
+   - Software distributed under the License is distributed on an "AS IS" basis,
+   - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+   - for the specific language governing rights and limitations under the
+   - License.
+   -
+   - The Original Code is the Takahashi-Method-based Presentation Tool in XUL.
+   -
+   - The Initial Developer of the Original Code is SHIMODA Hiroshi.
+   - Portions created by the Initial Developer are Copyright (C) 2005
+   - the Initial Developer. All Rights Reserved.
+   -
+   - Contributor(s): SHIMODA Hiroshi <piro@p.club.ne.jp>
+   -
+   - ***** END LICENSE BLOCK ***** -->
