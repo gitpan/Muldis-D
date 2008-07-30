@@ -9,6 +9,14 @@
 <html:textarea id="builtinCode" style="visibility: collapse">
 
 <![CDATA[
+Note: You may need to
+"zoom out" in your browser
+or set it to display text
+smaller than normal (such as
+with Cmd/Ctrl-minus), so
+you can see the longer
+lines of code
+----
 Muldis D -
 Portable Databases
 At Full Power
@@ -323,59 +331,59 @@ has duplicate tuples; also,
 a relation's tuples are
 never ordered
 ----
- Tuples in PTMD_Tiny dialect:
-   Tuple:{}
-   Tuple:{
-     'login_name' => Text:'hartmark',
-     'login_pass' => Text:'letmein',
-     'is_special' => Bool:true,
-   }
-   Tuple:{
-     'name' => Text:'Michelle',
-     'age'  => Int:9:17,
-   }
+Tuples in PTMD_Tiny dialect:
+  Tuple:{}
+  Tuple:{
+    'login_name' => Text:'hartmark',
+    'login_pass' => Text:'letmein',
+    'is_special' => Bool:true,
+  }
+  Tuple:{
+    'name' => Text:'Michelle',
+    'age'  => Int:9:17,
+  }
 ----
- Same in PTMD_Perl_Tiny dialect:
-   [ 'Tuple', {} ]
-   [ 'Tuple', {
-     'login_name' => [ 'Text', 'hartmark' ],
-     'login_pass' => [ 'Text', 'letmein' ],
-     'is_special' => [ 'Bool', 'md_enum', 'true' ],
-   } ]
-   [ 'Tuple', {
-     'name' => [ 'Text', 'Michelle' ],
-     'age'  => [ 'Int', 'perl_int', 17 ],
-   } ]
+Same in PTMD_Perl_Tiny dialect:
+  [ 'Tuple', {} ]
+  [ 'Tuple', {
+    'login_name' => [ 'Text', 'hartmark' ],
+    'login_pass' => [ 'Text', 'letmein' ],
+    'is_special' => [ 'Bool', 'md_enum', 'true' ],
+  } ]
+  [ 'Tuple', {
+    'name' => [ 'Text', 'Michelle' ],
+    'age'  => [ 'Int', 'perl_int', 17 ],
+  } ]
 ----
- Relations in PTMD_Tiny dialect:
-   Relation:{}
-   Relation:{ {}, }
-   Relation:{ 'x', 'y', 'z', }
-   Relation:{
-     {
-       'login_name' => Text:'hartmark',
-       'login_pass' => Text:'letmein',
-       'is_special' => Bool:true,
-     },
-   }
-   Relation:[ 'name', 'age', ]:{
-     [ Text:'Michelle', Int:9:17, ],
-   }
+Relations in PTMD_Tiny dialect:
+  Relation:{}
+  Relation:{ {}, }
+  Relation:{ 'x', 'y', 'z', }
+  Relation:{
+    {
+      'login_name' => Text:'hartmark',
+      'login_pass' => Text:'letmein',
+      'is_special' => Bool:true,
+    },
+  }
+  Relation:[ 'name', 'age', ]:{
+    [ Text:'Michelle', Int:9:17, ],
+  }
 ----
- Same in PTMD_Perl_Tiny dialect:
-   [ 'Relation', [] ]
-   [ 'Relation', [ {}, ] ]
-   [ 'Relation', [ 'x', 'y', 'z', ] ]
-   [ 'Relation', [
-     {
-       'login_name' => [ 'Text', 'hartmark' ],
-       'login_pass' => [ 'Text', 'letmein' ],
-       'is_special' => [ 'Bool', 'md_enum', 'true' ],
-     },
-   ] ]
-   [ 'Relation', [ 'name', 'age', ], [
-     [ [ 'Text', 'Michelle' ], [ 'Int', 'perl_int', 17 ], ],
-   ] ]
+Same in PTMD_Perl_Tiny dialect:
+  [ 'Relation', [] ]
+  [ 'Relation', [ {}, ] ]
+  [ 'Relation', [ 'x', 'y', 'z', ] ]
+  [ 'Relation', [
+    {
+      'login_name' => [ 'Text', 'hartmark' ],
+      'login_pass' => [ 'Text', 'letmein' ],
+      'is_special' => [ 'Bool', 'md_enum', 'true' ],
+    },
+  ] ]
+  [ 'Relation', [ 'name', 'age', ], [
+    [ [ 'Text', 'Michelle' ], [ 'Int', 'perl_int', 17 ], ],
+  ] ]
 ----
 Muldis D also has canonical
 representations of plain
@@ -412,20 +420,20 @@ it has 2 possreps called
 those having a single attr
 named with the empty string
 ----
- PTMD_Tiny dialect:
-   Scalar:'fed.lib.the_db.WeekDay':'name':{
-     '' => Text:'monday',
-   }
-   Scalar:'fed.lib.the_db.WeekDay':'number':{
-     '' => Int:9:5,
-   }
- HDMD_Perl_Tiny dialect:
-   [ 'Scalar', 'fed.lib.the_db.WeekDay', 'name', {
-     '' => [ 'Text', 'monday' ],
-   } ]
-   [ 'Scalar', 'fed.lib.the_db.WeekDay', 'number', {
-     '' => [ 'Int', 'perl_int', 5 ],
-   } ]
+PTMD_Tiny dialect:
+  Scalar:'fed.lib.the_db.WeekDay':'name':{
+    '' => Text:'monday',
+  }
+  Scalar:'fed.lib.the_db.WeekDay':'number':{
+    '' => Int:9:5,
+  }
+HDMD_Perl_Tiny dialect:
+  [ 'Scalar', 'fed.lib.the_db.WeekDay', 'name', {
+    '' => [ 'Text', 'monday' ],
+  } ]
+  [ 'Scalar', 'fed.lib.the_db.WeekDay', 'number', {
+    '' => [ 'Int', 'perl_int', 5 ],
+  } ]
 ----
 A few scalar types are
 special and don't have any
@@ -444,23 +452,23 @@ by system resources
 ----
 Boolean types
 ----
- Muldis D:
-   Bool
- SQL:
-   BOOLEAN, TINYINT(1),
-   INTEGER, NUMBER(1), ...
+Muldis D:
+  Bool
+SQL:
+  BOOLEAN, TINYINT(1),
+  INTEGER, NUMBER(1), ...
 ----
 Numeric types
 ----
- Muldis D:
-   Int, Rat
- SQL:
-   TINYINT, SMALLINT,
-   MEDIUMINT, INTEGER,
-   BIGINT, NUMERIC, NUMBER,
-   DECIMAL, REAL, FLOAT,
-   DOUBLE, BIT, PLS_INTEGER,
-   BINARY_INTEGER, ...
+Muldis D:
+  Int, Rat
+SQL:
+  TINYINT, SMALLINT,
+  MEDIUMINT, INTEGER,
+  BIGINT, NUMERIC, NUMBER,
+  DECIMAL, REAL, FLOAT,
+  DOUBLE, BIT, PLS_INTEGER,
+  BINARY_INTEGER, ...
 ----
 The Int and Rat types are
 bigints / bugnums; they are
@@ -479,24 +487,24 @@ radix, exponent] triple
 ----
 Binary string types
 ----
- Muldis D:
-   Blob
- SQL:
-   BIT, BINARY, VARBINARY,
-   TINYBLOB, BLOB,
-   MEDIUMBLOB, LONGBLOB,
-   BYTEA, RAW, LONG RAW, ...
+Muldis D:
+  Blob
+SQL:
+  BIT, BINARY, VARBINARY,
+  TINYBLOB, BLOB,
+  MEDIUMBLOB, LONGBLOB,
+  BYTEA, RAW, LONG RAW, ...
 ----
 Character string types
 ----
- Muldis D:
-   Text
- SQL:
-   CHAR, VARCHAR, TINYTEXT,
-   TEXT, MEDIUMTEXT,
-   LONGTEXT, CLOB,
-   NATIONAL variants,
-   VARCHAR2, LONG, ...
+Muldis D:
+  Text
+SQL:
+  CHAR, VARCHAR, TINYTEXT,
+  TEXT, MEDIUMTEXT,
+  LONGTEXT, CLOB,
+  NATIONAL variants,
+  VARCHAR2, LONG, ...
 ----
 All Muldis D character
 string types are Unicode
@@ -515,20 +523,17 @@ updaters and procedures
 ----
 Functions
 ----
- create in fed.myapp
- function cube {
-   result sys.std.Core.Type.Int
-   params { topic(sys.std.Core.Type.Int) }
-   exprs {
-     exp(sca_lit Int:9:3),
-     ''(func_invo sys.std.Integer.power
-       args { radix(lex.topic), exponent(lex.exp) }
-     ),
-   }
- }
- ;
- ;
- ;
+  create in fed.myapp
+  function cube {
+    result sys.std.Core.Type.Int
+    params { topic(sys.std.Core.Type.Int) }
+    exprs {
+      exp(sca_lit Int:9:3),
+      ''(func_invo sys.std.Integer.power
+        args { radix(lex.topic), exponent(lex.exp) }
+      ),
+    }
+  }
 ----
 Functions are pure and
 may only be invoked in value
@@ -540,20 +545,20 @@ invoke functional routines
 ----
 Updaters
 ----
- create in fed.myapp
- updater chop_sign {
-   upd_params { topic(sys.std.Core.Type.Int) }
-   exprs {
-     abs_val(func_invo sys.std.Integer.abs
-       args { topic(lex.topic) }
-     ),
-   }
-   stmt {
-     sys.std.Core.Universal.assign
-       upd_args { target(lex.topic) }
-       ro_args { v(lex.abs_val) },
-   }
- }
+  create in fed.myapp
+  updater chop_sign {
+    upd_params { topic(sys.std.Core.Type.Int) }
+    exprs {
+      abs_val(func_invo sys.std.Integer.abs
+        args { topic(lex.topic) }
+      ),
+    }
+    stmt {
+      sys.std.Core.Universal.assign
+        upd_args { target(lex.topic) }
+        ro_args { v(lex.abs_val) },
+    }
+  }
 ----
 Updaters are imperative but
 all of their statements will
@@ -581,20 +586,15 @@ be factored to one instance
 ----
 Procedures
 ----
- create in fed.myapp
- procedure fetch_all_people {
-   upd_params { people(type.var.fed.mydb.people) }
-   stmts [
-     proc_invo sys.std.Core.Universal.assign
-       upd_args { target(lex.people) }
-       ro_args { v(fed.mydb.people) },
-   ]
- }
- ;
- ;
- ;
- ;
- ;
+  create in fed.myapp
+  procedure fetch_all_people {
+    upd_params { people(type.var.fed.mydb.people) }
+    stmts [
+      proc_invo sys.std.Core.Universal.assign
+        upd_args { target(lex.people) }
+        ro_args { v(fed.mydb.people) },
+    ]
+  }
 ----
 Procedures are imperative,
 can see/update global vars,
@@ -620,41 +620,41 @@ be arbitrarily complex
 without forcing parts to be
 externalized as public rtns
 ----
- For example, to represent a
- SQL procedure like this:
-   CREATE PROCEDURE count_people
-       (INOUT p_count INT)
-     SELECT COUNT(*)
-     INTO p_count
-     FROM mydb.people;
- ... a Muldis DB procedure would
- use an inner updater to hold the
- "COUNT(*) FROM people" portion,
- which is a value expression
+For example, to represent a
+SQL procedure like this:
+  CREATE PROCEDURE count_people
+      (INOUT p_count INT)
+    SELECT COUNT(*)
+    INTO p_count
+    FROM mydb.people;
+... a Muldis DB procedure would
+use an inner updater to hold the
+"COUNT(*) FROM people" portion,
+which is a value expression
 ----
- create in fed.myapp
- procedure count_people {
-   upd_args { p_count(sys.std.Core.Type.UInt) }
-   stmts [
-     proc_invo inn.icount
-       upd_args { p_count(lex.p_count) }
-       ro_args { the_db(fed.mydb) },
-   ]
-   updater icount {
-     upd_params { p_count(sys.std.Core.Type.UInt) }
-     ro_params { the_db(type.var.fed.mydb) }
-     exprs {
-       pc(func_invo sys.std.Core.Relation.cardinality
-         args { topic(lex.the_db.people) }
-       ),
-     }
-     stmt {
-       sys.std.Core.Universal.assign
-         upd_args { target(lex.p_count) }
-         ro_args { v(lex.pc) },
-     }
-   }
- }
+  create in fed.myapp
+  procedure count_people {
+    upd_args { p_count(sys.std.Core.Type.UInt) }
+    stmts [
+      proc_invo inn.icount
+        upd_args { p_count(lex.p_count) }
+        ro_args { the_db(fed.mydb) },
+    ]
+    updater icount {
+      upd_params { p_count(sys.std.Core.Type.UInt) }
+      ro_params { the_db(type.var.fed.mydb) }
+      exprs {
+        pc(func_invo sys.std.Core.Relation.cardinality
+          args { topic(lex.the_db.people) }
+        ),
+      }
+      stmt {
+        sys.std.Core.Universal.assign
+          upd_args { target(lex.p_count) }
+          ro_args { v(lex.pc) },
+      }
+    }
+  }
 ----
 Another use of inner
 routines is to support
@@ -730,20 +730,20 @@ you don't have to split up a
 relvar into several for
 normalization
 ----
- Relation:[ 'order_id', 'cust_id', 'order_item' ]:{
-   [ Int:9:5073, Int:9:209, Relation:{
-     { 'prod_id' => Text:'paint',  'qty' => Int:9:3 },
-   } ],
-   [ Int:9:5074, Int:9:332, Relation:{
-     { 'prod_id' => Text:'axle',  'qty' => Int:9:20 },
-     { 'prod_id' => Text:'lever', 'qty' => Int:9:50 },
-     { 'prod_id' => Text:'paint', 'qty' => Int:9:8 },
-   } ],
-   [ Int:9:5075, Int:9:17, Relation:{
-     { 'prod_id' => Text:'banana', 'qty' => Int:9:100 },
-     { 'prod_id' => Text:'orange', 'qty' => Int:9:160 },
-   } ],
- }
+  Relation:[ 'order_id', 'cust_id', 'order_item' ]:{
+    [ Int:9:5073, Int:9:209, Relation:{
+      { 'prod_id' => Text:'paint',  'qty' => Int:9:3 },
+    } ],
+    [ Int:9:5074, Int:9:332, Relation:{
+      { 'prod_id' => Text:'axle',  'qty' => Int:9:20 },
+      { 'prod_id' => Text:'lever', 'qty' => Int:9:50 },
+      { 'prod_id' => Text:'paint', 'qty' => Int:9:8 },
+    } ],
+    [ Int:9:5075, Int:9:17, Relation:{
+      { 'prod_id' => Text:'banana', 'qty' => Int:9:100 },
+      { 'prod_id' => Text:'orange', 'qty' => Int:9:160 },
+    } ],
+  }
 ----
 Values in logic
 ----
@@ -1168,78 +1168,56 @@ users have complete freedom
 ----
 Code comparisons
 ----
- Muldis D:
-   'x'
- SQL (as a scalar query):
-   (SELECT 'x')
- or:
-   (SELECT 'x' FROM dual)
+Muldis D:
+  'x'
+SQL (as a scalar query):
+  (SELECT 'x')
+or:
+  (SELECT 'x' FROM dual)
 ----
- Muldis D:
-   tab1
- SQL:
-   SELECT * FROM tab1
+Muldis D:
+  tab1
+SQL:
+  SELECT * FROM tab1
 ----
- Muldis D:
-   sys.std.Core.Relation.cardinality(
-     topic(tab1)
-   )
- SQL (as a scalar query):
-   (SELECT COUNT(*) FROM tab1)
+Muldis D:
+  sys.std.Core.Relation.cardinality(
+    topic(tab1)
+  )
+SQL (as a scalar query):
+  (SELECT COUNT(*) FROM tab1)
 ----
- Muldis D:
-   sys.std.Core.Relation.projection(
-     topic(tab1),
-     attrs(Set:{ 'col1', 'col2' }),
-   )
- SQL:
-   SELECT DISTINCT col1, col2
-   FROM tab1
+Muldis D:
+  sys.std.Core.Relation.projection(
+    topic(tab1),
+    attrs(Set:{ 'col1', 'col2' }),
+  )
+SQL:
+  SELECT DISTINCT col1, col2
+  FROM tab1
 ----
- Muldis D:
-   sys.std.Core.Relation.semijoin(
-     source(tab1),
-     filter(Relation:{
-       { col1(Text:'hello'), col2(Int:9:5) },
-       { col1(Text:'world'), col2(Int:9:7) },
-     }),
-   )
- ;
- ;
- ;
- ;
- ;
- ;
+Muldis D:
+  sys.std.Core.Relation.semijoin(
+    source(tab1),
+    filter(Relation:{
+      { col1(Text:'hello'), col2(Int:9:5) },
+      { col1(Text:'world'), col2(Int:9:7) },
+    }),
+  )
 ----
- SQL:
-   SELECT *
-   FROM tab1
-   WHERE (col1, col2) IN (
-     SELECT 'hello' AS col1, 5 AS col2
-     UNION
-     SELECT 'world' AS col1, 7 AS col2
-   )
- ;
- ;
- ;
- ;
- ;
- ;
-----
- or:
-   SELECT *
-   FROM tab1
-   WHERE col1 = 'hello' AND col2 = 5
-      OR col1 = 'world' AND col2 = 7
- ;
- ;
- ;
- ;
- ;
- ;
- ;
- ;
- ;
+SQL:
+  SELECT *
+  FROM tab1
+  WHERE (col1, col2) IN (
+    SELECT 'hello' AS col1, 5 AS col2
+    UNION
+    SELECT 'world' AS col1, 7 AS col2
+  )
+or:
+  SELECT *
+  FROM tab1
+  WHERE col1 = 'hello' AND col2 = 5
+     OR col1 = 'world' AND col2 = 7
 ----
 Alternately you can use
 "semidifference" if you want
@@ -1255,57 +1233,53 @@ like a generic WHERE
 The next example is a
 natural join of 2 relations
 whose attrs are as follows:
-tab1(col1,col2,col3),
-tab2(col2,col3,col4), such
-that the result is
-tab(col1,col2,col3,col4)
+  tab1(col1,col2,col3)
+  tab2(col2,col3,col4)
+such that the result is:
+  tab(col1,col2,col3,col4)
 ----
- Muldis D:
-   sys.std.Core.Relation.join(
-     topic(QuasiSet:{ tab1, tab2 }),
-   )
- SQL:
-   SELECT DISTINCT tab1.*, tab2.col4
-   FROM tab1 NATURAL INNER JOIN tab2
- or:
-   SELECT DISTINCT tab1.*, tab2.col4
-   FROM tab1 INNER JOIN tab2 USING (col2, col3)
- or:
-   SELECT DISTINCT tab1.*, tab2.col4
-   FROM tab1 INNER JOIN tab2
-     ON tab2.col2 = tab1.col2 AND tab2.col3 = tab1.col3
- ;
- ;
+Muldis D:
+  sys.std.Core.Relation.join(
+    topic(QuasiSet:{ tab1, tab2 }),
+  )
+SQL:
+  SELECT DISTINCT tab1.*, tab2.col4
+  FROM tab1 NATURAL INNER JOIN tab2
+or:
+  SELECT DISTINCT tab1.*, tab2.col4
+  FROM tab1 INNER JOIN tab2 USING (col2, col3)
+or:
+  SELECT DISTINCT tab1.*, tab2.col4
+  FROM tab1 INNER JOIN tab2
+    ON tab2.col2 = tab1.col2 AND tab2.col3 = tab1.col3
 ----
- Muldis D:
-   sys.std.Core.Relation.rename(
-     topic(tab1),
-     map(Relation:['before','after']:{
-       ['col1', 'foo'],
-       ['col3', 'bar'],
-     }),
-   )
- SQL:
-   SELECT col1 AS foo, col2, col3 AS bar
-   FROM tab1
+Muldis D:
+  sys.std.Core.Relation.rename(
+    topic(tab1),
+    map(Relation:['before','after']:{
+      ['col1', 'foo'],
+      ['col3', 'bar'],
+    }),
+  )
+SQL:
+  SELECT col1 AS foo, col2, col3 AS bar
+  FROM tab1
 ----
- Muldis D:
-   with { function myext {
-       result sys.std.Core.Type.Tuple
-       params { topic(sys.std.Core.Type.Tuple) }
-       body { Tuple:{
-         a => Text:'x',
-         b => sys.std.Integer.difference(
-           minuend(lex.topic.m),
-           subtrahend(lex.topic.n)
-         ), } }
-   }, }
-   sys.std.Core.Relation.extension(
-     topic(tab1), func(inn.myext), )
- SQL:
-   SELECT tab1.*, 'x' AS a, (tab1.m - tab1.n) AS b FROM tab1
- ;
- ;
+Muldis D:
+  with { function myext {
+      result sys.std.Core.Type.Tuple
+      params { topic(sys.std.Core.Type.Tuple) }
+      body { Tuple:{
+        a => Text:'x',
+        b => sys.std.Integer.difference(
+          minuend(lex.topic.m),
+          subtrahend(lex.topic.n)
+        ), } }
+  }, }
+  sys.std.Core.Relation.extension(
+    topic(tab1), func(inn.myext), )
+SQL:
+  SELECT tab1.*, 'x' AS a, (tab1.m - tab1.n) AS b FROM tab1
 ----
 Now that last Muldis D
 example shows the use of a
@@ -1497,51 +1471,83 @@ changes due to updating the
 system catalog can also be
 rolled back
 ----
-NOTE: THE FOLLOWING LAST FEW SLIDES
-ARE THE SAME CONTENT/FORMAT AS THE
-LIVE TALK VERSION, WHICH WAS FLESHED
-OUT FIRST.
-----
 Muldis Rosetta
 ----
- Introducing "Muldis Rosetta":
-  * Reference implementation of Muldis D
-  * Is a DBMS
-  * Mostly incomplete
-  * Should be working soon
+Muldis Rosetta is the
+reference implementation of
+Muldis D; it *is* a DBMS;
+it is mostly incomplete and
+can't run Muldis D code yet;
+it should be working soon
 ----
- Concepts:
-  * DBMS is a virtual machine
-  * DBMS embedded in your dev environment
-  * DBMS needn't be external program from your app
-  * DBMS is like module in your app
-  * Provides relational ops for munging app vars
-  * State managing solution for relvars/dbvars
-  * Actual embed or external, you code same way
-  * Like local vs remote procedure calls
-  * Write queries as named rtns to invoke later
+Muldis Rosetta presents the
+concept of a DBMS as a
+virtual machine; the DBMS is
+embedded in your development
+environment; it needn't be
+an external program from
+your app
 ----
- Implemented in Perl:
-  * Lots of fundamental features built in
-  * Can invoke compiler at runtime
-  * Just gen Perl code from MD, let Perl do work
-  * Automatic garbage collection
-  * Text is Unicode, unlimited length
-  * Bigint/bignum built-in
-  * Ad-hoc multi-dimensional data structures
-  * Extensive meta-model
-  * Closures, higher-order functions, map, grep
+The DBMS is like a module in
+your app, providing
+relational operators for
+munging app variables, as
+well as being a state
+managing solution for
+relvars/dbvars
 ----
- Structure:
-  * A Perl framework like DBI; sep intf, engines
-  * Develop/test on one DBMS, deploy on another
-  * Standalone Example Engine bundled with intf
-  * Develop/test a DBMS app without "real" DBMS
-  * Example just demos semantics, doesn't scale
-  * Most Engines likely bridge to existing DBMSs
-  * Keeps all features, speed of underlying DBMS
-  * Develop/test on one DBMS, deploy on another
-  * Common test suite for all Engines
+Whether the DBMS is actually
+embedded or external, you
+code to it the same way,
+like local vs remote
+procedure calls; you write
+queries as named routines to
+invoke later
+----
+Muldis Rosetta is
+implemented in Perl,
+having twin Perl 5 and
+Perl 6 native versions
+----
+Perl has lots of fundamental
+Muldis D features built-in;
+we leverage those directly,
+just generating equivalent
+Perl code from Muldis D
+code, and execute this so
+Perl does most of the work
+----
+Perl builtins include: can
+invoke compiler at runtime,
+extensive meta-model, text
+is Unicode, unlim length,
+bigint/num, ad-hoc multi-dim
+data structures, closures,
+map|grep, garbage collection
+----
+Muldis Rosetta is a
+framework like the Perl DBI,
+with separate Interface and
+Engines; develop/test on
+one DBMS, deploy on another;
+has a common Validator test
+suite for all Engines
+----
+Standalone Example Engine is
+bundled with the Interface
+and Validator; develop/test
+a database app without a
+"real" DBMS; Example just
+demos semantics, is for
+learning from, doesn't scale
+----
+Most Engines likely to
+bridge with existing DBMSs;
+Muldis Rosetta is designed
+to expose all the features,
+speed of underlying DBMS;
+you get rigorous portability
+while operating full speed
 ----
 Thank you!
 ----
