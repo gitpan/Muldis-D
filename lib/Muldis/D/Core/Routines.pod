@@ -9,7 +9,7 @@ Muldis D general purpose routines
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Routines version 0.28.0.
+This document is Muldis::D::Core::Routines version 0.29.0.
 
 =head1 PREFACE
 
@@ -830,33 +830,189 @@ isn't a subtype of the declared type of the variable behind C<target>.
 
 =back
 
+=head1 SYSTEM-DEFINED GENERIC RELVAR UPDATERS
+
+=over
+
+=item C<updater sys.std.Core.Relation.assign_insertion update { r(Relation)
+} read { t(Tuple) }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Relation.insertion> function with the same arguments, and
+then assigning the result of that function to C<r>.  This updater is
+analagous to the general case of the single-row SQL "INSERT" statement.
+
+=item C<updater sys.std.Core.Relation.assign_disjoint_insertion update {
+r(Relation) } read { t(Tuple) }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Relation.disjoint_insertion> function with the same
+arguments, and then assigning the result of that function to C<r>.
+
+=item C<updater sys.std.Core.Relation.assign_deletion update { r(Relation)
+} read { t(Tuple) }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Relation.deletion> function with the same arguments, and
+then assigning the result of that function to C<r>.
+
+=item C<updater sys.std.Core.Relation.assign_restriction update {
+topic(Relation) } read { func(Cat.FuncRef), assuming(QuasiTuple)? }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Relation.restriction> function with the same arguments, and
+then assigning the result of that function to C<topic>.
+
+=item C<updater sys.std.Core.Relation.assign_cmpl_restriction update {
+topic(Relation) } read { func(Cat.FuncRef), assuming(QuasiTuple)? }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Relation.cmpl_restriction> function with the same arguments,
+and then assigning the result of that function to C<topic>.  This updater
+is analagous to the general case of the SQL "DELETE" statement.
+
+=item C<updater sys.std.Core.Relation.assign_union update { topic(Relation)
+} read { other(Relation) }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Relation.union> function such that it has 2 input relations
+from C<assign_union>'s 2 arguments, and then assigning the result of that
+function to C<topic>.  This updater is analagous to the general case of the
+multiple-row SQL "INSERT" statement.
+
+=item C<updater sys.std.Core.Relation.assign_disjoint_union update {
+topic(Relation) } read { other(Relation) }>
+
+This update operator is to C<sys.std.Core.Relation.disjoint_union> what the
+function C<sys.std.Core.Relation.assign_union> is to
+C<sys.std.Core.Relation.union>.
+
+=item C<updater sys.std.Core.Relation.assign_intersection update {
+topic(Relation) } read { other(Relation) }>
+
+This update operator is to C<sys.std.Core.Relation.intersection> what the
+function C<sys.std.Core.Relation.assign_union> is to
+C<sys.std.Core.Relation.union>.
+
+=item C<updater sys.std.Core.Relation.assign_difference update {
+source(Relation) } read { filter(Relation) }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Relation.difference> function with the same arguments, and
+then assigning the result of that function to C<source>.
+
+=item C<updater sys.std.Core.Relation.assign_semidifference update {
+source(Relation) } read { filter(Relation) }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Relation.semidifference> function with the same arguments,
+and then assigning the result of that function to C<source>.  This updater
+is analagous to the common case of the SQL "DELETE" statement where the
+criteria is simply a set of and-ed and or-ed value equality tests.
+
+=item C<updater sys.std.Core.Relation.assign_semijoin update {
+source(Relation) } read { filter(Relation) }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Relation.semijoin> function with the same arguments, and
+then assigning the result of that function to C<source>.
+
+=back
+
 =head1 SYSTEM-DEFINED GENERIC CONTROL FLOW UPDATERS
 
 =over
 
-=item C<updater sys.std.Core.Control.upd_invo update {
-upd_args(QuasiTuple)? } read { updater(Cat.ProcRef), ro_args(QuasiTuple)?
-}>
+=item C<updater sys.std.Core.Control.upd_invo update { upd_args(QuasiTuple)
+} read { updater(Cat.ProcRef), ro_args(QuasiTuple)? }>
 
 This update operator has the same purpose and features as
 C<sys.std.Core.Control.func_invo> but that it invokes an updater rather
 than a function; there is no result to deal with, and there are both
 subject-to-update parameters and read-only parameters of the invoked
 updater to bind to; they are bound with the attributes of this updater's
-C<upd_args> and C<ro_args> arguments, respectively.  The C<upd_args> and
-C<ro_args> parameters are optional and default as per the C<args> parameter
-of C<func_invo>.
+C<upd_args> and C<ro_args> arguments, respectively.  The C<ro_args>
+parameter is optional and defaults as per the C<args> parameter of
+C<func_invo>; the C<upd_args> parameter is non-optional because an updater
+must always be invoked with at least one subject-to-update argument.
 
 =back
 
-=head1 SYSTEM-DEFINED GENERIC SYSTEM SERVICES
+=head1 SYSTEM-DEFINED GENERIC SYSTEM SERVICES FOR STANDARD I/O
 
-These system services are applicable to just one or more specific
-system-defined core scalar data type.
+These system services are provided so Muldis D can do basic user
+input/output by itself, using standard input and standard output, like any
+general purpose programming language, and help satisfy its need to be
+computationally complete.  For now they just work with plain (Unicode) text
+data, so one can implement a basic command-line program interface, or do
+basic invoker-setup file piping, as well as display diagnostics to standard
+error.  These routines are not exhaustive, and their details are subject to
+future revision.
 
-Note: Basic I/O procedures go here!
+=over
 
-I<This documentation is pending.>
+=item C<system_service sys.std.Core.STDIO.read_Text update { target(Text) }
+read { length_in_graphemes(UInt) }>
+
+This system service routine will attempt to read C<length_in_graphemes>
+characters from standard input as a single C<Text> value, blocking the
+current in-DBMS process until it finishes, and then update the variable
+supplied as its C<target> argument so that it holds the read value.  The
+routine will only fetch fewer than the requested number of characters if
+the input stream is closed first.  This routine will throw an exception if
+any system errors occur.
+
+=item C<system_service sys.std.Core.STDIO.read_Text_line update {
+target(Text) } read { ignore_empty_lines(Bool)? }>
+
+This system service routine is the same as C<sys.std.Core.STDIO.read_Text>
+except that it will read from standard input until an
+implementation-defined end-of-line character is read, rather than reading a
+fixed number of characters; this end-of-line character will not be included
+in the read C<Text> value.  If the C<ignore_empty_lines> argument is
+C<Bool:true>, then this routine will keep reading lines from standard input
+until it reads a non-empty line, and then C<target> is only updated to hold
+that last non-empty line; otherwise, this routine will end as soon as one
+line is read, even if it is empty.
+
+=item C<system_service sys.std.Core.STDIO.write_Text update {} read {
+v(Text) }>
+
+This system service routine will attempt to write the characters of its
+C<v> argument to standard output, blocking the current in-DBMS process
+until it finishes.  This routine will throw an exception if any system
+errors occur.
+
+=item C<system_service sys.std.Core.STDIO.write_Text_line update {} read {
+v(Text) }>
+
+This system service routine is the same as C<sys.std.Core.STDIO.write_Text>
+except that it will additionally write an implementation-defined
+end-of-line character after writing C<v>.
+
+=item C<system_service sys.std.Core.STDIO.prompt_Text_line update {
+target(Text) } read { prompt(Text), ignore_empty_lines(Bool)?  }>
+
+This system service routine is a wrapper over first invoking
+C<sys.std.Core.STDIO.write_Text> with its C<prompt> argument and then
+invoking C<sys.std.Core.STDIO.read_Text_line> with its C<target> argument.
+A true C<ignore_empty_lines> argument will result in I<both> of the wrapped
+routines being invoked repeatedly, not just C<read_text_line>.
+
+=item C<system_service sys.std.Core.STDIO.error_Text update {} read {
+v(Text) }>
+
+This system service routine is the same as C<sys.std.Core.STDIO.write_Text>
+except that it will write to standard error rather than standard output.
+
+=item C<system_service sys.std.Core.STDIO.error_Text_line update {} read {
+v(Text) }>
+
+This system service routine is the same as
+C<sys.std.Core.STDIO.write_Text_line> except that it will write to standard
+error rather than standard output.
+
+=back
 
 =head1 SYSTEM-DEFINED GENERIC CONTROL FLOW PROCEDURES
 
@@ -869,7 +1025,8 @@ upd_args(QuasiTuple)? } read { procedure(Cat.ProcRef),
 ro_args(QuasiTuple)? }>
 
 This procedure is the same as C<sys.std.Core.Control.upd_invo> but that it
-invokes a procedure rather than an updater.
+invokes a procedure rather than an updater, and that C<upd_args> is
+optional.
 
 =item C<procedure sys.std.Core.Control.fail update {} read {
 topic(Cat.Exception) }>

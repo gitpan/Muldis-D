@@ -1,6 +1,65 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-08-12  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.44.0 is released on CPAN as
+    Muldis-D-0.44.0.tar.gz.
+
+    * Rounded out the Core.pod file tree by adding the new file
+    lib/Muldis/D/Core/Routines_Catalog.pod, which debuts at version 0.0.0;
+    this new file is where the core Muldis D data definition routines would
+    be defined.  The appropriate references were added in other files
+    [Core.pod, the README file].
+
+    * New file versions are: D.pm 0.44.0 and Types_Catalog.pod 0.33.1 and
+    Routines.pod 0.29.0 and Relation.pod 0.27.0 and Text.pod 0.26.0 and
+    Core.pod 0.21.3.  The other pre-existing versioned files are unchanged.
+
+    * (Routines.pod)  Fixed the "upd_invo" routine so that its "upd_args"
+    parameter is non-optional, because all updaters have at least 1
+    subject-to-update parameter.
+
+    * (Text.pod)  Muldis D now just has a single function for testing the
+    length of a Text value, which is "length_in_graphemes"; this replaces
+    the previous 4 functions "length_in_nf(c|d)_(graphs|codes)".
+
+    * (Routines.pod, Relation.pod)  Added a set of 18 new update operators
+    where each is a short-cut over a relational function plus a generic
+    assignment of the function's result to the main relvar argument of the
+    function; a subset of these correspond directly to the common SQL
+    "INSERT|UPDATE|DELETE" statements.  In Routines.pod, these 11 updaters
+    were added as "sys.std.Core.Relation.\w+":
+    "assign_(|disjoint_)(insertion|union)",
+    "assign_(deletion|(|cmpl_)restriction)",
+    "assign_(intersection|(|semi)difference|semijoin)".  In Relation.pod,
+    these 7 updaters were added as "sys.std.Relation.\w+":
+    "assign_exclusion",
+    "assign_(|static_)substitution(|_in_(restriction|semijoin))".
+
+    * (Routines_Catalog.pod)  In a reversal of one aspect of release
+    0.19.0, brought back the then-removed "Cat.Order_reverse" function,
+    under the slightly updated name "sys.std.Core.Cat.Order_reverse".
+
+    * (Routines_Catalog.pod)  Added an initial complement of 22 data
+    definition procedures, each of which is an abstraction for inserting or
+    deleting a tuple in a catalog relvar.  These 22 procedures were added
+    as "sys.std.Core.Cat.\w+":
+    "(create|drop)_(depot_mount|subdepot|package)",
+    "(create|drop)_(depot|package)_(function|updater|procedure|type)".  In
+    addition, the 1 procedure "alter_depot_mount_so_we_may_not_update" was
+    added in that namespace, which instead updates a catalog tuple.
+
+    * (Routines.pod)  Added an initial complement of 7 generic standard I/O
+    system service routines, which should now round out provisioning Muldis
+    D to be computationally complete.  The 7 system service routines were
+    added as "sys.std.Core.STDIO.\w+": "(read|write|error)_Text(|_line)",
+    "prompt_Text_line".  These are mainly for implementing command-line
+    user interfaces and error diagnostics for programs, and just handle
+    Text; there are no bit string equivalents as yet.
+
+    * (Types_Catalog.pod)  Fixed a few typos.
+
 2008-07-29  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.43.0 is released on CPAN as
