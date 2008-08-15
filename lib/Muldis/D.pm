@@ -7,7 +7,7 @@ use warnings FATAL => 'all';
 ###########################################################################
 
 { package Muldis::D; # package
-    use version; our $VERSION = qv('0.44.0');
+    use version; our $VERSION = qv('0.45.0');
     # Note that Perl code only exists at all in this file in order to help
     # the CPAN indexer handle the distribution properly.
 } # package Muldis::D
@@ -29,7 +29,7 @@ Formal spec of Muldis D relational DBMS lang
 
 =head1 VERSION
 
-This document is Muldis::D version 0.44.0.
+This document is Muldis::D version 0.45.0.
 
 =head1 PREFACE
 
@@ -57,9 +57,9 @@ at them.
 
 The fully-qualified name of this multi-part document and the language
 specification it contains (as a single composition) is
-C<Muldis_D:'http://muldis.com':'0.44.0'>.  It is the official/original (not
+C<Muldis_D:'http://muldis.com':'0.45.0'>.  It is the official/original (not
 embraced and extended) Muldis D language specification by the authority
-Darren Duncan (C<http://muldis.com>), version C<0.44.0> (this number
+Darren Duncan (C<http://muldis.com>), version C<0.45.0> (this number
 matches the VERSION pod in this file).  This multi-part document is named
 and organized with the expectation that many dialects, extensions, and core
 versions of it will exist over time, some of those under the original
@@ -260,10 +260,14 @@ L<Muldis::D::Dialect::HDMD_Perl_Tiny>.
 
 The fifth element of the Muldis D language name is an unordered collection
 of name+value pairs (the names are unique keys in the collection) and are
-for specifying any other information that should be known, particularly
-enumerating what various non-standard but implementation-provided built-in
-features the current Muldis D code makes use of.  Non-standard in this case
-meaning not part of the already named language authority+version+dialect.
+for specifying any other information that should be known.  Some possible
+name+value pairs are dialect-specific pragmas or compiler directives, that
+change the behaviour of just how the dialect is parsed and are otherwise
+agnostic to implementation and have no further affect on code after it has
+been parsed.  Other possible name+value pairs will enumerate what various
+non-standard but implementation-provided built-in features the current
+Muldis D code makes use of; non-standard in this case meaning not part of
+the already named language authority+version+dialect.
 
 =head1 SEE ALSO
 

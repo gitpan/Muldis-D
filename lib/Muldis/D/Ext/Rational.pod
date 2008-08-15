@@ -9,7 +9,7 @@ Muldis D extension for rational data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Rational version 0.27.0.
+This document is Muldis::D::Ext::Rational version 0.28.0.
 
 =head1 PREFACE
 
@@ -140,6 +140,10 @@ numeric representations, so they tend to perform better.
 The C<Rat> type has a default ordering algorithm which is conceptually the
 same as for C<Int>; for 2 distinct C<Rat> values, the value closer to
 negative infinity is ordered before the value closer to positive infinity.
+
+The C<Rat> type has an implementation hint for less intelligent Muldis D
+implementations, that suggests using the C<float> possrep as the basis for
+the physical representation.
 
 =head2 sys.std.Rational.Type.URat
 

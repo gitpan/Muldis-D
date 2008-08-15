@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.33.1.
+This document is Muldis::D::Core::Types_Catalog version 0.34.0.
 
 =head1 PREFACE
 
@@ -222,6 +222,10 @@ remainders; the chain with the first remaining element that is ordered
 first as per its own algorithm (that of C<Cat.Name>) is ordered before the
 other chain.
 
+The C<Cat.NameChain> type has an implementation hint for less intelligent
+Muldis D implementations, that suggests using the C<flat> possrep as the
+basis for the physical representation.
+
 =head2 sys.std.Core.Type.Cat.DeclNameChain
 
 A C<Cat.DeclNameChain> (scalar) is mostly the same as a C<Cat.NameChain>
@@ -234,7 +238,7 @@ entities live under a potentially N-depth namespace, such as depot entities
 grouped in a subdepot hierarchy.  The default and minimum value of
 C<Cat.DeclNameChain> is a zero element sequence.  The C<Cat.DeclNameChain>
 type has a default ordering algorithm; it is the same as for
-C<Cat.NameChain>.
+C<Cat.NameChain>.  Likewise it has a same implementation hint.
 
 =head2 sys.std.Core.Type.Cat.Comment
 
@@ -267,7 +271,10 @@ possrep correspond in the same order as they are documented here.  The
 default value of C<Cat.Order> is C<same>; its minimum and maximum values
 are, respectively, C<increase> and C<decrease>.  The cardinality of this
 type is 3.  The C<Cat.Order> type has a default ordering algorithm;
-C<increase> is ordered before C<same>, and C<same> before C<decrease>.
+C<increase> is ordered before C<same>, and C<same> before C<decrease>.  The
+C<Cat.Order> type has an implementation hint for less intelligent Muldis D
+implementations, that suggests using the C<int> possrep as the basis for
+the physical representation.
 
 =head2 sys.std.Core.Type.Cat.OrdDetFuncNameChain
 
@@ -383,7 +390,7 @@ namespace.
 
 =back
 
-A C<Cat.SysNspSet> has a binary (unique) key on the C<parent> plus
+A C<Cat.SysNspSet> has a binary primary key on the C<parent> plus
 C<name> attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.Sys(Func|Upd|Proc)Set
@@ -419,7 +426,7 @@ and no more detail than necessary about how it is implemented.
 
 =back
 
-A C<Cat.Sys(Func|Upd|Proc)Set> has a binary (unique) key on the C<parent>
+A C<Cat.Sys(Func|Upd|Proc)Set> has a binary primary key on the C<parent>
 plus C<name> attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.SysSpecTypeSet
@@ -448,7 +455,7 @@ This is an optional programmer comment about the type as a whole.
 
 =back
 
-A C<Cat.SysSpecTypeSet> has a binary (unique) key on the C<parent> plus
+A C<Cat.SysSpecTypeSet> has a binary primary key on the C<parent> plus
 C<name> attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.SysScaNPRTypeSet
@@ -483,7 +490,7 @@ C<Bool:false> if the type is a scalar type.
 
 =back
 
-A C<Cat.SysScaNPRTypeSet> has a binary (unique) key on the C<parent> plus
+A C<Cat.SysScaNPRTypeSet> has a binary primary key on the C<parent> plus
 C<name> attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.SysTypeSet
@@ -516,7 +523,7 @@ This defines the entire type sans the name.
 
 =back
 
-A C<Cat.SysTypeSet> has a binary (unique) key on the C<parent> plus C<name>
+A C<Cat.SysTypeSet> has a binary primary key on the C<parent> plus C<name>
 attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.SysCatSet
@@ -547,7 +554,7 @@ This is the definition of the catalog dbvar.
 
 =back
 
-A C<Cat.SysCatSet> has a unary (unique) key on the C<name> attribute.  Its
+A C<Cat.SysCatSet> has a unary primary key on the C<name> attribute.  Its
 default value is empty.
 
 =head1 TYPES FOR DEFINING MOUNT CONTROLS
@@ -684,7 +691,7 @@ like constraints or stored invokable routines.
 
 =back
 
-A C<Cat.MountControlSet> has a unary (unique) key on the C<name> attribute.
+A C<Cat.MountControlSet> has a unary primary key on the C<name> attribute.
 Its default value is empty.  It also has a transition constraint that
 prevents changing some attributes of a depot mount control once set.  Note
 that the 3 attributes [C<is_temporary>, C<create_on_mount>,
@@ -746,7 +753,7 @@ made visible to the DBMS.
 
 =back
 
-A C<Cat.DepotMountSet> has a unary (unique) key on the C<name> attribute.
+A C<Cat.DepotMountSet> has a unary primary key on the C<name> attribute.
 Its default value is empty.
 
 =head1 TYPES FOR DEFINING DEPOTS AND SUBDEPOTS
@@ -827,7 +834,7 @@ This is an optional programmer comment about this specific subdepot.
 
 =back
 
-A C<Cat.SubdepotSet> has a binary (unique) key on the C<parent> plus
+A C<Cat.SubdepotSet> has a binary primary key on the C<parent> plus
 C<name> attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.PackageSet
@@ -862,7 +869,7 @@ This defines the entire system catalog of the package.
 
 =back
 
-A C<Cat.PackageSet> has a binary (unique) key on the C<parent> plus
+A C<Cat.PackageSet> has a binary primary key on the C<parent> plus
 C<name> attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.Dep(Func|Upd|Proc)Set
@@ -903,7 +910,7 @@ implementation, besides what C<interface> defines.
 
 =back
 
-A C<Cat.Dep(Func|Upd|Proc)Set> has a binary (unique) key on the C<parent>
+A C<Cat.Dep(Func|Upd|Proc)Set> has a binary primary key on the C<parent>
 plus C<name> attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.DepTypeSet
@@ -936,7 +943,7 @@ This defines the entire type sans the name.
 
 =back
 
-A C<Cat.DepTypeSet> has a binary (unique) key on the C<parent> plus C<name>
+A C<Cat.DepTypeSet> has a binary primary key on the C<parent> plus C<name>
 attributes.  Its default value is empty.
 
 =head1 TYPES FOR DEFINING PACKAGES
@@ -1017,7 +1024,7 @@ implementation, besides what C<interface> defines.
 
 =back
 
-A C<Cat.Pkg(Func|Upd|Proc)Set> has a unary (unique) key on the C<name>
+A C<Cat.Pkg(Func|Upd|Proc)Set> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.PkgTypeSet
@@ -1050,7 +1057,7 @@ This defines the entire type sans the name.
 
 =back
 
-A C<Cat.PkgTypeSet> has a unary (unique) key on the C<name> attribute.  Its
+A C<Cat.PkgTypeSet> has a unary primary key on the C<name> attribute.  Its
 default value is empty.
 
 =head1 TYPES FOR DEFINING ROUTINE HEADINGS
@@ -1134,7 +1141,7 @@ C<ro_params>.
 
 =back
 
-There is a distributed (unique) key over the C<name> attributes of
+There is a distributed primary key over the C<name> attributes of
 C<upd_params> and C<ro_params>.
 
 The default value of C<Cat.UpdHead> has 1 subject-to-update parameter whose
@@ -1172,7 +1179,7 @@ This is as per the same-named attribute of C<Cat.UpdHead>.
 
 =back
 
-There is a distributed (unique) key over the C<name> attributes of
+There is a distributed primary key over the C<name> attributes of
 C<upd_params> and C<ro_params>.
 
 The default value of C<Cat.ProcHead> has zero parameters; by default, its
@@ -1212,7 +1219,7 @@ These are all the inner type definitions that this function contains.
 
 =back
 
-There is a distributed (unique) key over both the C<name> attributes of
+There is a distributed primary key over both the C<name> attributes of
 C<inner_funcs> and the C<name> attributes of all the attributes of
 C<inner_types>.
 
@@ -1255,7 +1262,7 @@ These are all the inner type definitions that this updater contains.
 
 =back
 
-There is a distributed (unique) key over both the C<name> attributes of
+There is a distributed primary key over both the C<name> attributes of
 C<inner_(upds|funcs)> and the C<name> attributes of all the attributes of
 C<inner_types>.
 
@@ -1301,7 +1308,7 @@ These are all the inner type definitions that this procedure contains.
 
 =back
 
-There is a distributed (unique) key over both the C<name> attributes of
+There is a distributed primary key over both the C<name> attributes of
 C<inner_(procs|upds|funcs)> and the C<name> attributes of all the
 attributes of C<inner_types>.
 
@@ -1340,7 +1347,7 @@ implementation, besides what C<interface> defines.
 
 =back
 
-A C<Cat.Inner(Func|Upd|Proc)Set> has a unary (unique) key on the C<name>
+A C<Cat.Inner(Func|Upd|Proc)Set> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head1 TYPES FOR DEFINING INNER ROUTINE BODIES
@@ -1367,7 +1374,7 @@ This defines the value expression tree that comprises the entire (|inner
 
 =back
 
-There is a distributed (unique) key over the C<name> attributes of all the
+There is a distributed primary key over the C<name> attributes of all the
 attributes of C<expr>; and if this C<Cat.InnerFuncBody> is paired with a
 C<Cat.FuncHead>, then the distributed key also extends over the head's
 parameter names.
@@ -1461,7 +1468,7 @@ literals.
 
 =back
 
-There is a distributed (unique) key over the C<name> attributes of all of a
+There is a distributed primary key over the C<name> attributes of all of a
 C<Cat.ExprNodeSet>'s attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.ScaLitExprNodeSet
@@ -1492,7 +1499,7 @@ implementation defined/limited.>
 
 =back
 
-A C<Cat.ScaLitExprNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.ScaLitExprNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.ScaPRLitExprNodeSet
@@ -1536,7 +1543,7 @@ of the (|quasi-)scalar literal.
 
 =back
 
-A C<Cat.ScaPRLitExprNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.ScaPRLitExprNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.TupLitExprNodeSet
@@ -1568,7 +1575,7 @@ These are the attributes (names and values) of the (|quasi-)tuple literal.
 
 =back
 
-A C<Cat.TupLitExprNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.TupLitExprNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.RelLitExprNodeSet
@@ -1604,7 +1611,7 @@ These are the (|quasi-)tuples of the (|quasi-)relation literal.
 
 =back
 
-A C<Cat.RelLitExprNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.RelLitExprNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.FuncInvoExprNodeSet
@@ -1639,7 +1646,7 @@ local expression node which defines the value.
 
 =back
 
-A C<Cat.FuncInvoExprNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.FuncInvoExprNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.IfElseExprNodeSet
@@ -1697,7 +1704,7 @@ C<else> will be evaluated, and be the result of the larger if-else.
 
 =back
 
-A C<Cat.IfElseExprNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.IfElseExprNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.GivenWhenDefExprNodeSet
@@ -1749,7 +1756,7 @@ given-when-default.
 
 =back
 
-A C<Cat.GivenWhenDefExprNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.GivenWhenDefExprNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.(Func|Proc|Type|OrdDetFunc)RefLitExprNodeSet
@@ -1813,7 +1820,7 @@ reference all of the parameters that the (|inner )updater has.
 
 =back
 
-There is a distributed (unique) key over the C<name> attributes of all the
+There is a distributed primary key over the C<name> attributes of all the
 attributes of C<exprs>; and if this C<Cat.InnerUpdBody> is paired with a
 C<Cat.UpdHead>, then the distributed key also extends over the head's
 parameter names.
@@ -1871,7 +1878,7 @@ local expression node (or parameter) which defines the value.
 
 =back
 
-There is a distributed (unique) key over the C<name> attributes of
+There is a distributed primary key over the C<name> attributes of
 C<upd_args> and C<ro_args>.
 
 The default value of C<Cat.MultiUpdStmt> directly corresponds to the
@@ -1905,7 +1912,7 @@ This defines the statement tree that comprises the entire (|inner
 
 =back
 
-There is a distributed (unique) key over the C<name> attribute of C<vars>
+There is a distributed primary key over the C<name> attribute of C<vars>
 and the C<name> attributes of all the attributes of C<stmt>; and if this
 C<Cat.InnerProcBody> is paired with a C<Cat.ProcHead>, then the distributed
 key also extends over the head's parameter names.
@@ -1976,7 +1983,7 @@ These are statement nodes that represent generic looping block statements.
 
 =back
 
-There is a distributed (unique) key over the C<name> attributes of all of a
+There is a distributed primary key over the C<name> attributes of all of a
 C<Cat.StmtNodeSet>'s attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.LeaveStmtNodeSet
@@ -2012,9 +2019,9 @@ the current one, so this reference does not contribute to a cycle.
 
 =back
 
-A C<Cat.LeaveStmtNodeSet> has a unary (unique) key on the C<name>
-attribute, plus another such key on the C<leave> attribute.  Its default
-value is empty.
+A C<Cat.LeaveStmtNodeSet> has a unary primary key on the C<name> attribute,
+plus a unary (unique) key on the C<leave> attribute.  Its default value is
+empty.
 
 =head2 sys.std.Core.Type.Cat.CompoundStmtNodeSet
 
@@ -2043,7 +2050,7 @@ execute in this given sequence.
 
 =back
 
-A C<Cat.CompoundStmtNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.CompoundStmtNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.ProcInvoStmtNodeSet
@@ -2086,8 +2093,8 @@ value.
 
 =back
 
-A C<Cat.ProcInvoStmtNodeSet> has a unary (unique) key on the C<name>
-attribute.  Its default value is empty.  There is a distributed (unique)
+A C<Cat.ProcInvoStmtNodeSet> has a unary primary key on the C<name>
+attribute.  Its default value is empty.  There is a distributed primary
 key over the C<name> attributes of C<upd_args> and C<ro_args>.
 
 =head2 sys.std.Core.Type.Cat.IfElseStmtNodeSet
@@ -2135,7 +2142,7 @@ C<Nothing>, then the whole if-else will have been a no-op.
 
 =back
 
-A C<Cat.IfElseStmtNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.IfElseStmtNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.GivenWhenDefStmtNodeSet
@@ -2184,7 +2191,7 @@ been a no-op.
 
 =back
 
-A C<Cat.GivenWhenDefStmtNodeSet> has a unary (unique) key on the C<name>
+A C<Cat.GivenWhenDefStmtNodeSet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.IterateStmtNodeSet
@@ -2219,9 +2226,9 @@ cycle.
 
 =back
 
-A C<Cat.IterateStmtNodeSet> has a unary (unique) key on the C<name>
-attribute, plus another such key on the C<iterate> attribute.  Its default
-value is empty.
+A C<Cat.IterateStmtNodeSet> has a unary primary key on the C<name>
+attribute, plus a unary (unique) key on the C<iterate> attribute.  Its
+default value is empty.
 
 =head2 sys.std.Core.Type.Cat.LoopStmtNodeSet
 
@@ -2249,7 +2256,7 @@ each iteration of the loop; typically it has a sub-tree of statement nodes.
 
 =back
 
-A C<Cat.LoopStmtNodeSet> has a unary (unique) key on the C<name> attribute.
+A C<Cat.LoopStmtNodeSet> has a unary primary key on the C<name> attribute.
 Its default value is empty.
 
 =head1 TYPES FOR DEFINING DATA TYPES
@@ -2283,7 +2290,7 @@ support the main type or inner types.
 
 =back
 
-There is a distributed (unique) key over both the C<name> attributes of all
+There is a distributed primary key over both the C<name> attributes of all
 the attributes of C<inner_types> and the C<name> attributes of
 C<inner_funcs>.
 
@@ -2307,7 +2314,7 @@ that this type contains.
 
 =back
 
-There is a distributed (unique) key over the C<name> attributes of all of a
+There is a distributed primary key over the C<name> attributes of all of a
 C<Cat.InnerTypeSet>'s attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.Inner(Sca|Nonsca|Uni|Restr)TypeSet
@@ -2338,7 +2345,7 @@ the name.
 
 =back
 
-A C<Cat.Inner(Sca|Nonsca|Uni|Restr)TypeSet> has a unary (unique) key on the
+A C<Cat.Inner(Sca|Nonsca|Uni|Restr)TypeSet> has a unary primary key on the
 C<name> attribute.  Its default value is empty.
 
 =head1 TYPES FOR DEFINING INNER DATA TYPES
@@ -2386,7 +2393,7 @@ collective values whereby it defines a representation of all values of this
 type.  Note that if multiple (|quasi-)scalar types are related to each
 other such that more than one declares possreps for at least one common
 value, then the C<name> attribute of the C<possreps> attributes of all of
-those types' definitions have a distributed (unique) key over them.  Note
+those types' definitions have a distributed primary key over them.  Note
 that, to keep things simple and deterministic under the possibility of
 diamond subtype/supertype relationships (such that the generic
 system-defined scalar possrep attribute accessors can work), Muldis D
@@ -2442,7 +2449,7 @@ it is a singleton type, whose default value is its only value.
 A C<Cat.PossrepSet> is a C<Relation> that specifies a set of possreps that
 a (|quasi-)scalar (|sub-)type might consist primarily of.
 
-A C<Cat.PossrepSet> has these 4 attributes:
+A C<Cat.PossrepSet> has these 5 attributes:
 
 =over
 
@@ -2478,9 +2485,21 @@ just restricting enough so that the inter-possrep mapping functions can
 handle the arguments that it accepts, so it is possible to apply the other
 possreps' constraints.
 
+=item C<is_base> - C<Bool>
+
+This is an optimization hint for Muldis D implementations that are not
+intelligent enough to decide on a best physical representation for the
+(|sub-)type.  At most one of the type's possreps is singled out by having a
+C<Bool:true> value here, so an implementation doesn't have to think and can
+just use that as the basis for the physical representation.  To keep things
+simple, only a possrep of a root type may be marked C<Bool:true>, so it can
+apply consistently to all subtypes as well.  More intelligent
+implementations are free to ignore C<is_base>, or just use it as a
+tie-breaker if applicable.
+
 =back
 
-A C<Cat.PossrepSet> has a unary (unique) key on the C<name> attribute.  Its
+A C<Cat.PossrepSet> has a unary primary key on the C<name> attribute.  Its
 default value is empty.  The default value of a tuple of C<Cat.PossrepSet>
 has a C<name> that is the empty string, its C<attrs> is empty, and its
 C<constraint> unconditionally results in C<Bool:true>.
@@ -2532,7 +2551,7 @@ change.>
 
 =back
 
-A C<Cat.PossrepMapSet> has a binary (unique) key on the C<p1> plus C<p2>
+A C<Cat.PossrepMapSet> has a binary primary key on the C<p1> plus C<p2>
 attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.InnerNonscalarType
@@ -2641,7 +2660,8 @@ moreover no key's attributes may be a proper subset of any other key's
 attributes; if 2 such candidates appear, just use the one that has the
 subset.  It is valid for a key to consist of zero attributes; in this case,
 that key is the only key of the type, and values of the type may each
-consist of no more than one tuple.  Note that C<keys> is logically an
+consist of no more than one tuple.  At most one key in C<keys> may be
+privileged as the I<primary key>.  Note that C<keys> is logically an
 abstraction syntax (the canonical simplest form) for a particular kind of
 C<relation_constraint> of the type being defined, one that compares the
 cardinality of a projection of a relation on its key attributes with the
@@ -2652,13 +2672,15 @@ if the cardinalities are equal.
 
 These are the 0..N explicit simple distributed (unique) keys that are
 applicable to tuple/database values of the type being defined, that range
-over specified relation-typed attributes of it.  Note that C<distrib_keys>
-is logically an abstraction syntax (the canonical simplest form) for a
-particular kind of C<tuple_constraint> of the type being defined, one that
-compares the cardinality of the union of the projection of distributed key
-attributes of all key-participating relation-valued attributes, with the
-sum of cardinalities of the source relation-valued attributes; the
-attribute values comprise a distributed key if the cardinalities are equal.
+over specified relation-typed attributes of it.  At most one key in
+C<distrib_keys> may be privileged as the I<primary key>.  Note that
+C<distrib_keys> is logically an abstraction syntax (the canonical simplest
+form) for a particular kind of C<tuple_constraint> of the type being
+defined, one that compares the cardinality of the union of the projection
+of distributed key attributes of all key-participating relation-valued
+attributes, with the sum of cardinalities of the source relation-valued
+attributes; the attribute values comprise a distributed key if the
+cardinalities are equal.
 
 =item C<foreign_keys> - C<Cat.ForeignKeySet>
 
@@ -2709,7 +2731,7 @@ type whose declaration it is part of.
 
 =back
 
-There is a distributed (unique) key over the C<name> attributes of
+There is a distributed primary key over the C<name> attributes of
 C<(tuple|relation)_constraint> and C<(|foreign_)(|distrib_)keys>.
 
 The default value of C<Cat.InnerNonscalarType> defines a relation type that
@@ -2851,9 +2873,9 @@ don't go to the trouble of supporting updates.
 
 =back
 
-A C<Cat.VirtualAttrMapSet> has a binary (unique) key on the
+A C<Cat.VirtualAttrMapSet> has a binary primary key on the
 C<determinant_attrs> plus C<dependent_attrs> attributes; it also has a
-distributed (unique) key over the C<dependent_attrs> attribute of all
+distributed primary key over the C<dependent_attrs> attribute of all
 tuples.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.ConstraintSet
@@ -2885,7 +2907,7 @@ This defines the entire (main) body of the constraint function.
 
 =back
 
-A C<Cat.ConstraintSet> has a unary (unique) key on the C<name> attribute.
+A C<Cat.ConstraintSet> has a unary primary key on the C<name> attribute.
 Its default value is empty.  The default value of a tuple of
 C<Cat.ConstraintSet> has a C<name> that is the empty string, and its
 C<body> unconditionally results in C<Bool:true>.
@@ -2916,23 +2938,35 @@ to have a maximum of 1 tuple.
 
 =item C<is_primary> - C<Bool>
 
-This is C<Bool:true> if all of the attributes comprising this key are
+This is C<Bool:true> if this key has been designated the I<primary key> of
+the relation (a relation may have at most one, or none, of those); it is
+C<Bool:false> otherwise.  A primary key is privileged over candidate keys
+in general, in that all of the attributes comprising the primary key are
 likely to be treated as immutable in practice for the relation's tuples,
 and hence are the best candidates for identifying tuples within a relation
-over an extended term, and are the best mapping values for automatic new
-foreign keys and join conditions if the host relation type has to be
-auto-split into several associated ones, for example because the physical
-representation of this relation doesn't support RVAs.  This concept is a
-generalization of the concept of "the primary key" of a relation.  A
-relation type can have either none of its keys or more than one of its keys
-with a true C<is_primary> attribute.  This is C<Bool:false> if any of the
-attributes comprising this key are likely to mutate and so shouldn't be
-used as the target of generated foreign keys.
+over an extended term (if multiple keys conceptually have all those
+qualities, then you could choose either as the primary, or perhaps such a
+situation may indicate a flaw in your database design).  The common concept
+of a tuple having an identity that is distinct from the sum total of all
+its attribute values, such that one can say that a tuple is being "updated"
+(rather than its host relation being the only thing that is updated to hold
+a different set of tuples) is dependent in Muldis D on the host relation
+having a primary key; if a tuple in a relation is replaced by a distinct
+tuple whose values in the primary key attributes are identical, it is only
+in this situation that we can consider that we still have the same tuple,
+which was just updated, and that we have not lost the old tuple and gained
+a new one.  The relation attributes comprising a primary key are the best
+mapping values for automatic new foreign keys and join conditions if the
+host relation type has to be auto-split into several associated ones, for
+example because the physical representation of this relation doesn't
+support RVAs; in fact, some implementations may require that any relation
+having an RVA must also have an explicit primary key, so it is easier for
+them to choose the key to automatically relate a split relation on.
 
 =back
 
-A C<Cat.KeySet> has a unary (unique) key on the C<name> attribute, and
-another on its C<attrs> attribute.  Its default value is empty.
+A C<Cat.KeySet> has a unary primary key on the C<name> attribute, and a
+unary (unique) key on its C<attrs> attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.DistribKeySet
 
@@ -2977,8 +3011,9 @@ distributed as if the relations distributed over were one relation.
 
 =back
 
-A C<Cat.DistribKeySet> has a unary (unique) key on the C<name> attribute,
-and another on its C<relations> attribute.  Its default value is empty.
+A C<Cat.DistribKeySet> has a unary primary key on the C<name> attribute,
+and a unary (unique) key on its C<relations> attribute.  Its default value
+is empty.
 
 =head2 sys.std.Core.Type.Cat.DKMemRelAttrMap
 
@@ -3012,7 +3047,7 @@ other words, they must all map with the same distributed key attributes.
 
 =back
 
-A C<Cat.DKMemRelAttrMap> has a unary (unique) key on the C<rel_name>
+A C<Cat.DKMemRelAttrMap> has a unary primary key on the C<rel_name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.DKRelAttrKeyAttrMap
@@ -3078,7 +3113,7 @@ not be the same.
 
 =back
 
-A C<Cat.ForeignKeySet> has a unary (unique) key on the C<name> attribute.
+A C<Cat.ForeignKeySet> has a unary primary key on the C<name> attribute.
 Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.ForeignDistribKeySet
@@ -3134,7 +3169,7 @@ may not be the same.
 
 =back
 
-A C<Cat.ForeignDistribKeySet> has a unary (unique) key on the C<name>
+A C<Cat.ForeignDistribKeySet> has a unary primary key on the C<name>
 attribute.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.FKChildAttrParentAttrMap
