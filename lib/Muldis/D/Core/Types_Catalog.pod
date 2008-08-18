@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.34.0.
+This document is Muldis::D::Core::Types_Catalog version 0.35.0.
 
 =head1 PREFACE
 
@@ -78,7 +78,6 @@ more or less:
             sys.std.Core.Type.Cat.InnerNonscalarType
             sys.std.Core.Type.Cat.InnerUnionType
             sys.std.Core.Type.Cat.InnerRestrType
-            sys.std.Core.Type.Cat.DbVar
             sys.std.Core.Type.Cat.IfThenMap
 
             sys.std.Core.Type.Database
@@ -106,6 +105,8 @@ more or less:
             sys.std.Core.Type.Cat.SysCatSet
             sys.std.Core.Type.Cat.MountControlSet
             sys.std.Core.Type.Cat.DepotMountSet
+            sys.std.Core.Type.Cat.FedTypeMapSet
+            sys.std.Core.Type.Cat.FedTypeMap
             sys.std.Core.Type.Cat.SubdepotSet
             sys.std.Core.Type.Cat.PackageSet
             sys.std.Core.Type.Cat.Dep(Func|Upd|Proc)Set
@@ -548,9 +549,9 @@ This is an optional programmer comment about the catalog dbvar as a whole.
 This is C<Bool:true> if a catalog relcon is being described; it is
 C<Bool:false> if a catalog relvar is being described.
 
-=item C<catalog> - C<Cat.DbVar>
+=item C<catalog> - C<Cat.NameChain>
 
-This is the definition of the catalog dbvar.
+This is the declared data type of the catalog dbvar.
 
 =back
 
@@ -708,7 +709,7 @@ update, and that defines the scope of an active transaction.  There is
 exactly one of these per process and it doesn't have a name.  The system
 catalog variable named C<fed.cat> is of the C<Cat.Federation> type.
 
-A C<Cat.Federation> has these 2 attributes:
+A C<Cat.Federation> has these 3 attributes:
 
 =over
 
@@ -719,6 +720,20 @@ This is an optional programmer comment about the federation as a whole.
 =item C<mounts> - C<Cat.DepotMountSet>
 
 These are the depot mounts that comprise the federation.
+
+=item C<type_maps> - C<Cat.FedTypeMapSet>
+
+When this federation has more than one depot mount, and the depots have
+copies of the same data types, then C<type_maps> is used to specify which
+types in each depot correspond to types in others, so that during the time
+period of common mounting, those data types can be treated as aliases and
+so be used interchangeably.  Mainly this is used when either a procedure in
+one depot wants to access or update a dbvar of another depot, or when a
+procedure in one depot wants to invoke a routine in another depot, that
+have parameters/etc of some user-defined data type.  The expected most
+common use case would be when there are 2 depot mounts, one being a
+persistent database and the other being transient application-specific code
+that creates or otherwise works with that persistent database.
 
 =back
 
@@ -755,6 +770,42 @@ made visible to the DBMS.
 
 A C<Cat.DepotMountSet> has a unary primary key on the C<name> attribute.
 Its default value is empty.
+
+=head2 sys.std.Core.Type.Cat.FedTypeMapSet
+
+A C<Cat.FedTypeMapSet> is a C<Relation> such that each tuple in it
+specifies which of multiple depots have a copy of the same data type, for
+the purpose of treating all the copies as being interchangeable, so to
+support cross-depot interaction.
+
+A C<Cat.FedTypeMapSet> has these 2 attributes:
+
+=over
+
+=item C<comment> - C<Cat.Comment>
+
+This is an optional programmer comment about this type mapping.
+
+=item C<map> - C<Cat.FedTypeMap>
+
+This lists the fully-qualified names of 0..N data types that are all
+considered to be copies of the same 1 type, and should be treated
+interchangeably by the DBMS.
+
+=back
+
+A C<Cat.FedTypeMapSet> has a primary key on the C<map> attribute.  Its
+default value is empty.
+
+=head2 sys.std.Core.Type.Cat.FedTypeMap
+
+A C<Cat.FedTypeMap> is a C<Relation>.  It lists the fully-qualified names
+of 0..N data types that are all considered to be copies and of the same 1
+type, and should be treated interchangeably by the DBMS.  A
+C<Cat.FedTypeMap> has 2 attributes, C<depot> (a C<Cat.Name>) and C<type> (a
+C<Cat.NameChain>); the C<depot> is the declared name of the depot mount
+that the data type lives in; the C<type> is the C<dep.>-qualified name of
+the data type living in it.  Its default value has zero tuples.
 
 =head1 TYPES FOR DEFINING DEPOTS AND SUBDEPOTS
 
@@ -797,13 +848,16 @@ These are all the definitions that this (|sub)depot contains of
 (|quasi-)scalar types with possreps, and complete (|quasi-)nonscalar types,
 and union types, and restriction types.
 
-=item C<data> - C<single_of.Cat.DbVar>
+=item C<data> - C<maybe_of.Cat.NameChain>
 
-This is the definition of the dbvar that this (|sub)depot contains.
+This is the declared data type of the self-local dbvar that this
+(|sub)depot contains, iff C<data> is a C<Single>; if C<data> is C<Nothing>
+(the default), then this (|sub)depot does not have a self-local dbvar.
 
 =back
 
-The default value of C<Cat.Depot> defines an empty (|sub)depot.
+The default value of C<Cat.Depot> defines an empty (|sub)depot that does
+not have any self-local dbvar.
 
 =head2 sys.std.Core.Type.Cat.SubdepotSet
 
@@ -977,13 +1031,16 @@ These are all the definitions that this package contains of (|quasi-)scalar
 types with possreps, and complete (|quasi-)nonscalar types, and union
 types, and restriction types.
 
-=item C<data> - C<single_of.Cat.DbVar>
+=item C<data> - C<maybe_of.Cat.NameChain>
 
-This is the definition of the dbvar that this package contains.
+This is the declared data type of the dbvar that this package contains, iff
+C<data> is a C<Single>; if C<data> is C<Nothing> (the default), then this
+package does not have a self-local dbvar.
 
 =back
 
-The default value of C<Cat.Package> defines an empty package.
+The default value of C<Cat.Package> defines an empty package that does not
+have any self-local dbvar.
 
 =head2 sys.std.Core.Type.Cat.Pkg(Func|Upd|Proc)Set
 
@@ -3327,33 +3384,6 @@ Note that there is no valid combination of C<Cat.InnerRestrType> attribute
 values that would result in an alias for the C<Empty> type, due to
 C<default> being mandatory.
 
-=head1 TYPES FOR DEFINING DBVARS
-
-=head2 sys.std.Core.Type.Cat.DbVar
-
-A C<Cat.DbVar> is a C<Tuple>.  It specifies the data type and transition
-constraints and so forth of a database-typed variable, such as the
-C<(dep|sdp|pkg).data> variables.
-
-A C<Cat.DbVar> has these 2 attributes:
-
-=over
-
-=item C<comment> - C<Cat.Comment>
-
-This is an optional programmer comment about the dbvar as a whole.
-
-=item C<type> - C<Cat.Type>
-
-This defines the entire database type.
-
-=back
-
-I<Transition constraints et al are still TODO.>
-
-The default value of C<Cat.DbVar> defines a variable that is "just a
-database" and has no extra constraints.
-
 =head1 SIMPLE GENERIC NONSCALAR TYPES
 
 =head2 sys.std.Core.Type.Cat.NameTypeMap
@@ -3451,15 +3481,15 @@ outer entity that the inner is embedded in.  There is no valid
 C<Cat.NameChain> value for referencing it from outside that context
 (likewise for routines declared private to a package), and outside that
 context is typically where the routines that take closures as arguments
-would live.  For example, if public function C<dep.mymain> had an inner
-function C<inn.mytest> and C<dep.myfoo> invoked the public function
-C<dep.myfilter> with an argument value of C<inn.mytest>, then if
-C<dep.myfilter> tried to invoke the function it was passed, it would
-actually be trying to invoke an inner function of C<dep.myfilter> named
+would live.  For example, if public function C<dep.lib.mymain> had an inner
+function C<inn.mytest> and C<dep.lib.myfoo> invoked the public function
+C<dep.lib.myfilter> with an argument value of C<inn.mytest>, then if
+C<dep.lib.myfilter> tried to invoke the function it was passed, it would
+actually be trying to invoke an inner function of C<dep.lib.myfilter> named
 C<inn.mytest>, which won't work.  Conceptually, a solution to this problem
 is to actually pass a routine name in a more fully-qualified form,
-conceptually like C<dep.mymain.mytest>, which then C<dep.myfilter> could
-correctly invoke.  However, if that was made to work literally with a
+conceptually like C<dep.lib.mymain.mytest>, which then C<dep.lib.myfilter>
+could correctly invoke.  However, if that was made to work literally with a
 C<Cat.NameChain>, then this could cause problems where anything could
 invoke C<mytest> directly without being given permission from C<mymain>.
 

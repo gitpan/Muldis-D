@@ -1,6 +1,90 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-08-17  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.46.0 is released on CPAN as
+    Muldis-D-0.46.0.tar.gz.
+
+    * New file versions are: D.pm 0.46.0 and Types_Catalog.pod 0.35.0 and
+    Routines.pod 0.30.0 and Basics.pod 0.29.0 and PTMD_Tiny.pod 0.27.0 and
+    HDMD_Perl_Tiny.pod 0.24.0 and Routines_Catalog.pod 0.2.0.  The other
+    pre-existing versioned files are unchanged.
+
+    * (Basics.pod, HDMD_Perl_Tiny.pod, PTMD_Tiny.pod)  Bootloader routines
+    may now directly reference global variables, and can now invoke any
+    kind of imperative routine that has subject-to-update parameters,
+    including updaters.  In Basics.pod, updated the 'bootloader' routine
+    kind description and made related updates in the ROUTINES main pod
+    section.  With both Tiny.pod, updated the grammar and examples for
+    boot_call tokens/nodes so they now have distinct subject-to-update and
+    read-only arguments.
+
+    * (Types_Catalog.pod)  Removed the partly defined "Cat.DbVar" type,
+    which is no longer being used.  Updated the "Cat.(Depot|Package)" types
+    to change their "data" attribute to have the "Cat.NameChain" type
+    rather than "Cat.DbVar"; now, that attribute just holds the declared
+    name of the data type of the dbvar of the depot|package, where the type
+    is declared first as its own DBMS entity, or otherwise the declared
+    type is simply "Database".  Similarly updated the type of the "catalog"
+    attribute of the "Cat.SysCatSet" type to a NameChain from a DbVar.
+
+    * (Basics.pod, Types_Catalog.pod)  It is now optional for a
+    depot|subdepot|package to have a self-local dbvar, which should help
+    save us from some chicken and egg constraints that come into play when
+    one wants to do data definition of depots etc.  In Basics.pod, the
+    "User Namespace Correspondence" pod sub-section of "ENTITY NAMES" got
+    some large updates.  In Types_Catalog.pod, the data type of the "data"
+    attribute of the "Cat.(Depot|Package)" types is now a
+    "maybe_of.Cat.NameChain" rather than a "single_of.Cat.NameChain".
+
+    * (Routines.pod)  Added a set of 9 new update operators where each is a
+    short-cut over a tuple|relational function plus a generic assignment of
+    the function's result to the main relvar argument of the function; a
+    subset of these correspond directly to the data-manipulation phase of
+    common SQL "CREATE|ALTER|DROP TABLE|VIEW" statements.  These 4 updaters
+    were added as "sys.std.Core.Tuple.\w+":
+    "assign_(rename|product|(|cmpl_)projection)".  These 5 updaters were
+    added as "sys.std.Core.Relation.\w+":
+    "assign_(rename|(|static_)extension|(|cmpl_)projection)".
+
+    * (Types_Catalog.pod)  Updated the "Cat.Federation" type by adding a
+    third attribute "type_maps", which indicates the various copies of the
+    same type over multiple depots, such that the DBMS can then treat those
+    types as interchangeable, so to support cross-depot operations.  Also
+    added the 2 new catalog types "Cat.FedTypeMap(Set|)" which define that
+    new attribute.
+
+    * (Routines_Catalog.pod)  Grouped all the procedures under a new main
+    pod section "PROCEDURES FOR BOOTSTRAPPING A MULDIS D PROGRAM OR
+    DATABASE", where their old groupings became second-level pod sections.
+    Wrote an introduction to this section that outlines what the procedures
+    do or don't do, and explains them in the context of what a bootloader
+    can directly do and what it can only do indirectly by defining and
+    executing other routines.  Removed part of the "DESCRIPTION" as now
+    being redundant or outdated.
+
+    * (HDMD_Perl_Tiny.pod, PTMD_Tiny.pod)  Added new/first lexical-scope
+    pragma to both Tiny dialects named "treat_as_type", which takes the
+    form of a wrapper syntax/PHMD-node that annotates the
+    typically-nonscalar child lexical/node with a specific data type.  Used
+    alone, this can help with some kinds of compile-time type checking.
+    Used together with the "auto_complete" language-name-level pragma, this
+    can help determine what names and types of attributes need to be
+    auto-added to literals that are otherwise "just a relation|tuple" and
+    lack that specific meta-data, such as with argument values for
+    bootloader-invoked routines that have "Relation" typed parameters.
+
+    * (Basics.pod, Types_Catalog.pod, PTMD_Tiny.pod)  Fixed typos.
+
+    * (Basics.pod)  Added a few TODO-ish comments in ENTITY NAMES
+    sub-sections that any references to
+    "sys.cat.(system|impl|mount|foreign|interp)" are out-dated; the actual
+    system catalog doesn't mention them, and the catalog also still has to
+    be updated to have a place for describing implementation specific
+    entities; currently "(sys|mnt).cat" describe just standard entities;
+    the out-dated parts are being kept as a reminder of ideas still todo.
+
 2008-08-15  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.45.0 is released on CPAN as

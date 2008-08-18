@@ -44,21 +44,14 @@ constraint writers want to know anyway.
 
 * Add other kinds of triggered routines.
 
-* Augment or replace the automatic code completion of the two Tiny dialects
-so one can explicitly tag nonscalar literals with the nonscalar type name
-that they should auto-complete as ... as an augment, this is useful when
-the bootloader-invoked routine has a generic parameter type like plain
-Relation or Array ... maybe we don't actually want a pragma here at all.
-
 * Enhance the catalog so that one when defining values like
 (Tup|Rel)LitExprNodeSet, one can tag such values with the data type the
 value is supposed to be in, so they can auto-complete missing attributes as
-well ... this would also work for when a definition isn't a valid relation
-since the actual Node value is valid.
-
-* In the absense of or in addition to auto-complete, the above 2 features
-could be used as treat-like operators to help with code validation or allow
-more at-compile-time validation.
+per the treat_as_type lexical-scope pragma of the Tiny dialects; this would
+also work for when a definition isn't a valid relation since the actual
+Node value is valid.  In the absense of or in addition to auto-complete,
+this feature could be used as treat-like operators to help with code
+validation or allow more at-compile-time validation.
 
 * Update Text.pod (or add other extensions) to add general search and
 replace or transliteration or regular expression et al functionality,
@@ -96,11 +89,6 @@ of the same lexical scope as the invoking routine.  But there is still a
 lot to like about having each of the try/catch blocks being a separate
 (inner) routine with its own lexical scope, such as in predicting what a
 rollback would affect, and it might be easier to implement as-is.
-
-* Define short-hand data definition procedures analagous to SQL's CREATE,
-DROP etc for relvars and database constraints.  And don't forget to update
-any code samples such as in the Tiny .pod files so they use the official
-create-relvar routine names.
 
 * Add sequence generator updaters|procedures in Integer.pod.
 

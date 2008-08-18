@@ -9,7 +9,7 @@ How to format Perl Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl_Tiny version 0.23.0.
+This document is Muldis::D::Dialect::HDMD_Perl_Tiny version 0.24.0.
 
 =head1 PREFACE
 
@@ -92,17 +92,18 @@ be reconsidered.>
 =head1 BOOTLOADER
 
 A full or partial Muldis D C<bootloader> routine consists of a language
-name declaration plus a series of 0..N procedure calls (specifically
-procedures with no subject-to-update parameters).  A C<bootloader> is
-formatted as a PHMD node having 1..N elements, where the first element is
-a PHMD node defining a Muldis D "language name", and each remaining element
-is a PHMD node defining a "bootloader procedure call".
+name declaration plus a series of 0..N imperative routine calls.  A
+C<bootloader> is formatted as a PHMD node having 1..N elements, where the
+first element is a PHMD node defining a Muldis D "language name", and each
+remaining element is a PHMD node defining a "bootloader imperative routine
+call".
 
 Examples:
 
     [
         [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl_Tiny', {} ],
-        [ 'boot_call', 'sys.std.Core.Cat.create_public_relvar', { ... } ],
+        [ 'boot_call', 'sys.std.Core.Cat.create_depot_procedure',
+            {}, { ... } ],
     ]
 
 =head1 LANGUAGE NAME
@@ -152,12 +153,12 @@ be the input for a Perl Hosted Muldis D implementating virtual machine's
 configuration step, which provides a context for subsequent feeding of
 other PHMD trees to said virtual machine.
 
-=head1 BOOTLOADER PROCEDURE CALL
+=head1 BOOTLOADER IMPERATIVE ROUTINE CALL
 
 This PHMD node specifies one statement of a Muldis D C<bootloader> routine
-which invokes a procedure, such statements being what the entire body of a
-C<bootloader> is composed of.  A bootloader procedure call is formatted as
-a PHMD node having the following 3 elements:
+which invokes an imperative routine, such statements being what the entire
+body of a C<bootloader> is composed of.  A bootloader imperative routine
+call is formatted as a PHMD node having the following 4 elements:
 
 =over
 
@@ -167,19 +168,26 @@ Node type: the Perl C<Str> value C<boot_call>.
 
 =item *
 
-Procedure name: a Perl C<Array|Seq|Str> as per the payload of a
+Imperative routine name: a Perl C<Array|Seq|Str> as per the payload of a
 C<NameChain> PHMD node.
 
 =item *
 
-Procedure args: a Perl C<Hash|Mapping> as per the payload of a C<Tuple>
-PHMD node.
+Imperative routine subject-to-update args: a Perl C<Hash|Mapping> as per
+the payload of a C<Tuple> PHMD node except that every C<Hash|Mapping> value
+is just a Perl C<Array|Seq|Str> as per the payload of a C<NameChain> PHMD
+node (each value is the name of a global variable).
+
+=item *
+
+Imperative routine read-only args: a Perl C<Hash|Mapping> as per the
+payload of a C<Tuple> PHMD node.
 
 =back
 
 Examples
 
-    [ 'boot_call', 'sys.std.Core.Cat.create_public_relvar', { ... } ]
+    [ 'boot_call', 'sys.std.Core.Cat.create_depot_procedure', {}, { ... } ]
 
 =head1 CORE GENERIC SCALAR VALUES
 
@@ -1189,6 +1197,57 @@ Examples:
 
     [ 'RatRoundMeth', 'half_up' ]
 
+=head1 TREAT AS TYPE
+
+This PHMD node is a lexical-scoped pragma that may be used where any
+literal value representing PHMD node may be used.  It has 3 elements:
+
+=over
+
+=item *
+
+Node type: the Perl C<Str> value C<treat_as_type>.
+
+=item *
+
+Type name: a Perl C<Array|Seq|Str> as per the payload of a C<NameChain>
+PHMD node.
+
+=item *
+
+The payload; a PHMD node that defines a single value.
+
+=back
+
+This node is used just to provide meta-data for its sole child node, which
+typically is a tuple or relation literal.  By default, when defining a
+nonscalar literal using a PHMD node tree, the resulting nonscalar value is
+"just a tuple|relation".  If that literal is then a sub-literal used as
+either a scalar possrep attribute value or as an argument to a
+bootloader-invoked routine, the known declared type of that scalar possrep
+attribute or routine parameter would provide a context such that the
+expected specific type of the nonscalar value, such as what attributes it
+should have, can be gleaned, and then it would be known what type the
+nonscalar literal is supposed to belong to.  But in some contexts, such as
+when the declared type of the routine parameter is simply C<Relation>,
+there isn't enough information in the normal context to know what attribute
+names and types the new nonscalar should have.  So the C<treat_as_type>
+PHMD node type can then be used by the programmer to explicitly tell the
+Tiny dialect parser what the specific type of the nonscalar is.  The
+literal being annotated is provided by the payload 3rd node element, and
+the type name it is being annotated with is given in the type name 2nd node
+element.  Using C<treat_as_type> is useful to enable some kinds of
+compile-time type checking, and it also helps the C<auto_complete> pragma
+to work in many places where it otherwise lacks information needed to work.
+
+Examples:
+
+    [ 'treat_as_type', 'fed.lib.the_db.gene.Person',
+        [ 'Relation', [ 'name', 'age', ], [
+            [ [ 'Text', 'Michelle' ], [ 'Int', 'perl_int', 17 ], ],
+        ] ]
+    ]
+
 =head1 MULDIS D TINY DIALECT PRAGMAS
 
 =head2 auto_complete
@@ -1249,14 +1308,17 @@ being looked at is the declared type of the bootloader-invoked routine's
 parameter that the literal is being given to as an argument.
 
 Now if the declared type of said parameter is just a generic type, such as
-C<Relation> or C<Array>, then often no information can be gleaned for what
-attributes should exist, and so C<auto_complete> won't help you and you
-must fully define relation values with the same attributes per tuple.  But
-fortunately, a lot of the places where C<auto_complete> would help you the
-most is when the bootloader is invoking system-defined data-defining
-procedures, and their parameters are all of attribute-specifying types, and
-it is in such data definition that you may be most likely to face a large
-number of default-valued attributes, such as C<comment>.
+C<Relation> or C<Array>, then often no information can be gleaned from this
+context for what attributes should exist, and so you will need to wrap the
+argument literal in a C<treat_as_type> literal that explicitly provides the
+specific type information needed; otherwise, C<auto_complete> won't help
+you and you must then fully define relation values with the same attributes
+per tuple.  But fortunately for brevity, a lot of the places where
+C<auto_complete> would help you the most is when the bootloader is invoking
+system-defined data-defining procedures, and their parameters are all of
+attribute-specifying types, and it is in such data definition that you may
+be most likely to face a large number of default-valued attributes, such as
+C<comment>.
 
 Note that the reason the C<auto_complete> behaviour is turned off by
 default is twofold.  First, the parser can be a lot simpler / more tiny
