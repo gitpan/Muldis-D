@@ -9,7 +9,7 @@ How to format Perl Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl_Tiny version 0.24.0.
+This document is Muldis::D::Dialect::HDMD_Perl_Tiny version 0.26.0.
 
 =head1 PREFACE
 
@@ -241,6 +241,15 @@ Examples:
         'exponent' => [ 'Int', 'perl_int', 37 ],
     } ]
 
+    [ 'Scalar', 'sys.std.Temporal.Type.UTCDateTime', 'datetime', {
+        'year'   => [ 'Int', 'perl_int', 2003 ],
+        'month'  => [ 'Int', 'perl_int', 10 ],
+        'day'    => [ 'Int', 'perl_int', 26 ],
+        'hour'   => [ 'Int', 'perl_int', 1 ],
+        'minute' => [ 'Int', 'perl_int', 30 ],
+        'second' => [ 'Rat', 'perl_rat', 0 ],
+    } ]
+
     [ 'Scalar', 'fed.lib.the_db.WeekDay', 'name', {
         '' => [ 'Text', 'monday' ],
     } ]
@@ -356,11 +365,11 @@ be just a canonical integer value according to Perl.
 
 =item *
 
-If the format is C<any_perl>, then the payload may be any Perl value,
-and it is simply coerced into an integer context as per Perl's own
-semantics, meaning base-10 where applicable.  If something doesn't look
-numeric, it becomes zero; if something looks like a fractional number, it
-is truncated.
+If the format is C<any_perl>, then the payload may be any Perl value, and
+it is simply coerced into an integer context as per Perl's own semantics
+(resulting from adding zero to it), meaning base-10 where applicable.  If
+something doesn't look numeric, it becomes zero; if something looks like a
+fractional number, it is truncated.
 
 =back
 
@@ -674,7 +683,7 @@ defines the C<value> attribute of the single tuple of the new 'single'.
 
 Examples:
 
-    [ 'Single', [ 'Text', '2003.07.24' ] ]
+    [ 'Single', [ 'Text', 'I know this one!' ] ]
 
 =head2 sys.std.Core.Type.Array
 
@@ -715,7 +724,7 @@ Examples:
 
 =head2 sys.std.Core.Type.Bag
 
-This node type represents a bag value.  It has 3 elements:
+This node type represents a bag value.  It has 2-3 elements:
 
 =over
 
@@ -725,12 +734,14 @@ Node type: the Perl C<Str> value C<Bag>.
 
 =item *
 
-Format; one of: C<aoa_counted>, C<array_repeated>, C<perl_bag> (p6).
+Only when the node has 3 elements; format; one of: C<aoa_counted>,
+C<array_repeated>.
 
 =item *
 
-The payload; a Perl C<Bag|KeyBag> value or C<Array|Seq> or
-C<Array|Seq> of C<Array|Seq>.
+The payload; only when the node has 2 elements, a Perl C<Bag|KeyBag> value;
+only when the node has 3 elements, a Perl C<Array|Seq> or C<Array|Seq> of
+C<Array|Seq>.
 
 =back
 
@@ -742,30 +753,31 @@ follows:
 
 =item *
 
-If the format is C<aoa_counted>, then the payload must be a Perl
-C<Array|Seq>, and each element of the payload defines a binary tuple of the
-new bag; the element is a 2-element C<Array|Seq>, and those 2 elements, by
-index order, are a PHMD node that defines the C<value> attribute of the
-tuple, and a 2-3-element C<Array|Seq> (which is the same as an 'Int' PHMD
-node minus the first constant element) that defines the C<count> attribute
-of the tuple; the count must be a positive integer.
+If the node has 2 elements, then the payload must be a Perl 6 (there is no
+Perl 5 analogy) C<Bag|KeyBag> value; the payload elements are PHMD nodes
+corresponding to the C<value> attribute of the new bag's tuples, and the
+mapping is as you should expect.
 
 =item *
 
-If the format is C<array_repeated>, then the payload must be a Perl
-C<Array|Seq>, and each element of the payload contributes to a binary tuple
-of the new bag; the element value is a PHMD node that defines the C<value>
-attribute of the tuple.  The bag has 1 tuple for every distinct (after
-format normalization) element value in the payload, and the C<count>
-attribute of that tuple says how many instances of said element were in the
-payload.
+If the node has 3 elements, and the format is C<aoa_counted>, then the
+payload must be a Perl C<Array|Seq>, and each element of the payload
+defines a binary tuple of the new bag; the element is a 2-element
+C<Array|Seq>, and those 2 elements, by index order, are a PHMD node that
+defines the C<value> attribute of the tuple, and a 2-3-element C<Array|Seq>
+(which is the same as an 'Int' PHMD node minus the first constant element)
+that defines the C<count> attribute of the tuple; the count must be a
+positive integer.
 
 =item *
 
-If the format is C<perl_bag>, then the payload must be a Perl 6
-(there is no Perl 5 analogy) C<Bag|KeyBag> value; the payload elements are
-PHMD nodes corresponding to the C<value> attribute of the new bag's tuples,
-and the mapping is as you should expect.
+If the node has 3 elements, and the format is C<array_repeated>, then the
+payload must be a Perl C<Array|Seq>, and each element of the payload
+contributes to a binary tuple of the new bag; the element value is a PHMD
+node that defines the C<value> attribute of the tuple.  The bag has 1 tuple
+for every distinct (after format normalization) element value in the
+payload, and the C<count> attribute of that tuple says how many instances
+of said element were in the payload.
 
 =back
 
@@ -1022,13 +1034,11 @@ Node type: the Perl C<Str> value C<Rat>.
 
 =item *
 
-Format; one of: C<md_radix>, C<md_ratio>, C<md_float>, C<perl_rat>,
-C<perl_float>, C<perl_int_ratio>, C<perl_int_float>, C<any_perl>,
-C<any_perl_ratio>, C<any_perl_float>.
+Format; one of: C<md_rat>, C<perl_rat>, C<any_perl>.
 
 =item *
 
-Only when format is C<md_radix>|C<md_ratio>|C<md_float>; the max-col-val.
+Only when format is C<md_rat>; the max-col-val.
 
 =item *
 
@@ -1043,135 +1053,133 @@ as follows:
 
 =item *
 
-If the format is C<md_radix>, then the max-col-val must be a Perl C<Str>
-composed of a single C<[1-9A-Z]> character, and the payload must be a Perl
-C<Str> of the format C<< 0\.?<[0-9A-Z]>* >> or C<<
-\-?<[1-9A-Z]><[0-9A-Z]>*\.?<[0-9A-Z]>* >>.  This format specifically is
-what the Plain Text Muldis D grammar uses ('radix' option), and is the
-result of parsing it.  The payload is interpreted as a base-I<N> rational
-where I<N> might be between 2 and 36, and the given max-col-val says which
-possible value of I<N> to use.  Assuming all column values are between zero
-and I<N>-minus-one, the max-col-val contains that I<N>-minus-one.  So to
-specify, eg, bases [2,8,10,16], use max-col-val of [1,7,9,F].
+If the format is C<md_rat> and the payload is not an C<Array|Seq>, then the
+max-col-val must be a Perl C<Str> composed of a single C<[1-9A-Z]>
+character, and the payload must be a Perl C<Str> of the format C<<
+0\.?<[0-9A-Z]>* >> or C<< \-?<[1-9A-Z]><[0-9A-Z]>*\.?<[0-9A-Z]>* >>.  This
+format specifically is what the Plain Text Muldis D grammar uses ('radix'
+option), and is the result of parsing it.  The payload is interpreted as a
+base-I<N> rational where I<N> might be between 2 and 36, and the given
+max-col-val says which possible value of I<N> to use.  Assuming all column
+values are between zero and I<N>-minus-one, the max-col-val contains that
+I<N>-minus-one.  So to specify, eg, bases [2,8,10,16], use max-col-val of
+[1,7,9,F].
 
 =item *
 
-If the format is C<md_ratio>, then the max-col-val must be as per
-C<md_radix>, and the payload must be a 2-element C<Array|Seq> where the
-first element is a Perl C<Str> of the format C<0> or C<<
-\-?<[1-9A-Z]><[0-9A-Z]>* >> (an integer) and the second element is a Perl
-C<Str> of the format C<< <[1-9A-Z]><[0-9A-Z]>* >> (a positive integer).
-The payload is interpreted as per C<md_radix> but that its value comes from
-the first element (a numerator) divided by the second (a denominator).
-Note that while the C<md_radix> format is limited to representing rationals
-whose denominator is a power of some I<N> between 2 and 36, the C<md_ratio>
-format can represent those with any I<N> that is greater than or equal to
-2, such as 1/43.
+If the format is C<md_rat> and the payload is a 2-element C<Array|Seq>,
+then the max-col-val must be as per the previous bullet, and the payload
+C<Array|Seq> must be such that the first element is a Perl C<Str> of the
+format C<0> or C<< \-?<[1-9A-Z]><[0-9A-Z]>* >> (an integer) and the second
+element is a Perl C<Str> of the format C<< <[1-9A-Z]><[0-9A-Z]>* >> (a
+positive integer). The payload is interpreted as per C<md_radix> but that
+its value comes from the first element (a numerator) divided by the second
+(a denominator). Note that while the C<md_radix> format is limited to
+representing rationals whose denominator is a power of some I<N> between 2
+and 36, the C<md_ratio> format can represent those with any I<N> that is
+greater than or equal to 2, such as 1/43.
 
 =item *
 
-If the format is C<md_float>, then the max-col-val must be as per
-C<md_radix>, and the payload must be a 3-element C<Array|Seq> where the
-first element is a Perl C<Str> of the format C<0> or C<<
-\-?<[1-9A-Z]><[0-9A-Z]>* >> (an integer) and the second element is a Perl
-C<Str> of the format C<< <[2-9A-Z]><[0-9A-Z]>* >> (an integer greater than
-1) and the third element is as per the first (an integer).  The payload is
-interpreted as per C<md_radix> but that its value comes from the first
-element (a mantissa) multiplied by the result of the second element (a
-radix) taken to the power of the third (an exponent).  Note that while the
-C<md_ratio> format can represent all rationals, the very large or very
-small ones would be quite verbose written in that format, and so the
-C<md_float> format allows writing those values in a more terse fashion,
-such as 1.56*10^37.
+If the format is C<md_rat> and the payload is a 3-element C<Array|Seq>,
+then the max-col-val must be as per the previous bullet, and the payload
+C<Array|Seq> must be such that the first element is a Perl C<Str> of the
+format C<0> or C<< \-?<[1-9A-Z]><[0-9A-Z]>* >> (an integer) and the second
+element is a Perl C<Str> of the format C<< <[2-9A-Z]><[0-9A-Z]>* >> (an
+integer greater than 1) and the third element is as per the first (an
+integer).  The payload is interpreted as per C<md_radix> but that its value
+comes from the first element (a mantissa) multiplied by the result of the
+second element (a radix) taken to the power of the third (an exponent).
+Note that while the C<md_ratio> format can represent all rationals, the
+very large or very small ones would be quite verbose written in that
+format, and so the C<md_float> format allows writing those values in a more
+terse fashion, such as 1.56*10^37.
 
 =item *
 
-If the format is C<perl_rat>, then:  Under Perl 6, the payload must be a
-Perl C<Rat> (or C<Num>), which is mapped directly.  Under Perl 5, the
-payload must be just a canonical rational or numeric value according to
-Perl.
+If the format is C<perl_rat> and the payload is not an C<Array|Seq>, then:
+Under Perl 6, the payload must be a Perl C<Rat|Num|Int>, which is mapped
+directly.  Under Perl 5, the payload must be just a canonical numeric value
+according to Perl.
 
 =item *
 
-If the format is C<perl_float>, then:  Under Perl 6, the payload must be a
-Perl C<Float> (or C<Num>), which is mapped directly.  Under Perl 5, the
-payload must be just a canonical floating-point or numeric value according
-to Perl.
-
-=item *
-
-If the format is C<perl_int_ratio>, then the payload must a 2-element
-C<Array|Seq> where each element must be a canonical integer (or positive
-integer, respectively) to Perl as per defining a C<perl_int>; the
-rational's value is interpreted as the first element divided by the second.
-
-=item *
-
-If the format is C<perl_int_float>, then the payload must a 3-element
-C<Array|Seq> where each element must be a canonical integer (or integer
-greater than 2, or integer, respectively) to Perl as per defining a
+If the format is C<perl_rat> and the payload is a 2-element C<Array|Seq>,
+then the payload C<Array|Seq> must be such that each element is a canonical
+integer (or positive integer, respectively) to Perl as per defining a
 C<perl_int>; the rational's value is interpreted as the first element
-multiplied by the result of the second element taken to the power of the
-third.
+divided by the second.
 
 =item *
 
-If the format is C<any_perl>, then the payload may be any Perl value,
-and it is simply coerced into a numeric context as per Perl's own
-semantics, meaning base-10 where applicable.  If something doesn't look
-numeric, it becomes zero.
+If the format is C<perl_rat> and the payload is a 3-element C<Array|Seq>,
+then the payload C<Array|Seq> must be such that each element is a canonical
+integer (or integer greater than 2, or integer, respectively) to Perl as
+per defining a C<perl_int>; the rational's value is interpreted as the
+first element multiplied by the result of the second element taken to the
+power of the third.
 
 =item *
 
-If the format is C<any_perl_ratio>, then the payload is as per
-C<perl_int_ratio> but that each array element is simply coerced into an
-integer context.  If Perl's coercion of the denominator produces an integer
-less than 1, it becomes a 1.  I<This may be revised to fail instead.>
+If the format is C<any_perl> and the payload is not an C<Array|Seq>, then
+the payload may be any Perl value, and it is simply coerced into a numeric
+context as per Perl's own semantics (resulting from adding zero to it),
+meaning base-10 where applicable.  If something doesn't look numeric, it
+becomes zero.
 
 =item *
 
-If the format is C<any_perl_float>, then the payload is as per
-C<perl_int_float> but that each array element is simply coerced into an
-integer context.  If Perl's coercion of the radix produces an integer
-less than 2, it becomes a 2.  I<This may be revised to fail instead.>
+If the format is C<any_perl> and the payload is a 2-element C<Array|Seq>,
+then each payload array element is simply coerced into an integer context,
+and the payload is then interpreted as per C<perl_rat>.  If Perl's coercion
+of the denominator produces an integer less than 1, it becomes a 1.  I<This
+may be revised to fail instead.>
+
+=item *
+
+If the format is C<any_perl> and the payload is a 3-element C<Array|Seq>,
+then each payload array element is simply coerced into an integer context,
+and the payload is then interpreted as per C<perl_rat>.  If Perl's coercion
+of the radix produces an integer less than 2, it becomes a 2.  I<This may
+be revised to fail instead.>
 
 =back
 
 Examples:
 
-    [ 'Rat', 'md_radix', '1', '-1.1' ]
+    [ 'Rat', 'md_rat', '1', '-1.1' ]
 
-    [ 'Rat', 'md_radix', '9', '-1.5' ] # same val as prev
+    [ 'Rat', 'md_rat', '9', '-1.5' ] # same val as prev
 
-    [ 'Rat', 'md_radix', '9', '3.14159' ]
+    [ 'Rat', 'md_rat', '9', '3.14159' ]
 
-    [ 'Rat', 'md_radix', 'A', '0.0' ]
+    [ 'Rat', 'md_rat', 'A', '0.0' ]
 
-    [ 'Rat', 'md_radix', 'F', 'DEADBEEF.FACE' ]
+    [ 'Rat', 'md_rat', 'F', 'DEADBEEF.FACE' ]
 
-    [ 'Rat', 'md_radix', 'Z', '0.000AZE' ]
+    [ 'Rat', 'md_rat', 'Z', '0.000AZE' ]
 
-    [ 'Rat', 'md_ratio', '6', [ '500001', '1000' ] ]
+    [ 'Rat', 'md_rat', '6', [ '500001', '1000' ] ]
 
-    [ 'Rat', 'md_ratio', 'B', [ 'A09B', 'A' ] ]
+    [ 'Rat', 'md_rat', 'B', [ 'A09B', 'A' ] ]
 
-    [ 'Rat', 'md_float', '1', [ '1011101101', '10', '-11011' ] ]
+    [ 'Rat', 'md_rat', '1', [ '1011101101', '10', '-11011' ] ]
 
-    [ 'Rat', 'md_float', '9', [ '45207196', '10', '37' ] ]
+    [ 'Rat', 'md_rat', '9', [ '45207196', '10', '37' ] ]
 
     [ 'Rat', 'perl_rat', 21.003 ]
 
-    [ 'Rat', 'perl_float', 5.428**295 ]
+    [ 'Rat', 'perl_rat', 5.428**295 ]
 
-    [ 'Rat', 'perl_int_ratio', [ 1, 43 ] ]
+    [ 'Rat', 'perl_rat', [ 1, 43 ] ]
 
-    [ 'Rat', 'perl_int_float', [ 314159, 10, -5 ] ]
+    [ 'Rat', 'perl_rat', [ 314159, 10, -5 ] ]
 
     [ 'Rat', 'any_perl', ' 54.67 ' ]
 
-    [ 'Rat', 'any_perl_ratio', [ ' 57 ', ' 71 ' ] ]
+    [ 'Rat', 'any_perl', [ ' 57 ', ' 71 ' ] ]
 
-    [ 'Rat', 'any_perl_float', [ ' 656573456 ', ' 8 ', ' 243323 ' ] ]
+    [ 'Rat', 'any_perl', [ ' 656573456 ', ' 8 ', ' 243323 ' ] ]
 
 =head2 sys.std.Rational.Type.RatRoundMeth
 
@@ -1198,6 +1206,134 @@ C<to_zero>, C<to_inf>.
 Examples:
 
     [ 'RatRoundMeth', 'half_up' ]
+
+=head1 TEMPORAL EXTENSION SCALAR VALUES
+
+=head2 sys.std.Temporal.Type.UTCInstant
+
+This node type represents an "instant"/"datetime" value that is affiliated
+with the UTC time-zone.  It has 3-4 elements:
+
+=over
+
+=item *
+
+Node type: the Perl C<Str> value C<UTCInstant>.
+
+=item *
+
+Format; one of: C<md_num>, C<perl_num>, C<any_perl>.
+
+=item *
+
+Only when format is C<md_num>; the max-col-val.
+
+=item *
+
+The payload; a 6-element C<Array|Seq> value where each element may be
+either undefined or defined; or if fewer than 6 elements are provided, the
+C<Array|Seq> will be implicitly extended to 6, filling with undefs.
+
+=back
+
+This node is interpreted as a Muldis D C<sys.std.Temporal.Type.UTCInstant>
+value whose C<instant> possrep attribute values are defined by the
+C<Array|Seq> payload.  The 6 payload elements correspond in order, from the
+lowest to the highest indexed, to the 6 attributes: C<year>, C<month>
+C<day>, C<hour>, C<minute>, C<second>.  For each payload element that Perl
+considers undefined or defined, the corresponding attribute has a
+C<Nothing> or a C<Single> value, respectively.  For each of the first 5
+elements, when it is defined, it must qualify as a valid payload for an
+C<Int> PHMD node; for the 6th element, when it is defined, it must qualify
+as a valid payload for a C<Rat> PHMD node.  Each of the 6 payload elements,
+when defined, is further interpreted according to the format and
+max-col-val elements of this node, in the same manner as how an C<Int> or
+C<Rat> node payload is interpreted; the format value C<md_num> corresponds
+directly to C<md_(int|rat)>, C<perl_num> corresponds to C<perl_(int|rat)>,
+and C<any_perl> corresponds to C<any_perl>.
+
+A defined C<year> may be any integer, each of [C<month>, C<day>] must be a
+positive integer, each of [C<hour>, C<minute>] must be an
+unsigned/non-negative integer, and C<second> must be an
+unsigned/non-negative rational number.  If all 6 attributes are defined,
+then the new C<UTCInstant> value is also a C<UTCDateTime>; if just the
+first 3 or last 3 are defined, then the value is not a C<UTCDateTime> but
+rather a C<UTCDate> or C<UTCTime>, respectively; if any other combination
+of attributes are defined, then the value is just a C<UTCInstant> and not
+of any of the other 3 subtypes.
+
+Examples:
+
+    [ 'UTCInstant', 'perl_num', [1964,10,16,16,12,47.5] ] # a UTCDateTime
+
+    [ 'UTCInstant', 'perl_num', [2002,12,6] ] # a UTCDate
+
+    [ 'UTCInstant', 'perl_num', [undef,undef,undef,14,2,29] ] # a UTCTime
+
+=head2 sys.std.Temporal.Type.FloatInstant
+
+This node type is exactly the same as the C<UTCInstant> node type, in both
+structure/constraints and interpretation, etc, except that it represents a
+"floating" instant/datetime value, that is not affiliated with any
+time-zone, and it is interpreted as a Muldis D
+C<sys.std.Temporal.Type.FloatInstant> value.
+
+Examples:
+
+    [ 'FloatInstant', 'perl_num', [2003,4,5,2] ] # min,sec unknown or N/A
+
+    [ 'FloatInstant', 'perl_num', [1407] ] # just know its sometime in 1407
+
+=head2 sys.std.Temporal.Type.Duration
+
+This node type represents a duration value, an amount of time, which is not
+fixed to any instant in time.  It has 3-4 elements:
+
+=over
+
+=item *
+
+Node type: the Perl C<Str> value C<Duration>.
+
+=item *
+
+Format; one of: C<md_num>, C<perl_num>, C<any_perl>.
+
+=item *
+
+Only when format is C<md_num>; the max-col-val.
+
+=item *
+
+The payload; a 6-element C<Array|Seq> value where each element may be
+either undefined or defined; or if fewer than 6 elements are provided, the
+C<Array|Seq> will be implicitly extended to 6, filling with undefs.
+
+=back
+
+This node is interpreted as a Muldis D C<sys.std.Temporal.Type.Duration>
+value whose C<duration> possrep attribute values are defined by the
+C<Array|Seq> payload.  The 6 payload elements correspond in order, from the
+lowest to the highest indexed, to the 6 attributes: C<years>, C<months>
+C<days>, C<hours>, C<minutes>, C<seconds>.  For each payload element that
+Perl considers undefined or defined, the corresponding attribute has a
+C<Nothing> or a C<Single> value, respectively.  For each of the first 5
+elements, when it is defined, it must qualify as a valid payload for an
+C<Int> PHMD node; for the 6th element, when it is defined, it must qualify
+as a valid payload for a C<Rat> PHMD node.  Each of the 6 payload elements,
+when defined, is further interpreted according to the format and
+max-col-val elements of this node, in the same manner as how an C<Int> or
+C<Rat> node payload is interpreted; the format value C<md_num> corresponds
+directly to C<md_(int|rat)>, C<perl_num> corresponds to C<perl_(int|rat)>,
+and C<any_perl> corresponds to C<any_perl>.
+
+A defined [C<years>, C<months>, C<days>, C<hours>, C<minutes>] may be any
+integer, and C<seconds> may be any rational number.  I<Currently,
+C<Duration> has no system-defined subtypes, but that may change later.>
+
+Examples:
+
+    [ 'Duration', 'perl_num', [3,5,1,6,15,45.000012] ]
 
 =head1 TREAT AS TYPE
 

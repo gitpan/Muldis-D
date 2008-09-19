@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_Tiny version 0.27.0.
+This document is Muldis::D::Dialect::PTMD_Tiny version 0.29.0.
 
 =head1 PREFACE
 
@@ -104,8 +104,8 @@ at least.>  Any remaining errors should be corrected as soon as possible.
 
     use v6-alpha;
 
-    # grammar Muldis_D_PTMD_Tiny:auth<http://muldis.com>:ver<0.27.0>;
-    grammar Muldis_D_PTMD_Tiny-0.27.0-http://muldis.com;
+    # grammar Muldis_D_PTMD_Tiny:auth<http://muldis.com>:ver<0.29.0>;
+    grammar Muldis_D_PTMD_Tiny-0.29.0-http://muldis.com;
 
     token bootloader {
         (<language_name>)
@@ -167,6 +167,8 @@ at least.>  Any remaining errors should be corrected as soon as possible.
         | <order>
         | <rat>
         | <rat_round_meth>
+        | <instant>
+        | <duration>
         | <treat_as_type>
     }
 
@@ -292,15 +294,17 @@ at least.>  Any remaining errors should be corrected as soon as possible.
     }
 
     token bag_or_qv {
-          bag_counted_values_or_qv
-        | bag_repeated_values_or_qv
-    }
-
-    token bag_counted_values_or_qv {
         ((Quasi)? Bag)
         <spec_sep>
-        (count)
-        <spec_sep>
+        <bag_body>
+    }
+
+    token bag_body {
+          bag_body_counted_values
+        | bag_body_repeated_values
+    }
+
+    token bag_body_counted_values {
         <list_open>
             (((<literal>) <pair_sep> (<count>) <list_sep>)*)
         <list_close>
@@ -312,11 +316,7 @@ at least.>  Any remaining errors should be corrected as soon as possible.
         <pint_body>
     }
 
-    token bag_repeated_values_or_qv {
-        ((Quasi)? Bag)
-        <spec_sep>
-        (repeat)
-        <spec_sep>
+    token bag_body_repeated_values {
         <list_open>
             (((<literal>) <list_sep>)*)
         <list_close>
@@ -355,6 +355,8 @@ at least.>  Any remaining errors should be corrected as soon as possible.
     token int_max_col_val { (<[1-9A-Z]>) }
 
     token int_body { (0|\-?<[1-9A-Z]><[0-9A-Z]>*) }
+
+    token uint_body { (0|<[1-9A-Z]><[0-9A-Z]>*) }
 
     token pint_body { (<[1-9A-Z]><[0-9A-Z]>*) }
 
@@ -419,45 +421,53 @@ at least.>  Any remaining errors should be corrected as soon as possible.
     token order { (Order) <spec_sep> (increase|same|decrease|-1|0|1) }
 
     token rat {
-          rat_with_radix
-        | rat_as_ratio
-        | rat_as_float
-    }
-
-    token rat_with_radix {
         (Rat)
-        <spec_sep>
-        (radix)
         <spec_sep>
         <int_max_col_val>
         <spec_sep>
-        (<int_body>\.?<[0-9A-Z]>*)
+        <rat_body>
     }
 
-    token rat_as_ratio {
-        (Rat)
-        <spec_sep>
-        (ratio)
-        <spec_sep>
-        <int_max_col_val>
-        <spec_sep>
-        (<int_body> \s* \/ \s* <pint_body>)
+    token rat_body {
+          (<int_body>\.?<[0-9A-Z]>*)
+        | (<int_body> \s* \/ \s* <pint_body>)
+        | (<int_body> \s* \* \s* <pint_body> \s* \^ \s* <int_body>)
     }
 
-    token rat_as_float {
-        (Rat)
-        <spec_sep>
-        (float)
-        <spec_sep>
-        <int_max_col_val>
-        <spec_sep>
-        (<int_body> \s* \* \s* <pint_body> \s* \^ \s* <int_body>)
+    token urat_body {
+          (<uint_body>\.?<[0-9A-Z]>*)
+        | (<uint_body> \s* \/ \s* <pint_body>)
+        | (<uint_body> \s* \* \s* <pint_body> \s* \^ \s* <int_body>)
     }
 
     token rat_round_meth {
         (RatRoundMeth)
         <spec_sep>
         (half_down|half_up|half_even|to_floor|to_ceiling|to_zero|to_inf)
+    }
+
+    token instant {
+        ((UTC|Float) Instant)
+        <spec_sep>
+        <int_max_col_val>
+        <spec_sep>
+        <ord_list_open>
+            <int_body>? <list_sep>
+            (<pint_body>? <list_sep>) ** 2
+            (<uint_body>? <list_sep>) ** 2
+            <urat_body>?
+        <ord_list_close>
+    }
+
+    token duration {
+        (Duration)
+        <spec_sep>
+        <int_max_col_val>
+        <spec_sep>
+        <ord_list_open>
+            (<int_body>? <list_sep>) ** 5
+            <rat_body>
+        <ord_list_close>
     }
 
     token treat_as_type {
@@ -490,6 +500,15 @@ The following are fragments of actual Plain Text Muldis D code.
         'mantissa' => Int:9:45207196,
         'radix'    => Int:9:10,
         'exponent' => Int:9:37,
+    }
+
+    Scalar:'sys.std.Temporal.Type.UTCDateTime':'datetime':{
+        'year'   => Int:9:2003,
+        'month'  => Int:9:10,
+        'day'    => Int:9:26,
+        'hour'   => Int:9:1,
+        'minute' => Int:9:30,
+        'second' => Rat:9:0,
     }
 
     Scalar:'fed.lib.the_db.WeekDay':'name':{
@@ -582,7 +601,7 @@ The following are fragments of actual Plain Text Muldis D code.
 
     Nothing
 
-    Single:{ Text:'2003.07.24' }
+    Single:{ Text:'I know this one!' }
 
     Array:[
         Text:'Alphonse',
@@ -597,13 +616,13 @@ The following are fragments of actual Plain Text Muldis D code.
         Int:9:61,
     ]
 
-    Bag:count:{
+    Bag:{
         Text:'Apple'  => 9:500,
         Text:'Orange' => 9:300,
         Text:'Banana' => 9:400,
     }
 
-    Bag:repeat:{
+    Bag:{
         Text:'Foo',
         Text:'Quux',
         Text:'Foo',
@@ -628,27 +647,39 @@ The following are fragments of actual Plain Text Muldis D code.
 
     Order:same
 
-    Rat:radix:1:-1.1
+    Rat:1:-1.1
 
-    Rat:radix:9:-1.5
+    Rat:9:-1.5
 
-    Rat:radix:9:3.14159
+    Rat:9:3.14159
 
-    Rat:radix:A:0.0
+    Rat:A:0.0
 
-    Rat:radix:F:DEADBEEF.FACE
+    Rat:F:DEADBEEF.FACE
 
-    Rat:radix:Z:0.000AZE
+    Rat:Z:0.000AZE
 
-    Rat:ratio:6:500001/1000
+    Rat:6:500001/1000
 
-    Rat:ratio:B:A09B/A
+    Rat:B:A09B/A
 
-    Rat:float:1:1011101101*10^-11011
+    Rat:1:1011101101*10^-11011
 
-    Rat:float:9:45207196*10^37
+    Rat:9:45207196*10^37
 
     RatRoundMeth:half_up
+
+    UTCInstant:9:[1964,10,16,16,12,47.5]
+
+    UTCInstant:9:[2002,12,16,,,]
+
+    UTCInstant:9:[,,,14,2,29]
+
+    FloatInstant:9:[2003,4,5,2,,]
+
+    FloatInstant:9:[1407,,,,,]
+
+    Duration:9:[3,5,1,6,15,45.000012]
 
     treat_as_type:'fed.lib.the_db.gene.Person':{
         Relation:[ 'name', 'age', ]:{

@@ -9,7 +9,7 @@ Muldis D extension for rational data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Rational version 0.28.0.
+This document is Muldis::D::Ext::Rational version 0.29.0.
 
 =head1 PREFACE
 
@@ -242,6 +242,11 @@ minuend(Rat), subtrahend(Rat) }>
 
 This function results in the difference when its C<subtrahend> argument is
 subtracted from its C<minuend> argument.
+
+=item C<function sys.std.Rational.abs_difference result Rat params {
+topic(Rat), other(Rat) }>
+
+This function results in the absolute difference between its 2 arguments.
 
 =item C<function sys.std.Rational.product result Rat params {
 factors(bag_of.Rat) }>

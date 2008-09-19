@@ -9,7 +9,7 @@ Muldis D extension for integer data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Integer version 0.26.0.
+This document is Muldis::D::Ext::Integer version 0.27.0.
 
 =head1 PREFACE
 
@@ -105,6 +105,11 @@ minuend(Int), subtrahend(Int) }>
 
 This function results in the difference when its C<subtrahend> argument is
 subtracted from its C<minuend> argument.
+
+=item C<function sys.std.Integer.abs_difference result Int params {
+topic(Int), other(Int) }>
+
+This function results in the absolute difference between its 2 arguments.
 
 =item C<function sys.std.Integer.product result Int params {
 factors(bag_of.Int) }>
