@@ -9,7 +9,7 @@ How to format Perl Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl_Tiny version 0.26.0.
+This document is Muldis::D::Dialect::HDMD_Perl_Tiny version 0.27.0.
 
 =head1 PREFACE
 
@@ -22,8 +22,8 @@ before you read this one, which provides subservient details.
 This document outlines the grammar of the I<Hosted Data Muldis D> dialect
 named C<HDMD_Perl_Tiny>.  The fully-qualified name of this Muldis D
 dialect, in combination with the base language spec it is bundled with, is
-C<Muldis_D:'http://muldis.com':'N.N.N':'HDMD_Perl_Tiny'> (when the bundled
-base language version is substituted for the C<N.N.N>).
+C<[ 'Muldis_D', 'http://muldis.com', 'N.N.N', 'HDMD_Perl_Tiny' ]> (when the
+bundled base language version is substituted for the C<N.N.N>).
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -77,9 +77,7 @@ Array is a tree node.  The elements of each node/Array include typically a
 native Perl payload value, which may be a PHMD value itself, plus meta-data
 for that payload, that meta-data typically including the analogy of a class
 name, were PHMD nodes instead represented by a tree of PHMD-specific
-objects.  As an exception, one kind of PHMD node is not a Perl Array, but
-just a Perl C<Str>; if you see a C<Str> where you expect a PHMD node,
-assume it is a C<Name> node; this exception is for huffmanizing.
+objects.
 
 It should be emphasized that no Perl undefined values are allowed anywhere
 in a PHMD value; you must use only defined values instead.  This
@@ -210,7 +208,7 @@ C<NameChain> PHMD node.
 
 =item *
 
-Possrep name: a Perl C<Str> as per a C<Name> PHMD node.
+Possrep name: a Perl C<Str> as per the payload of a C<Name> PHMD node.
 
 =item *
 
@@ -349,7 +347,7 @@ follows:
 
 If the format is C<md_int>, then the max-col-val must be a Perl C<Str>
 composed of a single C<[1-9A-Z]> character, and the payload must be a Perl
-C<Str> of the format C<0> or C<< \-?<[1-9A-Z]><[0-9A-Z]>* >>.  This format
+C<Str> of the format C<0> or C<< \-?<[1-9A-Z]><[0-9A-Z_]>* >>.  This format
 specifically is what the Plain Text Muldis D grammar uses, and is the
 result of parsing it.  The payload is interpreted as a base-I<N> integer
 where I<N> might be between 2 and 36, and the given max-col-val says which
@@ -599,9 +597,9 @@ Examples:
 
     [ 'Relation', [] ]
 
-    [ 'Relation', [ {}, ] ]
+    [ 'Relation', [ {} ] ]
 
-    [ 'Relation', [ 'x', 'y', 'z', ] ]
+    [ 'Relation', [ 'x', 'y', 'z' ] ]
 
     [ 'Relation', [
         {
@@ -611,8 +609,8 @@ Examples:
         },
     ] ]
 
-    [ 'Relation', [ 'name', 'age', ], [
-        [ [ 'Text', 'Michelle' ], [ 'Int', 'perl_int', 17 ], ],
+    [ 'Relation', [ 'name', 'age' ], [
+        [ [ 'Text', 'Michelle' ], [ 'Int', 'perl_int', 17 ] ],
     ] ]
 
 =head2 sys.std.Core.Type.Set
@@ -724,7 +722,7 @@ Examples:
 
 =head2 sys.std.Core.Type.Bag
 
-This node type represents a bag value.  It has 2-3 elements:
+This node type represents a bag value.  It has 2 elements:
 
 =over
 
@@ -734,13 +732,7 @@ Node type: the Perl C<Str> value C<Bag>.
 
 =item *
 
-Only when the node has 3 elements; format; one of: C<aoa_counted>,
-C<array_repeated>.
-
-=item *
-
-The payload; only when the node has 2 elements, a Perl C<Bag|KeyBag> value;
-only when the node has 3 elements, a Perl C<Array|Seq> or C<Array|Seq> of
+The payload; a Perl C<Bag|KeyBag>, or C<Array|Seq> of C<Array|Seq>, or
 C<Array|Seq>.
 
 =back
@@ -753,52 +745,53 @@ follows:
 
 =item *
 
-If the node has 2 elements, then the payload must be a Perl 6 (there is no
-Perl 5 analogy) C<Bag|KeyBag> value; the payload elements are PHMD nodes
-corresponding to the C<value> attribute of the new bag's tuples, and the
-mapping is as you should expect.
+Iff the payload is not an C<Array|Seq>, then the payload must be a Perl 6
+(there is no Perl 5 analogy) C<Bag|KeyBag> value; the payload elements are
+PHMD nodes corresponding to the C<value> attribute of the new bag's tuples,
+and the mapping is as you should expect.
 
 =item *
 
-If the node has 3 elements, and the format is C<aoa_counted>, then the
-payload must be a Perl C<Array|Seq>, and each element of the payload
-defines a binary tuple of the new bag; the element is a 2-element
-C<Array|Seq>, and those 2 elements, by index order, are a PHMD node that
-defines the C<value> attribute of the tuple, and a 2-3-element C<Array|Seq>
-(which is the same as an 'Int' PHMD node minus the first constant element)
-that defines the C<count> attribute of the tuple; the count must be a
-positive integer.
+Iff the payload is an C<Array|Seq> with zero elements, then it defines the
+only bag value having zero elements.  Iff the payload is an C<Array|Seq>
+with at least one element, then every one of the payload elements must be
+itself an C<Array|Seq>.
 
 =item *
 
-If the node has 3 elements, and the format is C<array_repeated>, then the
-payload must be a Perl C<Array|Seq>, and each element of the payload
-contributes to a binary tuple of the new bag; the element value is a PHMD
-node that defines the C<value> attribute of the tuple.  The bag has 1 tuple
-for every distinct (after format normalization) element value in the
-payload, and the C<count> attribute of that tuple says how many instances
-of said element were in the payload.
+Iff the payload is an C<Array|Seq> with at least one (C<Array|Seq>)
+element, and the first element of that element I<is> itself an
+C<Array|Seq>, then the payload is interpreted as being of the I<array
+counted values> bag format.  Each element of the payload defines a binary
+tuple of the new bag; the element is a 2-element C<Array|Seq>, and those 2
+elements, by index order, are a PHMD node that defines the C<value>
+attribute of the tuple, and a 2-3-element C<Array|Seq> (which is the same
+as an 'Int' PHMD node minus the first constant element) that defines the
+C<count> attribute of the tuple; the count must be a positive integer.
+
+=item *
+
+Iff the payload is an C<Array|Seq> with at least one (C<Array|Seq>)
+element, and the first element of that element I<is not> itself an
+C<Array|Seq>, then the payload is interpreted as being of the I<array
+repeated values> bag format.  Each element of the payload contributes to a
+binary tuple of the new bag; the element value is a PHMD node that defines
+the C<value> attribute of the tuple.  The bag has 1 tuple for every
+distinct (after format normalization) element value in the payload, and the
+C<count> attribute of that tuple says how many instances of said element
+were in the payload.
 
 =back
 
 Examples:
 
-    [ 'Bag', 'aoa_counted', [
-        [
-            [ 'Text', 'Apple' ],
-            [ 'md_int', '9', '500' ],
-        ],
-        [
-            [ 'Text', 'Orange' ],
-            [ 'perl_int', 300 ],
-        ],
-        [
-            [ 'Text', 'Banana' ],
-            [ 'perl_int', 400 ],
-        ],
+    [ 'Bag', [
+        [ [ 'Text', 'Apple'  ], [ 'md_int', '9', '500' ] ],
+        [ [ 'Text', 'Orange' ], [ 'perl_int', 300 ] ],
+        [ [ 'Text', 'Banana' ], [ 'perl_int', 400 ] ],
     ] ]
 
-    [ 'Bag', 'array_repeated', [
+    [ 'Bag', [
         [ 'Text', 'Foo' ],
         [ 'Text', 'Quux' ],
         [ 'Text', 'Foo' ],
@@ -828,25 +821,31 @@ C<sys.std.Core.Type.QuasiBag>] values, respectively.
 
 This node type represents a canonical short name for any kind of DBMS
 entity when declaring it; it is a character string type, that is disjoint
-from C<Text>.
+from C<Text>.  It has 2 elements:
 
-Unlike every other PHMD node type, a canonical short name is simply a Perl
-C<Str> value, which is its payload; it is not encapsulated in a Perl Array;
-this difference is done for huffmanizing reasons, since a short name is
-probably the most often used node type, and moreover this change allows for
-simplifying other parts of the grammar.
+=over
+
+=item *
+
+Node type: the Perl C<Str> value C<Name>.
+
+=item *
+
+The payload.
+
+=back
 
 This node is interpreted as a Muldis D C<sys.std.Core.Type.Cat.Name> value
-by directly mapping itself / the payload.  Note that, while Plain Text
-Muldis D may contain a few escape sequences, those would be replaced with
-what they represent prior to making a PHMD node.  The node / its payload
-must be as per the payload of a C<Text> PHMD node.
+by directly mapping the payload.  Note that, while Plain Text Muldis D may
+contain a few escape sequences, those would be replaced with what they
+represent prior to making a PHMD node.  The payload must be as per the
+payload of a C<Text> PHMD node.
 
 Examples:
 
-    'login_pass'
+    [ 'Name', 'login_pass' ]
 
-    'First Name'
+    [ 'Name', 'First Name' ]
 
 =head2 sys.std.Core.Type.Cat.NameChain
 
@@ -1056,22 +1055,22 @@ as follows:
 If the format is C<md_rat> and the payload is not an C<Array|Seq>, then the
 max-col-val must be a Perl C<Str> composed of a single C<[1-9A-Z]>
 character, and the payload must be a Perl C<Str> of the format C<<
-0\.?<[0-9A-Z]>* >> or C<< \-?<[1-9A-Z]><[0-9A-Z]>*\.?<[0-9A-Z]>* >>.  This
-format specifically is what the Plain Text Muldis D grammar uses ('radix'
-option), and is the result of parsing it.  The payload is interpreted as a
-base-I<N> rational where I<N> might be between 2 and 36, and the given
-max-col-val says which possible value of I<N> to use.  Assuming all column
-values are between zero and I<N>-minus-one, the max-col-val contains that
-I<N>-minus-one.  So to specify, eg, bases [2,8,10,16], use max-col-val of
-[1,7,9,F].
+0\.?<[0-9A-Z_]>* >> or C<< \-?<[1-9A-Z]><[0-9A-Z_]>*\.?<[0-9A-Z_]>* >>.
+This format specifically is what the Plain Text Muldis D grammar uses
+('radix' option), and is the result of parsing it.  The payload is
+interpreted as a base-I<N> rational where I<N> might be between 2 and 36,
+and the given max-col-val says which possible value of I<N> to use.
+Assuming all column values are between zero and I<N>-minus-one, the
+max-col-val contains that I<N>-minus-one.  So to specify, eg, bases
+[2,8,10,16], use max-col-val of [1,7,9,F].
 
 =item *
 
 If the format is C<md_rat> and the payload is a 2-element C<Array|Seq>,
 then the max-col-val must be as per the previous bullet, and the payload
 C<Array|Seq> must be such that the first element is a Perl C<Str> of the
-format C<0> or C<< \-?<[1-9A-Z]><[0-9A-Z]>* >> (an integer) and the second
-element is a Perl C<Str> of the format C<< <[1-9A-Z]><[0-9A-Z]>* >> (a
+format C<0> or C<< \-?<[1-9A-Z]><[0-9A-Z_]>* >> (an integer) and the second
+element is a Perl C<Str> of the format C<< <[1-9A-Z]><[0-9A-Z_]>* >> (a
 positive integer). The payload is interpreted as per C<md_radix> but that
 its value comes from the first element (a numerator) divided by the second
 (a denominator). Note that while the C<md_radix> format is limited to
@@ -1084,8 +1083,8 @@ greater than or equal to 2, such as 1/43.
 If the format is C<md_rat> and the payload is a 3-element C<Array|Seq>,
 then the max-col-val must be as per the previous bullet, and the payload
 C<Array|Seq> must be such that the first element is a Perl C<Str> of the
-format C<0> or C<< \-?<[1-9A-Z]><[0-9A-Z]>* >> (an integer) and the second
-element is a Perl C<Str> of the format C<< <[2-9A-Z]><[0-9A-Z]>* >> (an
+format C<0> or C<< \-?<[1-9A-Z]><[0-9A-Z_]>* >> (an integer) and the second
+element is a Perl C<Str> of the format C<< <[2-9A-Z]><[0-9A-Z_]>* >> (an
 integer greater than 1) and the third element is as per the first (an
 integer).  The payload is interpreted as per C<md_radix> but that its value
 comes from the first element (a mantissa) multiplied by the result of the
@@ -1381,8 +1380,8 @@ to work in many places where it otherwise lacks information needed to work.
 Examples:
 
     [ 'treat_as_type', 'fed.lib.the_db.gene.Person',
-        [ 'Relation', [ 'name', 'age', ], [
-            [ [ 'Text', 'Michelle' ], [ 'Int', 'perl_int', 17 ], ],
+        [ 'Relation', [ 'name', 'age' ], [
+            [ [ 'Text', 'Michelle' ], [ 'Int', 'perl_int', 17 ] ],
         ] ]
     ]
 

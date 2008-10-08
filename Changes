@@ -1,6 +1,70 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-10-07  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.49.0 is released on CPAN as
+    Muldis-D-0.49.0.tar.gz.
+
+    * New file versions are: D.pm 0.49.0 and PTMD_Tiny.pod 0.30.0 and
+    HDMD_Perl_Tiny.pod 0.27.0.  The other pre-existing versioned files are
+    unchanged.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  In PTMD_Tiny.pod, updated
+    numeric-based literals to permit use of the underscore character as a
+    separator, which may make long numbers easier to read (eg
+    Int:1_000_000_000); in HDMD_Perl_Tiny.pod, made the same change
+    concerning 'md_\w+' formats of numeric-based literals.  Note that
+    concerning 'perl_\w+' formats, Perl already has this support built-in.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  There is no longer special terse
+    syntax for 'Name' literals appearing in the position of a generic
+    literal; the general syntax for 'Name' literals / PHMD nodes is now
+    exactly the same as for 'Text' or 'Comment', such as "Name:'foo'" and
+    "[ 'Name', 'foo' ]" rather than plain "'foo'".  On the other hand,
+    'Name' literals appearing in special positions where one is already
+    expected, such as nonscalar literal attribute names, are retaining the
+    terse syntax there.
+
+    * (HDMD_Perl_Tiny.pod)  Simplified 'Bag' literals by removing their
+    format hint portion.  Because 'Name' literals no longer have the
+    special Perl Str syntax in generic literal contexts, we can now
+    unambiguously interpret a 'Bag' literal payload without an external
+    format hint.
+
+    * (PTMD_Tiny.pod)  Simplified the entire grammar by removing all
+    capturing parens, and the 'grammar' declaration, that a real grammar
+    would have, so the given syntax can be a more clear human illustration.
+
+    * (PTMD_Tiny.pod)  Fixed a widespread Perl 6 grammar mistake;
+    non-capturing groups are actually delimited by square brackets, not
+    round parenthesis like in Perl 5.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  In PTMD_Tiny.pod, updated the
+    grammar for all comma-separated lists so that there now must not be a
+    trailing comma after the last list item; previously, a trailing comma
+    was mandatory.  Note that there is no corresponding HDMD_Perl_Tiny.pod
+    change since trailing commas are always optional in Perl.  Updated all
+    PTMD_Tiny.pod code samples to conform to the updated grammar, and
+    updated just some HDMD_Perl_Tiny.pod code samples likewise.
+
+    * (PTMD_Tiny.pod)  Refactored grammar for numeric literals, adding the
+    2 new tokens 'pint_(head|tail)'.  Also updated numeric literals so that
+    they may now be split into segments as per character or bit strings,
+    with the '~' segment separator character; useful for very long numbers.
+
+    * (PTMD_Tiny.pod)  Added support for bareword / non-delimited character
+    string literals, mainly intended to be used for 'Name' (and NameChain
+    etc) literals but also useable for Text and Comment literals.  A
+    character string may be used non-delimited iff it is non-empty and only
+    consists of the characters [a-zA-Z0-9_-], but allowable bareword
+    characters may be expanded later to include anything Unicode considers
+    a letter or a number.  Since most DBMS entity names and attribute names
+    etc are likely to qualify for bareword syntax, this change helps make
+    Muldis D code be easier to write and more like normal languages.  Also,
+    the 'PTMD_Tiny' 4th element of its fully qualified language name is now
+    always a bareword rather than always a delimited string.
+
 2008-09-18  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.48.0 is released on CPAN as
