@@ -166,7 +166,6 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
         | <rat_round_meth>
         | <instant>
         | <duration>
-        | <treat_as_type>
     }
 
     token scalar_or_qv {
@@ -211,13 +210,14 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token tuple_or_qv {
         [Quasi]? Tuple
+        [<spec_sep> <type_name>]?
         <spec_sep>
         <tuple_body>
     }
 
     token relation_or_qv {
           <generic_relation_empty_body_or_qv>
-        | <generic_relation_with_tuples_or_qv>
+        | <generic_relation_nonordered_attr_or_qv>
         | <generic_relation_ordered_attr_or_qv>
         | <set_or_qv>
         | <nothing_or_qv>
@@ -228,14 +228,16 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token generic_relation_empty_body_or_qv {
         [Quasi]? Relation
+        [<spec_sep> <type_name>]?
         <spec_sep>
         <list_open>
             [<name_body> ** <list_sep>]?
         <list_close>
     }
 
-    token generic_relation_with_tuples_or_qv {
+    token generic_relation_nonordered_attr_or_qv {
         [Quasi]? Relation
+        [<spec_sep> <type_name>]?
         <spec_sep>
         <list_open>
             [<tuple_body> ** <list_sep>]?
@@ -244,6 +246,7 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token generic_relation_ordered_attr_or_qv {
         [Quasi]? Relation
+        [<spec_sep> <type_name>]?
         <spec_sep>
         <ord_list_open>
             [<name_body> ** <list_sep>]?
@@ -266,6 +269,7 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token set_or_qv {
         [Quasi]? Set
+        [<spec_sep> <type_name>]?
         <spec_sep>
         <list_open>
             [<literal> ** <list_sep>]?
@@ -276,6 +280,7 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token single_or_qv {
         [Quasi]? Single
+        [<spec_sep> <type_name>]?
         <spec_sep>
         <list_open>
             <literal>
@@ -284,6 +289,7 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token array_or_qv {
         [Quasi]? Array
+        [<spec_sep> <type_name>]?
         <spec_sep>
         <ord_list_open>
             [<literal> ** <list_sep>]?
@@ -292,6 +298,7 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token bag_or_qv {
         [Quasi]? Bag
+        [<spec_sep> <type_name>]?
         <spec_sep>
         <bag_body>
     }
@@ -484,16 +491,6 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
         <ord_list_close>
     }
 
-    token treat_as_type {
-        treat_as_type
-        <spec_sep>
-        <type_name>
-        <spec_sep>
-        <list_open>
-            <literal>
-        <list_close>
-    }
-
     token type_name { <name_chain_body> }
 
 =head1 EXAMPLES
@@ -571,7 +568,7 @@ The following are fragments of actual Plain Text Muldis D code.
 
     Tuple:{}
 
-    Tuple:{
+    Tuple:type.tuple_from.var.fed.data.the_db.account.users:{
         login_name => Text:'hartmark',
         login_pass => Text:'letmein',
         is_special => Bool:true
@@ -584,9 +581,9 @@ The following are fragments of actual Plain Text Muldis D code.
 
     Relation:{}
 
-    Relation:{ {} }
-
     Relation:{ x, y, z }
+
+    Relation:{ {} }
 
     Relation:{
         {
@@ -596,11 +593,11 @@ The following are fragments of actual Plain Text Muldis D code.
         }
     }
 
-    Relation:[ name, age ]:{
+    Relation:fed.lib.the_db.gene.Person:[ name, age ]:{
         [ Text:'Michelle', Int:9:17 ]
     }
 
-    Set:{
+    Set:fed.lib.the_db.account.Country_Names:{
         Text:'Canada',
         Text:'Spain',
         Text:'Jordan',
@@ -623,14 +620,14 @@ The following are fragments of actual Plain Text Muldis D code.
         Text:'Winry'
     ]
 
-    Array:[
+    Array:fed.lib.the_db.stats.Samples_By_Order:[
         Int:9:57,
         Int:9:45,
         Int:9:63,
         Int:9:61
     ]
 
-    Bag:{
+    Bag:fed.lib.the_db.inventory.Fruit:{
         Text:'Apple'  => 9:500,
         Text:'Orange' => 9:300,
         Text:'Banana' => 9:400
@@ -694,12 +691,6 @@ The following are fragments of actual Plain Text Muldis D code.
     FloatInstant:9:[1407,,,,,]
 
     Duration:9:[3,5,1,6,15,45.000012]
-
-    treat_as_type:fed.lib.the_db.gene.Person:{
-        Relation:[ name, age ]:{
-            [ Text:'Michelle', Int:9:17 ]
-        }
-    }
 
 =head1 SEE ALSO
 
