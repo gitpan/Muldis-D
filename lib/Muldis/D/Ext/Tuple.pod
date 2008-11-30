@@ -9,7 +9,7 @@ Muldis D extension adding more generic tuple operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Tuple version 0.25.0.
+This document is Muldis::D::Ext::Tuple version 0.52.0.
 
 =head1 PREFACE
 
@@ -44,7 +44,7 @@ in that they typically work with any tuple types.
 
 =over
 
-=item C<function sys.std.Tuple.degree result UInt params { topic(Tuple) }>
+=item C<function sys.std.Tuple.degree result NNInt params { topic(Tuple) }>
 
 This function results in the degree of its argument (that is, the count of
 attributes it has).
