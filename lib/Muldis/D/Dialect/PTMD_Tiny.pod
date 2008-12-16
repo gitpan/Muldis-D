@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_Tiny version 0.52.0.
+This document is Muldis::D::Dialect::PTMD_Tiny version 0.53.0.
 
 =head1 PREFACE
 
@@ -33,8 +33,8 @@ round-trippable with the system catalog with the result maintaining all the
 details that were started with.  Since it matches the system catalog, this
 dialect should be able to exactly represent all possible Muldis D base
 language code (and probably all extensions too), rather than a subset of
-it.  This dialect similarly matches the C<HDMD_Perl_Tiny> dialect, which is
-documented at L<Muldis::D::Dialect::HDMD_Perl_Tiny>.
+it.  This dialect similarly matches the dialect
+L<HDMD_Perl_Tiny|Muldis::D::Dialect::HDMD_Perl_Tiny>.
 
 This dialect is designed to be as small as possible while meeting the above
 criteria, and is designed such that a parser that handles all of this
@@ -53,10 +53,10 @@ See instead L<Muldis::D::Core> for how to actually define the
 tuples and relations that define your data types and routines and queries
 and so forth.
 
-See also L<Muldis::D::Dialect::HDMD_Perl_Tiny> and look up its
-syntax for representing Muldis D literal values, each syntax item typically
-corresponds to a syntax item in the current document; the other document
-helps explain the meaning of and further constraints on value
+See also L<HDMD_Perl_Tiny|Muldis::D::Dialect::HDMD_Perl_Tiny> and look up
+its syntax for representing Muldis D literal values, each syntax item
+typically corresponds to a syntax item in the current document; the other
+document helps explain the meaning of and further constraints on value
 specifications than this current document does.  The syntax given in the
 current document primarily tests for well-formedness, not that code is
 otherwise valid.
@@ -89,7 +89,7 @@ indent, linewrap, order) code how they like, and making an automated code
 reformatter shouldn't be difficult.  Often, named elements can also be
 omitted entirely for brevity, in which case the parser would use context to
 supply default values for those elements.  These qualities are all shared
-by the C<HDMD_Perl_Tiny> dialect too.
+by the dialect L<HDMD_Perl_Tiny|Muldis::D::Dialect::HDMD_Perl_Tiny> too.
 
 =head1 GRAMMAR OF TINY PLAIN TEXT MULDIS D
 
@@ -111,43 +111,44 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token language_name {
         Muldis_D
-        <spec_sep>
+        <val_node_elem_sep>
         <ln_authority>
-        <spec_sep>
+        <val_node_elem_sep>
         <ln_version>
-        <spec_sep>
+        <val_node_elem_sep>
         <ln_dialect>
-        <spec_sep>
+        <val_node_elem_sep>
         <ln_extensions>
     }
 
-    token ln_authority { <text_str> }
+    token ln_authority { <char_str> }
 
-    token ln_version { <text_str> }
+    token ln_version { <char_str> }
 
     token ln_dialect { PTMD_Tiny }
 
-    token ln_extensions { <tuple_body> }
+    token ln_extensions { <tuple_or_qv_payload> }
 
     token bootloader_imperative_routine_call {
         boot_call
-        <spec_sep>
+        <val_node_elem_sep>
         <imperative_routine_name>
-        <spec_sep>
+        <val_node_elem_sep>
         <imperative_routine_upd_args>
-        <spec_sep>
+        <val_node_elem_sep>
         <imperative_routine_ro_args>
     }
 
-    token imperative_routine_name { <name_chain_body> }
+    token imperative_routine_name { <name_chain_payload> }
 
     token imperative_routine_upd_args {
         <list_open>
-            [[<name_body> <pair_sep> <name_chain_body>] ** <list_sep>]?
+            [[<name_payload> <pair_elem_sep> <name_chain_payload>]
+                ** <list_elem_sep>]?
         <list_close>
     }
 
-    token imperative_routine_ro_args { <tuple_body> }
+    token imperative_routine_ro_args { <tuple_or_qv_payload> }
 
     token literal {
           <scalar_or_qv>
@@ -170,66 +171,78 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
     }
 
     token scalar_or_qv {
-        [Quasi]? Scalar
-        <spec_sep>
-        <scalar_type_name>
-        <spec_sep>
-        <possrep_name>
-        <spec_sep>
+        [Quasi]? Scalar <val_node_elem_sep>
+        <type_name> <val_node_elem_sep>
+        <scalar_or_qv_payload>
+    }
+
+    token scalar_or_qv_payload {
+        <possrep_name> <val_payload_elem_sep>
         <possrep_attrs>
     }
 
-    token scalar_type_name { <name_chain_body> }
+    token possrep_name { <name_payload> }
 
-    token possrep_name { <name_body> }
+    token possrep_attrs { <tuple_or_qv_payload> }
 
-    token possrep_attrs { <tuple_body> }
-
-    token bool { Bool <spec_sep> [false|true|0|1] }
+    token bool {
+        Bool <val_node_elem_sep>
+        [false|true|0|1]
+    }
 
     token int {
-        Int
-        <spec_sep>
-        <int_max_col_val>
-        <spec_sep>
+        Int <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <int_payload>
+    }
+
+    token int_payload {
+        [<int_max_col_val> <val_payload_elem_sep>]?
         <int_body>
     }
 
     token string {
-        String
-        <spec_sep>
-        <int_max_col_val>
-        <spec_sep>
+        String <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <string_payload>
+    }
+
+    token string_payload {
+        [<int_max_col_val> <val_payload_elem_sep>]?
         <ord_list_open>
-            [<int_body> ** <list_sep>]?
+            [<int_body> ** <list_elem_sep>]?
         <ord_list_close>
     }
 
     token blob {
-        Blob
-        <spec_sep>
-        <[137F]>
-        <spec_sep>
-        [[<[0-9A-F]>+] ** <segment_sep>]?
+        Blob <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <blob_payload>
+    }
+
+    token blob_payload {
+        <[137F]> <val_payload_elem_sep>
+        [[<[ 0..9 A..F ]>+] ** <segment_sep>]?
     }
 
     token text {
-        Text
-        <spec_sep>
-        <text_str>
+        Text <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <text_payload>
+    }
+
+    token text_payload {
+        <char_str>
     }
 
     token tuple_or_qv {
-        [Quasi]? Tuple
-        [<spec_sep> <type_name>]?
-        <spec_sep>
-        <tuple_body>
+        [Quasi]? Tuple <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <tuple_or_qv_payload>
     }
 
     token relation_or_qv {
-          <generic_relation_empty_body_or_qv>
-        | <generic_relation_nonordered_attr_or_qv>
-        | <generic_relation_ordered_attr_or_qv>
+          <generic_relation_or_qv>
         | <set_or_qv>
         | <nothing_or_qv>
         | <single_or_qv>
@@ -237,103 +250,116 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
         | <bag_or_qv>
     }
 
-    token generic_relation_empty_body_or_qv {
-        [Quasi]? Relation
-        [<spec_sep> <type_name>]?
-        <spec_sep>
+    token generic_relation_or_qv {
+        [Quasi]? Relation <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <generic_relation_or_qv_payload>
+    }
+
+    token generic_relation_or_qv_payload {
+          <generic_relation_empty_body_or_qv_payload>
+        | <generic_relation_nonordered_attr_or_qv_payload>
+        | <generic_relation_ordered_attr_or_qv_payload>
+    }
+
+    token generic_relation_empty_body_or_qv_payload {
         <list_open>
-            [<name_body> ** <list_sep>]?
+            [<name_payload> ** <list_elem_sep>]?
         <list_close>
     }
 
-    token generic_relation_nonordered_attr_or_qv {
-        [Quasi]? Relation
-        [<spec_sep> <type_name>]?
-        <spec_sep>
+    token generic_relation_nonordered_attr_or_qv_payload {
         <list_open>
-            [<tuple_body> ** <list_sep>]?
+            [<tuple_or_qv_payload> ** <list_elem_sep>]?
         <list_close>
     }
 
-    token generic_relation_ordered_attr_or_qv {
-        [Quasi]? Relation
-        [<spec_sep> <type_name>]?
-        <spec_sep>
+    token generic_relation_ordered_attr_or_qv_payload {
         <ord_list_open>
-            [<name_body> ** <list_sep>]?
+            [<name_payload> ** <list_elem_sep>]?
         <ord_list_close>
-        <spec_sep>
+        <val_payload_elem_sep>
         <list_open>
         [[
             <ord_list_open>
-                [<literal> ** <list_sep>]?
+                [<literal> ** <list_elem_sep>]?
             <ord_list_close>
-        ] ** <list_sep>]?
+        ] ** <list_elem_sep>]?
         <list_close>
     }
 
-    token tuple_body {
+    token tuple_or_qv_payload {
         <list_open>
-            [[<name_body> <pair_sep> <literal>] ** <list_sep>]?
+            [[<name_payload> <pair_elem_sep> <literal>]
+                ** <list_elem_sep>]?
         <list_close>
     }
 
     token set_or_qv {
-        [Quasi]? Set
-        [<spec_sep> <type_name>]?
-        <spec_sep>
+        [Quasi]? Set <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <set_or_qv_payload>
+    }
+
+    token set_or_qv_payload {
         <list_open>
-            [<literal> ** <list_sep>]?
+            [<literal> ** <list_elem_sep>]?
         <list_close>
     }
 
-    token nothing_or_qv { [Quasi]? Nothing }
+    token nothing_or_qv {
+        [Quasi]? Nothing
+    }
 
     token single_or_qv {
-        [Quasi]? Single
-        [<spec_sep> <type_name>]?
-        <spec_sep>
+        [Quasi]? Single <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <single_or_qv_payload>
+    }
+
+    token single_or_qv_payload {
         <list_open>
             <literal>
         <list_close>
     }
 
     token array_or_qv {
-        [Quasi]? Array
-        [<spec_sep> <type_name>]?
-        <spec_sep>
+        [Quasi]? Array <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <array_or_qv_payload>
+    }
+
+    token array_or_qv_payload {
         <ord_list_open>
-            [<literal> ** <list_sep>]?
+            [<literal> ** <list_elem_sep>]?
         <ord_list_close>
     }
 
     token bag_or_qv {
-        [Quasi]? Bag
-        [<spec_sep> <type_name>]?
-        <spec_sep>
-        <bag_body>
+        [Quasi]? Bag <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <bag_or_qv_payload>
     }
 
-    token bag_body {
-          bag_body_counted_values
-        | bag_body_repeated_values
+    token bag_or_qv_payload {
+          bag_or_qv_payload_counted_values
+        | bag_or_qv_payload_repeated_values
     }
 
-    token bag_body_counted_values {
+    token bag_or_qv_payload_counted_values {
         <list_open>
-            [[<literal> <pair_sep> <count>] ** <list_sep>]?
+            [[<literal> <pair_elem_sep> <count>] ** <list_elem_sep>]?
         <list_close>
     }
 
     token count {
-        <int_max_col_val>
-        <spec_sep>
+        [<int_max_col_val> <val_payload_elem_sep>]?
         <pint_body>
     }
 
-    token bag_body_repeated_values {
+    token bag_or_qv_payload_repeated_values {
         <list_open>
-            [<literal> ** <list_sep>]?
+            [<literal> ** <list_elem_sep>]?
         <list_close>
     }
 
@@ -345,34 +371,32 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token ord_list_close { \s* ']' \s* }
 
-    token list_sep { \s* ',' \s* }
+    token list_elem_sep { \s* ',' \s* }
 
-    token pair_sep { \s* '=>' \s* }
+    token pair_elem_sep { \s* '=>' \s* }
 
-    token spec_sep { \s* ':' \s* }
+    token val_node_elem_sep { \s* ':' \s* }
 
-    token text_str {
-        [<text_str_seg> ** <segment_sep>]?
+    token val_payload_elem_sep { \s* ';' \s* }
+
+    token char_str {
+        [<char_str_seg> ** <segment_sep>]?
     }
 
     token segment_sep { \s* '~' \s* }
 
-    token text_str_seg {
-          <quoted_text_str_seg>
-        | <nonquoted_text_str_seg>
+    token char_str_seg {
+          <quoted_char_str_seg>
+        | <nonquoted_char_str_seg>
     }
 
-    token quoted_text_str_seg {
-        <text_delim>
-            <text_char>*
-        <text_delim>
+    token quoted_char_str_seg {
+        <[']>
+            ['\b'|'\q'|<-[\\\']>]*
+        <[']>
     }
 
-    token text_delim { <[']> }
-
-    token text_char { ['\b'|'\q'|<-[\\\']>] }
-
-    token nonquoted_text_str_seg { <[a-zA-Z0-9_-]>+ }
+    token nonquoted_char_str_seg { <[ a..z A..Z 0..9 _ - ]>+ }
 
     token int_max_col_val { <pint_head> }
 
@@ -382,81 +406,65 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
 
     token pint_body { <pint_head> <pint_tail>? }
 
-    token pint_head { <[1-9A-Z]> }
+    token pint_head { <[ 1..9 A..Z ]> }
 
-    token pint_tail { [<[0-9A-Z_]>+] ** <segment_sep> }
+    token pint_tail { [<[ 0..9 A..Z _ ]>+] ** <segment_sep> }
 
     token name {
-        Name
-        <spec_sep>
-        <name_body>
+        Name <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <name_payload>
     }
 
-    token name_body { <text_str> }
+    token name_payload {
+        <char_str>
+    }
 
     token name_chain {
-        NameChain
-        <spec_sep>
-        <name_chain_body>
+        NameChain <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <name_chain_payload>
     }
 
-    token name_chain_body {
-          nc_array
-        | nc_flat
-    }
-
-    token nc_array {
-        <ord_list_open>
-            <name_body> [\s* <nc_elem_sep> \s* <name_body>]+
-        <ord_list_close>
-    }
-
-    token nc_flat {
-        <text_delim>
-            [<nc_char>*] ** <nc_elem_sep>
-        <text_delim>
+    token name_chain_payload {
+        <name_payload> [\s* <nc_elem_sep> \s* <name_payload>]+
     }
 
     token nc_elem_sep { '.' }
 
-    token nc_char { ['\b'|'\q'|'\p'|<-[\\\'\.]>] }
-
     token decl_name_chain {
-        DeclNameChain
-        <spec_sep>
-        <decl_name_chain_body>
+        DeclNameChain <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <decl_name_chain_payload>
     }
 
-    token decl_name_chain_body {
-          dnc_array
-        | dnc_flat
-    }
-
-    token dnc_array {
-        <ord_list_open>
-            [<name_body> [\s* <nc_elem_sep> \s* <name_body>]*]?
-        <ord_list_close>
-    }
-
-    token dnc_flat {
-        <text_delim>
-            <nc_elem_sep> [<nc_char>* <nc_elem_sep>]*
-        <text_delim>
+    token decl_name_chain_payload {
+        [<name_payload> [\s* <nc_elem_sep> \s* <name_payload>]*]?
     }
 
     token comment {
-        Comment
-        <spec_sep>
-        <text_str>
+        Comment <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <comment_payload>
     }
 
-    token order { Order <spec_sep> [increase|same|decrease|-1|0|1] }
+    token comment_payload {
+        <char_str>
+    }
+
+    token order {
+        Order <val_node_elem_sep>
+        [increase|same|decrease|-1|0|1]
+    }
 
     token rat {
-        Rat
-        <spec_sep>
-        <int_max_col_val>
-        <spec_sep>
+        Rat <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <rat_payload>
+    }
+
+    token rat_payload {
+        [<int_max_col_val> <val_payload_elem_sep>]?
         <rat_body>
     }
 
@@ -473,36 +481,41 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
     }
 
     token rat_round_meth {
-        RatRoundMeth
-        <spec_sep>
+        RatRoundMeth <val_node_elem_sep>
         [half_down|half_up|half_even|to_floor|to_ceiling|to_zero|to_inf]
     }
 
     token instant {
-        [UTC|Float] Instant
-        <spec_sep>
-        <int_max_col_val>
-        <spec_sep>
+        [UTC|Float] Instant <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <instant_payload>
+    }
+
+    token instant_payload {
+        [<int_max_col_val> <val_payload_elem_sep>]?
         <ord_list_open>
-            <int_body>? <list_sep>
-            [<pint_body>? <list_sep>] ** 2
-            [<nnint_body>? <list_sep>] ** 2
+            <int_body>? <list_elem_sep>
+            [<pint_body>? <list_elem_sep>] ** 2
+            [<nnint_body>? <list_elem_sep>] ** 2
             <nnrat_body>?
         <ord_list_close>
     }
 
     token duration {
-        Duration
-        <spec_sep>
-        <int_max_col_val>
-        <spec_sep>
+        Duration <val_node_elem_sep>
+        [<type_name> <val_node_elem_sep>]?
+        <duration_payload>
+    }
+
+    token duration_payload {
+        [<int_max_col_val> <val_payload_elem_sep>]?
         <ord_list_open>
-            [<int_body>? <list_sep>] ** 5
+            [<int_body>? <list_elem_sep>] ** 5
             <rat_body>
         <ord_list_close>
     }
 
-    token type_name { <name_chain_body> }
+    token type_name { <name_chain_payload> }
 
 =head1 EXAMPLES
 
@@ -518,58 +531,58 @@ The following are fragments of actual Plain Text Muldis D code.
 
     boot_call:sys.std.Core.Cat.create_depot_procedure:{}:{ ... }
 
-    Scalar:sys.std.Rational.Type.Rat:float:{
-        mantissa => Int:9:45207196,
-        radix    => Int:9:10,
-        exponent => Int:9:37
+    Scalar:sys.std.Rational.Type.Rat:float;{
+        mantissa => Int:45207196,
+        radix    => Int:10,
+        exponent => Int:37
     }
 
-    Scalar:sys.std.Temporal.Type.UTCDateTime:datetime:{
-        year   => Int:9:2003,
-        month  => Int:9:10,
-        day    => Int:9:26,
-        hour   => Int:9:1,
-        minute => Int:9:30,
-        second => Rat:9:0
+    Scalar:sys.std.Temporal.Type.UTCDateTime:datetime;{
+        year   => Int:2003,
+        month  => Int:10,
+        day    => Int:26,
+        hour   => Int:1,
+        minute => Int:30,
+        second => Rat:0
     }
 
-    Scalar:fed.lib.the_db.WeekDay:name:{
+    Scalar:fed.lib.the_db.WeekDay:name;{
         '' => Text:'monday'
     }
 
-    Scalar:fed.lib.the_db.WeekDay:number:{
-        '' => Int:9:5
+    Scalar:fed.lib.the_db.WeekDay:number;{
+        '' => Int:5
     }
 
     Bool:true
 
-    Int:1:11001001
+    Int:1;11001001
 
-    Int:7:0
+    Int:7;0
 
-    Int:7:644
+    Int:7;644
 
-    Int:9:-34
+    Int:-34
 
-    Int:9:42
+    Int:42
 
-    Int:F:DEADBEEF
+    Int:F;DEADBEEF
 
-    Int:Z:-HELLOWORLD
+    Int:Z;-HELLOWORLD
 
-    Int:3:301
+    Int:3;301
 
-    Int:B:A09B
+    Int:B;A09B
 
-    String:F:[50,65,72,6C]
+    String:F;[50,65,72,6C]
 
-    Blob:1:00101110100010
+    Blob:1;00101110100010
 
-    Blob:3:
+    Blob:3;
 
-    Blob:F:A705E
+    Blob:F;A705E
 
-    Blob:7:523504376
+    Blob:7;523504376
 
     Text:'Ceres'
 
@@ -589,7 +602,7 @@ The following are fragments of actual Plain Text Muldis D code.
 
     Tuple:{
         name => Text:'Michelle',
-        age  => Int:9:17
+        age  => Int:17
     }
 
     Relation:{}
@@ -606,8 +619,8 @@ The following are fragments of actual Plain Text Muldis D code.
         }
     }
 
-    Relation:fed.lib.the_db.gene.Person:[ name, age ]:{
-        [ Text:'Michelle', Int:9:17 ]
+    Relation:fed.lib.the_db.gene.Person:[ name, age ];{
+        [ Text:'Michelle', Int:17 ]
     }
 
     Set:fed.lib.the_db.account.Country_Names:{
@@ -618,9 +631,9 @@ The following are fragments of actual Plain Text Muldis D code.
     }
 
     Set:{
-        Int:9:3,
-        Int:9:16,
-        Int:9:85
+        Int:3,
+        Int:16,
+        Int:85
     }
 
     Nothing
@@ -634,16 +647,16 @@ The following are fragments of actual Plain Text Muldis D code.
     ]
 
     Array:fed.lib.the_db.stats.Samples_By_Order:[
-        Int:9:57,
-        Int:9:45,
-        Int:9:63,
-        Int:9:61
+        Int:57,
+        Int:45,
+        Int:63,
+        Int:61
     ]
 
     Bag:fed.lib.the_db.inventory.Fruit:{
-        Text:'Apple'  => 9:500,
-        Text:'Orange' => 9:300,
-        Text:'Banana' => 9:400
+        Text:'Apple'  => 500,
+        Text:'Orange' => 300,
+        Text:'Banana' => 400
     }
 
     Bag:{
@@ -659,51 +672,55 @@ The following are fragments of actual Plain Text Muldis D code.
 
     Name:'First Name'
 
-    NameChain:[fed.data.the_db.gene.sorted_person_name]
+    NameChain:fed.data.the_db.gene.sorted_person_name
 
-    NameChain:fed.data.the_db.stats.samples_by_order
+    NameChain:fed.data.the_db.stats.'samples by order'
 
-    DeclNameChain:[gene.sorted_person_name]
+    DeclNameChain:gene.sorted_person_name
 
-    DeclNameChain:.stats.samples_by_order.
+    DeclNameChain:stats.'samples by order'
 
     Comment:'This does something.'
 
     Order:same
 
-    Rat:1:-1.1
+    Rat:1;-1.1
 
-    Rat:9:-1.5
+    Rat:-1.5
 
-    Rat:9:3.14159
+    Rat:3.14159
 
-    Rat:A:0.0
+    Rat:A;0.0
 
-    Rat:F:DEADBEEF.FACE
+    Rat:F;DEADBEEF.FACE
 
-    Rat:Z:0.000AZE
+    Rat:Z;0.000AZE
 
-    Rat:6:500001/1000
+    Rat:6;500001/1000
 
-    Rat:B:A09B/A
+    Rat:B;A09B/A
 
-    Rat:1:1011101101*10^-11011
+    Rat:1;1011101101*10^-11011
 
-    Rat:9:45207196*10^37
+    Rat:45207196*10^37
+
+    Rat:1/43
+
+    Rat:314159*10^-5
 
     RatRoundMeth:half_up
 
-    UTCInstant:9:[1964,10,16,16,12,47.5]
+    UTCInstant:[1964,10,16,16,12,47.5]
 
-    UTCInstant:9:[2002,12,16,,,]
+    UTCInstant:[2002,12,16,,,]
 
-    UTCInstant:9:[,,,14,2,29]
+    UTCInstant:[,,,14,2,29]
 
-    FloatInstant:9:[2003,4,5,2,,]
+    FloatInstant:[2003,4,5,2,,]
 
-    FloatInstant:9:[1407,,,,,]
+    FloatInstant:[1407,,,,,]
 
-    Duration:9:[3,5,1,6,15,45.000012]
+    Duration:[3,5,1,6,15,45.000012]
 
 =head1 SEE ALSO
 

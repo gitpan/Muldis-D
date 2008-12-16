@@ -1,10 +1,201 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-12-15  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.53.0 is released on CPAN as
+    Muldis-D-0.53.0.tar.gz.
+
+    * (Basics.pod, Types.pod, Types_Catalog.pod, Routines.pod,
+    Routines_Catalog.pod, HDMD_Perl_Tiny.pod, Conventions.pod, Ordered.pod,
+    Tuple.pod, Relation.pod, Set.pod, Array.pod, Bag.pod, Rational.pod)
+    Updated all distro files that referred to catalog types using their
+    unqualified name so to remove the 'Cat.' prefix; now the unqualified
+    references for all system-defined types are just spelled 'Foo' and the
+    catalog types are no longer special case spelled 'Cat.Foo'.
+
+    * (Types.pod, Blob.pod)  In Types.pod, added new proper subtype of
+    'Blob' named 'OctetBlob' whose string lengths are a multiple of 8 bits,
+    and that subtype added a new possrep 'octets'.  This new subtype is for
+    convenience of users since most user Blob values will likely consist of
+    whole octets and users would probably like to deal in those terms.
+    Also added new 'String' subtype 'OString' in the same file.  In
+    Blob.pod, renamed the 2 functions "is_(|not_)_substr" to
+    "is_(|not_)_substr_bits" and added the 3 new functions
+    "length_in_octets" and "is_(|not_)_substr_octets".
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Fixed a widespread Perl 6
+    grammar mistake in PTMD_Tiny.pod; with character classes defined as a
+    range between 2 characters, the endpoints of the range are actually
+    separated by a double period (which is generic Perl range literal
+    syntax), not a single hyphen like in Perl 5.  Likewise updated the
+    string format syntax in HDMD_Perl_Tiny.pod.
+
+    * (HDMD_Perl_Tiny.pod)  Renamed the concept "node type" to "node kind",
+    to help avoid possible confusion with the concept of a data type name.
+
+    * (PTMD_Tiny.pod)  Renamed the 4 grammar tokens "text_str",
+    "(|(|non)quoted_)text_str_seg" to replace any "text" for "char, since
+    they're also used for Name and Comment etc.  Renamed the token
+    "list_sep" to "list_elem_sep" and "pair_sep" to "pair_elem_sep".  The
+    token "scalar_type_name" was merged into "type_name".
+
+    * (Types_Catalog.pod)  Updated the NameChain and DeclNameChain types to
+    eliminate their "flat" possreps, leaving just their "array" possreps;
+    the concept of a "flat" possrep has been demoted and can now just be
+    provided by individual dialects in their proprietary manners instead.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Updated both Tiny dialects to
+    simplify the literal formats for NameChain and DeclNameChain values.
+    With PTMD_Tiny, you can't put a whole (multi-part) chain in a single
+    pair of bracket or quote delimiters anymore; instead, each kind of
+    chain is just expressed as a non-delimited chain of period-separated
+    Name-formatted elements; only each element can be either a bareword or
+    a quote-delimited string; now, literal period characters in chain
+    elements are never escaped; now, DeclNameChain are formatted exactly
+    the same as NameChain, without any leading/trailing periods.  With
+    HDMD_Perl_Tiny, eliminated all Muldis D specific character escaping;
+    now, if you want to have literal perod characters in chain elements,
+    then you must use the Array payload format; also an empty string in the
+    string payload format now means a single-element DeclNameChain; you
+    must use the Array payload format to represent a zero-element chain.
+    In PTMD_Tiny, merged the 5 grammar tokens "(|d)nc_(array|flat)" and
+    "nc_char" into the 2 "(|decl_)name_chain_body" and then merged the 2
+    grammar tokens "text_(delim|char)" into the 1 "quoted_char_str_seg".
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Further standardized the formats
+    and generic features of Muldis D value literals in both Tiny formats so
+    that literals are more intuitive to write and easier to parse or
+    generate.  Now, every value literal has 1-3 main parts, which are the
+    node kind, a usually optional type name, and a usually mandatory
+    payload.  Previously, most scalar typed literals didn't take an
+    (optional) explicit subtype name like nonscalar typed literals did, but
+    now they do.  Any old 1+ main literal parts besides the node kind and
+    optional type name are now all collectively part of the payload under
+    the new design.  In PTMD_Tiny, the 'spec_sep' token has been split into
+    the 2 tokens 'val_(node|payload)_elem_sep', the first new one being a
+    colon character like the old one, and the second new one being a
+    semicolon character; the first new one is used to separate the 1-3 main
+    parts of a value literal, and the second is used to separate any
+    multiplicity of payload parts that some payloads might have.  In
+    HDMD_Perl_Tiny, the main documentation has been refactored so that the
+    GENERAL STRUCTURE pod section now describes the 1-3 main PHMD node
+    parts on behalf of all node kinds, and the pod sections specific to
+    each node kind have now been simplified to just describe the new
+    payloads; where the old PHMD node had just 1 element besides node kind
+    and optional type name, the new payload is exactly the same; where the
+    old PHMD node had possibly multiple (typically 1 or 2) elements besides
+    the node kind and type name, the new payload is an Array|Seq having
+    those same 1 or 2 elements (the old 'payload' was renamed, typically to
+    'main payload'); any further refactoring on this matter is described in
+    other change items.  The main PHMD node is an Array|Seq in the general
+    case but if a node would have 2 elements (no type name is present),
+    then in Perl 6 there is now the option to use a Perl 6 Pair for the
+    PHMD node instead.
+
+    * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Updated PTMD_Tiny to support an
+    alternative more terse syntax for base-10 numeric literals; you can now
+    write a numeric literal without an explicit max-col-val specifier,
+    which is interpreted the same as an explicit max-col-val of '9'
+    (HDMD_Perl_Tiny already supported this terse form before).  Both Tiny
+    files had their examples updated to use the terse syntax for literals
+    that were explicitly base-10 before.  Also added a couple more 'Rat'
+    examples in PTMD_Tiny.
+
+    * (PTMD_Tiny.pod)  Refactored all the tokens denoting value literals so
+    that the payload portion is always apart from the main portion, and
+    further standardized naming for already existing such splits.
+    Reorganized the 4 tokens ["relation_or_qv",
+    "generic_relation_(empty_body|(|non)ordered_attr)_or_qv"] into the 6
+    tokens ["(|generic_)relation_or_qv",
+    "generic_relation_(|empty_body|(|non)ordered_attr)_or_qv_payload"].
+    Renamed the 2 tokens "(tuple|bag)_body" to "(tuple|bag)_or_qv_payload".
+    Split each of these 12 tokens into itself and a same-named but for a
+    "_payload" suffix: "scalar_or_qv", "int", "string", "blob", "text",
+    "set_or_qv", "single_or_qv", "array_or_qv", "comment", "rat",
+    "instant", "duration".  Renamed each of these 2 tokens to change the
+    "body" to "payload": "name_body", "name_chain_body".
+
+    * (HDMD_Perl_Tiny.pod)  Forked every "Examples:" section into 2
+    adjacent "Perl 6|5 Examples:" sections, with each version having
+    identical-meaning code but with greater savvy for distinct host
+    language features.
+
+    * (HDMD_Perl_Tiny.pod)  Updated the value literal payload formats for
+    the 3 types [Bool, Order, RatRoundMeth] so that the Perl 6 and Perl 5
+    descriptions are now disjoint.  Perl 6 has been restricted so that now
+    the only way you can specify 'Bool' and 'Order' payloads is with their
+    Perl 6 native counterparts, which are 'Bool' and 'Order' objects; you
+    can no longer specify such payloads as Perl 6 Int or Str objects; so a
+    PTMD_Tiny parser in Perl 6 will now have to do more than tokenize to
+    Str objects.  In Perl 5 you still have all the options you did before,
+    and these are now spelled out more clearly; you can still use all the
+    canonical or typical Perl 5 forms of those values, plus the string
+    results of a PTMD_Tiny parser in Perl 5.  Since 'RatRoundMeth' has no
+    native equivalent types in either Perl version, you still use Str
+    objects or char string scalars as before.
+
+    * (HDMD_Perl_Tiny.pod)  Updated the value literal payload formats for
+    the 7 types [Int, String, Blob, Rat, (UTC|Float)Instant, Duration] so
+    that the Perl 6 and Perl 5 descriptions are now disjoint.  Perl 6 has
+    been restricted so that now the only way you can specify 'Int' and
+    'Blob' and 'Rat' payloads is with their Perl 6 native counterparts,
+    which are 'Int' and 'Blob' and 'Rat|Num|Int' objects; you can no longer
+    specify such literals as Perl 6 Str objects, or specify Rat payloads as
+    a collection of Int components; for all 7 types, you can no longer use
+    'Str' objects plus max-col-val meta-data to get the Muldis D
+    implementation convert the results from a PTMD_Tiny tokenizer, but
+    rather you must now use the native facilities of Perl 6 to support
+    denoting numeric literals in any base from 2 thru 36; Perl 6 can do the
+    text-to-num mapping for you, and Perl 6's native numbers are "big".  In
+    Perl 5 you still have all the options you did before, and these are now
+    spelled out more clearly; you can still use all the canonical or
+    typical Perl 5 forms of those values, plus the string results of a
+    PTMD_Tiny parser in Perl 5.  One large further change in Perl 5 is that
+    you now use a 1-element hash ref to group a max-col-val (the key) with
+    the main payload it is meta-data for (the value); this is instead of
+    using a 2-element array ref; this change was made so that one could
+    disambiguate 'Rat' payloads like "['2', '11001001']" (is the first
+    element a max-col-val or a numerator?) without using messy further
+    array nesting; it was done with all max-col-val possibly using types
+    for consistency and to allow further simplification and elegance.  Note
+    that it is expected the actual use of max-col-val would be infrequent,
+    so huffman coding with the 'slower'/'fatter' hash refs is justified.
+
+    * (HDMD_Perl_Tiny.pod)  Updated the value literal payload formats for
+    the 5 types [Text, (|Quasi)Tuple, (|Quasi)Array] so that the Perl 6 and
+    Perl 5 descriptions are now disjoint.  There aren't any actual changes
+    or restrictions here, just clarifications.
+
+    * (HDMD_Perl_Tiny.pod)  Updated the value literal payload formats for
+    the 4 types [(|Quasi)Set, (|Quasi)Bag] so that the Perl 6 and Perl 5
+    descriptions are now disjoint.  Perl 6 has been restricted so that now
+    the only way you can specify 'Set' and 'Bag' payloads is with their
+    Perl 6 native counterparts, which are 'Set|KeySet' and
+    'Bag|KeyBag|Set|KeySet' objects; you can no longer specify such
+    literals as single or nested Perl 6 Seq|Array objects.  In Perl 5 you
+    still have the same options you did before (namely single or nested
+    array refs), and these are now spelled out more clearly.
+
+    * (HDMD_Perl_Tiny.pod)  Updated the value literal payload formats for
+    the 2 types "(|Quasi)Scalar" so that the Perl 6 and Perl 5 descriptions
+    are now disjoint.  In Perl 6, the 2 elements of the payload (possrep
+    name and possrep attrs) are now wrapped up in a Perl 6 Pair rather than
+    a Seq|Array.  In Perl 5, a 2 element array ref is still used.
+
+    * (HDMD_Perl_Tiny.pod)  Updated the value literal payload formats for
+    the 2 types "(|Quasi)Relation" so that the Perl 6 and Perl 5
+    descriptions are now disjoint.  In Perl 6, every payload now must be
+    either a Perl 6 Pair (ordered attrs format) or Set (named attrs
+    format), and can't be a Seq|Array like before; also, the value element
+    of that Pair must likewise be a Set; so now every part of the literal
+    that was conceptually unordered now actually is.  In Perl 5, array refs
+    are still used like before.
+
 2008-11-29  Darren Duncan <perl@DarrenDuncan.net>
 
-    * Muldis::D version 0.52.0 is released on CPAN as
-    Muldis-D-0.52.0.tar.gz.
+    * Muldis::D version 0.53.0 is released on CPAN as
+    Muldis-D-0.53.0.tar.gz.
 
     * As of this release, all (non-archive) versioned files have had their
     version numbers increased to match the version number of the release
