@@ -25,7 +25,7 @@ specifically [result, params, update, read], to something better sounding.
 6's Test.pm / David Wheeler's pgTAP to Muldis D; assist users in testing
 their Muldis D code using TAP protocol.  The TAP messages have type Text.
 
-* UP NEXT ...
+* IN PROGRESS ...
 Reorganize the type hierarchy so that quasi-scalar|tuple|relation are now
 the main supertypes and the non-quasi scalar|tuple|relation supertypes are
 now proper subtypes of those.  That also means that the system-defined
@@ -83,21 +83,6 @@ in front of any elements beyond the second.  For example, maybe just use
 colon after first element, and then semicolon between any 2nd/3rd etc.  Or
 use a delimiter pair such as <> following the first element and surrounding
 all remaining ones, any multiple remaining being semicolon delimited.
-
-* IN PROGRESS ...
-Split up the 1 HDMD_Perl_Tiny dialect into the 2 HDMD_Perl(6|5)_Tiny
-dialects, and don't be afraid to let them grow apart.  For example, the
-Perl 6 version can use Pair objects as the basis for most nodes, eg
-":Text<Foo>" or ":Int(:3<21>)", rather than Array/Seq, and the p6v can
-avoid providing the 3-part number syntax to match the plain-text dialect,
-simply requiring use of Perl 6's own multi-radix support (plain-text
-parsers in Perl 6 would do more than just output tokens as text), and
-Bool|Order|Int|etc nodes would require payloads as only native Perl 6
-Bool|Order|Int|etc objects and not accept text forms or number forms for
-bool etc (once again, parsers in Perl 6 can do more than just tokenize).
-For example, the Perl 5 version can ignore mentioning all the named
-variants in Perl 6, and just say "string" rather than Str|etc and array-ref
-rather than Array|Seq etc.
 
 * Update the Tiny dialects with special syntax for declaring whole depots
 in a single expression, catalog+data.  This can be useful for example with
@@ -210,7 +195,7 @@ sequence generators.
 
 * Consider some more elegant solution about matters of closures et al.
 
-* UP NEXT ...
+* IN PROGRESS ...
 Add Ext/Quasi.pod or multiple such language extensions that contain
 routines for system-defined quasi-scalar and quasi-nonscalar types, which
 are analagous to the system-defined routines for their non-quasi

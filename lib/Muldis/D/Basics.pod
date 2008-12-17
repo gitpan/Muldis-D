@@ -9,7 +9,7 @@ Muldis::D::Basics -
 
 =head1 VERSION
 
-This document is Muldis::D::Basics version 0.53.0.
+This document is Muldis::D::Basics version 0.54.0.
 
 =head1 PREFACE
 
@@ -472,8 +472,10 @@ writing code in the host language.
 
 Some official Muldis D dialects have their specifications bundled with the
 current multi-document: L<Muldis::D::Dialect::PTMD_Tiny>,
-L<Muldis::D::Dialect::HDMD_Perl_Tiny>.  Other, unofficial Muldis D dialects
-may be made by third parties in the future, but none are currently known.
+L<Muldis::D::Dialect::HDMD_Perl6_Tiny>,
+L<Muldis::D::Dialect::HDMD_Perl5_Tiny>.  Other, unofficial Muldis D
+dialects may be made by third parties in the future, but none are currently
+known.
 
 The other parts of the current multi-document generally focus on the
 behaviours and semantic features of Muldis D, rather than its syntax, and
@@ -768,7 +770,7 @@ Generic system-defined selector and possrep attribute accessor operators
 exist that automatically work with all scalar types (that have possreps,
 which all user-defined scalar root types do), so such do not need to be
 explicitly defined per such type.  They are all in the
-C<sys.std.Core.Scalar.\w+> namespace.  These generic operators take
+C<sys.std.Core.QScalar.\w+> namespace.  These generic operators take
 advantage of the fact that each scalar possrep looks like a tuple, and they
 look like basic tuple operators but for taking an extra argument to say
 which possrep we're dealing with, and possibly a second extra attribute to

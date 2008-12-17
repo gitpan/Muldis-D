@@ -9,7 +9,7 @@ Muldis D extension for temporal data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Temporal version 0.53.0.
+This document is Muldis::D::Ext::Temporal version 0.54.0.
 
 =head1 PREFACE
 
@@ -247,9 +247,10 @@ value.  A C<UTCDate> adds 1 system-defined possrep whose name is C<date>,
 which has 3 attributes: C<year> (an C<Int>), C<month> (a C<PInt12>), C<day>
 (a C<PInt31>).  The default value of C<UTCDate> is January 1st of the year
 1 CE; its minimum and maximum values are conceptually infinities and
-practically impossible. The cardinality of this type is infinity; to define
-a most-generalized finite C<UTCDate> subtype, you must specify the earliest
-and latest dates it includes (minimally, the earliest and latest C<year>).
+practically impossible.  The cardinality of this type is infinity; to
+define a most-generalized finite C<UTCDate> subtype, you must specify the
+earliest and latest dates it includes (minimally, the earliest and latest
+C<year>).
 
 =head2 sys.std.Temporal.Type.UTCTime
 

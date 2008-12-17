@@ -4,12 +4,12 @@
 
 =head1 NAME
 
-Muldis::D::Dialect::HDMD_Perl_Tiny -
-How to format Perl Hosted Data Muldis D
+Muldis::D::Dialect::HDMD_Perl5_Tiny -
+How to format Perl 5 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl_Tiny version 0.53.0.
+This document is Muldis::D::Dialect::HDMD_Perl5_Tiny version 0.54.0.
 
 =head1 PREFACE
 
@@ -20,15 +20,15 @@ before you read this one, which provides subservient details.
 =head1 DESCRIPTION
 
 This document outlines the grammar of the I<Hosted Data Muldis D> dialect
-named C<HDMD_Perl_Tiny>.  The fully-qualified name of this Muldis D
+named C<HDMD_Perl5_Tiny>.  The fully-qualified name of this Muldis D
 dialect, in combination with the base language spec it is bundled with, is
-C<[ 'Muldis_D', 'http://muldis.com', 'N.N.N', 'HDMD_Perl_Tiny' ]> (when the
-bundled base language version is substituted for the C<N.N.N>).
+C<[ 'Muldis_D', 'http://muldis.com', 'N.N.N', 'HDMD_Perl5_Tiny' ]> (when
+the bundled base language version is substituted for the C<N.N.N>).
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
 by Muldis D programs at runtime) as to what non-critical meta-data it
-explicitly stores; so code in the C<HDMD_Perl_Tiny> dialect should be
+explicitly stores; so code in the C<HDMD_Perl5_Tiny> dialect should be
 round-trippable with the system catalog with the result maintaining all the
 details that were started with.  Since it matches the system catalog, this
 dialect should be able to exactly represent all possible Muldis D base
@@ -43,21 +43,21 @@ criteria, and is designed such that a parser that handles all of this
 dialect can be tiny, hence the dialect's C<Tiny> name.  Likewise, a code
 generator for this dialect from the system catalog can be tiny.
 
-The C<HDMD_Perl_Tiny> dialect is defined to be hosted in either Perl 5 or
-Perl 6, and as composed of just|mainly core Perl types.  Where Perl 5 and 6
-differ, the terminology and examples in this documentation specifically
-uses Perl 6 terminology and examples by default, and adds analogous Perl 5
-terminology as necessary.
+The C<HDMD_Perl5_Tiny> dialect is defined to be hosted in Perl 5, and is
+composed of just|mainly core Perl 5 types.  This dialect is optimized for
+Perl 5 specifically, and doesn't try to match the version for Perl 6; you
+*will* have to reformat any Perl Hosted Data Muldis D when migrating
+between Perl 5 and Perl 6, same as with your ordinary Perl code.
 
 Fundamentally, the various Muldis D scalar and collection types are
-represented by their equivalent Perl 5 or 6 native scalar and collection
+represented by their equivalent Perl 5 native scalar and collection
 types.  But since Muldis D is more strongly typed, or at least differently
-typed, than Perl, each Muldis D literal is represented by a Perl Array,
-whose elements include both the payload Perl literal plus explicit
-meta-data for how to interpret that Perl literal for mapping to Muldis D.
+typed, than Perl 5, each Muldis D literal is represented by a Perl 5 Array,
+whose elements include both the payload Perl 5 literal plus explicit
+meta-data for how to interpret that Perl 5 literal for mapping to Muldis D.
 
 This document mainly just specifies a way to represent Muldis D values as
-Perl values.  Since the fundamental way to do data definition in Muldis D
+Perl 5 values.  Since the fundamental way to do data definition in Muldis D
 is to update catalog (information schema) variables, aka the Muldis D
 meta-model, which are themselves just data, then this document only needs
 to tell you how to define values to put in the catalog variables.  Defining
@@ -67,8 +67,9 @@ See instead L<Muldis::D::Core> for how to actually define the
 tuples and relations that define your data types and routines and queries
 and so forth.
 
-For the present, this document will use the term I<PHMD> (I<Perl Hosted
-Muldis D>) for brevity when referring to aspects of the Perl-Tiny dialect.
+For the present, this document will use the term I<PHMD> (I<Perl 5 Hosted
+Muldis D>) for brevity when referring to aspects of the Perl 5-Tiny
+dialect.
 
 =head1 GENERAL STRUCTURE
 
@@ -77,9 +78,7 @@ Array is a tree node.  The elements of each node/Array include typically a
 native Perl payload value, which may be a PHMD value itself, plus meta-data
 for that payload, that meta-data typically including the analogy of a class
 name, were PHMD nodes instead represented by a tree of PHMD-specific
-objects.  While a PHMD main node may be represented by an Array|Seq in both
-Perl 5 and Perl 6, Perl 6 provides the extra option that a PHMD node may be
-represented by a Perl 6 Pair value.
+objects.
 
 Every PHMD node representing a Muldis D value literal has 1-3 elements:
 
@@ -87,9 +86,9 @@ Every PHMD node representing a Muldis D value literal has 1-3 elements:
 
 =item *
 
-Node kind: a Perl C<Str> value of the format C<< <[ a..z A..Z 0..9 _ ]>+
->>.  All of the PHMD node kinds for Muldis D value literals are these 31:
-C<(|Quasi)Scalar>, C<Bool>, C<Int>, C<String>, C<Blob>, C<Text>,
+Node kind: a Perl character string of the format C<< <[ a..z A..Z 0..9 _
+]>+ >>.  All of the PHMD node kinds for Muldis D value literals are these
+31: C<(|Quasi)Scalar>, C<Bool>, C<Int>, C<String>, C<Blob>, C<Text>,
 C<(|Quasi)Tuple>, C<(|Quasi)Relation>, C<(|Quasi)Set>, C<(|Quasi)Nothing>,
 C<(|Quasi)Single>, C<(|Quasi)Array>, C<(|Quasi)Bag>, C<Name>, C<NameChain>,
 C<DeclNameChain>, C<Comment>, C<Order>, C<Rat>, C<RatRoundMeth>,
@@ -115,11 +114,6 @@ kind, further below.
 
 =back
 
-Under Perl 6, a Pair may alternately be used to represent a main PHMD node
-iff that node has exactly 2 elements (node kind and payload); in that case,
-the node kind is stored in that Pair's key, and the payload is stored in
-the Pair's value.
-
 Generally speaking, no Perl undefined values are allowed anywhere in a PHMD
 value; you must use only defined values instead.  This documentation also
 assumes that only defined values are used, and that supplying a Perl undef
@@ -137,7 +131,8 @@ call".
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl_Tiny', {} ],
+        [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl5_Tiny',
+            {} ],
         [ 'boot_call', 'sys.std.Core.Cat.create_depot_procedure',
             {}, { ... } ],
     ]
@@ -146,41 +141,41 @@ Examples:
 
 As per the VERSIONING pod section of L<Muldis::D>, code written in
 Muldis D must start by declaring the fully-qualified Muldis D language name
-it is written in.  The C<HDMD_Perl_Tiny> dialect formats this name as a
+it is written in.  The C<HDMD_Perl5_Tiny> dialect formats this name as a
 PHMD node having the following 5 elements:
 
 =over
 
 =item *
 
-Node kind / language base name: the Perl C<Str> value C<Muldis_D>.
+Node kind / language base name: the Perl character string C<Muldis_D>.
 
 =item *
 
-Base authority: a Perl C<Str> as per the payload of a C<Text> node;
-typically the Perl C<Str> value C<http://muldis.com>.
+Base authority: a Perl character string as per the payload of a C<Text>
+node; typically the Perl character string C<http://muldis.com>.
 
 =item *
 
-Base version number: a Perl C<Str> as per the payload of a C<Text> node;
-typically a Perl C<Str> value like C<1.2.3>.
+Base version number: a Perl character string as per the payload of a
+C<Text> node; typically a Perl character string like C<1.2.3>.
 
 =item *
 
-Dialect: the Perl C<Str> value C<HDMD_Perl_Tiny>.
+Dialect: the Perl character string C<HDMD_Perl5_Tiny>.
 
 =item *
 
-Extensions: a Perl C<Hash|Mapping> as per the payload of a C<Tuple> node;
+Extensions: a Perl hash ref as per the payload of a C<Tuple> node;
 see the L<MULDIS D TINY DIALECT PRAGMAS> pod section for more details.
 
 =back
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl_Tiny', {} ]
+    [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl5_Tiny', {} ]
 
-    [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl_Tiny', {
+    [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl5_Tiny', {
         'auto_add_attrs'          => [ 'Bool', 'true' ],
         'auto_unabbrev_std_names' => [ 'Bool', 'true' ],
         'auto_chains_from_names'  => [ 'Bool', 'true' ],
@@ -202,23 +197,23 @@ call is formatted as a PHMD node having the following 4 elements:
 
 =item *
 
-Node kind: the Perl C<Str> value C<boot_call>.
+Node kind: the Perl character string C<boot_call>.
 
 =item *
 
-Imperative routine name: a Perl C<Array|Seq|Str> as per the payload of a
-C<NameChain> PHMD node.
+Imperative routine name: a Perl array ref or character string as per the
+payload of a C<NameChain> PHMD node.
 
 =item *
 
-Imperative routine subject-to-update args: a Perl C<Hash|Mapping> as per
-the payload of a C<Tuple> PHMD node except that every C<Hash|Mapping> value
-is just a Perl C<Array|Seq|Str> as per the payload of a C<NameChain> PHMD
+Imperative routine subject-to-update args: a Perl hash ref as per the
+payload of a C<Tuple> PHMD node except that every hash ref is just a Perl
+array ref or character string as per the payload of a C<NameChain> PHMD
 node (each value is the name of a global variable).
 
 =item *
 
-Imperative routine read-only args: a Perl C<Hash|Mapping> as per the
+Imperative routine read-only args: a Perl hash ref as per the
 payload of a C<Tuple> PHMD node.
 
 =back
@@ -234,49 +229,23 @@ Examples
 This node kind represents a scalar subtype value.  This node is interpreted
 as a Muldis D C<sys.std.Core.Type.Scalar> subtype value whose declared type
 is specified by the PHMD node's (mandatory for C<Scalar>) type name element
-and whose attributes are defined by the payload.  Under Perl 6, the payload
-must be a Perl 6 C<Pair>, whose key and value, respectively, are designated
-I<possrep name> and I<possrep attrs>.  Under Perl 5, the payload must be
-just a Perl 5 array ref having exactly 2 elements, that are designated the
-same 2 labels in that order.  The possrep name and possrep attrs must be as
+and whose attributes are defined by the payload.  The payload must be just
+a Perl array ref having exactly 2 elements, that are designated I<possrep
+name> and I<possrep attrs>.  The possrep name and possrep attrs must be as
 per the payload of a C<Name> and C<Tuple> PHMD node payload, respectively.
 The C<Scalar> PHMD node kind can only be used for scalar types that have at
 least 1 possrep, and the I<possrep attrs> is interpreted specifically as
 attributes of the declared type's possrep which is specified by the
 I<possrep name>.  Each key+value pair of the second payload element defines
 a named possrep attribute of the new scalar; the pair's key and value are,
-respectively, a Perl C<Str> that specifies the possrep attribute name, and
-a PHMD node that specifies the possrep attribute value.  (Note that most
-scalar types have at least 1 possrep; the only ones that don't are either
-union types of types having possreps, or they are core system-defined
-types, and those all have their own dedicated syntax for literals.)
+respectively, a Perl character string that specifies the possrep attribute
+name, and a PHMD node that specifies the possrep attribute value.  (Note
+that most scalar types have at least 1 possrep; the only ones that don't
+are either union types of types having possreps, or they are core
+system-defined types, and those all have their own dedicated syntax for
+literals.)
 
-Perl 6 Examples:
-
-    [ 'Scalar', 'sys.std.Rational.Type.Rat', float => {
-        mantissa => :Int(45207196),
-        radix    => :Int(10),
-        exponent => :Int(37),
-    } ]
-
-    [ 'Scalar', 'sys.std.Temporal.Type.UTCDateTime', datetime => {
-        year   => :Int(2003),
-        month  => :Int(10),
-        day    => :Int(26),
-        hour   => :Int(1),
-        minute => :Int(30),
-        second => :Rat(0),
-    } ]
-
-    [ 'Scalar', 'fed.lib.the_db.WeekDay', name => {
-        '' => :Text<monday>,
-    } ]
-
-    [ 'Scalar', 'fed.lib.the_db.WeekDay', number => {
-        '' => :Int(5),
-    } ]
-
-Perl 5 Examples:
+Examples:
 
     [ 'Scalar', 'sys.std.Rational.Type.Rat', [ 'float', {
         'mantissa' => [ 'Int', 45207196 ],
@@ -310,32 +279,21 @@ Muldis D C<sys.std.Core.Type.Bool> value as follows:
 
 =item *
 
-Under Perl 6, the payload must be a Perl 6 C<Bool>, and so C<Bool::False>
-and C<Bool::True> are mapped directly.
+The canonical payload is the specific result of a Perl logical expression,
+such as C<(1 == 0)> for 'false' or C<(1 == 1)> for 'true'; said values are
+probably the empty string and number 1, respectively.
 
 =item *
 
-Under Perl 5, the canonical payload is the specific result of a Perl 5
-logical expression, such as C<(1 == 0)> for 'false' or C<(1 == 1)> for
-'true'; said values are probably the empty string and number 1,
-respectively.
-
-=item *
-
-Under Perl 5, a few alternative payload formats are supported:  The Perl 5
-value literals [C<'false'>, C<'0'>, C<0>, C<''>] all map to 'false', and
-the Perl 5 value literals [C<'true'>, C<'1'>, C<1>] all map to 'true'.  The
-4 character strings [C<false>, C<0>, C<true>, C<1>] specifically are what
-the Plain Text Muldis D grammar uses, and are the results of parsing it in
-Perl 5.
+A few alternative payload formats are supported:  The Perl value literals
+[C<'false'>, C<'0'>, C<0>, C<''>] all map to 'false', and the Perl value
+literals [C<'true'>, C<'1'>, C<1>] all map to 'true'.  The 4 character
+strings [C<false>, C<0>, C<true>, C<1>] specifically are what the Plain
+Text Muldis D grammar uses, and are the results of parsing it in Perl 5.
 
 =back
 
-Perl 6 Examples:
-
-    :Bool(Bool::True)
-
-Perl 5 Examples:
+Examples:
 
     [ 'Bool', 'true' ]
 
@@ -350,60 +308,35 @@ Muldis D C<sys.std.Core.Type.Int> value as follows:
 
 =item *
 
-Under Perl 6, the payload must be a Perl 6 C<Int>, which is mapped
-directly.
+If the payload is a Perl scalar, then it must be just a canonical integer
+value according to Perl, and it is mapped directly; since native Perl
+integers are limited precision, larger integers can be represented by a
+Perl character string of the format C<0> or C<< \-?<[1..9]><[ 0..9 _ ]>* >>
+that is interpreted as base 10.
 
 =item *
 
-Under Perl 5, if the payload is a Perl 5 scalar, then it must be just a
-canonical integer value according to Perl, and it is mapped directly; since
-native Perl 5 integers are limited precision, larger integers can be
-represented by a Perl 5 character string of the format C<0> or C<<
-\-?<[1..9]><[ 0..9 _ ]>* >> that is interpreted as base 10.
+An alternative payload format is a C<bigint> object, which is conceptually
+the closest thing Perl 5 has in core to a "big integer".
 
 =item *
 
-Under Perl 5, an alternative payload format is a C<bigint> object, which is
-conceptually the closest thing Perl 5 has in core to a Perl 6 C<Int>.
-
-=item *
-
-Under Perl 5, if the payload is a Perl 5 hash ref, then it must have 1
-element, whose key and value are designated, in order, I<max-col-val> and
-I<main payload>; the max-col-val must be a Perl 5 string composed of a
-single C<[ 1..9 A..Z ]> character, and the main payload must be a Perl 5
-character string of the format C<0> or C<< \-?<[ 1..9 A..Z ]><[ 0..9 A..Z _
-]>* >>.  This format specifically is what the Plain Text Muldis D grammar
-uses as its general form for integer literals, and is the result of parsing
-it.  The main payload is interpreted as a base-I<N> integer where I<N>
-might be between 2 and 36, and the given max-col-val says which possible
-value of I<N> to use.  Assuming all column values are between zero and
-I<N>-minus-one, the max-col-val contains that I<N>-minus-one.  So to
-specify, eg, bases [2,8,10,16], use max-col-val of [1,7,9,F].
+If the payload is a Perl hash ref, then it must have 1 element, whose key
+and value are designated, in order, I<max-col-val> and I<main payload>; the
+max-col-val must be a Perl string composed of a single C<[ 1..9 A..Z ]>
+character, and the main payload must be a Perl character string of the
+format C<0> or C<< \-?<[ 1..9 A..Z ]><[ 0..9 A..Z _ ]>* >>.  This format
+specifically is what the Plain Text Muldis D grammar uses as its general
+form for integer literals, and is the result of parsing it.  The main
+payload is interpreted as a base-I<N> integer where I<N> might be between 2
+and 36, and the given max-col-val says which possible value of I<N> to use.
+Assuming all column values are between zero and I<N>-minus-one, the
+max-col-val contains that I<N>-minus-one.  So to specify, eg, bases
+[2,8,10,16], use max-col-val of [1,7,9,F].
 
 =back
 
-Perl 6 Examples:
-
-    :Int(:2<11001001>) # binary
-
-    :Int(:8<0>) # octal
-
-    :Int(:8<644>) # octal
-
-    :Int(-34) # decimal
-
-    :Int(42) # decimal
-
-    :Int(:16<DEADBEEF>) # hexadecimal
-
-    :Int(:36<-HELLOWORLD>) # base-36
-
-    :Int(:4<301>) # base-4
-
-    :Int(:12<A09B>) # base-12
-
-Perl 5 Examples:
+Examples:
 
     [ 'Int', { 1 => '11001001' } ] # binary
 
@@ -432,34 +365,21 @@ interpreted as a Muldis D C<sys.std.Core.Type.String> value as follows:
 
 =item *
 
-Under Perl 6, the payload must be a Perl 6 C<Seq|Array>, whose elements are
-all Perl 6 C<Int>, which is mapped directly; each payload element is mapped
-directly as per the payload of an C<Int> PHMD node.
+If the payload is a Perl array ref, then every one of its elements must
+constitute a valid payload for an C<Int> PHMD node.
 
 =item *
 
-Under Perl 5, if the payload is a Perl 5 array ref, then every one of its
-elements must constitute a valid payload for an C<Int> PHMD node.
-
-=item *
-
-Under Perl 5, if the payload is a Perl 5 hash ref, then it must have 1
-element, whose key and value are designated, in order, I<max-col-val> and
-I<main payload>; the max-col-val must be a Perl 5 string and the main
-payload must be a Perl 5 array ref; every pairwise combination of the
-max-col-val with the elements of the main payload must, when appropriately
-wrapped in a Perl 5 hash ref, must constitute a valid hash ref payload for
-an C<Int> PHMD node.
+If the payload is a Perl hash ref, then it must have 1 element, whose key
+and value are designated, in order, I<max-col-val> and I<main payload>; the
+max-col-val must be a Perl string and the main payload must be a Perl array
+ref; every pairwise combination of the max-col-val with the elements of the
+main payload must, when appropriately wrapped in a Perl hash ref, must
+constitute a valid hash ref payload for an C<Int> PHMD node.
 
 =back
 
-Perl 6 Examples:
-
-    :String[0x50,0x65,0x72,0x6C] # Unicode codepoints = 'Perl'
-
-    :String[80,101,114,109] # same thing
-
-Perl 5 Examples:
+Examples:
 
     [ 'String', { F => ['50','65','72','6C'] } ] # Unicode codepts = 'Perl'
 
@@ -474,39 +394,24 @@ Muldis D C<sys.std.Core.Type.Blob> value as follows:
 
 =item *
 
-Under Perl 6, the payload must be a Perl 6 C<Blob>, which is mapped
+If the payload is a Perl scalar, then it must be a canonical Perl bit
+string, which is a scalar whose utf-8 flag is false, and it is mapped
 directly.
 
 =item *
 
-Under Perl 5, if the payload is a Perl 5 scalar, then it must be a
-canonical Perl 5 bit string, which is a scalar whose utf-8 flag is false,
-and it is mapped directly.
-
-=item *
-
-Under Perl 5, if the payload is a Perl 5 hash ref, then it must have 1
-element, whose key and value are designated, in order, I<max-col-val> and
-I<main payload>; the max-col-val must be a Perl 5 string composed of a
-single C<[137F]> character, and the main payload must be a Perl 5 character
-string of the format C<< <[ 0..9 A..F ]>* >>.  This format specifically is
-what the Plain Text Muldis D grammar uses, and is the result of parsing it
-in Perl 5.  Each column of the main payload specifies a sequence of one of
-[1,2,3,4] bits, depending on whether max-col-val is [1,3,7,F].
+If the payload is a Perl hash ref, then it must have 1 element, whose key
+and value are designated, in order, I<max-col-val> and I<main payload>; the
+max-col-val must be a Perl string composed of a single C<[137F]> character,
+and the main payload must be a Perl character string of the format C<< <[
+0..9 A..F ]>* >>.  This format specifically is what the Plain Text Muldis D
+grammar uses, and is the result of parsing it in Perl 5.  Each column of
+the main payload specifies a sequence of one of [1,2,3,4] bits, depending
+on whether max-col-val is [1,3,7,F].
 
 =back
 
-Perl 6 Examples I<TODO: What is the actual syntax for the P6 Blob type?>:
-
-    :Blob( Blob.new(  2 => '00101110100010' ) ) # binary
-
-    :Blob( Blob.new(  4 => '' ) )
-
-    :Blob( Blob.new( 16 => 'A705E' ) ) # hexadecimal
-
-    :Blob( Blob.new(  8 => '523504376' ) )
-
-Perl 5 Examples:
+Examples:
 
     [ 'Blob', { 1 => '00101110100010' } ] # binary
 
@@ -526,22 +431,11 @@ This node kind represents a character string.  This node is interpreted as
 a Muldis D C<sys.std.Core.Type.Text> value by directly mapping the payload.
 Note that, while Plain Text Muldis D may contain a few escape sequences,
 those would be replaced with what they represent prior to making a PHMD
-node.  Under Perl 6, the payload must be a Perl 6 C<Str>.  Under Perl 5,
-the payload must be just a canonical Perl 5 character string, which is any
-Perl 5 scalar value (a Muldis D implementation in Perl 5 can ignore the
+node.  The payload must be just a canonical Perl character string, which is
+any Perl scalar value (a Muldis D implementation in Perl can ignore the
 utf-8 flag as Perl itself knows how to treat its strings consistently).
 
-Perl 6 Examples:
-
-    :Text<Ceres>
-
-    :Text<サンプル>
-
-    :Text<>
-
-    :Text<Perl>
-
-Perl 5 Examples:
+Examples:
 
     [ 'Text', 'Ceres' ]
 
@@ -557,28 +451,12 @@ Perl 5 Examples:
 
 This node kind represents a tuple value.  This node is interpreted as a
 Muldis D C<sys.std.Core.Type.Tuple> value whose attributes are defined by
-the payload.  Under Perl 6, the payload must be a Perl 6 C<Mapping|Hash>.
-Under Perl 5, the payload must be just a Perl 5 hash ref.  Each key+value
+the payload.  The payload must be just a Perl hash ref.  Each key+value
 pair of the payload defines a named attribute of the new tuple; the pair's
-key and value are, respectively, a Perl C<Str> that specifies the attribute
-name, and a PHMD node that specifies the attribute value.
+key and value are, respectively, a Perl character string that specifies the
+attribute name, and a PHMD node that specifies the attribute value.
 
-Perl 6 Examples:
-
-    :Tuple{}
-
-    [ 'Tuple', 'type.tuple_from.var.fed.data.the_db.account.users', {
-        login_name => :Text<hartmark>,
-        login_pass => :Text<letmein>,
-        is_special => :Bool(Bool::True),
-    } ]
-
-    :Tuple{
-        name => :Text<Michelle>,
-        age  => :Int(17),
-    }
-
-Perl 5 Examples:
+Examples:
 
     [ 'Tuple', {} ]
 
@@ -603,76 +481,45 @@ are defined by the payload.  The payload is interpreted as follows:
 
 =item *
 
-Under Perl 6, iff the payload is a Perl 6 C<Set|KeySet> with zero elements,
-then it defines the only relation value having zero attributes and zero
-tuples.  For the Perl 5 equivalent, change the C<Set|KeySet> to a Perl 5
-array ref.
+Iff the payload is a Perl array ref with zero elements, then it defines the
+only relation value having zero attributes and zero tuples.
 
 =item *
 
-Under Perl 6, iff the payload is a Perl 6 C<Set|KeySet> with at least one
-element, and every element is a Perl 6 C<Str> (as per a valid payload for a
-C<Name> PHMD node), then it defines the attribute names of a relation
-having zero tuples.  For the Perl 5 equivalent, change the C<Set|KeySet> to
-a Perl 5 array ref, and each C<Str> to a Perl 5 character string.
+Iff the payload is a Perl array ref with at least one element, and every
+element is a Perl character string (as per a valid payload for a C<Name>
+PHMD node), then it defines the attribute names of a relation having zero
+tuples.
 
 =item *
 
-Under Perl 6, iff the payload is a Perl 6 C<Set|KeySet> with at least one
-element, and every element is a Perl 6 C<Mapping|Hash> (as per a valid
-payload for a C<Tuple> PHMD node), then each element of the payload defines
-a tuple of the new relation; every tuple-defining element of the payload
-must be of the same degree and have the same attribute names as its sibling
-elements; these are the degree and attribute names of the relation as a
-whole, which is its heading for the current purposes.  For the Perl 5
-equivalent, change the C<Set|KeySet> to a Perl 5 array ref, and each
-C<Mapping|Hash> to a Perl 5 hash ref.
+Iff the payload is a Perl array ref with at least one element, and every
+element is a Perl hash ref (as per a valid payload for a C<Tuple> PHMD
+node), then each element of the payload defines a tuple of the new
+relation; every tuple-defining element of the payload must be of the same
+degree and have the same attribute names as its sibling elements; these are
+the degree and attribute names of the relation as a whole, which is its
+heading for the current purposes.
 
 =item *
 
-Under Perl 6, iff the payload is a Perl 6 C<Pair>, then:  The new relation
-value's attribute names are defined by the payload's key, which is a Perl 6
-C<Seq|Array> of C<Str> (each as per a C<Name> node payload), and the
-relation body's tuples' attribute values are defined by the payload's
-value, which is a Perl 6 C<Set|KeySet> of C<Seq|Array> of tuple attribute
+Iff the payload is a Perl array ref with exactly 2 elements, each of which
+is a Perl array ref, then:  The new relation value's attribute names are
+defined by the payload's first element, which is a Perl array ref of
+character string (each as per a C<Name> node payload), and the relation
+body's tuples' attribute values are defined by the payload's second
+element, which is a Perl array ref of Perl array ref of tuple attribute
 value defining PHMD nodes.  This format is meant to be the most compact of
 the generic relation payload formats, as the attribute names only appear
 once for the relation rather than repeating for each tuple.  As a
-trade-off, the attribute values per tuple from the payload value must
-appear in the same order as their corresponding attribute names appear in
-the payload key, as the names and values in the relation literal are
-matched up by ordinal position here.  For the Perl 5 equivalent, change the
-C<Pair> to a Perl 5 array ref with exactly 2 elements, each of which is a
-Perl 5 array ref, and:  The new relation value's attribute names are
-defined by the payload's first element, which is a Perl 5 array ref of
-character string (each as per a C<Name> node payload), and the relation
-body's tuples' attribute values are defined by the payload's value, which
-is a Perl 5 array ref of Perl 5 array ref of tuple attribute value defining
-PHMD nodes.
+trade-off, the attribute values per tuple from the payload second element
+must appear in the same order as their corresponding attribute names appear
+in the payload first element, as the names and values in the relation
+literal are matched up by ordinal position here.
 
 =back
 
-Perl 6 Examples I<TODO: What is the actual syntax for the P6 Set type?>:
-
-    :Relation( Set.new() )  # zero attrs + zero tuples
-
-    :Relation( Set.new(<x y z>) )  # 3 attrs + zero tuples
-
-    :Relation( Set.new( {} ) )  # zero attrs + 1 tuple
-
-    :Relation( Set.new(
-        {
-            login_name => :Text<hartmark>,
-            login_pass => :Text<letmein>,
-            is_special => :Bool(Bool::True),
-        },
-    ) )  # 3 attrs + 1 tuple
-
-    [ 'Relation', 'fed.lib.the_db.gene.Person', <name age> => Set.new(
-        [ :Text<Michelle>, :Int(17) ],
-    ) ]  # 2 attrs + 1 tuple
-
-Perl 5 Examples:
+Examples:
 
     [ 'Relation', [] ]  # zero attrs + zero tuples
 
@@ -696,27 +543,11 @@ Perl 5 Examples:
 
 This node kind represents a set value.  This node is interpreted as a
 Muldis D C<sys.std.Core.Type.Set> value whose elements are defined by the
-payload.  Under Perl 6, the payload must be a Perl 6 C<Set|KeySet>.  Under
-Perl 5, the payload must be just a Perl 5 array ref.  Each element of the
+payload.  The payload must be just a Perl array ref.  Each element of the
 payload defines a unary tuple of the new set; each element is a PHMD node
 that defines the C<value> attribute of the tuple.
 
-Perl 6 Examples I<TODO: What is the actual syntax for the P6 Set type?>:
-
-    [ 'Set', 'fed.lib.the_db.account.Country_Names', Set.new(
-        :Text<Canada>,
-        :Text<Spain>,
-        :Text<Jordan>,
-        :Text<Thailand>,
-    ) ]
-
-    :Set( Set.new(
-        :Int(3),
-        :Int(16),
-        :Int(85),
-    ) )
-
-Perl 5 Examples:
+Examples:
 
     [ 'Set', 'fed.lib.the_db.account.Country_Names', [
         [ 'Text', 'Canada' ],
@@ -734,14 +565,10 @@ Perl 5 Examples:
 =head2 sys.std.Core.Type.Nothing
 
 This node kind represents a 'nothing' value; it is interpreted as a Muldis
-D C<sys.std.Core.Type.Nothing>.  It has 1 element, which is the Perl C<Str>
-value C<Nothing>.
+D C<sys.std.Core.Type.Nothing>.  It has 1 element, which is the Perl
+character string C<Nothing>.
 
-Perl 6 Examples:
-
-    :Nothing()  # or how does Perl 6 make a Pair with undef/default value?
-
-Perl 5 Examples:
+Examples:
 
     [ 'Nothing' ]
 
@@ -753,11 +580,7 @@ as a Muldis D C<sys.std.Core.Type.Single> value whose element is defined by
 the payload.  The payload is a PHMD node that defines the C<value>
 attribute of the single tuple of the new 'single'.
 
-Perl 6 Examples:
-
-    :Single( :Text('I know this one!') )
-
-Perl 5 Examples:
+Examples:
 
     [ 'Single', [ 'Text', 'I know this one!' ] ]
 
@@ -765,28 +588,12 @@ Perl 5 Examples:
 
 This node kind represents a sequence value.  This node is interpreted as a
 Muldis D C<sys.std.Core.Type.Array> value whose elements are defined by the
-payload.  Under Perl 6, the payload must be a Perl 6 C<Seq|Array>.  Under
-Perl 5, the payload must be just a Perl 5 array ref.  Each element of the
+payload.  The payload must be just a Perl array ref.  Each element of the
 payload defines a binary tuple of the new sequence; the element value is a
 PHMD node that defines the C<value> attribute of the tuple, and the element
 index is used as the C<index> attribute of the tuple.
 
-Perl 6 Examples:
-
-    :Array[
-        :Text<Alphonse>,
-        :Text<Edward>,
-        :Text<Winry>,
-    ]
-
-    [ 'Array', 'fed.lib.the_db.stats.Samples_By_Order', [
-        :Int(57),
-        :Int(45),
-        :Int(63),
-        :Int(61),
-    ] ]
-
-Perl 5 Examples:
+Examples:
 
     [ 'Array', [
         [ 'Text', 'Alphonse' ],
@@ -811,63 +618,36 @@ payload.  The payload is interpreted as follows:
 
 =item *
 
-Under Perl 6, the payload must be a Perl 6 C<Bag|KeyBag|Set|KeySet> value;
-the payload element keys are PHMD nodes corresponding to the C<value>
-attribute of the new bag's tuples, and the payload element values are
-positive integers (or C<Bool::True>, which counts as the number 1)
-corresponding to the C<count> attribute; the payload element mapping is as
-you should expect.
+Iff the payload is a Perl array ref with zero elements, then it defines the
+only bag value having zero elements.  Iff the payload is an array ref with
+at least one element, then every one of the payload elements must be itself
+a Perl array ref.
 
 =item *
 
-Under Perl 5, iff the payload is a Perl 5 array ref with zero elements,
-then it defines the only bag value having zero elements.  Iff the payload
-is an array ref with at least one element, then every one of the payload
-elements must be itself a Perl 5 array ref.
+Iff the payload is an array ref with at least one (array ref) element, and
+the first element of that element I<is> itself an array ref, then the
+payload is interpreted as being of the I<array counted values> bag format.
+Each element of the payload defines a binary tuple of the new bag; the
+element is a 2-element array ref, and those 2 elements, by index order, are
+a PHMD node that defines the C<value> attribute of the tuple, and a valid
+C<Int> PHMD node payload that defines the C<count> attribute of the tuple;
+the count must be a positive integer.
 
 =item *
 
-Under Perl 5, iff the payload is an array ref with at least one (array ref)
-element, and the first element of that element I<is> itself an array ref,
-then the payload is interpreted as being of the I<array counted values> bag
-format.  Each element of the payload defines a binary tuple of the new bag;
-the element is a 2-element array ref, and those 2 elements, by index order,
-are a PHMD node that defines the C<value> attribute of the tuple, and a
-valid C<Int> PHMD node payload that defines the C<count> attribute of the
-tuple; the count must be a positive integer.
-
-=item *
-
-Under Perl 5, iff the payload is an array ref with at least one (array ref)
-element, and the first element of that element I<is not> itself an array
-ref, then the payload is interpreted as being of the I<array repeated
-values> bag format.  Each element of the payload contributes to a binary
-tuple of the new bag; the element value is a PHMD node that defines the
-C<value> attribute of the tuple.  The bag has 1 tuple for every distinct
-(after format normalization) element value in the payload, and the C<count>
-attribute of that tuple says how many instances of said element were in the
-payload.
+Iff the payload is an array ref with at least one (array ref) element, and
+the first element of that element I<is not> itself an array ref, then the
+payload is interpreted as being of the I<array repeated values> bag format.
+ Each element of the payload contributes to a binary tuple of the new bag;
+the element value is a PHMD node that defines the C<value> attribute of the
+tuple.  The bag has 1 tuple for every distinct (after format normalization)
+element value in the payload, and the C<count> attribute of that tuple says
+how many instances of said element were in the payload.
 
 =back
 
-Perl 6 Examples I<TODO: What is the actual syntax for the P6 Bag type?>:
-
-    [ 'Bag', 'fed.lib.the_db.inventory.Fruit', Bag.new(
-        :Text<Apple>  => 500,
-        :Text<Orange> => 300,
-        :Text<Banana> => 400,
-    ) ]
-
-    :Bag( Bag.new( [
-        :Text<Foo>,
-        :Text<Quux>,
-        :Text<Foo>,
-        :Text<Bar>,
-        :Text<Baz>,
-        :Text<Baz>,
-    ] ) )
-
-Perl 5 Examples:
+Examples:
 
     [ 'Bag', 'fed.lib.the_db.inventory.Fruit', [
         [ [ 'Text', 'Apple'  ], 500 ],
@@ -890,10 +670,10 @@ Every PHMD node kind for a generic scalar or nonscalar literal has a
 corresponding extra PHMD node kind for a quasi- literal.  The corresponding
 extra quasi- node kinds are exactly the same in format to the non-quasi
 types but that for each one of them, the value of its first element has the
-Perl C<Str> value C<Quasi> prepended.  So PHMD nodes whose first elements
-each are [C<QuasiScalar>, C<QuasiTuple>, C<QuasiRelation>, C<QuasiSet>,
-C<QuasiNothing>, C<QuasiSingle>, C<QuasiArray>, C<QuasiBag>] are
-interpreted as Muldis D [C<sys.std.Core.Type.QuasiScalar>,
+Perl character string C<Quasi> prepended.  So PHMD nodes whose first
+elements each are [C<QuasiScalar>, C<QuasiTuple>, C<QuasiRelation>,
+C<QuasiSet>, C<QuasiNothing>, C<QuasiSingle>, C<QuasiArray>, C<QuasiBag>]
+are interpreted as Muldis D [C<sys.std.Core.Type.QuasiScalar>,
 C<sys.std.Core.Type.QuasiTuple>, C<sys.std.Core.Type.QuasiRelation>,
 C<sys.std.Core.Type.QuasiSet>, C<sys.std.Core.Type.QuasiNothing>,
 C<sys.std.Core.Type.QuasiSingle>, C<sys.std.Core.Type.QuasiArray>,
@@ -911,13 +691,7 @@ that, while Plain Text Muldis D may contain a few escape sequences, those
 would be replaced with what they represent prior to making a PHMD node.
 The payload must be as per the payload of a C<Text> PHMD node.
 
-Perl 6 Examples:
-
-    :Name<login_pass>
-
-    :Name('First Name')
-
-Perl 5 Examples:
+Examples:
 
     [ 'Name', 'login_pass' ]
 
@@ -927,37 +701,30 @@ Perl 5 Examples:
 
 This node kind represents a canonical long name for invoking a DBMS entity
 in some contexts; it is conceptually a sequence of entity short names.  Its
-payload is a Perl C<Array|Seq> value or C<Str> (char-mode scalar) value.
-This node is interpreted as a Muldis D C<sys.std.Core.Type.Cat.NameChain>
-value as follows:
+payload is a Perl array ref or character string.  This node is interpreted
+as a Muldis D C<sys.std.Core.Type.Cat.NameChain> value as follows:
 
 =over
 
 =item *
 
-If the payload is an C<Array|Seq>, then it must have at least 2 elements,
+If the payload is an array ref, then it must have at least 2 elements,
 and every element must be a valid payload for a C<Name> PHMD node (that
 is, any Perl character string).  Each element of the payload, in order,
 defines an element of the C<array> possrep's attribute of a C<NameChain>.
 
 =item *
 
-If the payload is a C<Str>, then it must be formatted as a catenation
+If the payload is a char str, then it must be formatted as a catenation
 (using period (C<.>) separators) of at least 2 parts, where each part can
 not have any literal period (C<.>) characters (if you want literal periods
-then you can only use the C<Array|Seq> payload format to express it).  The
-C<Str> format of payload is interpreted by splitting it on the separators
-into the C<Array|Seq> format, then processed as per the latter.
+then you can only use the array ref payload format to express it).  The
+char str format of payload is interpreted by splitting it on the separators
+into the array ref format, then processed as per the latter.
 
 =back
 
-Perl 6 Examples:
-
-    :NameChain['fed','data','the_db','gene','sorted_person_name']
-
-    :NameChain('fed.data.the_db.stats.samples by order')
-
-Perl 5 Examples:
+Examples:
 
     [ 'NameChain', ['fed','data','the_db','gene','sorted_person_name'] ]
 
@@ -969,17 +736,11 @@ This node kind is exactly the same as the C<NameChain> node kind, in both
 structure/constraints and interpretation, etc, except that it represents a
 canonical long name for declaring a DBMS entity in N-depth contexts, and
 that the chain may have as few as zero parts rather than as few as 2;
-however, a zero part chain can only be expressed with the C<Array|Seq>
-payload format; an empty string C<Str> format will be interpreted as having
+however, a zero part chain can only be expressed with the array ref payload
+format; an empty string char str format will be interpreted as having
 a single element that is the empty string.
 
-Perl 6 Examples:
-
-    :DeclNameChain['gene','sorted_person_name']
-
-    :DeclNameChain('stats.samples by order')
-
-Perl 5 Examples:
+Examples:
 
     [ 'DeclNameChain', ['gene','sorted_person_name'] ]
 
@@ -995,11 +756,7 @@ D may contain a few escape sequences, those would be replaced with what
 they represent prior to making a PHMD node.  The payload must be as per the
 payload of a C<Text> PHMD node.
 
-Perl 6 Examples:
-
-    :Comment('This does something.')
-
-Perl 5 Examples:
+Examples:
 
     [ 'Comment', 'This does something.' ]
 
@@ -1012,34 +769,24 @@ as a Muldis D C<sys.std.Core.Type.Cat.Order> value as follows:
 
 =item *
 
-Under Perl 6, the payload must be a Perl 6 C<Order>, and so
-C<Order::Increase> and C<Order::Same> and C<Order::Decrease> are mapped
-directly.
+The canonical payload is the specific result of a Perl order-determining
+expression, such as C<< (1 <=> 2) >> for 'increase' or C<< (1 <=> 1) >> for
+'same' or C<< (2 <=> 1) >> for 'decrease'; said values are probably the
+numbers [-1,0,1], respectively.
 
 =item *
 
-Under Perl 5, the canonical payload is the specific result of a Perl 5
-order-determining expression, such as C<< (1 <=> 2) >> for 'increase' or
-C<< (1 <=> 1) >> for 'same' or C<< (2 <=> 1) >> for 'decrease'; said values
-are probably the numbers [-1,0,1], respectively.
-
-=item *
-
-Under Perl 5, a few alternative payload formats are supported:  The Perl 5
-value literals [C<'increase'>, C<'-1'>, C<-1>] all map to 'increase', the
-Perl 5 value literals [C<'same'>, C<'0'>, C<0>] all map to 'same, and the
-Perl 5 value literals [C<'decrease'>, C<'1'>, C<1>] all map to 'decrease'.
-The 6 character strings [C<increase>, C<-1>, C<same>, C<0>, C<decrease>,
-C<1>] specifically are what the Plain Text Muldis D grammar uses, and are
-the results of parsing it in Perl 5.
+A few alternative payload formats are supported:  The Perl value literals
+[C<'increase'>, C<'-1'>, C<-1>] all map to 'increase', the Perl value
+literals [C<'same'>, C<'0'>, C<0>] all map to 'same, and the Perl value
+literals [C<'decrease'>, C<'1'>, C<1>] all map to 'decrease'.  The 6
+character strings [C<increase>, C<-1>, C<same>, C<0>, C<decrease>, C<1>]
+specifically are what the Plain Text Muldis D grammar uses, and are the
+results of parsing it in Perl 5.
 
 =back
 
-Perl 6 Examples:
-
-    :Order(Order::Same)
-
-Perl 5 Examples:
+Examples:
 
     [ 'Order', 'same' ]
 
@@ -1056,86 +803,53 @@ Muldis D C<sys.std.Rational.Type.Rat> value as follows:
 
 =item *
 
-Under Perl 6, the payload must be a Perl C<Rat|Num|Int>, which is mapped
-directly.
+If the payload is a Perl scalar, then it must be just a canonical numeric
+value according to Perl, and it is mapped directly; since native Perl
+numerics are limited precision or are inexact (IEEE float), larger numerics
+can be represented by a Perl character string of the format C<< 0\.?<[ 0..9
+_ ]>* >> or C<< \-?<[1..9]><[ 0..9 _ ]>*\.?<[ 0..9 _ ]>* >> that is
+interpreted as base 10.
 
 =item *
 
-Under Perl 5, if the payload is a Perl 5 scalar, then it must be just a
-canonical numeric value according to Perl, and it is mapped directly; since
-native Perl 5 numerics are limited precision or are inexact (IEEE float),
-larger numerics can be represented by a Perl 5 character string of the
-format C<< 0\.?<[ 0..9 _ ]>* >> or C<< \-?<[1..9]><[ 0..9 _ ]>*\.?<[ 0..9 _
-]>* >> that is interpreted as base 10.
+An alternative payload format is a C<bigrat|bignum|bigint> object, which is
+conceptually the closest thing Perl 5 has in core to a "big rational".
 
 =item *
 
-Under Perl 5, an alternative payload format is a C<bigrat|bignum|bigint>
-object, which is conceptually the closest thing Perl 5 has in core to a
-Perl 6 C<Rat|Num|Int>.
+If the payload is a Perl array ref, then the payload must have exactly 2 or
+3 elements, each of which constitutes a valid payload of an C<Int> PHMD
+node.  If the payload has 2 elements, then the rational's value is
+interpreted as the first element (a numerator) divided by the second (a
+denominator).  If the payload has 3 elements, then the rational's value is
+interpreted as the first element (a mantissa) multiplied by the result of
+the second element (a radix) taken to the power of the third (an exponent).
 
 =item *
 
-Under Perl 5, if the payload is a Perl 5 array ref, then the payload must
-have exactly 2 or 3 elements, each of which constitutes a valid payload of
-an C<Int> PHMD node.  If the payload has 2 elements, then the rational's
-value is interpreted as the first element (a numerator) divided by the
-second (a denominator).  If the payload has 3 elements, then the rational's
-value is interpreted as the first element (a mantissa) multiplied by the
-result of the second element (a radix) taken to the power of the third (an
-exponent).
-
-=item *
-
-Under Perl 5, if the payload is a Perl 5 hash ref, then it must have 1
-element, whose key and value are designated, in order, I<max-col-val> and
-I<main payload>; the max-col-val must be a Perl 5 string composed of a
-single C<[ 1..9 A..Z ]> character.  If the main payload is a Perl 5 scalar,
-then the main payload must be a Perl 5 character string of the format C<<
-0\.?<[ 0..9 A..Z _ ]>* >> or C<< \-?<[ 1..9 A..Z ]><[ 0..9 A..Z _ ]>*\.?<[
-0..9 A..Z _ ]>* >>.  This format specifically is what the Plain Text Muldis
-D grammar uses as one general form for rational literals, and is the result
-of parsing it.  The main payload is interpreted as a base-I<N> rational
-where I<N> might be between 2 and 36, and the given max-col-val says which
-possible value of I<N> to use.  Assuming all column values are between zero
-and I<N>-minus-one, the max-col-val contains that I<N>-minus-one.  So to
+If the payload is a Perl hash ref, then it must have 1 element, whose key
+and value are designated, in order, I<max-col-val> and I<main payload>; the
+max-col-val must be a Perl string composed of a single C<[ 1..9 A..Z ]>
+character.  If the main payload is a Perl scalar, then the main payload
+must be a Perl character string of the format C<< 0\.?<[ 0..9 A..Z _ ]>* >>
+or C<< \-?<[ 1..9 A..Z ]><[ 0..9 A..Z _ ]>*\.?<[ 0..9 A..Z _ ]>* >>.  This
+format specifically is what the Plain Text Muldis D grammar uses as one
+general form for rational literals, and is the result of parsing it.  The
+main payload is interpreted as a base-I<N> rational where I<N> might be
+between 2 and 36, and the given max-col-val says which possible value of
+I<N> to use.  Assuming all column values are between zero and
+I<N>-minus-one, the max-col-val contains that I<N>-minus-one.  So to
 specify, eg, bases [2,8,10,16], use max-col-val of [1,7,9,F].  If the main
-payload is a Perl 5 array ref, then the main payload must have exactly 2 or
-3 elements, and every pairwise combination of the max-col-val with the
-elements of the main payload must, when appropriately wrapped in a Perl 5
+payload is a Perl array ref, then the main payload must have exactly 2 or 3
+elements, and every pairwise combination of the max-col-val with the
+elements of the main payload must, when appropriately wrapped in a Perl
 hash ref, must constitute a valid hash ref payload for an C<Int> PHMD node;
 the meaning of the 2 or 3 main payload elements is the same as the 2 or 3
 payload elements mentioned in the previous bullet point.
 
 =back
 
-Perl 6 Examples:
-
-    :Rat(:2<-1.1>)
-
-    :Rat(-1.5) # same val as prev
-
-    :Rat(3.14159)
-
-    :Rat(:11<0.0>)
-
-    :Rat(:16<DEADBEEF.FACE>)
-
-    :Rat(:36<0.000AZE>)
-
-    :Rat(:7<500001> div :7<1000>)
-
-    :Rat(:12<A09B> div :12<A>)
-
-    :Rat(:2<1011101101> * :2<10> ** :2<-11011>)
-
-    :Rat(45207196 * 10 ** 37)
-
-    :Rat(1 div 43)
-
-    :Rat(314159 * 10 ** -5)
-
-Perl 5 Examples:
+Examples:
 
     [ 'Rat', { 1 => '-1.1' } ]
 
@@ -1165,15 +879,11 @@ Perl 5 Examples:
 
 This node kind represents a rounding method.  This node is interpreted as a
 Muldis D C<sys.std.Rational.Type.RatRoundMeth> value by directly mapping
-the payload.  The payload must be a Perl 6 C<Str> or Perl 5 character
-string having one of the 7 values C<half_down>, C<half_up>, C<half_even>,
-C<to_floor>, C<to_ceiling>, C<to_zero>, C<to_inf>.
+the payload.  The payload must be a Perl character string having one of the
+7 values C<half_down>, C<half_up>, C<half_even>, C<to_floor>,
+C<to_ceiling>, C<to_zero>, C<to_inf>.
 
-Perl 6 Examples:
-
-    :RatRoundMeth<half_up>
-
-Perl 5 Examples:
+Examples:
 
     [ 'RatRoundMeth', 'half_up' ]
 
@@ -1191,17 +901,17 @@ follows:
 
 =item *
 
-Under Perl 6, the payload must be a Perl 6 C<Seq|Array> with 6 elements,
-where each element may be either undefined or defined; or if fewer than 6
-elements are provided, the C<Seq|Array> will be implicitly extended to 6,
-filling with undefs.  The 6 payload elements correspond in
-order, from the lowest to the highest indexed, to the 6 attributes:
-C<year>, C<month> C<day>, C<hour>, C<minute>, C<second>.  For each
-payload element that Perl considers undefined or defined, the corresponding
-attribute has a C<Nothing> or a C<Single> value, respectively.  For each of
-the first 5 elements, when it is defined, it must qualify as a valid
-payload for an C<Int> PHMD node; for the 6th element, when it is defined,
-it must qualify as a valid payload for a C<Rat> PHMD node.
+If the payload is a Perl array ref, then it must have 6 elements, where
+each element may be either undefined or defined; or if fewer than 6
+elements are provided, the array ref will be implicitly extended to 6,
+filling with undefs.  The 6 payload elements correspond in order, from the
+lowest to the highest indexed, to the 6 attributes: C<year>, C<month>
+C<day>, C<hour>, C<minute>, C<second>.  For each payload element that Perl
+considers undefined or defined, the corresponding attribute has a
+C<Nothing> or a C<Single> value, respectively.  For each of the first 5
+elements, when it is defined, it must qualify as a valid payload for an
+C<Int> PHMD node; for the 6th element, when it is defined, it must qualify
+as a valid payload for a C<Rat> PHMD node.
 
 A defined C<year> may be any integer, each of [C<month>, C<day>] must be a
 positive integer, each of [C<hour>, C<minute>] must be a non-negative
@@ -1214,32 +924,19 @@ value is just a C<UTCInstant> and not of any of the other 3 subtypes.
 
 =item *
 
-Under Perl 5, if the payload is a Perl 5 array ref, then the interpretation
-of this payload is the same as for the Perl 6 payload.
-
-=item *
-
-Under Perl 5, if the payload is a Perl 5 hash ref, then it must have 1
-element, whose key and value are designated, in order, I<max-col-val> and
-I<main payload>; the max-col-val must be a Perl 5 string and the main
-payload must be a Perl 5 array ref as per the payload of the previous
-bullet point but that none of the 6 elements is a Perl 5 hash ref.  Each of
-the 6 main payload elements, when defined, is further interpreted according
-to the max-col-val, in the same manner as how an C<Int> or C<Rat> node's
-hash ref payload's element's value is interpreted.  The interpretation of
-this payload is the same as for the other Perl 5 payload.
+If the payload is a Perl hash ref, then it must have 1 element, whose key
+and value are designated, in order, I<max-col-val> and I<main payload>; the
+max-col-val must be a Perl string and the main payload must be a Perl array
+ref as per the payload of the previous bullet point but that none of the 6
+elements is a Perl hash ref.  Each of the 6 main payload elements, when
+defined, is further interpreted according to the max-col-val, in the same
+manner as how an C<Int> or C<Rat> node's hash ref payload's element's value
+is interpreted.  The interpretation of this payload is the same as for the
+Perl array ref payload.
 
 =back
 
-Perl 6 Examples:
-
-    :UTCInstant[1964,10,16,16,12,47.5] # a UTCDateTime
-
-    :UTCInstant[2002,12,6] # a UTCDate
-
-    :UTCInstant[undef,undef,undef,14,2,29] # a UTCTime
-
-Perl 5 Examples:
+Examples:
 
     [ 'UTCInstant', [1964,10,16,16,12,47.5] ] # a UTCDateTime
 
@@ -1255,13 +952,7 @@ structure/constraints and interpretation, etc, except that it represents a
 time-zone, and it is interpreted as a Muldis D
 C<sys.std.Temporal.Type.FloatInstant> value.
 
-Perl 6 Examples:
-
-    :FloatInstant[2003,4,5,2] # min,sec unknown or N/A
-
-    :FloatInstant[1407] # just know its sometime in 1407
-
-Perl 5 Examples:
+Examples:
 
     [ 'FloatInstant', [2003,4,5,2] ] # min,sec unknown or N/A
 
@@ -1278,9 +969,9 @@ values are defined by the payload.  The payload is interpreted as follows:
 
 =item *
 
-Under Perl 6, the payload must be a Perl 6 C<Seq|Array> with 6 elements,
-where each element may be either undefined or defined; or if fewer than 6
-elements are provided, the C<Seq|Array> will be implicitly extended to 6,
+If the payload is a Perl array ref, then it must have 6 elements, where
+each element may be either undefined or defined; or if fewer than 6
+elements are provided, the array ref will be implicitly extended to 6,
 filling with undefs.  The 6 payload elements correspond in order, from the
 lowest to the highest indexed, to the 6 attributes: C<years>, C<months>
 C<days>, C<hours>, C<minutes>, C<seconds>.  For each payload element that
@@ -1296,35 +987,26 @@ C<Duration> has no system-defined subtypes, but that may change later.>
 
 =item *
 
-Under Perl 5, if the payload is a Perl 5 array ref, then the interpretation
-of this payload is the same as for the Perl 6 payload.
-
-=item *
-
-Under Perl 5, if the payload is a Perl 5 hash ref, then it must have 1
-element, whose key and value are designated, in order, I<max-col-val> and
-I<main payload>; the max-col-val must be a Perl 5 string and the main
-payload must be a Perl 5 array ref as per the payload of the previous
-bullet point but that none of the 6 elements is a Perl 5 hash ref.  Each of
-the 6 main payload elements, when defined, is further interpreted according
-to the max-col-val, in the same manner as how an C<Int> or C<Rat> node's
-hash ref payload's element's value is interpreted.  The interpretation of
-this payload is the same as for the other Perl 5 payload.
+If the payload is a Perl hash ref, then it must have 1 element, whose key
+and value are designated, in order, I<max-col-val> and I<main payload>; the
+max-col-val must be a Perl string and the main payload must be a Perl array
+ref as per the payload of the previous bullet point but that none of the 6
+elements is a Perl hash ref.  Each of the 6 main payload elements, when
+defined, is further interpreted according to the max-col-val, in the same
+manner as how an C<Int> or C<Rat> node's hash ref payload's element's value
+is interpreted.  The interpretation of this payload is the same as for the
+Perl array ref payload.
 
 =back
 
-Perl 6 Examples:
-
-    :Duration[3,5,1,6,15,45.000012]
-
-Perl 5 Examples:
+Examples:
 
     [ 'Duration', [3,5,1,6,15,45.000012] ]
 
 =head1 MULDIS D TINY DIALECT PRAGMAS
 
 All of the following pragmas apply to both the C<PTMD_Tiny> and
-C<HDMD_Perl_Tiny> dialects, and have the same semantics with both.
+C<HDMD_Perl5_Tiny> dialects, and have the same semantics with both.
 
 =head2 auto_add_attrs
 
@@ -1334,7 +1016,7 @@ attribute being undefined; normally when one selects a value of a
 particular attribute-based type, they must supply values for I<all> of its
 attributes; this is true with values comprising the system catalog as with
 any other values.  Code written in the Muldis D C<PTMD_Tiny> or
-C<HDMD_Perl_Tiny> dialect is comprised almost entirely of value literals,
+C<HDMD_Perl5_Tiny> dialect is comprised almost entirely of value literals,
 and by default all of the attribute values of said values must be
 explicitly given in the literals as sub-literals, even in the common case
 where some attributes just have the default values for their type.
@@ -1356,7 +1038,7 @@ attributes are missing will be extended to become the default value of the
 type of the wider literal but that those attributes of its that I<were>
 explicitly given will override the default's values for those attributes.
 The actual behaviour is essentially what the
-C<sys.std.Tuple.substitution_in_default> function does.
+C<sys.std.QTuple.substitution_in_default> function does.
 
 But the C<auto_add_attrs> pragma is not simply an automatically invoked
 pre-processing Muldis D function, because it also serves the common case
@@ -1441,7 +1123,7 @@ still writes those as normal prepended to the otherwise shortened chains.
 So for example, one can just write C<Int> rather than
 C<sys.std.Core.Type.Int>, C<is_identical> rather than
 C<sys.std.Core.Universal.is_identical>, C<Tuple.attr> rather than
-C<sys.std.Core.Tuple.attr>, C<min> rather than C<sys.std.Ordered.min>,
+C<sys.std.Core.QTuple.attr>, C<min> rather than C<sys.std.Ordered.min>,
 C<array_of.Rat> rather than C<array_of.sys.std.Rational.Type.Rat>, and so
 on.
 

@@ -7,7 +7,7 @@ use warnings FATAL => 'all';
 ###########################################################################
 
 { package Muldis::D; # package
-    use version 0.74; our $VERSION = qv('0.53.0');
+    use version 0.74; our $VERSION = qv('0.54.0');
     # Note that Perl code only exists at all in this file in order to help
     # the CPAN indexer handle the distribution properly.
 } # package Muldis::D
@@ -29,7 +29,7 @@ Formal spec of Muldis D relational DBMS lang
 
 =head1 VERSION
 
-This document is Muldis::D version 0.53.0.
+This document is Muldis::D version 0.54.0.
 
 =head1 PREFACE
 
@@ -38,13 +38,14 @@ documents that comprise the remaining parts of the specification, in their
 suggested reading order (but that all follow the root), are:
 L<Muldis::D::Basics>, L<Muldis::D::Core> (which has its own tree of parts
 to follow), L<Muldis::D::Dialect::PTMD_Tiny>,
-L<Muldis::D::Dialect::HDMD_Perl_Tiny>, L<Muldis::D::Conventions>,
+L<Muldis::D::Dialect::HDMD_Perl6_Tiny>,
+L<Muldis::D::Dialect::HDMD_Perl5_Tiny>, L<Muldis::D::Conventions>,
 L<Muldis::D::Ext::Ordered>, L<Muldis::D::Ext::Integer>,
-L<Muldis::D::Ext::Blob>, L<Muldis::D::Ext::Text>, L<Muldis::D::Ext::Tuple>,
-L<Muldis::D::Ext::Relation>, L<Muldis::D::Ext::Set>,
-L<Muldis::D::Ext::Array>, L<Muldis::D::Ext::Bag>,
-L<Muldis::D::Ext::Rational>, L<Muldis::D::Ext::Temporal>,
-L<Muldis::D::Ext::Spatial>.
+L<Muldis::D::Ext::Blob>, L<Muldis::D::Ext::Text>,
+L<Muldis::D::Ext::QTuple>, L<Muldis::D::Ext::QRelation>,
+L<Muldis::D::Ext::QSet>, L<Muldis::D::Ext::QArray>,
+L<Muldis::D::Ext::QBag>, L<Muldis::D::Ext::Rational>,
+L<Muldis::D::Ext::Temporal>, L<Muldis::D::Ext::Spatial>.
 
 =head1 DESCRIPTION
 
@@ -57,9 +58,9 @@ at them.
 
 The fully-qualified name of this multi-part document and the language
 specification it contains (as a single composition) is
-C<Muldis_D:'http://muldis.com':'0.53.0'>.  It is the official/original (not
+C<Muldis_D:'http://muldis.com':'0.54.0'>.  It is the official/original (not
 embraced and extended) Muldis D language specification by the authority
-Darren Duncan (C<http://muldis.com>), version C<0.53.0> (this number
+Darren Duncan (C<http://muldis.com>), version C<0.54.0> (this number
 matches the VERSION pod in this file).  This multi-part document is named
 and organized with the expectation that many dialects, extensions, and core
 versions of it will exist over time, some of those under the original
@@ -260,8 +261,8 @@ code's behavior.
 
 See the following parts of the current multi-document for descriptions of
 bundled dialects (names subject to change):
-L<Muldis::D::Dialect::PTMD_Tiny>,
-L<Muldis::D::Dialect::HDMD_Perl_Tiny>.
+L<Muldis::D::Dialect::PTMD_Tiny>, L<Muldis::D::Dialect::HDMD_Perl6_Tiny>,
+L<Muldis::D::Dialect::HDMD_Perl5_Tiny>.
 
 =head2 Extensions
 
