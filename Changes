@@ -1,6 +1,155 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2008-12-19  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.55.0 is released on CPAN as
+    Muldis-D-0.55.0.tar.gz.
+
+    * This release features the first rough cut of a reorganization of the
+    Muldis D type system such that the quasi-(scalar|tuple|relation) types
+    are now proper supertypes of the scalar|tuple|relation types, rather
+    than the 2 groups being disjoint yet very similar.  As part of this
+    change, all of the generic scalar|tuple|relation operators have been
+    made more liberal so to handle the quasi- supertypes natively; but
+    their behaviour is unchanged when given arguments that were valid
+    before, so these changes are essentially backwards compatible.
+
+    * (PTMD_Tiny.pod, HDMD_Perl6_Tiny.pod)  Fixed a few fossils.  In
+    PTMD_Tiny.pod it was a grammar syntax error; in HDMD_Perl6_Tiny.pod it
+    was an out-dated code example.
+
+    * (Basics.pod, Routines.pod, Types_Catalog.pod)  Fixed one fossil per
+    file regarding the declared type of 'assuming' parameters; each one
+    said the parameter was a tuple but it has actually been a quasi-tuple
+    for awhile now.
+
+    * (Types.pod, Integer.pod, Blob.pod, Rational.pod, Temporal.pod)  Fixed
+    all occurrences of the common documentation/grammar error in type
+    definitions that said "a/an <foo-type> is a subtype of <bar-type>" by
+    removing the leading "a/an"; the "a/an" designates a value, where we
+    wanted to designate a type.
+
+    * (QRelation.pod)  Added new updater "sys.std.QRelation.assign_empty"
+    which is analagous to a SQL "TRUNCATE" statement.
+
+    * (Types.pod, Basics.pod, Routines.pod, Types_Catalog.pod,
+    PTMD_Tiny.pod, HDMD_Perl(5|6)_Tiny.pod, Ordered.pod, QSet.pod,
+    QRelation.pod, QArray.pod, QBag.pod)  In Types.pod, renamed all 12
+    Quasi- type declarations
+    "sys.std.Core.Type.Quasi(Scalar|ScalarDVPT|Tuple(|D0)|Relation(|D0))"
+    and "sys.std.Core.Type.Quasi(Set|Maybe|Nothing|Single|Array|Bag)",
+    replacing the "Quasi" prefix with "Q".  In all 12 files,
+    correspondingly updated all references to those types.
+
+    * (Types.pod, PTMD_Tiny.pod, HDMD_Perl(5|6)_Tiny.pod)  Deleted the 4
+    core types
+    "sys.std.Core.Type.Q(ScalarDVPT|(Tuple|Relation)D0|Nothing)", and their
+    corresponding special Tiny literal syntaxes.  Renamed the text-Tiny
+    token "nothing_or_qv" to "nothing".  Updated the QScalar type
+    declaration to not give a default value, giving it one is TODO next.
+
+    * (Basics.pod)  Multiple updates to the TYPE SYSTEM main pod section.
+    The 'Tuple' and 'Relation' types are no longer primitives but rather
+    are now enumerations, of 'QTuple' and 'QRelation' values.  Under "Type
+    Identification": Non-ref type system values are now all in 3 disjoint
+    categories rather than 6, the 3 quasi- ones, with the 3 non-quasi now
+    being subsets rather than disjoint.  Renamed the "Scalar Types" pod
+    section to "Q/Scalar Types", the "Tuple Types and Relation Types" pod
+    section to "Q/Tuple Types and Q/Relation Types", and the "Quasi- Types"
+    pod section to "Distinction of Quasi- Types from Non-Quasi Types".
+
+    * (Basics.pod)  Completely rewrote the previous-mentioned
+    "Distinction..." section, so it now defines non-quasi types in concise
+    terms of quasi- types plus a simple restriction ... the distinction is
+    that with non-quasi types you can recursively ungroup/unwrap all
+    attributes down to scalars, whereas with other quasi- types you can't.
+
+    * (Types.pod)  Merged the 4 main documentation sections "SYSTEM-DEFINED
+    CORE (|QUASI-)(|NON)SCALAR PARAMETERIZED DATA TYPES" into the 2 main
+    documentation sections "SYSTEM-DEFINED CORE QUASI-/(|NON)SCALAR
+    PARAMETERIZED DATA TYPES" and arranged all the type declarations such
+    that each 2 similarly named (one quasi-, one not) types appear
+    together, the parent quasi- type first.  Within each pair, the quasi-
+    parent type now contains most of the descriptive details the pair has
+    in common, and the non-quasi one now specifies it is a proper subtype.
+    Also reorganized the TYPE SUMMARY documentation section to reflect the
+    new type hierarchy.  Also updated the QScalar type declaration to say
+    its default value is now the same as Scalar and Bool.
+
+    * (Types_Catalog.pod)  Updated the TYPE SUMMARY pod section to add the
+    3 nodes Q(Scalar|Tuple|Relation) to the tree between Universal and
+    Scalar|Tuple|Relation.  Also updated the description of the
+    'special_types' attribute of the 'System' catalog type to remove
+    'Scalar|Tuple|Relation' from the list, leaving just 11 items; said 3
+    types will instead be declared under the 'types' attribute of 'System',
+    as they now have a type definition format like what users can declare.
+    Also updated any mentions, in various catalog entity descriptions, of
+    tuple|scalar|relation values or types to add the prefix "q/" where
+    either those or their more general quasi- types are applicable.
+
+    * (Types_Catalog.pod)  Updated these 6 catalog types to remove each
+    type's "is_quasi" boolean/maybe-of-bool attribute: "SysScaNPRTypeSet",
+    "(ScaPR|Tup|Rel)LitExprNodeSet", "Inner(S|Nons)calarType".  In the case
+    of "SysScaNPRTypeSet", there are no longer any system-defined
+    no-possrep types that aren't scalar.  As for the rest, whether they are
+    non-quasi or not will be determined by looking at each type's
+    attributes' type definitions, essentially the same work as is done with
+    union etc types.
+
+    * (Integer.pod, Blob.pod, Rational.pod, Temporal.pod, Spatial.pod)  In
+    these, the 5 language extension files that declare data types, updated
+    each file's TYPE SUMMARY pod section to add the single QScalar node to
+    the tree between Universal and Scalar; in just Rational.pod, also added
+    the single QTuple node between Universal and Tuple.
+
+    * (Routines.pod, Ordered.pod, QTuple.pod, QRelation.pod, QSet.pod,
+    QBag.pod, QArray.pod)  Updated all the generic relational operators and
+    other generic scalar or nonscalar operators to gain savvy with the
+    wider quasi- versions of the types they handled before.  These still
+    have the same semantics as before with non-quasi values that worked
+    before.  Generally speaking, any declared result or parameter types of
+    "Scalar|Tuple|Relation|Set|Maybe|Single|Array|Bag" have now been
+    changed to "QScalar" etc; also, all declared result or parameter types
+    of "ScaTupRel" have been changed to "Universal".  (So the "ScaTupRel"
+    type is no longer used in any system-defined entity signatures, but it
+    continues to be declared for the convenience of user-defined entities.)
+    Also any "(set|maybe|single|array|bag)_of" type prefixes attached to a
+    now-Q-type result or parameter type declaration have been changed to
+    "quasi_\w+_of" versions.
+
+    * (Routines.pod, QTuple.pod, QSet.pod, QAarray.pod, QBag.pod,
+    QRelation.pod) Related to the previous changes, to make their names
+    more accurate, 15 routines were renamed to
+    ["sys.std.Core.QScalar.(QTuple_from_QScalar|QScalar_from_QTuple)",
+    "sys.std.Core.QRelation.(QTuple_from_QRelation|QRelation_from_QTuple)",
+    "sys.std.QTuple.(attr_from_QTuple|QTuple_from_attr)",
+    "sys.std.QBag.QSet_from_(wrap|attr)",
+    "sys.std.QArray.(QArray_from_(wrap|attr)|limit_of_QArray_from_wrap)",
+    "sys.std.QBag.(QSet_from_QBag|QBag_from_(QSet|wrap|attr))"] from the
+    same names but lacking any "Q".
+
+    * (Routines.pod)  Updated the descriptions of the 2 routines
+    "sys.std.Core.QRelation.un(wrap|group)" to specify that they would fail
+    with certain quasi-relation arguments due to their TVAs or RVAs not
+    having consistent attribute sets (a problem that non-quasi relations
+    never have, by definition).
+
+    * (Routines.pod, QSet.pod, QArray.pod)  Updated the descriptions of the
+    8 routines
+    ["sys.std.Core.QRelation.(is_(member|subset)|difference|join)",
+    "sys.std.QSet.is_member",
+    "sys.std.QArray.(update_value|insertion|is_element)"] so that they now
+    warn rather than die on type incompatabilities of input relations that
+    would make the routine result in a general quasi-relation rather than a
+    relation.  Note that there might be other routines needing similar
+    documentation updates, but the above 8 were the only ones easily
+    locatable by their use of the word "incompatible".  In fact, most
+    routines were simply silent on the matter, the behaviour being implied.
+
+    * (Core.pod, Routines_Catalog.pod, Conventions.pod)  Minor entity
+    description updates re quasi-/non merge.
+
 2008-12-16  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.54.0 is released on CPAN as

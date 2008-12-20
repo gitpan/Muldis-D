@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_Tiny version 0.54.0.
+This document is Muldis::D::Dialect::PTMD_Tiny version 0.55.0.
 
 =head1 PREFACE
 
@@ -174,7 +174,7 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
     }
 
     token scalar_or_qv {
-        [Quasi]? Scalar <val_node_elem_sep>
+        [Q]? Scalar <val_node_elem_sep>
         <type_name> <val_node_elem_sep>
         <scalar_or_qv_payload>
     }
@@ -239,7 +239,7 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
     }
 
     token tuple_or_qv {
-        [Quasi]? Tuple <val_node_elem_sep>
+        [Q]? Tuple <val_node_elem_sep>
         [<type_name> <val_node_elem_sep>]?
         <tuple_or_qv_payload>
     }
@@ -247,14 +247,14 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
     token relation_or_qv {
           <generic_relation_or_qv>
         | <set_or_qv>
-        | <nothing_or_qv>
+        | <nothing>
         | <single_or_qv>
         | <array_or_qv>
         | <bag_or_qv>
     }
 
     token generic_relation_or_qv {
-        [Quasi]? Relation <val_node_elem_sep>
+        [Q]? Relation <val_node_elem_sep>
         [<type_name> <val_node_elem_sep>]?
         <generic_relation_or_qv_payload>
     }
@@ -299,7 +299,7 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
     }
 
     token set_or_qv {
-        [Quasi]? Set <val_node_elem_sep>
+        [Q]? Set <val_node_elem_sep>
         [<type_name> <val_node_elem_sep>]?
         <set_or_qv_payload>
     }
@@ -310,12 +310,12 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
         <list_close>
     }
 
-    token nothing_or_qv {
-        [Quasi]? Nothing
+    token nothing {
+        Nothing
     }
 
     token single_or_qv {
-        [Quasi]? Single <val_node_elem_sep>
+        [Q]? Single <val_node_elem_sep>
         [<type_name> <val_node_elem_sep>]?
         <single_or_qv_payload>
     }
@@ -327,7 +327,7 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
     }
 
     token array_or_qv {
-        [Quasi]? Array <val_node_elem_sep>
+        [Q]? Array <val_node_elem_sep>
         [<type_name> <val_node_elem_sep>]?
         <array_or_qv_payload>
     }
@@ -339,14 +339,14 @@ capturing parens for simplicity to fulfil its purpose as an illustration.
     }
 
     token bag_or_qv {
-        [Quasi]? Bag <val_node_elem_sep>
+        [Q]? Bag <val_node_elem_sep>
         [<type_name> <val_node_elem_sep>]?
         <bag_or_qv_payload>
     }
 
     token bag_or_qv_payload {
-          bag_or_qv_payload_counted_values
-        | bag_or_qv_payload_repeated_values
+          <bag_or_qv_payload_counted_values>
+        | <bag_or_qv_payload_repeated_values>
     }
 
     token bag_or_qv_payload_counted_values {

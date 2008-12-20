@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_Tiny version 0.54.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_Tiny version 0.55.0.
 
 =head1 PREFACE
 
@@ -78,9 +78,9 @@ Array is a tree node.  The elements of each node/Array include typically a
 native Perl payload value, which may be a PHMD value itself, plus meta-data
 for that payload, that meta-data typically including the analogy of a class
 name, were PHMD nodes instead represented by a tree of PHMD-specific
-objects.  While a PHMD main node may be represented by an Array|Seq, Perl
-provides the extra option that a PHMD node may be represented by a Perl
-Pair value.
+objects.  While a PHMD main node would generally be represented by an
+Array|Seq, Perl provides the extra option in common cases that a PHMD node
+may be represented by a Perl Pair value.
 
 Every PHMD node representing a Muldis D value literal has 1-3 elements:
 
@@ -89,30 +89,30 @@ Every PHMD node representing a Muldis D value literal has 1-3 elements:
 =item *
 
 Node kind: a Perl C<Str> value of the format C<< <[ a..z A..Z 0..9 _ ]>+
->>.  All of the PHMD node kinds for Muldis D value literals are these 31:
-C<(|Quasi)Scalar>, C<Bool>, C<Int>, C<String>, C<Blob>, C<Text>,
-C<(|Quasi)Tuple>, C<(|Quasi)Relation>, C<(|Quasi)Set>, C<(|Quasi)Nothing>,
-C<(|Quasi)Single>, C<(|Quasi)Array>, C<(|Quasi)Bag>, C<Name>, C<NameChain>,
-C<DeclNameChain>, C<Comment>, C<Order>, C<Rat>, C<RatRoundMeth>,
-C<(UTC|Float)Instant>, C<Duration>.  All of the non-value-literal PHMD node
-kinds currently defined are these 2: C<Muldis_D>, C<boot_call>.
+>>.  All of the PHMD node kinds for Muldis D value literals are these 30:
+C<(|Q)Scalar>, C<Bool>, C<Int>, C<String>, C<Blob>, C<Text>, C<(|Q)Tuple>,
+C<(|Q)Relation>, C<(|Q)Set>, C<Nothing>, C<(|Q)Single>, C<(|Q)Array>,
+C<(|Q)Bag>, C<Name>, C<NameChain>, C<DeclNameChain>, C<Comment>, C<Order>,
+C<Rat>, C<RatRoundMeth>, C<(UTC|Float)Instant>, C<Duration>.  All of the
+non-value-literal PHMD node kinds currently defined are these 2:
+C<Muldis_D>, C<boot_call>.
 
 =item *
 
 Only when the node has 3 elements; type name: as per the payload of a
-C<NameChain> PHMD node.  PHMD nodes of all of the aforementioned 31
+C<NameChain> PHMD node.  PHMD nodes of all of the aforementioned 30
 value-specific kinds can have the 2nd type name node element except for
-these 5: C<Bool>, C<(|Quasi)Nothing>, C<Order>, C<RatRoundMeth>; this isn't
-because those types can't be subtyped, but because in practice doing so
-isn't useful.  Furthermore, with just the C<(|Quasi)Scalar> kinds, having
-the second type name element is mandatory.  Non-value-literal PHMD nodes
-never have this type name element.
+these 4: C<Bool>, C<Nothing>, C<Order>, C<RatRoundMeth>; this isn't because
+those types can't be subtyped, but because in practice doing so isn't
+useful.  Furthermore, with just the C<(|Q)Scalar> kinds, having the second
+type name element is mandatory.  Non-value-literal PHMD nodes never have
+this type name element.
 
 =item *
 
-Only when the node kind is not C<(|Quasi)Nothing>; the payload: its allowed
-formats depend on the node kind, and are defined separately per each node
-kind, further below.
+Only when the node kind is not C<Nothing>; the payload: its allowed formats
+depend on the node kind, and are defined separately per each node kind,
+further below.
 
 =back
 
@@ -183,9 +183,9 @@ Examples:
     [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl6_Tiny', {} ]
 
     [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl6_Tiny', {
-        'auto_add_attrs'          => [ 'Bool', 'true' ],
-        'auto_unabbrev_std_names' => [ 'Bool', 'true' ],
-        'auto_chains_from_names'  => [ 'Bool', 'true' ],
+        auto_add_attrs          => :Bool(Bool::True),
+        auto_unabbrev_std_names => :Bool(Bool::True),
+        auto_chains_from_names  => :Bool(Bool::True),
     } ]
 
 More specifically, a language name PHMD node like the above would generally
@@ -558,14 +558,13 @@ Every PHMD node kind for a generic scalar or nonscalar literal has a
 corresponding extra PHMD node kind for a quasi- literal.  The corresponding
 extra quasi- node kinds are exactly the same in format to the non-quasi
 types but that for each one of them, the value of its first element has the
-Perl C<Str> value C<Quasi> prepended.  So PHMD nodes whose first elements
-each are [C<QuasiScalar>, C<QuasiTuple>, C<QuasiRelation>, C<QuasiSet>,
-C<QuasiNothing>, C<QuasiSingle>, C<QuasiArray>, C<QuasiBag>] are
-interpreted as Muldis D [C<sys.std.Core.Type.QuasiScalar>,
-C<sys.std.Core.Type.QuasiTuple>, C<sys.std.Core.Type.QuasiRelation>,
-C<sys.std.Core.Type.QuasiSet>, C<sys.std.Core.Type.QuasiNothing>,
-C<sys.std.Core.Type.QuasiSingle>, C<sys.std.Core.Type.QuasiArray>,
-C<sys.std.Core.Type.QuasiBag>] values, respectively.
+Perl C<Str> value C<Q> prepended.  So PHMD nodes whose first elements each
+are [C<QScalar>, C<QTuple>, C<QRelation>, C<QSet>, C<QSingle>, C<QArray>,
+C<QBag>] are interpreted as Muldis D [C<sys.std.Core.Type.QScalar>,
+C<sys.std.Core.Type.QTuple>, C<sys.std.Core.Type.QRelation>,
+C<sys.std.Core.Type.QSet>, C<sys.std.Core.Type.QSingle>,
+C<sys.std.Core.Type.QArray>, C<sys.std.Core.Type.QBag>] values,
+respectively.
 
 =head1 CATALOG SCALAR VALUES
 
@@ -843,7 +842,7 @@ is supposed to have, and their declared types, and also sub-literals can no
 longer in general be fully converted to values in isolation; now the
 parent-most literal must be evaluated first, because its declared type
 generally determines the declared types of its attributes, and then their
-attributes recursively.  For non-scalar types, the initial declared type
+attributes recursively.  For nonscalar types, the initial declared type
 being looked at is the declared type of the bootloader-invoked routine's
 parameter that the literal is being given to as an argument.
 
@@ -904,7 +903,7 @@ still writes those as normal prepended to the otherwise shortened chains.
 
 So for example, one can just write C<Int> rather than
 C<sys.std.Core.Type.Int>, C<is_identical> rather than
-C<sys.std.Core.Universal.is_identical>, C<Tuple.attr> rather than
+C<sys.std.Core.Universal.is_identical>, C<QTuple.attr> rather than
 C<sys.std.Core.QTuple.attr>, C<min> rather than C<sys.std.Ordered.min>,
 C<array_of.Rat> rather than C<array_of.sys.std.Rational.Type.Rat>, and so
 on.

@@ -9,7 +9,7 @@ Muldis D extension for bit string data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Blob version 0.54.0.
+This document is Muldis::D::Ext::Blob version 0.55.0.
 
 =head1 PREFACE
 
@@ -50,14 +50,15 @@ and aren't re-described here):
 
         sys.std.Core.Type.Empty
 
-        sys.std.Core.Type.Scalar
-            sys.std.Core.Type.Int
-                sys.std.Core.Type.NNInt
-                    sys.std.Core.Type.PInt
+        sys.std.Core.Type.QScalar
+            sys.std.Core.Type.Scalar
+                sys.std.Core.Type.Int
+                    sys.std.Core.Type.NNInt
+                        sys.std.Core.Type.PInt
 
-                        # These are all integer types.
+                            # These are all integer types.
 
-                        sys.std.Blob.Type.PInt1_4
+                            sys.std.Blob.Type.PInt1_4
 
 I<This documentation is pending.>
 
@@ -65,7 +66,7 @@ I<This documentation is pending.>
 
 =head2 sys.std.Blob.Type.PInt1_4
 
-This is an enumeration data type.  A C<PInt1_4> is a proper subtype of
+This is an enumeration data type.  C<PInt1_4> is a proper subtype of
 C<PInt> where all member values are between 1 and 4.  Its maximum value is
 4.  The cardinality of this type is 4.
 
