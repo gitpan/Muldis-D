@@ -1,6 +1,92 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-01-08  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.57.0 is released on CPAN as
+    Muldis-D-0.57.0.tar.gz.
+
+    * (Types_Catalog.pod)  Eliminated the "SysScaNPRTypeSet" type and the
+    "System" type's "sca_npr_types" attribute; their role of declaring the
+    2 types 'Int' and 'String' will now be handled by the "SysSpecTypeSet"
+    type and "special_types" attribute.
+
+    * (Routines_Catalog.pod)  Refactored the 2 pod sections "Procedures For
+    Defining (Routines|Data Types)" into 2 alternate pod sections
+    "Procedures For Defining (Depot|Package) Routines and Data Types";
+    there were no changes to the 8 there-declared procedures themselves.
+
+    * (Basics.pod, Types_Catalog.pod, Routines_Catalog.pod)  Added new
+    language concept of "topic namespaces", which is analagous to the
+    frequently used SQL DBMS (or general purpose language) concept of a
+    "current database|schema" (or current class etc).  In Basics.pod, added
+    new primary namespace "tpc" ("topic"), and added new pod sub-section
+    under "ENTITY NAMES" called "Time-Varying Topic Namespaces" which
+    explains the new feature. In Types_Catalog.pod, added new data type
+    "sys.std.Core.Type.Cat.TopicNSControlCat" (for "tpc.cat") in new main
+    pod section "TYPES FOR DEFINING TOPIC NAMESPACE CONTROLS".  In
+    Routines_Catalog.pod, added new procedure
+    "sys.std.Core.Cat.select_topic_namespaces" in new pod sub-section
+    "Procedures For Defining Topic Namespaces"; also updated the previously
+    existing 12 "create|drop" procedures for in-depot namespaces and
+    routines and types so they no longer have explicit parent
+    namespace-specifying parameters; instead, users must now set an
+    appropriate topic namespace before invoking any of those "create|drop"
+    routines, as the topic namespace now is the implicit topic namespace of
+    the entity to create|drop.
+
+    * (HDMD_Perl(6|5)_Tiny.pod)  Reorganized some pod sections, but did not
+    make any language changes.  Merged the 2 pod main sections "CORE
+    GENERIC NONSCALAR VALUES" and "QUASI- VALUES" into the 1 "GENERIC
+    Q/SCALAR AND Q/NONSCALAR VALUE LITERALS", which also had the
+    "sys.std.Core.Type.Scalar" sub-section moved to it; quasi and non-quasi
+    variants of the same node kind are now described together.  Merged the
+    2 pod main sections "CORE GENERIC SCALAR VALUES" and "CATALOG SCALAR
+    VALUES" into the 1 "SIMPLE CORE SCALAR VALUE LITERALS".  Merged the 2
+    "Instant" pod sub-sections into one.  Moved the 2 "BOOTLOADER" sections
+    downward to just previous of the "PRAGMAS" section.  Renamed the 2
+    "EXTENSION" main sections to replace "VALUES" with "VALUE LITERALS".
+
+    * (PTMD_Tiny.pod, HDMD_Perl(6|5)_Tiny.pod)  Renamed the concept
+    "bootloader imperative routine call" to "bootloader statement"; the
+    corresponding node kind was renamed from "boot_call" to "boot_stmt";
+    the main pod section for it was likewise renamed.
+
+    * (PTMD_Tiny.pod)  Added pod main section "MULDIS D TINY DIALECT
+    PRAGMAS" which is simply a clone of the one in HDMD_Perl(6|5)_Tiny.pod;
+    in any event, that whole section as we know it now is deprecated.
+
+    * (PTMD_Tiny.pod)  Refactored some grammar tokens, but did not make any
+    language changes.  Split "language_name" into itself and
+    "ln_base_name"; renamed "ln_authority" to "ln_base_authority", and
+    "ln_version" to "ln_base_version_number".  Renamed "literal" to
+    "value".  Renamed "val_(node|payload)_elem_sep" to
+    "value_(node|payload)_elem_sep".  Renamed all "foo_or_qv" tokens to
+    "qfoo".  Changed any "[Q]?" grammar fossils to "Q?".
+
+    * (PTMD_Tiny.pod)  Reorganized all the grammar tokens and code
+    examples, but did not make any language changes.  The old 2 pod main
+    sections "GRAMMAR OF TINY PLAIN TEXT MULDIS D" and "EXAMPLES" were
+    replaced with 8 main sections having 22 sub-sections, of which 7 / 22
+    correspond directly to those same-named in HDMD_Perl(6|5)_Tiny.pod (1
+    "LANGUAGE NAME", 4 "VALUE LITERALS", 2 "BOOTLOADER); the 8th new main
+    section was "VALUE LITERAL COMMON ELEMENTS".  Following this change,
+    all Tiny.pod files now keep related grammar and code examples together.
+
+    * (PTMD_Tiny.pod)  Fleshed out the "VALUE LITERAL COMMON ELEMENTS" pod
+    main section, so that it now supersedes the kind of information in the
+    "GENERAL STRUCTURE" section of HDMD_Perl(6|5)_Tiny.pod; the latter will
+    be stripped later.  Cloned and split the "value" token into itself plus
+    the 2 new "value_kind" and "payload" tokens; there are now 2 versions
+    of "value" in this section, showing things from different angles.  Also
+    split the 3 tokens "(bool|order|rat_round_meth)" into themselves and 3
+    additional "(bool|order|rat_round_meth)_payload".
+
+    * (PTMD_Tiny.pod)  Added example code to the "BOOTLOADER" section which
+    mimics the corresponding example code in HDMD_Perl(6|5)_Tiny.pod.
+
+    * Incremented all copyright year range-ends to 2009.
+
 2008-12-27  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.56.0 is released on CPAN as
