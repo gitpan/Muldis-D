@@ -9,7 +9,7 @@ Muldis D extension adding more generic relational operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::QRelation version 0.57.0.
+This document is Muldis::D::Ext::QRelation version 0.58.0.
 
 =head1 PREFACE
 
@@ -53,6 +53,20 @@ topic(QRelation) }>
 This function results in the degree of its argument (that is, the count of
 attributes it has).
 
+=item C<function sys.std.QRelation.is_nullary result Bool params {
+topic(QRelation) }>
+
+This function results in C<Bool:true> iff its argument has a degree of zero
+(that is, it has zero attributes), and C<Bool:false> otherwise.  By
+definition, the only 2 q/relation values for which this function would
+result in C<Bool:true> are the only members of the type C<RelationD0>.
+
+=item C<function sys.std.QRelation.is_not_nullary result Bool params {
+topic(QRelation) }>
+
+This function is exactly the same as C<sys.std.QRelation.is_nullary> except
+that it results in the opposite boolean value when given the same argument.
+
 =item C<function sys.std.QRelation.has_attrs result Bool params {
 topic(QRelation), attrs(set_of.Name) }>
 
@@ -70,11 +84,11 @@ argument.
 =item C<function sys.std.QRelation.is_empty result Bool params {
 topic(QRelation) }>
 
-This function results in C<Bool:true> iff its argument has zero q/tuples,
-and C<Bool:false> otherwise.  Note that if you are using a C<QMaybe> to
-represent a sparse data item, analagously to a SQL nullable context, then
-testing the C<QMaybe> with C<is_empty> is analagous to testing a SQL
-nullable with C<is null>.
+This function results in C<Bool:true> iff its argument has a cardinality of
+zero (that is, it has zero q/tuples), and C<Bool:false> otherwise.  Note
+that if you are using a C<QMaybe> to represent a sparse data item,
+analagously to a SQL nullable context, then testing the C<QMaybe> with
+C<is_empty> is analagous to testing a SQL nullable with C<is null>.
 
 =item C<function sys.std.QRelation.is_not_empty result Bool params {
 topic(QRelation) }>
@@ -108,9 +122,9 @@ relation.
 params { topic(QRelation) }>
 
 This function results in the transitive closure of its argument.  The
-argument is a binary q/relation whose attributes are both of the same type,
-and the result is a q/relation having the same heading and a body which is
-a superset of the argument's q/tuples.  Assuming that the argument
+argument must be a binary q/relation whose attributes are both of the same
+type, and the result is a q/relation having the same heading and a body
+which is a superset of the argument's q/tuples.  Assuming that the argument
 represents all of the node pairs in a directed graph that have an arc
 between them, and so each argument q/tuple represents an arc,
 C<transitive_closure> will determine all of the node pairs in that graph
@@ -148,7 +162,8 @@ C<QMaybe> of what is otherwise the result type, and that result has zero
 elements if the argument has zero elements.
 
 =item C<function sys.std.QRelation.map result QRelation params {
-topic(QRelation), func(FuncRef), assuming(QTuple)? }>
+topic(QRelation), result_attrs(set_of.Name), func(FuncRef),
+assuming(QTuple)? }>
 
 This function provides a convenient one-place generalization of per-q/tuple
 transformations that otherwise might require the chaining of up to a
@@ -166,7 +181,14 @@ result has appropriately fewer q/tuples.  As a trivial case, if C<func> is
 defined to unconditionally result in the same q/tuple as its own C<topic>
 argument, then this function results simply in C<topic>; or, if C<func> is
 defined to have a static result, then this function's result will have just
-0..1 q/tuples.
+0..1 q/tuples.  Now, C<map> requires the extra C<result_attrs> argument to
+prevent ambiguity in the general case where C<topic> might have zero
+q/tuples, because in that situation, C<func> would never be invoked, and
+the names of the attributes of the result are not known (we don't generally
+assume that C<map> can reverse-engineer C<func> to see what attributes it
+would have resulted in).  This function will fail if C<topic> has at least
+1 q/tuple and the result of C<func> does not have matching attribute names
+to those named by C<result_attrs>.
 
 =back
 
@@ -181,12 +203,27 @@ in that they typically work with any q/relation types.
 look_in(QRelation), look_for(QRelation) }>
 
 This function is exactly the same as C<sys.std.Core.QRelation.is_subset>
-except that it results in C<Bool:false> if its 2 arguments are equal.
+except that it results in C<Bool:false> if its 2 arguments are identical.
 
 =item C<function sys.std.QRelation.is_not_proper_subset result Bool params
 { look_in(QRelation), look_for(QRelation) }>
 
 This function is exactly the same as C<sys.std.QRelation.is_proper_subset>
+except that it results in the opposite boolean value when given the same
+arguments.
+
+=item C<function sys.std.QRelation.is_disjoint result Bool params {
+topic(QRelation), other(QRelation) }>
+
+This function results in C<Bool:true> iff the set of q/tuples comprising
+each of its 2 arguments are mutually disjoint, that is, iff the
+intersection of the 2 arguments is empty; it results in C<Bool:false>
+otherwise.  This function's 2 parameters are mutually commutative.
+
+=item C<function sys.std.QRelation.is_not_disjoint result Bool params {
+topic(QRelation), other(QRelation) }>
+
+This function is exactly the same as C<sys.std.QRelation.is_disjoint>
 except that it results in the opposite boolean value when given the same
 arguments.
 
@@ -206,15 +243,16 @@ exclusion is the same as for relational union.  Note that this operation is
 also legitimately known as I<symmetric difference>.
 
 =item C<function sys.std.QRelation.composition result QRelation params {
-r1(QRelation), r2(QRelation) }>
+topic(QRelation), other(QRelation) }>
 
-This function results in the relational composition of its 2 arguments.  It
-is conceptually a short-hand for first doing an ordinary relational join
-between its 2 arguments, and then performing a relational projection on all
-of the attributes that only one of the arguments has; that is, the result
-has all of and just the attributes that were not involved in matching the
-q/tuples of the 2 arguments.  This function will fail|warn any time that
-C<join> would fail|warn on the same 2 input q/relations.
+This function results in the relational composition of its (mutually
+commutative) 2 arguments.  It is conceptually a short-hand for first doing
+an ordinary relational join between its 2 arguments, and then performing a
+relational projection on all of the attributes that only one of the
+arguments has; that is, the result has all of and just the attributes that
+were not involved in matching the q/tuples of the 2 arguments.  This
+function will fail|warn any time that C<join> would fail|warn on the same 2
+input q/relations.
 
 =item C<function sys.std.QRelation.join_with_group result QRelation params
 { primary(QRelation), secondary(QRelation), group_attr(Name) }>
@@ -394,14 +432,16 @@ used in result rows that were a non-match.
 QRelation params { primary(QRelation), secondary(QRelation),
 filler(TypeRef) }>
 
-This function is the same as C<sys.std.QRelation.outer_join_with_product>
-but that the filler q/tuple is the default value of the q/tuple data type
-whose name is given in the C<filler> argument.  This function is a
-short-hand for invoking C<outer_join_with_product> with the result from
-invoking C<sys.std.Core.Universal.default>.
+This function is the same as
+C<sys.std.QRelation.outer_join_with_static_extension> but that the filler
+q/tuple is the default value of the q/tuple data type whose name is given
+in the C<filler> argument.  This function is a short-hand for invoking
+C<outer_join_with_static_extension> with the result from invoking
+C<sys.std.Core.Universal.default>.
 
-=item C<function sys.std.QRelation.outer_join_with_product result QRelation
-params { primary(QRelation), secondary(QRelation), filler(QTuple) }>
+=item C<function sys.std.QRelation.outer_join_with_static_extension result
+QRelation params { primary(QRelation), secondary(QRelation), filler(QTuple)
+}>
 
 This function is the same as C<sys.std.QRelation.outer_join_with_maybes>
 but that C<secondary>-sourced result attributes are not converted to
@@ -409,24 +449,21 @@ C<QMaybe>; rather, for result q/tuples from non-matches, the missing values
 are provided explicitly from the C<filler> argument, which is a q/tuple
 whose heading matches the projection of C<secondary>'s attributes that
 aren't in common with C<primary>, and whose body is the literal values to
-use for those missing attribute values.  This function gets its name in
-that conceptually the result q/tuples from non-matches are the result of
-performing a relational cross-product between the un-matched C<primary>
-q/tuples and the single C<filler> q/tuple.  This function could alternately
-be named I<outer_join_with_static_extension>.
+use for those missing attribute values.
 
 =item C<function sys.std.QRelation.outer_join_with_extension result
 QRelation params { primary(QRelation), secondary(QRelation),
 exten_func(FuncRef), exten_assuming(QTuple)? }>
 
-This function is the same as C<sys.std.QRelation.outer_join_with_product>
-but that the result q/tuples from non-matches are the result of performing
-a relational extension on the un-matched C<primary> q/tuples such that each
-said result q/tuple is determined by applying the function named in
-C<exten_func> to each said C<primary> q/tuple when the named function is
-curried using the C<exten_assuming> argument.  The C<exten_assuming>
-parameter is optional and defaults to the zero-attribute tuple if no
-explicit argument is given to it.
+This function is the same as
+C<sys.std.QRelation.outer_join_with_static_extension> but that the result
+q/tuples from non-matches are the result of performing a relational
+extension on the un-matched C<primary> q/tuples such that each said result
+q/tuple is determined by applying the function named in C<exten_func> to
+each said C<primary> q/tuple when the named function is curried using the
+C<exten_assuming> argument.  The C<exten_assuming> parameter is optional
+and defaults to the zero-attribute tuple if no explicit argument is given
+to it.
 
 =back
 

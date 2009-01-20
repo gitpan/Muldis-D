@@ -9,7 +9,7 @@ Muldis D general purpose routines
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Routines version 0.57.0.
+This document is Muldis::D::Core::Routines version 0.58.0.
 
 =head1 PREFACE
 
@@ -34,14 +34,14 @@ These functions are applicable to values of any data type at all.
 =item C<function sys.std.Core.Universal.is_identical result Bool params {
 topic(Universal), other(Universal) }>
 
-This function results in C<Bool:true> iff its 2 arguments are exactly the
-same value, and C<Bool:false> otherwise.  This function's 2 parameters are
-mutually commutative.  This function will warn if, in regards to the
-declared types of its arguments, none the following are true: 1. they are
-both subtypes of a common q/scalar root type; 2. they are both subtypes of
-a common complete q/tuple or q/relation type, that is they essentially have
-the same headings; 3. at least one type is a generic (eg-C<Universal>) or
-incomplete (eg-C<Relation>) type, and it is a supertype of the other.
+This function results in C<Bool:true> iff its (mutually commutative) 2
+arguments are exactly the same value, and C<Bool:false> otherwise.  This
+function will warn if, in regards to the declared types of its arguments,
+none the following are true: 1. they are both subtypes of a common q/scalar
+root type; 2. they are both subtypes of a common complete q/tuple or
+q/relation type, that is they essentially have the same headings; 3. at
+least one type is a generic (eg-C<Universal>) or incomplete
+(eg-C<Relation>) type, and it is a supertype of the other.
 
 =item C<function sys.std.Core.Universal.is_not_identical result Bool params
 { topic(Universal), other(Universal) }>
@@ -355,6 +355,14 @@ This function is the same as C<projection> but that it results in the
 complementary subset of attributes of C<topic> when given the same
 arguments.
 
+=item C<function sys.std.Core.QTuple.static_extension result QTuple params
+{ topic(QTuple), attrs(QTuple) }>
+
+This function results in the extension of its C<topic> argument by joining
+that with its C<attrs> argument; the attribute names of the 2 arguments
+must be disjoint.  See also C<sys.std.Core.QTuple.product> for an N-ary
+version of this.
+
 =item C<function sys.std.Core.QTuple.wrap result QTuple params {
 topic(QTuple), inner(set_of.Name), outer(Name) }>
 
@@ -603,7 +611,7 @@ complementary subset of q/tuples of C<topic> when given the same arguments.
 See also the C<sys.std.Core.QRelation.semidifference> function.
 
 =item C<function sys.std.Core.QRelation.extension result QRelation params {
-topic(QRelation), func(FuncRef), assuming(QTuple)? }>
+topic(QRelation), attrs(set_of.Name), func(FuncRef), assuming(QTuple)? }>
 
 This function results in the relational extension of its C<topic> argument
 as determined by applying the C<QTuple>-resulting function named in its
@@ -617,7 +625,15 @@ C<topic> argument and C<assuming> as its C<assuming> argument; the first
 and second q/tuples must have no attribute names in common, and the result
 q/tuple is derived by joining (cross-product) the q/tuples together.  As a
 trivial case, if C<func> is defined to unconditionally result in the
-degree-zero tuple, then this function results simply in C<topic>.
+degree-zero tuple, then this function results simply in C<topic>.  Now,
+C<extension> requires the extra C<attrs> argument to prevent ambiguity in
+the general case where C<topic> might have zero q/tuples, because in that
+situation, C<func> would never be invoked, and the names of the attributes
+to add to C<topic> are not known (we don't generally assume that
+C<extension> can reverse-engineer C<func> to see what attributes it would
+have resulted in).  This function will fail if C<topic> has at least 1
+q/tuple and the result of C<func> does not have matching attribute names to
+those named by C<attrs>.
 
 =item C<function sys.std.Core.QRelation.static_extension result QRelation
 params { topic(QRelation), attrs(QTuple) }>
@@ -630,8 +646,8 @@ the new attributes; the new attribute names and common values are given in
 the C<attrs> argument.
 
 =item C<function sys.std.Core.QRelation.summary result QRelation params {
-topic(QRelation), group_per(set_of.Name), summ_func(FuncRef),
-summ_assuming(QTuple)? }>
+topic(QRelation), group_per(set_of.Name), result_attrs(set_of.Name),
+summ_func(FuncRef), summ_assuming(QTuple)? }>
 
 This function provides a convenient context for using aggregate functions
 to derive a per-group summary q/relation, which is its result, from another
@@ -654,7 +670,15 @@ C<summary> is not intended to be used to summarize an entire C<topic>
 q/relation at once (except by chance of it resolving to 1 group); you
 should instead invoke your summarize-all C<func> directly, or inline it,
 rather than by way of C<summary>, especially if you want a single-q/tuple
-result on an empty C<topic> (which C<summary>) won't do.
+result on an empty C<topic> (which C<summary>) won't do.  Now, C<summary>
+requires the extra C<result_attrs> argument to prevent ambiguity in the
+general case where C<topic> might have zero q/tuples, because in that
+situation, C<summ_func> would never be invoked, and the names of the
+attributes of the result are not known (we don't generally assume that
+C<summary> can reverse-engineer C<summ_func> to see what attributes it
+would have resulted in).  This function will fail if C<topic> has at least
+1 q/tuple and the result of C<summ_func> does not have matching attribute
+names to those named by C<result_attrs>.
 
 =back
 
@@ -788,7 +812,7 @@ identity value); or, if any 2 inputs have no attribute names in common,
 then the join of just those 2 is a cartesian product; or, if any 2 inputs
 have all attribute names in common, then the join of just those 2 is an
 intersection; or, if for 2 inputs, one's set of attribute names is a proper
-subset of another's, then the join of just those to is a semijoin with the
+subset of another's, then the join of just those two is a semijoin with the
 former filtering the latter.  This function will warn if any input
 q/relations have attributes with common names where their declared types
 are incompatible as per C<is_identical>.  Note that this operation is also
@@ -884,16 +908,15 @@ each tuple of C<map> corresponds to a renamed SQL table.
 
 =over
 
-=item C<updater sys.std.Core.QTuple.assign_product update { topic(QTuple) }
-read { other(QTuple) }>
+=item C<updater sys.std.Core.QTuple.assign_static_extension update {
+topic(QTuple) } read { attrs(QTuple) }>
 
 This update operator is a short-hand for first invoking the
-C<sys.std.Core.QTuple.product> function such that it has 2 input q/tuples
-from C<assign_product>'s 2 arguments, and then assigning the result of that
-function to C<topic>.  This procedure is analagous to the data-manipulation
-phase of a SQL CREATE TABLE|VIEW statement iff both arguments are
-C<Database>-typed; each q/relation-typed attribute of C<other> corresponds
-to a created SQL table.
+C<sys.std.Core.QTuple.static_extension> function with the same arguments,
+and then assigning the result of that function to C<topic>.  This procedure
+is analagous to the data-manipulation phase of a SQL CREATE TABLE|VIEW
+statement iff both arguments are C<Database>-typed; each q/relation-typed
+attribute of C<attrs> corresponds to a created SQL table.
 
 =back
 
@@ -1039,7 +1062,8 @@ column.
 =over
 
 =item C<updater sys.std.Core.QRelation.assign_extension update {
-topic(QRelation) } read { func(FuncRef), assuming(QTuple)? }>
+topic(QRelation) } read { attrs(set_of.Name), func(FuncRef),
+assuming(QTuple)? }>
 
 This update operator is a short-hand for first invoking the
 C<sys.std.Core.QRelation.extension> function with the same arguments, and
