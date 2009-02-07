@@ -7,7 +7,7 @@ use warnings FATAL => 'all';
 ###########################################################################
 
 { package Muldis::D; # package
-    use version 0.74; our $VERSION = qv('0.58.0');
+    use version 0.74; our $VERSION = qv('0.59.0');
     # Note that Perl code only exists at all in this file in order to help
     # the CPAN indexer handle the distribution properly.
 } # package Muldis::D
@@ -29,7 +29,7 @@ Formal spec of Muldis D relational DBMS lang
 
 =head1 VERSION
 
-This document is Muldis::D version 0.58.0.
+This document is Muldis::D version 0.59.0.
 
 =head1 PREFACE
 
@@ -58,9 +58,9 @@ at them.
 
 The fully-qualified name of this multi-part document and the language
 specification it contains (as a single composition) is
-C<Muldis_D:'http://muldis.com':'0.58.0'>.  It is the official/original (not
+C<Muldis_D:'http://muldis.com':'0.59.0'>.  It is the official/original (not
 embraced and extended) Muldis D language specification by the authority
-Darren Duncan (C<http://muldis.com>), version C<0.58.0> (this number
+Darren Duncan (C<http://muldis.com>), version C<0.59.0> (this number
 matches the VERSION pod in this file).  This multi-part document is named
 and organized with the expectation that many dialects, extensions, and core
 versions of it will exist over time, some of those under the original
@@ -283,7 +283,9 @@ Darren Duncan (C<perl@DarrenDuncan.net>)
 
 This file is part of the formal specification of the Muldis D language.
 
-Muldis D is Copyright © 2002-2009, Darren Duncan.  All rights reserved.
+Muldis D is Copyright © 2002-2009, Muldis Data Systems, Inc.
+
+L<http://www.muldis.com/>
 
 Muldis D is free documentation for software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License (GPL) as
@@ -306,10 +308,10 @@ suggesting improvements to the standard version.
 =head1 TRADEMARK POLICY
 
 MULDIS and MULDIS MULTIVERSE OF DISCOURSE are trademarks of Muldis Data
-Systems Inc. (L<http://www.muldis.com/>), which is wholly owned by Darren
-Duncan.  The trademarks apply to computer database software and related
-services.  See L<http://www.muldis.com/trademark_policy.html> for the full
-written details of Muldis Data Systems' trademark policy.
+Systems, Inc. (L<http://www.muldis.com/>).  The trademarks apply to
+computer database software and related services.  See
+L<http://www.muldis.com/trademark_policy.html> for the full written details
+of Muldis Data Systems' trademark policy.
 
 The word MULDIS is intended to be used as the distinguishing brand name for
 all the products and services of Muldis Data Systems.  So we would greatly
@@ -355,9 +357,10 @@ None yet.
 
 Several public email-based forums exist whose main topic is all
 implementations of the L<Muldis D|Muldis::D> language, especially the
-L<Muldis Rosetta|Muldis::Rosetta> reference implementation.  All of these
-you can reach via L<http://mm.DarrenDuncan.net/mailman/listinfo>; go there
-to manage your subscriptions to, or view the archives of, the following:
+L<Muldis Rosetta|Muldis::Rosetta> reference implementation, but also the
+L<Set::Relation> module.  All of these you can reach via
+L<http://mm.DarrenDuncan.net/mailman/listinfo>; go there to manage your
+subscriptions to, or view the archives of, the following:
 
 =over
 

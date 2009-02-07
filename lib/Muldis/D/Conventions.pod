@@ -9,7 +9,7 @@ Style and design guidelines for Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Conventions version 0.58.0.
+This document is Muldis::D::Conventions version 0.59.0.
 
 =head1 PREFACE
 
@@ -178,7 +178,7 @@ Darren Duncan (C<perl@DarrenDuncan.net>)
 
 This file is part of the formal specification of the Muldis D language.
 
-Muldis D is Copyright © 2002-2009, Darren Duncan.
+Muldis D is Copyright © 2002-2009, Muldis Data Systems, Inc.
 
 See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
 

@@ -9,7 +9,7 @@ Muldis D extension adding more generic relational operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::QRelation version 0.58.0.
+This document is Muldis::D::Ext::QRelation version 0.59.0.
 
 =head1 PREFACE
 
@@ -114,8 +114,8 @@ the same as that of the argument) and which has a q/tuple for every
 distinct subset of q/tuples in the argument.  The cardinality of the result
 is equal to 2 raised to the power of the cardinality of the argument (which
 may easily lead to a very large result, so use this function with care).
-Note that the N-ary relational union of the power set of some q/relation is
-that q/relation; the N-ary intersection of any power set is the empty
+Note that the N-adic relational union of the power set of some q/relation
+is that q/relation; the N-adic intersection of any power set is the empty
 relation.
 
 =item C<function sys.std.QRelation.transitive_closure result QRelation
@@ -157,7 +157,7 @@ quasi_maybe_of.QTuple params { topic(QRelation), func(FuncRef),
 assuming(QTuple)? }>
 
 This function is exactly the same as C<sys.std.QRelation.reduction> except
-that it does not take an C<assuming> argument, and it results in a
+that it does not take an C<identity> argument, and it results in a
 C<QMaybe> of what is otherwise the result type, and that result has zero
 elements if the argument has zero elements.
 
@@ -332,7 +332,7 @@ tuple if no explicit argument is given to it.
 =over
 
 =item C<function sys.std.QRelation.substitution result QRelation params {
-topic(QRelation), func(FuncRef), assuming(QTuple)? }>
+topic(QRelation), attrs(set_of.Name), func(FuncRef), assuming(QTuple)? }>
 
 This function is similar to C<extension> except that it substitutes values
 of existing q/relation attributes rather than adding new attributes.  The
@@ -347,7 +347,15 @@ defined to unconditionally result in either the degree-zero tuple or in the
 same q/tuple as its own C<topic> argument, then this function results
 simply in C<topic>; or, if C<func> is defined to have a static result and
 it replaces all attributes, then this function's result will have just 0..1
-q/tuples.
+q/tuples.  Now, strictly speaking, C<substitution> could conceivably be
+implemented such that each result from C<func> is allowed to specify
+replacement values for different subsets of C<topic> attributes; however,
+to improve the function's predictability and ease of implementation over
+disparate foundations, C<substitution> requires the extra C<attrs> argument
+so that users can specify a consistent subset that C<func> will update
+(possibly to itself).  This function will fail if C<topic> has at least 1
+q/tuple and the result of C<func> does not have matching attribute names to
+those named by C<attrs>.
 
 =item C<function sys.std.QRelation.static_substitution result QRelation
 params { topic(QRelation), attrs(QTuple) }>
@@ -358,43 +366,43 @@ q/tuple of a q/relation, given in the C<topic> argument, is updated with
 identical values for the same attributes; the new attribute values are
 given in the C<attrs> argument.
 
-=item C<function sys.std.QRelation.substitution_in_restriction result
-QRelation params { topic(QRelation), restr_func(FuncRef),
-restr_assuming(QTuple)?, subst_func(FuncRef), subst_assuming(QTuple)? }>
+=item C<function sys.std.QRelation.subst_in_restr result QRelation params {
+topic(QRelation), restr_func(FuncRef), restr_assuming(QTuple)?,
+subst_attrs(set_of.Name), subst_func(FuncRef), subst_assuming(QTuple)? }>
 
 This function is like C<substitution> except that it only transforms a
 subset of the q/tuples of C<topic> rather than all of them.  It is a
 short-hand for first separating the q/tuples of C<topic> into 2 groups
 where those passed by a relational restriction (defined by C<restr_func>
-and C<restr_assuming>) are then transformed (defined by C<subst_func> and
-C<subst_assuming>), then the result of the substitution is unioned with the
-un-transformed group.  See also the C<substitution_in_semijoin> function,
-which is a simpler-syntax alternative for C<substitution_in_restriction> in
-its typical usage where restrictions are composed simply of anded or ored
-tests for attribute value equality.
+and C<restr_assuming>) are then transformed (defined by C<subst_attrs>,
+C<subst_func> and C<subst_assuming>), then the result of the substitution
+is unioned with the un-transformed group.  See also the
+C<subst_in_semijoin> function, which is a simpler-syntax alternative for
+C<subst_in_restr> in its typical usage where restrictions are composed
+simply of anded or ored tests for attribute value equality.
 
-=item C<function sys.std.QRelation.static_substitution_in_restriction
-result QRelation params { topic(QRelation), restr_func(FuncRef),
-restr_assuming(QTuple)?, subst(QTuple) }>
+=item C<function sys.std.QRelation.static_subst_in_restr result QRelation
+params { topic(QRelation), restr_func(FuncRef), restr_assuming(QTuple)?,
+subst(QTuple) }>
 
-This function is to C<sys.std.QRelation.substitution_in_restriction> what
+This function is to C<sys.std.QRelation.subst_in_restr> what
 C<sys.std.QRelation.static_substitution> is to
 C<sys.std.QRelation.substitution>.  See also the
-C<static_substitution_in_semijoin> function.
+C<static_subst_in_semijoin> function.
 
-=item C<function sys.std.QRelation.substitution_in_semijoin result
-QRelation params { topic(QRelation), restr(QRelation), subst_func(FuncRef),
-subst_assuming(QTuple)? }>
+=item C<function sys.std.QRelation.subst_in_semijoin result QRelation
+params { topic(QRelation), restr(QRelation), subst_attrs(set_of.Name),
+subst_func(FuncRef), subst_assuming(QTuple)? }>
 
-This function is like C<substitution_in_restriction> except that the subset
-of the q/tuples of C<topic> to be transformed is determined by those
-matched by a semijoin with C<restr> rather than those that pass a generic
-relational restriction.
+This function is like C<subst_in_restr> except that the subset of the
+q/tuples of C<topic> to be transformed is determined by those matched by a
+semijoin with C<restr> rather than those that pass a generic relational
+restriction.
 
-=item C<function sys.std.QRelation.static_substitution_in_semijoin result
+=item C<function sys.std.QRelation.static_subst_in_semijoin result
 QRelation params { topic(QRelation), restr(QRelation), subst(QTuple) }>
 
-This function is to C<sys.std.QRelation.substitution_in_semijoin> what
+This function is to C<sys.std.QRelation.subst_in_semijoin> what
 C<sys.std.QRelation.static_substitution> is to
 C<sys.std.QRelation.substitution>.
 
@@ -433,13 +441,13 @@ QRelation params { primary(QRelation), secondary(QRelation),
 filler(TypeRef) }>
 
 This function is the same as
-C<sys.std.QRelation.outer_join_with_static_extension> but that the filler
+C<sys.std.QRelation.outer_join_with_static_exten> but that the filler
 q/tuple is the default value of the q/tuple data type whose name is given
 in the C<filler> argument.  This function is a short-hand for invoking
-C<outer_join_with_static_extension> with the result from invoking
+C<outer_join_with_static_exten> with the result from invoking
 C<sys.std.Core.Universal.default>.
 
-=item C<function sys.std.QRelation.outer_join_with_static_extension result
+=item C<function sys.std.QRelation.outer_join_with_static_exten result
 QRelation params { primary(QRelation), secondary(QRelation), filler(QTuple)
 }>
 
@@ -451,12 +459,12 @@ whose heading matches the projection of C<secondary>'s attributes that
 aren't in common with C<primary>, and whose body is the literal values to
 use for those missing attribute values.
 
-=item C<function sys.std.QRelation.outer_join_with_extension result
-QRelation params { primary(QRelation), secondary(QRelation),
-exten_func(FuncRef), exten_assuming(QTuple)? }>
+=item C<function sys.std.QRelation.outer_join_with_exten result QRelation
+params { primary(QRelation), secondary(QRelation), exten_func(FuncRef),
+exten_assuming(QTuple)? }>
 
 This function is the same as
-C<sys.std.QRelation.outer_join_with_static_extension> but that the result
+C<sys.std.QRelation.outer_join_with_static_exten> but that the result
 q/tuples from non-matches are the result of performing a relational
 extension on the un-matched C<primary> q/tuples such that each said result
 q/tuple is determined by applying the function named in C<exten_func> to
@@ -503,41 +511,40 @@ This update operator is a short-hand for first invoking the
 C<sys.std.Core.QRelation.static_substitution> function with the same
 arguments, and then assigning the result of that function to C<topic>.
 
-=item C<updater sys.std.QRelation.assign_substitution_in_restriction update
-{ topic(QRelation) } read { restr_func(FuncRef), restr_assuming(QTuple)?,
+=item C<updater sys.std.QRelation.assign_subst_in_restr update {
+topic(QRelation) } read { restr_func(FuncRef), restr_assuming(QTuple)?,
 subst_func(FuncRef), subst_assuming(QTuple)? }>
 
 This update operator is a short-hand for first invoking the
-C<sys.std.Core.QRelation.substitution_in_restriction> function with the
-same arguments, and then assigning the result of that function to C<topic>.
-This updater is analagous to the general case of the conditional SQL
-"UPDATE" statement.
+C<sys.std.Core.QRelation.subst_in_restr> function with the same arguments,
+and then assigning the result of that function to C<topic>.  This updater
+is analagous to the general case of the conditional SQL "UPDATE" statement.
 
-=item C<updater sys.std.QRelation.assign_static_substitution_in_restriction
-update { topic(QRelation) } read { restr_func(FuncRef),
-restr_assuming(QTuple)?, subst(QTuple) }>
-
-This update operator is a short-hand for first invoking the
-C<sys.std.Core.QRelation.static_substitution_in_restriction> function with
-the same arguments, and then assigning the result of that function to
-C<topic>.
-
-=item C<updater sys.std.QRelation.assign_substitution_in_semijoin update {
-topic(QRelation) } read { restr(QRelation), subst_func(FuncRef),
-subst_assuming(QTuple)? }>  This updater is analagous to the common
-case of the conditional SQL "UPDATE" statement where the criteria is simply
-a set of and-ed and or-ed value equality tests.
+=item C<updater sys.std.QRelation.assign_static_subst_in_restr update {
+topic(QRelation) } read { restr_func(FuncRef), restr_assuming(QTuple)?,
+subst(QTuple) }>
 
 This update operator is a short-hand for first invoking the
-C<sys.std.Core.QRelation.substitution_in_semijoin> function with the same
+C<sys.std.Core.QRelation.static_subst_in_restr> function with the same
 arguments, and then assigning the result of that function to C<topic>.
 
-=item C<updater sys.std.QRelation.assign_static_substitution_in_semijoin
-update { topic(QRelation) } read { restr(QRelation), subst(QTuple) }>
+=item C<updater sys.std.QRelation.assign_subst_in_semijoin update {
+topic(QRelation) } read { restr(QRelation), subst_func(FuncRef),
+subst_assuming(QTuple)? }>
 
 This update operator is a short-hand for first invoking the
-C<sys.std.Core.QRelation.static_substitution_in_semijoin> function with the
-same arguments, and then assigning the result of that function to C<topic>.
+C<sys.std.Core.QRelation.subst_in_semijoin> function with the same
+arguments, and then assigning the result of that function to C<topic>.
+This updater is analagous to the common case of the conditional SQL
+"UPDATE" statement where the criteria is simply a set of and-ed and or-ed
+value equality tests.
+
+=item C<updater sys.std.QRelation.assign_static_subst_in_semijoin update {
+topic(QRelation) } read { restr(QRelation), subst(QTuple) }>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.QRelation.static_subst_in_semijoin> function with the same
+arguments, and then assigning the result of that function to C<topic>.
 
 =back
 
@@ -555,7 +562,7 @@ Darren Duncan (C<perl@DarrenDuncan.net>)
 
 This file is part of the formal specification of the Muldis D language.
 
-Muldis D is Copyright © 2002-2009, Darren Duncan.
+Muldis D is Copyright © 2002-2009, Muldis Data Systems, Inc.
 
 See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
 

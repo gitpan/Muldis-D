@@ -9,7 +9,7 @@ How to format Perl 5 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl5_Tiny version 0.58.0.
+This document is Muldis::D::Dialect::HDMD_Perl5_Tiny version 0.59.0.
 
 =head1 PREFACE
 
@@ -1021,7 +1021,7 @@ attributes are missing will be extended to become the default value of the
 type of the wider literal but that those attributes of its that I<were>
 explicitly given will override the default's values for those attributes.
 The actual behaviour is essentially what the
-C<sys.std.QTuple.substitution_in_default> function does.
+C<sys.std.QTuple.subst_in_default> function does.
 
 But the C<auto_add_attrs> pragma is not simply an automatically invoked
 pre-processing Muldis D function, because it also serves the common case
@@ -1165,7 +1165,7 @@ Darren Duncan (C<perl@DarrenDuncan.net>)
 
 This file is part of the formal specification of the Muldis D language.
 
-Muldis D is Copyright © 2002-2009, Darren Duncan.
+Muldis D is Copyright © 2002-2009, Muldis Data Systems, Inc.
 
 See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
 
