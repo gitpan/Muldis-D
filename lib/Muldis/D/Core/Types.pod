@@ -9,7 +9,7 @@ Muldis D general purpose data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types version 0.59.1.
+This document is Muldis::D::Core::Types version 0.60.0.
 
 =head1 PREFACE
 
@@ -44,6 +44,7 @@ relationships:
                 sys.std.Core.Type.Int
                     sys.std.Core.Type.NNInt
                         sys.std.Core.Type.PInt
+                            sys.std.Core.Type.PInt2_N
                 sys.std.Core.Type.String
                     sys.std.Core.Type.BString
                     sys.std.Core.Type.OString
@@ -51,6 +52,11 @@ relationships:
                 sys.std.Core.Type.Blob
                     sys.std.Core.Type.OctetBlob
                 sys.std.Core.Type.Text
+                sys.std.Core.Type.Rat
+                    sys.std.Core.Type.NNRat
+                        sys.std.Core.Type.PRat
+                sys.std.Core.Type.Instant
+                sys.std.Core.Type.Duration
 
         # The following are mostly q/nonscalar type factories.
 
@@ -228,6 +234,12 @@ This is an enumeration data type.  C<PInt> (positive integer) is a proper
 subtype of C<NNInt> where all member values are greater than zero.  Its
 default and minimum value is 1.
 
+=head2 sys.std.Core.Type.PInt2_N
+
+This is an enumeration data type.  C<PInt2_N> is a proper subtype of
+C<PInt> where all member values are greater than 1.  Its default and
+minimum value is 2.
+
 =head2 sys.std.Core.Type.String
 
 This is a primitive data type.  A C<String> is a string of integers, or
@@ -320,6 +332,114 @@ to ordering, possibly the standard Unicode Collation Algorithm (UCA) also
 works this way, assuming it is totally ordered, but that's unsure.  I<TODO:
 Support customization parameters for default text sorting.>
 
+=head2 sys.std.Core.Type.Rat
+
+This is a structure data type.  A C<Rat> (scalar) is a single exact
+rational number of any magnitude and precision.  It is conceptually a
+composite type with 2 main system-defined possreps, called C<ratio> and
+C<float>, both of which are defined over several C<Int>.
+
+The C<ratio> possrep consists of 2 attributes: C<numerator> (an C<Int>),
+C<denominator> (a C<PInt>); the conceptual value of a C<Rat> is the result
+of rational-dividing its C<numerator> by its C<denominator>.  Because in
+the general case there are an infinite set of [C<numerator>,C<denominator>]
+integer pairs that denote the same rational value, the C<ratio> possrep
+carries the normalization constraint that C<numerator> and C<denominator>
+must be coprime, that is, they have no common integer factors other than 1.
+
+The C<float> possrep consists of 3 attributes: C<mantissa> (an C<Int>),
+C<radix> (a C<PInt2_N>), C<exponent> (an C<Int>); the conceptual value
+of a C<Rat> is the result of multiplying its C<mantissa> by the result of
+taking its C<radix> to the power of its C<exponent>.  The C<float> possrep
+carries the normalization constraint that among all the
+[C<mantissa>,C<radix>,C<exponent>] triples which would denote the same
+rational value, the only allowed triple is the one having both the C<radix>
+with the lowest value (that is closest to or equal to 2) and the
+C<exponent> with the highest value (that is closest to positive infinity).
+I<Note: this constraint could stand to be rephrased for simplification or
+correction, eg if somehow the sets of candidate triples sharing the lowest
+radix and sharing the highest exponent have an empty intersection.>
+
+The default value of C<Rat> is zero; its minimum and maximum values are
+conceptually infinities and practically impossible.  The cardinality of
+this type is infinity; to define a most-generalized finite C<Rat> subtype,
+you must specify the greatest magnitude value denominator, plus the the 2
+integer end-points of the inclusive range of the value numerator; or
+alternately you must specify the greatest magnitude value mantissa (the
+I<maximum precision> of the number), and specify the greatest magnitude
+value radix, plus the the 2 integer end-points of the inclusive range of
+the value exponent (the I<maximum scale> of the number).  Common subtypes
+specify that the normalized radixes of all their values are either 2 or 10;
+types such as these will easily map exactly to common human or physical
+numeric representations, so they tend to perform better.
+
+The C<Rat> type has a default ordering algorithm which is conceptually the
+same as for C<Int>; for 2 distinct C<Rat> values, the value closer to
+negative infinity is ordered before the value closer to positive infinity.
+
+The C<Rat> type has an implementation hint for less intelligent Muldis D
+implementations, that suggests using the C<float> possrep as the basis for
+the physical representation.
+
+=head2 sys.std.Core.Type.NNRat
+
+This is an enumeration data type.  C<NNRat> (non-negative rational) is a
+proper subtype of C<Rat> where all member values are greater than or equal
+to zero (that is, the C<numerator>|C<mantissa> is greater than or equal to
+zero).  Its minimum value is zero.
+
+=head2 sys.std.Core.Type.PRat
+
+This is an enumeration data type.  C<PRat> (positive rational) is a
+proper subtype of C<NNRat> where all member values are greater than zero
+(that is, the C<numerator>|C<mantissa> is greater than zero).  Its default
+and minimum value is 1.
+
+=head2 sys.std.Core.Type.Instant
+
+This is a structure data type.  An C<Instant> is a single point in time
+which is specified with arbitrary precision in terms of of atomic seconds
+with fractions.  That is, an C<Instant> is defined as a point on the
+canonical continuous timeline of International Atomic Time (TAI; this is a
+perfectly linear scale with no discontinuities), specified by a scalar
+number of TAI seconds since the TAI epoch, which is exactly midnight at the
+start of January 1st of the year 1958 CE.  Put another way, the C<Instant>
+type is intended to have exactly the same meaning as the same-named type of
+Perl 6 (see L<http://perlcabal.org/syn/S02.html> for details).
+
+An C<Instant> has 1 system-defined possrep named C<tai_instant> which
+consists of 1 C<Rat>-typed attribute named C<seconds>.  An C<Instant> is a
+simple wrapper for a C<Rat> and all of its other details such as default
+and minimum and maximum values and cardinality and default ordering
+algorithm all correspond directly.  But C<Instant> is explicitly disjoint
+from C<Rat> due to having a different intended interpretation.
+
+The C<Instant> type is intended more for use with system event time-stamps
+or sensitive scientific applications and is not necessarily the best choice
+for common human-specified temporal artifacts according to various
+calendars, since there is no fixed conversion rate between them in the
+general case that includes future dates, and also calendar-based artifacts
+may be very non-specific; see also the L<Muldis D Temporal
+Extension|Muldis::D::Ext::Temporal> for a selection of other temporal data
+types defined in terms of calendars.
+
+=head2 sys.std.Core.Type.Duration
+
+This is a structure data type.  A C<Duration> is a single amount of time,
+which is specified with arbitrary precision in terms of the same units as
+an C<Instant> is structured with.  A C<Duration> is not fixed to any point
+in time.  A C<Duration> is the result type of taking the difference between
+two C<Instant> values, but it is not defined in terms of said two values.
+The C<Duration> type is intended to have exactly the same meaning as the
+same-named type of Perl 6, as per C<Instant>.  A C<Duration> has 1
+system-defined possrep named C<tai_duration> which consists of 1
+C<Rat>-typed attribute named C<seconds>.  A C<Duration> is a simple wrapper
+for a C<Rat> in all ways as per C<Instant>.  But C<Duration> is explicitly
+disjoint from C<Instant> due to having a different intended interpretation.
+The C<Duration> type is intended more for benchmarking or scientific
+applications and is not intended for human-specified calendar based
+artifacts; again see the I<Muldis D Temporal Extension> for alternatives.
+
 =head1 SYSTEM-DEFINED CORE QUASI-/NONSCALAR DATA TYPES
 
 These core q/nonscalar data types permit transparent/user-visible
@@ -362,8 +482,8 @@ C<QTuple> and matters of its cardinality are determined likewise.
 =head2 sys.std.Core.Type.TupleD0
 
 This is an enumeration data type.  C<TupleD0> is a proper subtype of
-C<Tuple> that has zero attributes; its cardinality is 1, and its only value
-is also the default value of C<Tuple> and C<QTuple>.
+C<Tuple> that has zero attributes; the cardinality of this type is 1, and
+its only value is also the default value of C<Tuple> and C<QTuple>.
 
 =head2 sys.std.Core.Type.Database
 
@@ -414,8 +534,8 @@ likewise.
 =head2 sys.std.Core.Type.RelationD0
 
 This is an enumeration data type.  C<RelationD0> is a proper subtype of
-C<Relation> that has 0 attributes; its cardinality is 2, and its default
-value is the same as that of C<Relation> and C<QRelation>.
+C<Relation> that has 0 attributes; the cardinality of this type is 2, and
+its default value is the same as that of C<Relation> and C<QRelation>.
 
 =head2 sys.std.Core.Type.QSet
 
@@ -432,43 +552,44 @@ type C<Bar>.
 =head2 sys.std.Core.Type.Set
 
 This is an enumeration data type.  C<Set> is the intersection type of
-C<QSet> and C<Relation>.  Its cardinality is infinite.
+C<QSet> and C<Relation>.  The cardinality of this type is infinite.
 
 =head2 sys.std.Core.Type.QMaybe
 
 This is an enumeration data type.  C<QMaybe> is a proper subtype of C<QSet>
-that may have at most one element; that is, it is a unary C<QRelation> with
-a nullary key.  Operators that work specifically with C<QMaybe> subtypes
-can provide a syntactic shorthand for working with sparse data; so Muldis D
-has something which is conceptually close to SQL's nullable types without
-actually having 3-valued logic; it would probably be convenient for code
-that round-trips SQL by way of Muldis D to use the C<QMaybe> type.  Its
-default value has zero q/tuples.
+where all member values may have at most one element; that is, it is a
+unary C<QRelation> with a nullary key.  Operators that work specifically
+with C<QMaybe> subtypes can provide a syntactic shorthand for working with
+sparse data; so Muldis D has something which is conceptually close to SQL's
+nullable types without actually having 3-valued logic; it would probably be
+convenient for code that round-trips SQL by way of Muldis D to use the
+C<QMaybe> type.  Its default value has zero q/tuples.
 
 =head2 sys.std.Core.Type.Maybe
 
 This is an enumeration data type.  C<Maybe> is the intersection type of
-C<QMaybe> and C<Set>.  Its cardinality is infinite.
+C<QMaybe> and C<Set>.  The cardinality of this type is infinite.
 
 =head2 sys.std.Core.Type.Nothing
 
 This is an enumeration data type.  C<Nothing> is a proper subtype of
-C<Maybe> that has exactly zero elements; its cardinality is 1 and its only
-value is its default.  The single C<Nothing> value, which is a relation
-with zero tuples and a single attribute named C<value>, is Muldis D's
-answer to the SQL NULL and is intended to be used for the same purposes;
-that is, a special marker for missing or inapplicable information, that
-does not typically equal any normal/scalar value; however, in Muldis D,
-C<Nothing> I<is a value>, and it I<is> equal to itself.
+C<Maybe> where its only member value has exactly zero elements; the
+cardinality of this type is 1 and its only value is its default.  The
+single C<Nothing> value, which is a relation with zero tuples and a single
+attribute named C<value>, is Muldis D's answer to the SQL NULL and is
+intended to be used for the same purposes; that is, a special marker for
+missing or inapplicable information, that does not typically equal any
+normal/scalar value; however, in Muldis D, C<Nothing> I<is a value>, and it
+I<is> equal to itself.
 
 =head2 sys.std.Core.Type.QSingle
 
 This is an enumeration data type.  C<QSingle> is a proper subtype of
-C<QMaybe> that has exactly 1 element.  Its default value's only q/tuple's
-only attribute has the value C<Bool:false>.  The C<QSingle> type is
-complementary to the C<Nothing> type under C<QMaybe>; C<Nothing> consists
-of exactly 1 of C<QMaybe>'s values, and C<QSingle> consists of all of
-C<QMaybe>'s other values.
+C<QMaybe> where all member values have exactly 1 element.  Its default
+value's only q/tuple's only attribute has the value C<Bool:false>.  The
+C<QSingle> type is complementary to the C<Nothing> type under C<QMaybe>;
+C<Nothing> consists of exactly 1 of C<QMaybe>'s values, and C<QSingle>
+consists of all of C<QMaybe>'s other values.
 
 =head2 sys.std.Core.Type.Single
 
@@ -476,7 +597,7 @@ This is an enumeration data type.  C<Single> is the intersection type of
 C<QSingle> and C<Maybe>.  Subtypes of C<Single> are also used to implement
 data-carrying database objects that are conceptually scalars rather than
 relations; for example, the current state of a sequence generator might
-typically be one.  Its cardinality is infinite.
+typically be one.  The cardinality of this type is infinite.
 
 =head2 sys.std.Core.Type.QArray
 
@@ -495,7 +616,7 @@ C<value>.  Its default value has zero q/tuples.
 =head2 sys.std.Core.Type.Array
 
 This is an enumeration data type.  C<Array> is the intersection type of
-C<QArray> and C<Relation>.  Its cardinality is infinite.
+C<QArray> and C<Relation>.  The cardinality of this type is infinite.
 
 =head2 sys.std.Core.Type.QBag
 
@@ -512,7 +633,7 @@ default value has zero q/tuples.
 =head2 sys.std.Core.Type.Bag
 
 This is an enumeration data type.  C<Bag> is the intersection type of
-C<QBag> and C<Relation>.  Its cardinality is infinite.
+C<QBag> and C<Relation>.  The cardinality of this type is infinite.
 
 =head1 SYSTEM-DEFINED REFERENCE TYPES
 

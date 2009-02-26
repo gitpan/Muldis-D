@@ -1,6 +1,85 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-02-25  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.60.0 is released on CPAN as
+    Muldis-D-0.60.0.tar.gz.
+
+    * (Types.pod)  Minor update to ambiguity-reduce the descriptions of 8
+    types; replaced the text "its cardinality is" with the text "the
+    cardinality of this type is"; the remaining types already used the
+    newer wording.  Further related minor update with the 3 types [QMaybe,
+    Nothing, QSingle] regarding text like "is a proper subtype of" that
+    talks about the number of elements it has; this was updated to clarify
+    it is talking about how many elements each member value of the type
+    has, and it is not talking about how many member values the type has.
+
+    * (Types.pod, Types_Catalog.pod, Rational.pod, PTMD_Tiny.pod,
+    HDMD_Perl(5|6)_Tiny.pod, Basics.pod, Core.pod, Temporal.pod, D.pm, the
+    README file)  Promoted the 6 rational numeric concerning types [Rat,
+    NNRat, PRat, PInt2_N, RatRound(Meth|Rule)] to the language core, where
+    they how have a status like Blob and Text, which is being not necessary
+    for bootstrapping a minimal Muldis D, but still being highly important
+    for user data nonetheless; this said, in the near future, Rat may
+    become needed by the system catalog if the latter starts storing
+    time-stamps.  The 4 type declarations [Rat, NNRat, PRat, PInt2_N] were
+    moved from Rational.pod to Types.pod, and their namespace changed from
+    "sys.std.Rational.Type.\w+" to "sys.std.Core.Type.\w+"; the 2 type
+    declarations [RatRound(Meth|Rule)] were moved from Rational.pod to
+    Types_Catalog.pod, and their namespace changed similarly but for an
+    extra ".Cat"; all 6 types were exactly the same after the move, except
+    that the types' fully qualified names changed.  After these moves,
+    Rational.pod has declarations for just the 3 types [BRat, DRat,
+    PInt2_36]; all of its routines were kept, unchanged.  In each of the 3
+    Tiny dialect files, the literal syntax for "Rat" and "RatRoundMeth" was
+    moved upwards to go next to the appropriate other core scalar types,
+    and the main documentation section "RATIONAL EXTENSION SCALAR VALUE
+    LITERALS" no longer exists.  Any other files that referred to rational
+    types or the rational extension were appropriately updated.
+
+    * (Temporal.pod, PTMD_Tiny.pod, HDMD_Perl(5|6)_Tiny.pod)  Renamed the
+    type "sys.std.Temporal.Type.Duration" to
+    "sys.std.Temporal.Type.UTCDuration", in order to avoid a short-name
+    conflict with an upcoming new type.  Also correspondingly renamed the
+    "sys.std.Temporal.Duration.\w+" namespace.  For each of the Tiny
+    dialects, also renamed the corresponding value literal node name from
+    'Duration' to 'UTCDuration'.  In PTMD_Tiny.pod, renamed the 4 tokens
+    "(instant|duration)(|_payload)" to prepend "utc_".
+
+    * (Types.pod, PTMD_Tiny.pod, HDMD_Perl(5|6)_Tiny.pod)  Added the 2 new
+    scalar types "sys.std.Core.Type.(Instant|Duration)" to the language
+    core (Types.pod) and added corresponding special value literal syntax
+    for them to all the Tiny dialects.  Unlike the existing types in
+    Temporal.pod, which are focused more on calendar-based artifacts with
+    distinct YMDHIS components and will DWIM with future dates, the new,
+    disjoint types in Types.pod are simply counts of seconds in the TAI
+    time scale, and are now the recommended types for tasks like timestamps
+    or benchmarks or scientific applications.  The representation of each
+    of these 2 new types is a rational numeric, and their Tiny literal
+    syntax is exactly the same as for 'Rat' save for the different
+    [Instant, Duration] value kind.  Within the language core, the 2 new
+    types have the same status as 'Rat', which is being not necessary for
+    bootstrapping a minimal Muldis D, but still being highly important for
+    user data nonetheless; this said, in the near future, at least
+    'Instant' may become needed by the system catalog if the latter starts
+    storing time-stamps.
+
+    * (Temporal.pod)  Added an initial complement of 7 new functions
+    "sys.std.Temporal.Instant.((|abs_)difference|later|earlier)",
+    "sys.std.Temporal.Duration.(abs|sum|difference)" and 1 new system
+    service "sys.std.Temporal.Instant.fetch_current_instant" to go with the
+    new core language "Instant" and "Duration" types as used in isolation
+    from the additional types that Temporal.pod declares.
+
+    * (Temporal.pod)  Added an initial complement of 2 new functions
+    "sys.std.Temporal.UTCInstant.(UTC_from_TAI|TAI_from_UTC)", in the new
+    main documentation section "FUNCTIONS FOR CONVERSION BETWEEN UTC AND
+    TAI", which are for mapping "Instant" and "UTCDateTime" values.
+
+    * (Basics.pod, Routines.pod, Rational.pod, Temporal.pod)  Minor updates
+    and fixes.
+
 2009-02-07  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.59.1 is released on CPAN as
