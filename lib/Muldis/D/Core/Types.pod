@@ -9,7 +9,7 @@ Muldis D general purpose data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types version 0.60.0.
+This document is Muldis::D::Core::Types version 0.61.0.
 
 =head1 PREFACE
 
@@ -46,6 +46,8 @@ relationships:
                         sys.std.Core.Type.PInt
                             sys.std.Core.Type.PInt2_N
                 sys.std.Core.Type.String
+                    sys.std.Core.Type.String.*
+                    sys.std.Core.Type.SEString
                     sys.std.Core.Type.BString
                     sys.std.Core.Type.OString
                     sys.std.Core.Type.UCPString
@@ -146,11 +148,9 @@ zero.
 
 =head1 SYSTEM-DEFINED CORE QUASI-/SCALAR DATA TYPES
 
-These core scalar data types are the most fundamental Muldis D types.  Some
-of them have zero possreps, and hence have no named components that can be
-referenced; with those that do have possreps, their components are of the
-types in this section that don't.  Plain Text Muldis D provides a specific
-syntax per type to select a value of one of these types, which does not
+These core scalar data types are the most fundamental Muldis D types.
+Plain Text Muldis D provides a specific syntax per type to select a value
+of every one of these types (or of their super/subtypes), which does not
 look like a routine invocation, but rather like a scalar literal in a
 typical programming language; details of that syntax are not given here,
 but in L<Muldis::D::Dialect::PTMD_Tiny>.  Hosted Data Muldis D as hosted in
@@ -211,16 +211,16 @@ basis for the physical representation.
 
 =head2 sys.std.Core.Type.Int
 
-This is a primitive data type.  An C<Int> is a single exact integral number
-of any magnitude.  Its default value is zero; its minimum and maximum
-values are conceptually infinities and practically impossible.  C<Int> is
-one of just two scalar root types (the other is C<String>) that does I<not>
-have any possreps.  The cardinality of this type is infinity; to define a
-most-generalized finite C<Int> subtype, you must specify the 2 integer
-end-points of the inclusive range that all its values are in.  The C<Int>
-type has a default ordering algorithm; for 2 distinct C<Int> values, the
-value closer to negative infinity is ordered before the value closer to
-positive infinity.
+This is a structure data type.  An C<Int> is a single exact integral number
+of any magnitude.  An C<Int> has 1 system-defined possrep whose name is the
+empty string, which has of 1 C<SEString>-typed attribute whose name is the
+empty string.  Its default value is zero; its minimum and maximum values
+are conceptually infinities and practically impossible.  The cardinality of
+this type is infinity; to define a most-generalized finite C<Int> subtype,
+you must specify the 2 integer end-points of the inclusive range that all
+its values are in.  The C<Int> type has a default ordering algorithm; for 2
+distinct C<Int> values, the value closer to negative infinity is ordered
+before the value closer to positive infinity.
 
 =head2 sys.std.Core.Type.NNInt
 
@@ -242,23 +242,62 @@ minimum value is 2.
 
 =head2 sys.std.Core.Type.String
 
-This is a primitive data type.  A C<String> is a string of integers, or
-more specifically it is a dense sequence of 0..N elements (I<not> defined
-over C<Relation>) where each element is an C<Int>.  Its default and minimum
-value is the empty sequence; its maximum value is an infinite-length
-sequence and practically impossible.  C<String> is one of just two scalar
-root types (the other is C<Int>) that does I<not> have any possreps.  The
+This is an enumeration data type.  The C<String> type is a union type over
+the infinite number of types having C<sys.std.Core.Type.String.*>-format
+names (see also their collective entry in the type list).  A C<String> is a
+string of integers, or more specifically it is a dense sequence of 0..N
+elements (I<not> defined over C<Relation>) where each element is an
+integer.  Its default and minimum value is the empty sequence; its maximum
+value is an infinite-length sequence and practically impossible.  The
 cardinality of this type is infinity; to define a most-generalized finite
 C<String> subtype, you must specify a maximum length in elements that the
-subtype's values can have.  The C<String> type has a default ordering
-algorithm; for 2 distinct C<String> values, their order is determined as
-follows:  First eliminate any identical leading elements from both strings
-as those alone would make the strings compare as same (if the remainder of
-both strings was the empty string, then the strings are identical).  Then,
-iff the remainder of just one string is the empty string, then that string
-is ordered before the non-empty one; otherwise, compare the first element
-of each of the string remainders according to the default ordering
-algorithm of C<Int> to get the order of their respective strings.
+subtype's values can have, and you must specify the 2 integer end-points of
+the inclusive range that all its values' integer elements are in.  The
+C<String> type has a default ordering algorithm; for 2 distinct C<String>
+values, their order is determined as follows:  First eliminate any
+identical leading element sequences from both strings as those alone would
+make the strings compare as same (if the remainder of both strings was the
+empty string, then the strings are identical).  Then, iff the remainder of
+just one string is the empty string, then that string is ordered before the
+non-empty one; otherwise, compare the first element of each of the string
+remainders according to the following ordering algorithm to get the order
+of their respective strings: the integer value closer to negative infinity
+is ordered before the value closer to positive infinity.
+
+=head2 sys.std.Core.Type.String.*
+
+There are an infinite number of types having
+C<sys.std.Core.Type.String.*>-format names and each one is a structure data
+type; for the rest of this description, the type name C<String.Value> will
+be used as a proxy for each and every one of them.  A C<String.Value> is a
+string of integers, or more specifically it is a dense sequence of 0..N
+elements (I<not> defined over C<Relation>) where each element is an
+integer.  A C<String.Value> has 1 system-defined possrep whose name is the
+empty string and which has zero attributes.  The cardinality of this type
+is 1, and its only value is its default and minimum and maximum value.  The
+sole value of C<String.Value> is the same as its unqualified name, or more
+accurately, it is identical to the sole attribute value of the sole possrep
+of the C<Name> value C<Value>.
+
+Now, one main rationale to have the system-defined C<String> type as a
+union type over an infinite number of C<String.*> types, is to avoid any
+"chicken and egg" scenario where at least one q/scalar root type needs to
+be special and have no possreps in order to be the foundation for other
+scalar root types.  Under the current system, I<every> q/scalar root type
+has at least one possrep and the type system design does not require any
+q/scalar root type to be special.  One can always avoid the need for some
+other type to base your scalar root type off of by building your scalar
+root type over singleton types with no possrep attributes.  That said, the
+fact that an implicitly defined infinity of types underlie C<String>
+(rather than an explicitly defined finite set of types) now is another kind
+of special that user-defined types can't do, but this solution seemed to be
+the lesser of evils versus some scalar root types having no possreps.
+
+=head2 sys.std.Core.Type.SEString
+
+This is an enumeration data type.  C<SEString> (single-element string) is a
+proper subtype of C<String> where all member values have exactly one
+element.  One can be used to represent an integer.
 
 =head2 sys.std.Core.Type.BString
 
