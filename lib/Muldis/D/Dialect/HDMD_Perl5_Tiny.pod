@@ -9,7 +9,7 @@ How to format Perl 5 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl5_Tiny version 0.61.0.
+This document is Muldis::D::Dialect::HDMD_Perl5_Tiny version 0.62.0.
 
 =head1 PREFACE
 
@@ -121,6 +121,23 @@ depend on the node kind, and are defined separately per each node kind,
 further below.
 
 =back
+
+For some data types, a GCVL PHMD node may alternately be just its payload
+for the sake of brevity.  If any Perl value of one of the following types
+is encountered where a GCVL PHMD node is expected, then it is interpreted
+as a full PHMD node as follows:
+
+    Muldis D <- Perl 5
+    --------------------
+    Int  <- BigInt object or Perl scalar that looks like an integer
+    Text <- Perl scalar that doesn't look like a number
+    Rat  <- BigRat|BigNum obj or Perl scal that looks like num but not int
+
+Or specifically, Int or Rat is assumed if the Perl value agrees with a
+canonical payload format according to the Int|Rat PHMD node definitions, or
+the value is otherwise interpreted as Text by default.  If your data is
+such that the assumption might be wrong, then just use a full PHMD node to
+force the desired behaviour.
 
 Generally speaking, no Perl undefined values are allowed anywhere in a PHMD
 value; you must use only defined values instead.  This documentation also
@@ -252,9 +269,9 @@ Examples:
 
     [ 'Int', { 7 => '644' } ] # octal
 
-    [ 'Int', -34 ] # decimal
+    -34 # decimal
 
-    [ 'Int', 42 ] # decimal
+    42 # decimal
 
     [ 'Int', { F => 'DEADBEEF' } ] # hexadecimal
 
@@ -347,11 +364,14 @@ Examples:
 
     [ 'Text', 'Ceres' ]
 
-    [ 'Text', 'サンプル' ] # note: needs "use utf8;" pragma to work
+    'サンプル' # note: needs "use utf8;" pragma to work
 
-    [ 'Text', '' ]
+    ''
 
-    [ 'Text', 'Perl' ]
+    'Perl'
+
+    "\N{LATIN SMALL LETTER OU}\x{263A}".chr(65)
+        # note: \N{} needs "use charnames ':full';" pragma to work
 
 =head2 sys.std.Core.Type.Rat
 
@@ -365,8 +385,8 @@ Muldis D C<sys.std.Core.Type.Rat> value as follows:
 If the payload is a Perl scalar, then it must be just a canonical numeric
 value according to Perl, and it is mapped directly; since native Perl
 numerics are limited precision or are inexact (IEEE float), larger numerics
-can be represented by a Perl character string of the format C<< 0\.?<[ 0..9
-_ ]>* >> or C<< \-?<[1..9]><[ 0..9 _ ]>*\.?<[ 0..9 _ ]>* >> that is
+can be represented by a Perl character string of the format C<< 0\.<[ 0..9
+_ ]>+ >> or C<< \-?<[1..9]><[ 0..9 _ ]>*\.<[ 0..9 _ ]>+ >> that is
 interpreted as base 10.
 
 =item *
@@ -390,8 +410,8 @@ If the payload is a Perl hash ref, then it must have 1 element, whose key
 and value are designated, in order, I<max-col-val> and I<main payload>; the
 max-col-val must be a Perl string composed of a single C<[ 1..9 A..Z ]>
 character.  If the main payload is a Perl scalar, then the main payload
-must be a Perl character string of the format C<< 0\.?<[ 0..9 A..Z _ ]>* >>
-or C<< \-?<[ 1..9 A..Z ]><[ 0..9 A..Z _ ]>*\.?<[ 0..9 A..Z _ ]>* >>.  This
+must be a Perl character string of the format C<< 0\.<[ 0..9 A..Z _ ]>+ >>
+or C<< \-?<[ 1..9 A..Z ]><[ 0..9 A..Z _ ]>*\.<[ 0..9 A..Z _ ]>+ >>.  This
 format specifically is what the Plain Text Muldis D grammar uses as one
 general form for rational literals, and is the result of parsing it.  The
 main payload is interpreted as a base-I<N> rational where I<N> might be
@@ -412,9 +432,9 @@ Examples:
 
     [ 'Rat', { 1 => '-1.1' } ]
 
-    [ 'Rat', -1.5 ] # same val as prev
+    -1.5 # same val as prev
 
-    [ 'Rat', 3.14159 ]
+    3.14159
 
     [ 'Rat', { A => '0.0' } ]
 
@@ -444,7 +464,9 @@ must be as per the payload of a C<Rat> PHMD node.
 
 Examples:
 
-    [ 'Instant', 1235556432 ]
+    [ 'Instant', 1235556432.0 ]
+
+    [ 'Instant', 854309115.0 ]
 
 =head2 sys.std.Core.Type.Duration
 
@@ -457,9 +479,9 @@ C<Rat> PHMD node.
 
 Examples:
 
-    [ 'Duration', 3600 ]
+    [ 'Duration', 3600.0 ]
 
-    [ 'Duration', -50 ]
+    [ 'Duration', -50.0 ]
 
     [ 'Duration', 3.14159 ]
 
@@ -616,26 +638,26 @@ own dedicated syntax for literals.)
 Examples:
 
     [ 'Scalar', 'sys.std.Core.Type.Rat', [ 'float', {
-        'mantissa' => [ 'Int', 45207196 ],
-        'radix'    => [ 'Int', 10 ],
-        'exponent' => [ 'Int', 37 ],
+        'mantissa' => 45207196,
+        'radix'    => 10,
+        'exponent' => 37,
     } ] ]
 
     [ 'Scalar', 'sys.std.Temporal.Type.UTCDateTime', [ 'datetime', {
-        'year'   => [ 'Int', 2003 ],
-        'month'  => [ 'Int', 10 ],
-        'day'    => [ 'Int', 26 ],
-        'hour'   => [ 'Int', 1 ],
-        'minute' => [ 'Int', 30 ],
-        'second' => [ 'Rat', 0 ],
+        'year'   => 2003,
+        'month'  => 10,
+        'day'    => 26,
+        'hour'   => 1,
+        'minute' => 30,
+        'second' => 0.0,
     } ] ]
 
     [ 'Scalar', 'fed.lib.the_db.WeekDay', [ 'name', {
-        '' => [ 'Text', 'monday' ],
+        '' => 'monday',
     } ] ]
 
     [ 'Scalar', 'fed.lib.the_db.WeekDay', [ 'number', {
-        '' => [ 'Int', 5 ],
+        '' => 5,
     } ] ]
 
 =head2 sys.std.Core.Type.(Q|)Tuple
@@ -652,14 +674,14 @@ Examples:
     [ 'Tuple', {} ]
 
     [ 'Tuple', 'type.tuple_from.var.fed.data.the_db.account.users', {
-        'login_name' => [ 'Text', 'hartmark' ],
-        'login_pass' => [ 'Text', 'letmein' ],
+        'login_name' => 'hartmark',
+        'login_pass' => 'letmein',
         'is_special' => [ 'Bool', 'true' ],
     } ]
 
     [ 'Tuple', {
-        'name' => [ 'Text', 'Michelle' ],
-        'age'  => [ 'Int', 17 ],
+        'name' => 'Michelle',
+        'age'  => 17,
     } ]
 
 =head2 sys.std.Core.Type.(Q|)Relation
@@ -720,14 +742,14 @@ Examples:
 
     [ 'Relation', [
         {
-            'login_name' => [ 'Text', 'hartmark' ],
-            'login_pass' => [ 'Text', 'letmein' ],
+            'login_name' => 'hartmark',
+            'login_pass' => 'letmein',
             'is_special' => [ 'Bool', 'true' ],
         },
     ] ]  # 3 attrs + 1 tuple
 
     [ 'Relation', 'fed.lib.the_db.gene.Person', [ [ 'name', 'age' ], [
-        [ [ 'Text', 'Michelle' ], [ 'Int', 17 ] ],
+        [ 'Michelle', 17 ],
     ] ] ]  # 2 attrs + 1 tuple
 
 =head2 sys.std.Core.Type.(Q|)Set
@@ -741,16 +763,16 @@ node that defines the C<value> attribute of the tuple.
 Examples:
 
     [ 'Set', 'fed.lib.the_db.account.Country_Names', [
-        [ 'Text', 'Canada' ],
-        [ 'Text', 'Spain' ],
-        [ 'Text', 'Jordan' ],
-        [ 'Text', 'Thailand' ],
+        'Canada',
+        'Spain',
+        'Jordan',
+        'Thailand',
     ] ]
 
     [ 'Set', [
-        [ 'Int', 3 ],
-        [ 'Int', 16 ],
-        [ 'Int', 85 ],
+        3,
+        16,
+        85,
     ] ]
 
 =head2 sys.std.Core.Type.Nothing
@@ -773,7 +795,7 @@ C<value> attribute of the single tuple of the new 'single'.
 
 Examples:
 
-    [ 'Single', [ 'Text', 'I know this one!' ] ]
+    [ 'Single', 'I know this one!' ]
 
 =head2 sys.std.Core.Type.(Q|)Array
 
@@ -787,16 +809,16 @@ element index is used as the C<index> attribute of the tuple.
 Examples:
 
     [ 'Array', [
-        [ 'Text', 'Alphonse' ],
-        [ 'Text', 'Edward' ],
-        [ 'Text', 'Winry' ],
+        'Alphonse',
+        'Edward',
+        'Winry',
     ] ]
 
     [ 'Array', 'fed.lib.the_db.stats.Samples_By_Order', [
-        [ 'Int', 57 ],
-        [ 'Int', 45 ],
-        [ 'Int', 63 ],
-        [ 'Int', 61 ],
+        57,
+        45,
+        63,
+        61,
     ] ]
 
 =head2 sys.std.Core.Type.(Q|)Bag
@@ -841,18 +863,18 @@ how many instances of said element were in the payload.
 Examples:
 
     [ 'Bag', 'fed.lib.the_db.inventory.Fruit', [
-        [ [ 'Text', 'Apple'  ], 500 ],
-        [ [ 'Text', 'Orange' ], 300 ],
-        [ [ 'Text', 'Banana' ], 400 ],
+        [ 'Apple' , 500 ],
+        [ 'Orange', 300 ],
+        [ 'Banana', 400 ],
     ] ]
 
     [ 'Bag', [
-        [ 'Text', 'Foo' ],
-        [ 'Text', 'Quux' ],
-        [ 'Text', 'Foo' ],
-        [ 'Text', 'Bar' ],
-        [ 'Text', 'Baz' ],
-        [ 'Text', 'Baz' ],
+        'Foo',
+        'Quux',
+        'Foo',
+        'Bar',
+        'Baz',
+        'Baz',
     ] ]
 
 =head1 TEMPORAL EXTENSION SCALAR VALUE LITERALS
@@ -912,7 +934,7 @@ Examples:
 
     [ 'UTCInstant', [2002,12,6] ] # a UTCDate
 
-    [ 'UTCInstant', [undef,undef,undef,14,2,29] ] # a UTCTime
+    [ 'UTCInstant', [undef,undef,undef,14,2,29.0] ] # a UTCTime
 
     [ 'FloatInstant', [2003,4,5,2] ] # min,sec unknown or N/A
 

@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_Tiny version 0.61.0.
+This document is Muldis::D::Dialect::PTMD_Tiny version 0.62.0.
 
 =head1 PREFACE
 
@@ -150,9 +150,9 @@ Grammar:
 
     token ln_base_name { Muldis_D }
 
-    token ln_base_authority { <char_str> }
+    token ln_base_authority { <name_payload> }
 
-    token ln_base_version_number { <char_str> }
+    token ln_base_version_number { <name_payload> }
 
     token ln_dialect { PTMD_Tiny }
 
@@ -163,22 +163,26 @@ Examples:
     Muldis_D:'http://muldis.com':'1.2.3':PTMD_Tiny:{}
 
     Muldis_D:'http://muldis.com':'1.2.3':PTMD_Tiny:{
-        auto_add_attrs          => Bool:true,
-        auto_unabbrev_std_names => Bool:true,
-        auto_chains_from_names  => Bool:true
+        auto_add_attrs          => true,
+        auto_unabbrev_std_names => true,
+        auto_chains_from_names  => true
     }
 
 =head1 VALUE LITERAL COMMON ELEMENTS
 
-A I<generic context value literal> (or I<GCVL>) is a value literal that
-includes explicit I<value kind> meta-data (such as, "this is an C<Int>" or
-"this is a C<Name>") so that the literal can be properly interpreted in a
-context that is expecting I<a> value but has no expectation that said value
-belongs to a specific data type.  For example, each element of a generic
-Muldis D collection value, such as a member of an array or tuple, could
+A I<generic context value literal> (or I<GCVL>) is a value literal that can
+be properly interpreted in a context that is expecting I<a> value but has
+no expectation that said value belongs to a specific data type; in the
+general case, a GCVL includes explicit I<value kind> meta-data (such as,
+"this is an C<Int>" or "this is a C<Name>"); but with a few specific data
+types (see the C<value_kind> node description for details) that meta-data
+may be omitted for brevity because the main literal has mutually uniquely
+identifying characteristics.  For example, each element of a generic Muldis
+D collection value, such as a member of an array or tuple, could
 potentially have any type at all.  In contrast, a I<specific context value
 literal> (or I<SCVL>) is a value literal that does not include explicit
-value kind meta-data, because the context of its use supplies said
+value kind meta-data, even when the main literal doesn't have uniquely
+identifying characteristics, because the context of its use supplies said
 meta-data.  For example, in a tuple value literal it is assumed that a
 value literal in an attribute name position must denote a C<Name>.  The
 grammar token C<value> denotes a GCVL, as do most short-named grammar
@@ -189,12 +193,13 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
 
     token value {
         (
-            (<value_kind>)
-            [
+              (<value_kind>)
+              [
                 <value_node_elem_sep>
                 [(<type_name>) <value_node_elem_sep>]?
                 (<payload>)
-            ]?
+              ]?
+            | (<payload>)
         )
     }
 
@@ -259,8 +264,17 @@ So a C<value> node has 1-3 elements in general:
 
 This is a character string of the format C<< <[A..Z]> <[ a..z A..Z ]>+ >>;
 it identifies the data type of the value literal in broad terms and is the
-only external meta-data of C<payload> necessary to interpret the latter;
-what grammars are valid for C<payload> depend just on C<value_kind>.
+only external meta-data of C<payload> generally necessary to interpret the
+latter; what grammars are valid for C<payload> depend just on
+C<value_kind>.
+
+With just the 5 data types [C<Bool>, C<Int>, C<Blob>, C<Text>, C<Rat>], the
+C<value_kind> portion of a GCVL may be omitted for brevity, but the code
+parser should still be able to infer it easily by examining the first few
+characters of the C<payload>, which for each of said 5 data types has a
+mutually uniquely identifying format, which is also distinct from all
+possible C<value_kind>.  Note that omission of C<value_kind> is only
+allowed when the GCVL doesn't include a C<type_name> element.
 
 =item C<type_name>
 
@@ -319,8 +333,11 @@ For GCVL examples, see the subsequent documentation sections.
 Grammar:
 
     token bool {
-        Bool <value_node_elem_sep>
-        <bool_payload>
+        [
+              Bool <value_node_elem_sep>
+              <bool_payload>
+            | [false | true]
+        ]
     }
 
     token bool_payload {
@@ -331,13 +348,17 @@ Examples:
 
     Bool:true
 
+    false
+
 =head2 sys.std.Core.Type.Int
 
 Grammar:
 
     token int {
-        Int <value_node_elem_sep>
-        [<type_name> <value_node_elem_sep>]?
+        [
+            Int <value_node_elem_sep>
+            [<type_name> <value_node_elem_sep>]?
+        ]?
         <int_payload>
     }
 
@@ -366,21 +387,21 @@ Examples:
 
     Int:1;11001001
 
-    Int:7;0
+    7;0
 
-    Int:7;644
+    7;644
 
-    Int:-34
+    -34
 
-    Int:42
+    42
 
-    Int:F;DEADBEEF
+    F;DEADBEEF
 
-    Int:Z;-HELLOWORLD
+    Z;-HELLOWORLD
 
-    Int:3;301
+    3;301
 
-    Int:B;A09B
+    B;A09B
 
 =head2 sys.std.Core.Type.String
 
@@ -414,74 +435,79 @@ Examples:
 Grammar:
 
     token blob {
-        Blob <value_node_elem_sep>
-        [<type_name> <value_node_elem_sep>]?
+        [
+            Blob <value_node_elem_sep>
+            [<type_name> <value_node_elem_sep>]?
+        ]?
         <blob_payload>
     }
 
     token blob_payload {
         <[137F]> <value_payload_elem_sep>
-        [[<[ 0..9 A..F ]>+] ** <segment_sep>]?
+        [<[']> <[ 0..9 A..F ]>* <[']>] ** <segment_sep>
     }
 
 Examples:
 
-    Blob:1;00101110100010
+    Blob:1;'00101110100010'
 
-    Blob:3;
+    3;''
 
-    Blob:F;A705E
+    F;'A705E'
 
-    Blob:7;523504376
+    7;'523504376'
 
 =head2 sys.std.Core.Type.Text
 
 Grammar:
 
     token text {
-        Text <value_node_elem_sep>
-        [<type_name> <value_node_elem_sep>]?
+        [
+            Text <value_node_elem_sep>
+            [<type_name> <value_node_elem_sep>]?
+        ]?
         <text_payload>
     }
 
     token text_payload {
-        <char_str>
-    }
-
-    token char_str {
-        [<char_str_seg> ** <segment_sep>]?
-    }
-
-    token char_str_seg {
-          <quoted_char_str_seg>
-        | <nonquoted_char_str_seg>
+        <quoted_char_str_seg> ** <segment_sep>
     }
 
     token quoted_char_str_seg {
         <[']>
-            ['\b' | '\q' | <-[\\\']>]*
+            [
+                  '\b' | '\q' | <-[\\\']>
+                | '\c<' [
+                      [<[ A..Z ]> | ' ']+
+                    | [0 | <[ 1..9 ]> <[ 0..9 ]>*]
+                    | <[ 1..9 A..Z ]> ';'
+                        [0 | <[ 1..9 A..Z ]> <[ 0..9 A..Z ]>*]
+                  ] '>'
+            ]*
         <[']>
     }
-
-    token nonquoted_char_str_seg { <[ a..z A..Z 0..9 _ - ]>+ }
 
 Examples:
 
     Text:'Ceres'
 
-    Text:'サンプル'
+    'サンプル'
 
-    Text:''
+    ''
 
-    Text:'Perl'
+    'Perl'
+
+    '\c<LATIN SMALL LETTER OU>\c<F;263A>\c<65>'
 
 =head2 sys.std.Core.Type.Rat
 
 Grammar:
 
     token rat {
-        Rat <value_node_elem_sep>
-        [<type_name> <value_node_elem_sep>]?
+        [
+            Rat <value_node_elem_sep>
+            [<type_name> <value_node_elem_sep>]?
+        ]?
         <rat_payload>
     }
 
@@ -491,13 +517,13 @@ Grammar:
     }
 
     token rat_body {
-          <int_body>\.?<pint_tail>?
+          <int_body>\.<pint_tail>
         | <int_body> \s* \/ \s* <pint_body>
         | <int_body> \s* \* \s* <pint_body> \s* \^ \s* <int_body>
     }
 
     token nnrat_body {
-          <nnint_body>\.?<pint_tail>?
+          <nnint_body>\.<pint_tail>
         | <nnint_body> \s* \/ \s* <pint_body>
         | <nnint_body> \s* \* \s* <pint_body> \s* \^ \s* <int_body>
     }
@@ -506,27 +532,27 @@ Examples:
 
     Rat:1;-1.1
 
-    Rat:-1.5
+    -1.5
 
-    Rat:3.14159
+    3.14159
 
-    Rat:A;0.0
+    A;0.0
 
-    Rat:F;DEADBEEF.FACE
+    F;DEADBEEF.FACE
 
-    Rat:Z;0.000AZE
+    Z;0.000AZE
 
     Rat:6;500001/1000
 
-    Rat:B;A09B/A
+    B;A09B/A
 
     Rat:1;1011101101*10^-11011
 
-    Rat:45207196*10^37
+    45207196*10^37
 
-    Rat:1/43
+    1/43
 
-    Rat:314159*10^-5
+    314159*10^-5
 
 =head2 sys.std.Core.Type.Instant
 
@@ -545,7 +571,9 @@ Grammar:
 
 Examples:
 
-    Instant:1235556432
+    Instant:1235556432.0
+
+    Instant:854309115.0
 
 =head2 sys.std.Core.Type.Duration
 
@@ -564,9 +592,9 @@ Grammar:
 
 Examples:
 
-    Duration:3600
+    Duration:3600.0
 
-    Duration:-50
+    Duration:-50.0
 
     Duration:3.14159
 
@@ -585,8 +613,10 @@ Grammar:
     }
 
     token name_payload {
-        <char_str>
+        [<quoted_char_str_seg> | <nonquoted_char_str_seg>] ** <segment_sep>
     }
+
+    token nonquoted_char_str_seg { <[ a..z A..Z 0..9 _ - ]>+ }
 
 Examples:
 
@@ -647,7 +677,7 @@ Grammar:
     }
 
     token comment_payload {
-        <char_str>
+        <quoted_char_str_seg> ** <segment_sep>
     }
 
 Examples:
@@ -670,6 +700,8 @@ Grammar:
 Examples:
 
     Order:same
+
+    Order:decrease
 
 =head2 sys.std.Core.Type.Cat.RatRoundMeth
 
@@ -717,26 +749,26 @@ Grammar:
 Examples:
 
     Scalar:sys.std.Core.Type.Rat:float;{
-        mantissa => Int:45207196,
-        radix    => Int:10,
-        exponent => Int:37
+        mantissa => 45207196,
+        radix    => 10,
+        exponent => 37
     }
 
     Scalar:sys.std.Temporal.Type.UTCDateTime:datetime;{
-        year   => Int:2003,
-        month  => Int:10,
-        day    => Int:26,
-        hour   => Int:1,
-        minute => Int:30,
-        second => Rat:0
+        year   => 2003,
+        month  => 10,
+        day    => 26,
+        hour   => 1,
+        minute => 30,
+        second => 0.0
     }
 
     Scalar:fed.lib.the_db.WeekDay:name;{
-        '' => Text:'monday'
+        '' => 'monday'
     }
 
     Scalar:fed.lib.the_db.WeekDay:number;{
-        '' => Int:5
+        '' => 5
     }
 
 =head2 sys.std.Core.Type.(Q|)Tuple
@@ -767,14 +799,14 @@ Examples:
     Tuple:{}
 
     Tuple:type.tuple_from.var.fed.data.the_db.account.users:{
-        login_name => Text:'hartmark',
-        login_pass => Text:'letmein',
-        is_special => Bool:true
+        login_name => 'hartmark',
+        login_pass => 'letmein',
+        is_special => true
     }
 
     Tuple:{
-        name => Text:'Michelle',
-        age  => Int:17
+        name => 'Michelle',
+        age  => 17
     }
 
 =head2 sys.std.Core.Type.(Q|)Relation
@@ -838,14 +870,14 @@ Examples:
 
     Relation:{
         {
-            login_name => Text:'hartmark',
-            login_pass => Text:'letmein',
-            is_special => Bool:true
+            login_name => 'hartmark',
+            login_pass => 'letmein',
+            is_special => true
         }
     }
 
     Relation:fed.lib.the_db.gene.Person:[ name, age ];{
-        [ Text:'Michelle', Int:17 ]
+        [ 'Michelle', 17 ]
     }
 
 =head2 sys.std.Core.Type.(Q|)Set
@@ -867,16 +899,16 @@ Grammar:
 Examples:
 
     Set:fed.lib.the_db.account.Country_Names:{
-        Text:'Canada',
-        Text:'Spain',
-        Text:'Jordan',
-        Text:'Thailand'
+        'Canada',
+        'Spain',
+        'Jordan',
+        'Thailand'
     }
 
     Set:{
-        Int:3,
-        Int:16,
-        Int:85
+        3,
+        16,
+        85
     }
 
 =head2 sys.std.Core.Type.Nothing
@@ -909,7 +941,7 @@ Grammar:
 
 Examples:
 
-    Single:{ Text:'I know this one!' }
+    Single:{ 'I know this one!' }
 
 =head2 sys.std.Core.Type.(Q|)Array
 
@@ -930,16 +962,16 @@ Grammar:
 Examples:
 
     Array:[
-        Text:'Alphonse',
-        Text:'Edward',
-        Text:'Winry'
+        'Alphonse',
+        'Edward',
+        'Winry'
     ]
 
     Array:fed.lib.the_db.stats.Samples_By_Order:[
-        Int:57,
-        Int:45,
-        Int:63,
-        Int:61
+        57,
+        45,
+        63,
+        61
     ]
 
 =head2 sys.std.Core.Type.(Q|)Bag
@@ -977,18 +1009,18 @@ Grammar:
 Examples:
 
     Bag:fed.lib.the_db.inventory.Fruit:{
-        Text:'Apple'  => 500,
-        Text:'Orange' => 300,
-        Text:'Banana' => 400
+        'Apple'  => 500,
+        'Orange' => 300,
+        'Banana' => 400
     }
 
     Bag:{
-        Text:'Foo',
-        Text:'Quux',
-        Text:'Foo',
-        Text:'Bar',
-        Text:'Baz',
-        Text:'Baz'
+        'Foo',
+        'Quux',
+        'Foo',
+        'Bar',
+        'Baz',
+        'Baz'
     }
 
 =head1 TEMPORAL EXTENSION SCALAR VALUE LITERALS
@@ -1019,7 +1051,7 @@ Examples:
 
     UTCInstant:[2002,12,16,,,]
 
-    UTCInstant:[,,,14,2,29]
+    UTCInstant:[,,,14,2,29.0]
 
     FloatInstant:[2003,4,5,2,,]
 

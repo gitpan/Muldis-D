@@ -1,6 +1,89 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-03-17  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.62.0 is released on CPAN as
+    Muldis-D-0.62.0.tar.gz.
+
+    * Congratulations to the developers of Parrot (Speaks Your Language),
+    which saw its long-awaited 1.0.0 release earlier today.
+
+    * (PTMD_Tiny.pod)  Updated the "quoted_char_str_seg" grammar token to
+    add support for specifying characters in terms of their Unicode
+    codepoint name or number, in addition to the previous means of
+    specifying characters as their literal selves in the presumably Unicode
+    PTMD_Tiny source code.  The new feature is in the form of the escape
+    pattern "\c<...>", where that any occurrences of such a substring in a
+    quoted character string literal are replaced with the actual Unicode
+    codepoint whose name or number is given by the "..."; the "..." takes a
+    form like either "A..Z " for character names (example "\c<LATIN SMALL
+    LETTER OU>") or "\d;\d+"|"\d+" for character numbers (examples
+    "\c<F;263A>" or "\c<65>".  One reason for this feature is to empower
+    specifying exactly which sequence of codepoints you want for a
+    particular grapheme (which text editors tend to abstract away when you
+    write characters literally), and also it is to empower more elegant
+    passing of Unicode-savvy PTMD_Tiny source code through a communications
+    channel that is more limited, such as to 7-bit ASCII.
+
+    * (PTMD_Tiny.pod, HDMD_Perl(5|6)_Tiny.pod)  Added "Text" value literal
+    example to all 3 Tiny grammars illustrating how to specify characters
+    in terms of Unicode codepoint names or numbers.
+
+    * (PTMD_Tiny.pod)  Updated the "(|nn)rat_body" grammar tokens to be
+    stricter such that rational-type numbers now may never look like
+    integer-type numbers; specifically, where you used to be able to say
+    "Rat:42" you must instead say "Rat:42.0".  This change affects not just
+    "Rat" value literals but also "Instant", "Duration", and "UTC"/"Float"
+    versions of the latter.  This change was made partly to aid code
+    self-documentation and syntax highlighting, as well as support a
+    subsequent change item (unqualified value literals).
+
+    * (HDMD_Perl(5|6)_Tiny.pod)  Updates corresponding to previous change
+    item, as was appropriate for each Perl version.
+
+    * (PTMD_Tiny.pod)  Updated the "blob_payload" grammar token so that the
+    string must be quoted rather than unquoted.  This change was made
+    partly to aid syntax highlighting, especially with the empty string, as
+    well as to support a subsequent change item (unqual value literals).
+
+    * (PTMD_Tiny.pod)  Made "Text" and "Comment" value literals stricter
+    such that all of their character string segments must be quoted; now
+    only "Name"/etc character strings allow unquoted string segments.  In
+    the process, did a bit of grammar refactoring that eliminated the
+    "char_str(|_seg)" tokens and updated the "(text|name|comment)_payload"
+    and "ln_base_(authority|version_number)" tokens.  This change was made
+    to aid code readability as well as support a subsequent change item
+    (unqualified value literals).
+
+    * (PTMD_Tiny.pod, HDMD_Perl(5|6)_Tiny.pod)  Updated the Tiny dialects
+    to add support for specifying generic context value literals of certain
+    data types as just their payloads, without explicit "value kind"
+    metadata; that is, added support for unqualified value literals.  Which
+    data types this new feature is allowed to be used with varies by
+    dialect.  With PTMD_Tiny, the 5 types [Bool, Int, Blob, Text, Rat] are
+    supported.  With HDMD_Perl6_Tiny, the 8 types [Bool, Int, Blob, Text,
+    Rat, Instant, Duration, Order] are supported.  With HDMD_Perl5_Tiny,
+    the 3 types [Int, Text, Rat] are supported, albeit less rigorously.
+    This change was made to aid code brevity and to make Muldis D
+    significantly more like typical programming languages in regards to how
+    one writes character string or numeric literals; in fact those formats
+    are now exactly the same in general.  Most example code was updated to
+    the new terse format, with typically just one example per type
+    remaining in the old fully qualified format.  No grammar tokens were
+    added, just some were changed.
+
+    * (Routines.pod, Ordered.pod, Integer.pod)  Added the 6 new functions
+    ["sys.std.Core.QRelation.(restriction_and_cmpl|semijoin_and_diff)",
+    "sys.std.Ordered.(|maybe_)minmax",
+    "sys.std.Integer.(|maybe_)quotient_and_remainder"]; each of these is
+    just a wrapper over a pair of other mutually complementary functions.
+
+    * (QRelation.pod)  Added new function
+    "sys.std.QRelation.classification" which is sort of a cross between
+    "restriction" and "group"; it uses a user-defined function argument to
+    partition a q/relation's tuples into an arbitrary number of groups.
+
 2009-03-13  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.61.0 is released on CPAN as
