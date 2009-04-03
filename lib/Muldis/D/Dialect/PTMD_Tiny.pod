@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_Tiny version 0.62.3.
+This document is Muldis::D::Dialect::PTMD_Tiny version 0.63.0.
 
 =head1 PREFACE
 
@@ -268,13 +268,14 @@ only external meta-data of C<payload> generally necessary to interpret the
 latter; what grammars are valid for C<payload> depend just on
 C<value_kind>.
 
-With just the 5 data types [C<Bool>, C<Int>, C<Blob>, C<Text>, C<Rat>], the
-C<value_kind> portion of a GCVL may be omitted for brevity, but the code
-parser should still be able to infer it easily by examining the first few
-characters of the C<payload>, which for each of said 5 data types has a
-mutually uniquely identifying format, which is also distinct from all
-possible C<value_kind>.  Note that omission of C<value_kind> is only
-allowed when the GCVL doesn't include a C<type_name> element.
+With just the 7 data types [C<Bool>, C<Int>, C<Blob>, C<Text>, C<Rat>,
+C<Order>, C<RatRoundMeth>], the C<value_kind> portion of a GCVL may be
+omitted for brevity, but the code parser should still be able to infer it
+easily by examining the first few characters of the C<payload>, which for
+each of said 7 data types has a mutually uniquely identifying format, which
+is also distinct from all possible C<value_kind>.  Note that omission of
+C<value_kind> is only allowed when the GCVL doesn't include a C<type_name>
+element.
 
 =item C<type_name>
 
@@ -333,15 +334,12 @@ For GCVL examples, see the subsequent documentation sections.
 Grammar:
 
     token bool {
-        [
-              Bool <value_node_elem_sep>
-              <bool_payload>
-            | [false | true]
-        ]
+        [Bool <value_node_elem_sep>]?
+        <bool_payload>
     }
 
     token bool_payload {
-        [false | true | 0 | 1]
+        [false | true]
     }
 
 Examples:
@@ -363,8 +361,8 @@ Grammar:
     }
 
     token int_payload {
-        [<int_max_col_val> <value_payload_elem_sep>]?
-        <int_body>
+          <int_max_col_val> <value_payload_elem_sep> <int_body>
+        | <d_int_body>
     }
 
     token value_payload_elem_sep { \s* ';' \s* }
@@ -379,9 +377,19 @@ Grammar:
 
     token pint_head { <[ 1..9 A..Z ]> }
 
-    token pint_tail { [<[ 0..9 A..Z _ ]>+] ** <segment_sep> }
+    token pint_tail { [['_'?<[ 0..9 A..Z ]>+]+] ** <segment_sep> }
 
     token segment_sep { \s* '~' \s* }
+
+    token d_int_body { [0 | \-?<d_pint_body>] }
+
+    token d_nnint_body { [0 | <d_pint_body>] }
+
+    token d_pint_body { <d_pint_head> <d_pint_tail>? }
+
+    token d_pint_head { <[ 1..9 ]> }
+
+    token d_pint_tail { [['_'?<[ 0..9 ]>+]+] ** <segment_sep> }
 
 Examples:
 
@@ -414,10 +422,13 @@ Grammar:
     }
 
     token string_payload {
-        [<int_max_col_val> <value_payload_elem_sep>]?
-        <ord_list_open>
-            [<int_body> ** <list_elem_sep>]?
-        <ord_list_close>
+          <int_max_col_val> <value_payload_elem_sep>
+          <ord_list_open>
+              [<int_body> ** <list_elem_sep>]?
+          <ord_list_close>
+        | <ord_list_open>
+              [<d_int_body> ** <list_elem_sep>]?
+          <ord_list_close>
     }
 
     token ord_list_open { \s* '[' \s* }
@@ -470,21 +481,23 @@ Grammar:
     }
 
     token text_payload {
-        <quoted_char_str_seg> ** <segment_sep>
+        <quoted_char_str>
     }
 
-    token quoted_char_str_seg {
-        <[']>
-            [
-                  '\b' | '\q' | <-[\\\']>
-                | '\c<' [
-                      [<[ A..Z ]> | ' ']+
-                    | [0 | <[ 1..9 ]> <[ 0..9 ]>*]
-                    | <[ 1..9 A..Z ]> ';'
-                        [0 | <[ 1..9 A..Z ]> <[ 0..9 A..Z ]>*]
-                  ] '>'
-            ]*
-        <[']>
+    token quoted_char_str {
+        [
+            <[']>
+                [
+                      '\b' | '\q' | <-[\\\']>
+                    | '\c<' [
+                          [<[ A..Z ]>+] ** ' '
+                        | [0 | <[ 1..9 ]> <[ 0..9 ]>*]
+                        | <[ 1..9 A..Z ]> ';'
+                            [0 | <[ 1..9 A..Z ]> <[ 0..9 A..Z ]>*]
+                      ] '>'
+                ]*
+            <[']>
+        ] ** <segment_sep>
     }
 
 Examples:
@@ -512,8 +525,8 @@ Grammar:
     }
 
     token rat_payload {
-        [<int_max_col_val> <value_payload_elem_sep>]?
-        <rat_body>
+          <int_max_col_val> <value_payload_elem_sep> <rat_body>
+        | <d_rat_body>
     }
 
     token rat_body {
@@ -526,6 +539,18 @@ Grammar:
           <nnint_body>\.<pint_tail>
         | <nnint_body> \s* \/ \s* <pint_body>
         | <nnint_body> \s* \* \s* <pint_body> \s* \^ \s* <int_body>
+    }
+
+    token d_rat_body {
+          <d_int_body>\.<d_pint_tail>
+        | <d_int_body> \s* \/ \s* <d_pint_body>
+        | <d_int_body> \s* \* \s* <d_pint_body> \s* \^ \s* <d_int_body>
+    }
+
+    token d_nnrat_body {
+          <d_nnint_body>\.<d_pint_tail>
+        | <d_nnint_body> \s* \/ \s* <d_pint_body>
+        | <d_nnint_body> \s* \* \s* <d_pint_body> \s* \^ \s* <d_int_body>
     }
 
 Examples:
@@ -565,8 +590,7 @@ Grammar:
     }
 
     token instant_payload {
-        [<int_max_col_val> <value_payload_elem_sep>]?
-        <rat_body>
+        <rat_payload>
     }
 
 Examples:
@@ -586,8 +610,7 @@ Grammar:
     }
 
     token duration_payload {
-        [<int_max_col_val> <value_payload_elem_sep>]?
-        <rat_body>
+        <rat_payload>
     }
 
 Examples:
@@ -613,10 +636,19 @@ Grammar:
     }
 
     token name_payload {
-        [<quoted_char_str_seg> | <nonquoted_char_str_seg>] ** <segment_sep>
+          <nonquoted_char_str>
+        | <quoted_char_str>
     }
 
-    token nonquoted_char_str_seg { <[ a..z A..Z 0..9 _ - ]>+ }
+    token nonquoted_char_str { <[ a..z A..Z _ ]><[ a..z A..Z 0..9 _ - ]>* }
+
+A C<nonquoted_char_str> is composed of a single alphabetic or underscore
+character followed by zero or more characters that are each alphanumeric or
+underscore or hyphen.  It can not be segmented, so you will have to use the
+C<quoted_char_str> equivalent if you want a segmented string.  I<The
+definitions of alphabetic and numeric should include appropriate Unicode
+characters, but at the moment this isn't reflected in the grammar; TODO:
+fix this.>
 
 Examples:
 
@@ -657,7 +689,8 @@ Grammar:
     }
 
     token decl_name_chain_payload {
-        [<name_payload> ** <name_chain_elem_sep>]?
+          <name_payload> ** <name_chain_elem_sep>
+        | <ord_list_open> <ord_list_close>
     }
 
 Examples:
@@ -665,6 +698,8 @@ Examples:
     DeclNameChain:gene.sorted_person_name
 
     DeclNameChain:stats.'samples by order'
+
+    DeclNameChain:[]
 
 =head2 sys.std.Core.Type.Cat.Comment
 
@@ -677,7 +712,7 @@ Grammar:
     }
 
     token comment_payload {
-        <quoted_char_str_seg> ** <segment_sep>
+        <quoted_char_str>
     }
 
 Examples:
@@ -689,26 +724,26 @@ Examples:
 Grammar:
 
     token order {
-        Order <value_node_elem_sep>
+        [Order <value_node_elem_sep>]?
         <order_payload>
     }
 
     token order_payload {
-        [increase | same | decrease | -1 | 0 | 1]
+        [increase | same | decrease]
     }
 
 Examples:
 
     Order:same
 
-    Order:decrease
+    decrease
 
 =head2 sys.std.Core.Type.Cat.RatRoundMeth
 
 Grammar:
 
     token rat_round_meth {
-        RatRoundMeth <value_node_elem_sep>
+        [RatRoundMeth <value_node_elem_sep>]?
         <rat_round_meth_payload>
     }
 
@@ -724,6 +759,8 @@ Grammar:
 Examples:
 
     RatRoundMeth:half_up
+
+    to_zero
 
 =head1 GENERIC Q/SCALAR AND Q/NONSCALAR VALUE LITERALS
 
@@ -996,8 +1033,8 @@ Grammar:
     }
 
     token count {
-        [<int_max_col_val> <value_payload_elem_sep>]?
-        <pint_body>
+          <int_max_col_val> <value_payload_elem_sep> <pint_body>
+        | <d_pint_body>
     }
 
     token qbag_payload_repeated_values {
@@ -1036,13 +1073,19 @@ Grammar:
     }
 
     token utc_instant_payload {
-        [<int_max_col_val> <value_payload_elem_sep>]?
-        <ord_list_open>
-            <int_body>? <list_elem_sep>
-            [<pint_body>? <list_elem_sep>] ** 2
-            [<nnint_body>? <list_elem_sep>] ** 2
-            <nnrat_body>?
-        <ord_list_close>
+          <int_max_col_val> <value_payload_elem_sep>
+          <ord_list_open>
+              <int_body>? <list_elem_sep>
+              [<pint_body>? <list_elem_sep>] ** 2
+              [<nnint_body>? <list_elem_sep>] ** 2
+              <nnrat_body>?
+          <ord_list_close>
+        | <ord_list_open>
+              <d_int_body>? <list_elem_sep>
+              [<d_pint_body>? <list_elem_sep>] ** 2
+              [<d_nnint_body>? <list_elem_sep>] ** 2
+              <d_nnrat_body>?
+          <ord_list_close>
     }
 
 Examples:
@@ -1068,11 +1111,15 @@ Grammar:
     }
 
     token utc_duration_payload {
-        [<int_max_col_val> <value_payload_elem_sep>]?
-        <ord_list_open>
-            [<int_body>? <list_elem_sep>] ** 5
-            <rat_body>
-        <ord_list_close>
+          <int_max_col_val> <value_payload_elem_sep>
+          <ord_list_open>
+              [<int_body>? <list_elem_sep>] ** 5
+              <rat_body>
+          <ord_list_close>
+        | <ord_list_open>
+              [<d_int_body>? <list_elem_sep>] ** 5
+              <d_rat_body>
+          <ord_list_close>
     }
 
 Examples:

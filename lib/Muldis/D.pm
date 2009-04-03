@@ -7,7 +7,7 @@ use warnings FATAL => 'all';
 ###########################################################################
 
 { package Muldis::D; # package
-    use version 0.74; our $VERSION = qv('0.62.3');
+    use version 0.74; our $VERSION = qv('0.63.0');
     # Note that Perl code only exists at all in this file in order to help
     # the CPAN indexer handle the distribution properly.
 } # package Muldis::D
@@ -29,7 +29,7 @@ Formal spec of Muldis D relational DBMS lang
 
 =head1 VERSION
 
-This document is Muldis::D version 0.62.3.
+This document is Muldis::D version 0.63.0.
 
 =head1 PREFACE
 
@@ -58,9 +58,9 @@ at them.
 
 The fully-qualified name of this multi-part document and the language
 specification it contains (as a single composition) is
-C<Muldis_D:'http://muldis.com':'0.62.3'>.  It is the official/original (not
+C<Muldis_D:'http://muldis.com':'0.63.0'>.  It is the official/original (not
 embraced and extended) Muldis D language specification by the authority
-Darren Duncan (C<http://muldis.com>), version C<0.62.3> (this number
+Darren Duncan (C<http://muldis.com>), version C<0.63.0> (this number
 matches the VERSION pod in this file).  This multi-part document is named
 and organized with the expectation that many dialects, extensions, and core
 versions of it will exist over time, some of those under the original
@@ -194,8 +194,9 @@ strongly recommended for Muldis D variant names that authority strings
 follow the formats that are valid as authority strings for the long names
 of Perl 6 packages, such as a CPAN identifier or an http url.
 
-For the official/original Muldis D language spec by Darren Duncan, that
-string is always C<http://muldis.com> during the foreseeable future.
+For the official/original Muldis D language spec by Muldis Data Systems,
+Inc., that string is always C<http://muldis.com> during the foreseeable
+future.
 
 If someone else wants to I<embrace and extend> Muldis D, then they must use
 their own (not C<http://muldis.com>) base authority identifier, to prevent

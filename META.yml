@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Muldis-D
-version:             0.62.3
+version:             0.63.0
 abstract:            Formal spec of Muldis D relational DBMS lang
 license:             gpl
 author:              
