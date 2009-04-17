@@ -1,6 +1,117 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-04-16  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.64.0 is released on CPAN as
+    Muldis-D-0.64.0.tar.gz.
+
+    * (Basics.pod)  Minor updates to "NOTES ON TERMINOLOGY", clarifying
+    that a value literal is a common special case of a selector, and also
+    that a constant may alternately be a niladic function.
+
+    * (Types_Catalog.pod, Routines_Catalog.pod)  Renamed the 8 relation
+    types "ScaLitExprNodeSet" and
+    "[ScaPR|Tup|Rel|[Func|Proc|Type|OrdDetFunc]Ref]LitExprNodeSet" to
+    "ScaValExprNodeSet" and
+    "[ScaPR|Tup|Rel|[Func|Proc|Type|OrdDetFunc]Ref]SelExprNodeSet"; the old
+    names were actually inappropriate because partly the concept of a
+    literal doesn't exist in a type definition (just in concrete code), and
+    also child nodes of these nodes are often non-literal expressions such
+    as function invocations.  Also renamed the corresponding 8 attributes
+    of the database type "ExprNodeType", and updated the few other
+    references to the renamed types to use the new names.
+
+    * (Types_Catalog.pod)  Added 3 new relation types
+    "sys.std.Core.Type.Cat.[Set|Ary|Bag]SelExprNodeSet" which are like
+    specialized versions of "RelSelExprNodeSet", with a simpler structure
+    for the commonly used Set|Array|Bag value selectors.  Also added 3 new
+    corresponding attributes to the "ExprNodeType" type.
+
+    * (Types_Catalog.pod)  Corrected an omission in the tuple type
+    "sys.std.Core.Type.Cat.InnerScalarType" by adding a new attribute
+    "subtype_constraint", used when we are defining a proper subtype of
+    another type, which constrains the base type's value set at least
+    enough such that the new type's possrep maps can work without error,
+    and it is possible for the new type's possreps' constraints to operate
+    without error.  Also updated a few other cat type/attr descriptions.
+
+    * (Types_Catalog.pod, QTuple.pod, QRelation.pod, QArray.pod)  Added new
+    order-determination function "sys.std.QTuple.order_by_attr_names" which
+    provides a convenient short-hand for ordering tuples of a relation
+    simply in terms of a list of attribute names; this saves users having
+    to declare their own order-determination function for this common
+    format of queries; also added new type
+    "sys.std.Core.Type.Cat.OrderByName" used by said new function.  Also
+    added the 4 new wrapper functions
+    "sys.std.QRelation.[rank|limit]_by_attr_names" and
+    "sys.std.QArray.[|limit_of_]QArray_from_wrap_by_attr_names" which
+    combine the previous function with their partial namesakes.  And so
+    Muldis D now provides a direct analogy to the SQL syntax "ORDER BY foo,
+    bar" etc that doesn't need a user-defined closure, though you still
+    need the latter for the general case of "ORDER BY <expr>".
+
+    * (Routines.pod)  Changed the "sys.std.Core.QRelation.summary" function
+    by renaming its "result_attr_names" parameter to "summ_attr_names" and
+    redefining its functionality more in terms of "extension" rather than
+    "map"; the function given to "summ_func" must now just result in a
+    tuple with attributes to add to a result which now already has all the
+    attributes named by "group_per", rather than resulting in all
+    attributes for the result.  The new version of "summary" should be much
+    easier to use as presumably users always want to keep the attributes
+    they are grouping per, and they now don't have to spell them out every
+    time.  For the rare case where you want the old behaviour, now you have
+    to do it manually with an explicit "cmpl_group" plus "map".
+
+    * (Routines.pod, QBag.pod)  Added new function
+    "sys.std.Core.QRelation.cardinality_per_group" which is like "summary"
+    but shorthands the common case where people just want a count of tuples
+    per group and not any other information.  Also added new function
+    "sys.std.QBag.QBag_from_cmpl_group" which is like the other new
+    function but the result is a QBag.
+
+    * (QBag.pod)  Added new function "sys.std.QBag.union_sum" which is like
+    "sys.std.QBag.union" but that counts in the result come from summing
+    the counts of the inputs rather than taking maximums of said.  Also
+    updated the description of "sys.std.QBag.insertion" to clarify it is
+    semantically like "union_sum" and not "sys.std.QBag.union" which is the
+    direct analogy to set union.
+
+    * Added new file "lib/Muldis/D/Ext/Counted.pod" which houses the new
+    "Muldis D Counted Extension".  This extension defines special
+    count-sensitive versions of all the common and applicable relational
+    operators in Routines.pod and QRelation.pod, each new one taking an
+    extra $count_attr_name argument that specifies which attribute of each
+    normal argument contains the count and is to be treated specially, such
+    that generally just the other attributes are considered in regards to
+    the normal semantics of the operators, and the count attributes are
+    summed or diffed as is appropriate.  Having these operators
+    system-defined is probably the best way to support people who actually
+    want bag-of-tuple semantics, or most precisely simulate the general
+    case of bag-of-tuple behaviour of SQL for those using Muldis D as an
+    intermediate representation, and then various users won't be
+    reimplementing that wheel as multiple incompatible extensions.  This
+    file has an initial complement of 22 new functions, all in the
+    "sys.std.Counted.\w+" namespace: "[add|remove]_count_attr",
+    "counted_[cardinality|is_[|not_]member|insertion|deletion]",
+    "counted_[[|cmpl_]projection|[|maybe_]reduction|map]",
+    "counted_is_[|not_][|proper_]subset",
+    "counted_[union[|_sum]|intersection|difference]"
+    "counted_[|static_]substitution".
+
+    * (D.pm, Core.pod, README)  Added basic references to the new
+    Counted.pod file.
+
+    * (HDMD_Perl5_Tiny.pod)  Fixed a few detail fossils that became
+    obsolete with last release's PTMD_Tiny changes.  Updated details for
+    PHMD payloads of these 4 types: Bool, Int, Rat, Order.
+
+    * (PTMD_Tiny.pod, HDMD_Perl[5|6]_Tiny.pod)  Removed a fossil each that
+    referenced the concept of a scalar without a possrep.
+
+    * (Basics.pod, Routines.pod, Types_Catalog.pod, Ordered.pod,
+    QRelation.pod)  Minor updates.
+
 2009-04-02  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.63.0 is released on CPAN as

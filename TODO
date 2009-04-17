@@ -18,6 +18,12 @@ table for these items; they are simply to be done "as soon as possible".
 the progress is non-trivial, so there are regular public snapshots with
 nicely rendered documentation.
 
+* In PTMD_Tiny, update Comment literals to have # delimiters (whose
+official Unicode name is "NUMBER SIGN", so let's maybe backslash # literals
+with \n, or maybe not since that escape is so common in Perl etc with diff
+meaning).  Related item, simplify the BBEdit CLM Plist so that all colored
+string literals don't include value-kind keyword, now simply a keyword.
+
 * Add ext/TAP.pod, which is a partial port of Perl 5's Test::More / Perl
 6's Test.pm / David Wheeler's pgTAP to Muldis D; assist users in testing
 their Muldis D code using TAP protocol.  The TAP messages have type Text.
@@ -234,7 +240,7 @@ constraint writers want to know anyway.
 * Add other kinds of triggered routines.
 
 * Enhance the catalog so that one when defining values like
-[Tup|Rel]LitExprNodeSet, one can tag such values with the data type the
+[Tup|Rel]SelExprNodeSet, one can tag such values with the data type the
 value is supposed to be in, so they can auto-complete missing attributes as
 per the GCVL optional middle element of the Tiny dialects; this would
 also work for when a definition isn't a valid relation since the actual
