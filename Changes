@@ -1,6 +1,52 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-04-28  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.65.1 is released on CPAN as
+    Muldis-D-0.65.1.tar.gz.
+
+    * (PTMD_Tiny.pod, HDMD_Perl(6|5)_Tiny.pod)  Rearranged some POD
+    sections:  Moved "BOOTLOADER" to just above "LANGUAGE NAME".  Moved
+    "Nothing" to just above "Bool".  Moved "Order" and "RatRoundMeth" to
+    just below "Bool".  Moved "Rat" to just below "Int".  Moved
+    "[Instant|Duration]" to just below "Comment".  Moved
+    "[UTCInstant|FloatInstant|UTCDuration]" to just below "Duration".
+    Moved "String" to just below "UTCDuration".  Renamed "SIMPLE CORE
+    SCALAR VALUE LITERALS" to "OPAQUE VALUE LITERALS", and "GENERIC
+    Q/SCALAR AND Q/NONSCALAR VALUE LITERALS" to "COLLECTION VALUE
+    SELECTORS", and removed the now-empty "TEMPORAL EXTENSION SCALAR VALUE
+    LITERALS" heading.  Following these changes, "OPAQUE ..." has "Nothing"
+    plus all the q/scalar selectors, including all the temporal selectors,
+    but not "[|Q]Scalar", and "COLLECTION ..." has "[|Q]Scalar" plus all
+    the q/nonscalar selectors, but not "Nothing".  The distinction between
+    these 2 new groups is that "COLLECTION ..." has all the selectors which
+    are visibly collections of other nodes, while "OPAQUE ..." has all the
+    selectors which visibly have no component nodes; the latter are always
+    constant expressions while the former might vary at runtime if child
+    nodes are say function invocations or routine parameters.
+
+    * (PTMD_Tiny.pod, HDMD_Perl(6|5)_Tiny.pod)  Renamed all the level-2 /
+    type-specific pod section headings from "sys.std.Core[.Cat]?.\w+" to
+    headings that are more generic, in the process also merging a few
+    similar such pod sections; 24 sections per file became 20.  The 3
+    sections "[Name|NameChain|DeclNameChain]" merged into the 1 "DBMS
+    Entity Name Literals", the 2 sections "[Instant|Duration]" merged into
+    the 1 "TAI Temporal Literals", the 2 sections
+    "[[UTC|Float]Instant|Duration]" merged into the 1 "UTC and Float
+    Temporal Literals".  The simple renames were these 17 sections:
+    "Nothing" -> "The Nothing Literal", "Bool" -> "Boolean Literals",
+    "Order" -> "Order-Determination Literals", "RatRoundMeth" -> "Rational
+    Rounding Method Literals", "[Int|Rat]" -> "General Purpose
+    [Integer|Rational] Numeric Literals", "[Blob|Text]" -> "General Purpose
+    [Binary|Character] String Literals", "Comment" -> "Code Comment
+    Literals", "String" -> "Low Level Integer String Literals", "Tuple" ->
+    "Tuple and Database Selectors",
+    "[Q|][Scalar|Relation|Set|Single|Array|Bag]" ->
+    "[Scalar|Relation|Set|Single|Array|Bag] Selectors",
+
+    * (HDMD_Perl(6|5)_Tiny.pod)  Various other minor updates and fixes.
+
 2009-04-22  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.65.0 is released on CPAN as
