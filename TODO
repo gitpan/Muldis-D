@@ -18,9 +18,6 @@ table for these items; they are simply to be done "as soon as possible".
 the progress is non-trivial, so there are regular public snapshots with
 nicely rendered documentation.
 
-* Move the "String" types into Cat.* so to emphasize that they're not
-actually for general purpose use for user data.
-
 * Add ext/TAP.pod, which is a partial port of Perl 5's Test::More / Perl
 6's Test.pm / David Wheeler's pgTAP to Muldis D; assist users in testing
 their Muldis D code using TAP protocol.  The TAP messages have type Text.
@@ -44,11 +41,9 @@ for awhile between releases of the language spec, and also since .Z updates
 in the language spec only indicate bug fixes and shouldn't constitute a
 change to the spec from the point of view of ::Validator.
 
-* IN PROGRESS ...
-Reorganize the Tiny dialects docs so that plain-text-Tiny now has most of
-the detail info and is standalone, and hosted-data-Perl-Tiny is just
-defined as being the same as the former but for specified format
-differences.
+* Update the HDMD_Perl[6|5]_Tiny dialects to strip out any redundant
+description text, since they should now be able to piggyback on the
+PTMD_Tiny descriptions, and otherwise update them / clean them up.
 
 * Update the Tiny dialects with special syntax for declaring whole depots
 in a single expression, catalog+data.  This can be useful for example with

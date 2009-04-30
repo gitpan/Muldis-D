@@ -1,12 +1,125 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-04-29  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.66.0 is released on CPAN as
+    Muldis-D-0.66.0.tar.gz.
+
+    * This release features major updates and additions to the PTMD_Tiny
+    dialect, including fleshing out of descriptive text, such that this
+    dialect's definition is now fully self-defined and you no longer have
+    to look at the HDMD_Perl[6|5]_Tiny dialects to fill in the gaps.
+    That's not to say that the concrete grammars are complete (they're
+    not), but now PTMD_Tiny is no longer lagging the other dialects with
+    regard to completeness.
+
+    * (Types.pod, Types_Catalog.pod, Basics.pod)  Renamed all of the
+    "String" types from the generic "sys.std.Core.Type.\w+" namespace to
+    the catalog-focused "sys.std.Core.Type.Cat.\w+" namespace, and moved
+    their definitions from Types.pod to Types_Catalog.pod; specifically the
+    5 normal types "(|SE|B|O|UCP)String" plus the infinite number of
+    "String.*" types were renamed.  The main reason for this change was to
+    emphasize that the "String" types are not generally intended for direct
+    use with user data, and should only be used mainly by other
+    system-defined types and operators in their definitions.
+
+    * (Routines_Catalog.pod, QTuple.pod)  Renamed the 3 functions
+    "sys.std.Core.Cat.Order_[[|conditional_]reverse|reduction]" to
+    "sys.std.Core.Cat.Order.[[|conditional_]reverse|reduction]".
+
+    * (PTMD_Tiny.pod)  Split the pod section "VALUE LITERAL COMMON
+    ELEMENTS" into the 2 sections "VALUE LITERALS AND SELECTORS" and "Value
+    Literal Common Elements".  Renamed the illustrative grammar token
+    "value" to "x_value", leaving just the one "value" that should actually
+    be used in a generic grammar.
+
+    * (PTMD_Tiny.pod)  Updated every kind of quoted character string
+    literals so that non-"space" whitespace characters may no longer appear
+    literally, but must instead be denoted with escape sequences; to be
+    specific, disallowed the 4 characters "\t\n\f\r" from appearing
+    literally.  The main reason for this change was to ensure that the
+    actual values being selected by char str literals were not variable per
+    the kind of linebreaks used to format the Muldis D source code itself.
+    These 3 grammar tokens were updated: "[text|comment|_payload]",
+    "quoted_name_str".
+
+    * (PTMD_Tiny.pod)  Added another simple escape sequence for quoted char
+    str literals, "\s", representing a space (F;20).  Updated "Comment"
+    literals so they can have optional leading or trailing space chars
+    inside the # delimiters which are not part of the selected Comment
+    value; you must escape leading/trailing spaces now if you want them
+    included in the value.  These 2 grammar tokens were updated:
+    "comment_payload", "escaped_char".
+
+    * (PTMD_Tiny.pod)  Renamed a few generic grammar tokens:
+    "int_max_col_val" -> "num_max_col_val", "list_[open|close]" ->
+    "nonord_list_[open|close]".
+
+    * (PTMD_Tiny.pod)  Refactored grammar tokens concerning generic
+    relations, UTC temporals, etc.  Merged the "qrelation" token into the
+    "value" token (and "payload"), then renamed the 2
+    "generic_qrelation[|_payload]" to "qrelation[|_payload]", and renamed
+    the 3 "generic_relation_\w+_payload" to "r_\w+_payload".  Split the 2
+    tokens "utc_instant[|_payload]" into themselves and
+    "float_instant[|_payload]", and updated the "value" and "payload"
+    tokens accordingly.  Split the token "value" 3 ways into itself and
+    "opaque_value_literal" plus "coll_value_selector".
+
+    * (PTMD_Tiny.pod)  Updated the whole PTMD_Tiny grammar to add capturing
+    parenthesis, so to help illustrate a map between the concrete grammar
+    and anticipated parse tree nodes, which HDMD_Perl[6|5]_Tiny are to a
+    large degree.
+
+    * (PTMD_Tiny.pod)  Renamed all the grammar tokens that are either the
+    main tokens or main payload tokens for value literals or selectors, so
+    to spell the tokens the same way as their "value_kind" components which
+    is the resulting type names; for example, the tokens that were named
+    "rat_round_meth[|_payload]" are now named "RatRoundMeth[|_payload]".
+    This also means that the grammar tokens and capture node names
+    ("value_kind") now actually match each other.
+
+    * (PTMD_Tiny.pod)  Split up the following grammar tokens into
+    themselves and additional parts, so to make them more self-documenting:
+    "Blob_payload", "[[UTC|Float]Instant|UTCDuration]_payload",
+    "String_payload", "r_ordered_qattr_payload".
+
+    * (PTMD_Tiny.pod)  Updated the grammar tokens [Int, Rat, Blob,
+    UTCInstant, FloatInstant, String, QTuple] and "value_kind" to add one
+    or more "value_kind" alternative values which provide a terser
+    alternative to common settings of a "value" node's "type_name"; for
+    example, added "NNInt", "OctetBlob", "UTCDate", and "Database".
+
+    * (PTMD_Tiny.pod)  Updated the top-level grammar so the language root
+    token is "bootloader" and it composes a "language_name" token plus
+    exactly one alternative between the 3 tokens "value", "depot", (a
+    sequence of) "boot_stmt".  The "depot" one is new, and is declared in
+    the new pod section "DEPOT DECLARATION".  Fleshed out the pod sections
+    "BOOTLOADER", "VALUE LITERALS AND SELECTORS", "COLLECTION VALUE
+    SELECTORS" with their own description paragraphs, and removed now
+    redundant text from "GENERAL STRUCTURE".  Also small "DESCRIPTION"
+    updates.  Also split the token "boot_stmt" into itself plus
+    "generic_boot_stmt", the latter being the first of unspecified
+    alternatives in the former, todo in a subsequent release.  The new
+    "depot" token references 2 undeclared/todo tokens
+    "depot_[catalog|data]".  Also updated the appropriate sub-tokens of
+    "Q[Tuple|Relation|Set|Single|Array|Bag" so they now embed "expr" tokens
+    rather than "value"; declaring the "expr" token is todo.
+
+    * (PTMD_Tiny.pod)  Updated the "LANGUAGE NAME" main pod section plus
+    all the pod sections specific to value node literals/selectors to add
+    complete desc paragraphs to each one, all of these derived from their
+    counterpart desc text in the HDMD_Perl[6|5]_Tiny.pod files.
+
+    * (PTMD_Tiny.pod)  Removed the now-unneeded brief main pod section
+    REWRITE PROGRESS MARKER.
+
 2009-04-28  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.65.1 is released on CPAN as
     Muldis-D-0.65.1.tar.gz.
 
-    * (PTMD_Tiny.pod, HDMD_Perl(6|5)_Tiny.pod)  Rearranged some POD
+    * (PTMD_Tiny.pod, HDMD_Perl[6|5]_Tiny.pod)  Rearranged some POD
     sections:  Moved "BOOTLOADER" to just above "LANGUAGE NAME".  Moved
     "Nothing" to just above "Bool".  Moved "Order" and "RatRoundMeth" to
     just below "Bool".  Moved "Rat" to just below "Int".  Moved
@@ -26,7 +139,7 @@
     constant expressions while the former might vary at runtime if child
     nodes are say function invocations or routine parameters.
 
-    * (PTMD_Tiny.pod, HDMD_Perl(6|5)_Tiny.pod)  Renamed all the level-2 /
+    * (PTMD_Tiny.pod, HDMD_Perl[6|5]_Tiny.pod)  Renamed all the level-2 /
     type-specific pod section headings from "sys.std.Core[.Cat]?.\w+" to
     headings that are more generic, in the process also merging a few
     similar such pod sections; 24 sections per file became 20.  The 3
@@ -45,7 +158,7 @@
     "[Q|][Scalar|Relation|Set|Single|Array|Bag]" ->
     "[Scalar|Relation|Set|Single|Array|Bag] Selectors",
 
-    * (HDMD_Perl(6|5)_Tiny.pod)  Various other minor updates and fixes.
+    * (HDMD_Perl[6|5]_Tiny.pod)  Various other minor updates and fixes.
 
 2009-04-22  Darren Duncan <perl@DarrenDuncan.net>
 
