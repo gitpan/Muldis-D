@@ -41,10 +41,6 @@ for awhile between releases of the language spec, and also since .Z updates
 in the language spec only indicate bug fixes and shouldn't constitute a
 change to the spec from the point of view of ::Validator.
 
-* Update the HDMD_Perl[6|5]_Tiny dialects to strip out any redundant
-description text, since they should now be able to piggyback on the
-PTMD_Tiny descriptions, and otherwise update them / clean them up.
-
 * Update the Tiny dialects with special syntax for declaring whole depots
 in a single expression, catalog+data.  This can be useful for example with
 a simple Muldis D implementation that wants to represent a persisted depot
@@ -90,8 +86,8 @@ builtins-interfaces-defining code into Muldis D implementations, or maybe
 no comment is necessary.  Probably a good precedent is to look at what
 legalities concern existing tutorial/etc books that have sample code.
 
-* Further to the prior item, add new file Ext/String.pod and add to that
-file and other files definitions of any remaining routines that would be
+* Further to the prior item, add to Routines_Catalog.pod and other files
+definitions of any remaining routines, eg String routines, that would be
 needed so that for all system-defined types all the necessary
 system-defined routines would exist that are necessary for defining said
 types, especially their constraint or mapping etc definitions.  So in
@@ -199,7 +195,7 @@ sys.std.Core.Type.Foreign (itself 'special' like FuncRef etc), the new
 one being a root type, and then we simply say that all values passed in
 from a host or peer language are of that root type, period; this new one is
 declared in Types.pod probably maybe I guess.  Then update Perl5_Tiny and
-Perl6_Tiny to add a new PHMD node kind 'Foreign' which takes any Perl
+Perl6_Tiny to add a new selector node kind 'Foreign' which takes any Perl
 value or object as its payload; this is treated completely as a black box
 in general within the Muldis D implementation.  For matters of identity
 within the Muldis D envirnment, it works as follows:  Under Perl 6, the
@@ -286,6 +282,10 @@ rollback would affect, and it might be easier to implement as-is.
 
 * Consider adding random value generators for data types other than integer
 and rational numerics, such as for character strings or binary strings.
+
+* Consider updating the Tiny dialects to to provide alternate special
+syntax for certain values, for example in PTMD_Tiny allowing value literals
+like these to be valid: Tuple:d0, Relation:d0c0, Relation:d0c1.
 
 * Make further updates to Temporal.pod to improve correctness or
 normalization, particularly with durations, maybe add some UTCDuration

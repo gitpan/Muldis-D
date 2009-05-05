@@ -9,7 +9,7 @@ Muldis D general purpose data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types version 0.66.0.
+This document is Muldis::D::Core::Types version 0.67.0.
 
 =head1 PREFACE
 
@@ -58,17 +58,14 @@ relationships:
 
         sys.std.Core.Type.QTuple
             sys.std.Core.Type.Tuple
-                sys.std.Core.Type.TupleD0
                 sys.std.Core.Type.Database
 
         sys.std.Core.Type.QRelation
             sys.std.Core.Type.Relation
-                sys.std.Core.Type.RelationD0
             sys.std.Core.Type.QSet
                 sys.std.Core.Type.Set
                 sys.std.Core.Type.QMaybe
                     sys.std.Core.Type.Maybe
-                        sys.std.Core.Type.Nothing
                     sys.std.Core.Type.QSingle
                         sys.std.Core.Type.Single
             sys.std.Core.Type.QArray
@@ -102,10 +99,8 @@ here is another view of those:
 
         sys.std.Core.Type.QRelation
             sys.std.Core.Type.Relation
-                sys.std.Core.Type.RelationD0
                 sys.std.Core.Type.Set
                     sys.std.Core.Type.Maybe
-                        sys.std.Core.Type.Nothing
                         sys.std.Core.Type.Single
                 sys.std.Core.Type.Array
                 sys.std.Core.Type.Bag
@@ -398,9 +393,7 @@ artifacts; again see the I<Muldis D Temporal Extension> for alternatives.
 These core q/nonscalar data types permit transparent/user-visible
 compositions of multiple values into other conceptual values.  For all
 q/nonscalar types, their cardinality is mainly or wholly dependent on the
-data types they are composed of.  Almost all of these types are
-quasi-nonscalar types; only the C<Nothing> type and the 2 C<D0> types are
-non-quasi nonscalar types.
+data types they are composed of.
 
 =head2 sys.std.Core.Type.QTuple
 
@@ -432,11 +425,9 @@ of all Muldis D tuple (nonscalar) types, and contains every tuple value
 that could possibly exist.  Its default value is the same as that of
 C<QTuple> and matters of its cardinality are determined likewise.
 
-=head2 sys.std.Core.Type.TupleD0
-
-This is an enumeration data type.  C<TupleD0> is a proper subtype of
-C<Tuple> that has zero attributes; the cardinality of this type is 1, and
-its only value is also the default value of C<Tuple> and C<QTuple>.
+The only member value of C<Tuple> that has exactly zero attributes is also
+known by the special name C<Tuple:d0>, which serves as the default value of
+the 3 types C<[Q|]Tuple> and C<Database>.
 
 =head2 sys.std.Core.Type.Database
 
@@ -445,8 +436,7 @@ C<Tuple> where all of its attributes are each of relation types or of
 database types (the leaves of this recursion are all relation types); it is
 otherwise the same.  The 4 system-defined user-data variables named
 C<[fed|dep|sdp|pkg].data> are all of "just" the C<Database> type, or are of
-its proper subtypes.  It is also trivially a proper supertype of
-C<TupleD0>.
+its proper subtypes.
 
 =head2 sys.std.Core.Type.QRelation
 
@@ -484,11 +474,11 @@ relation value that could possibly exist.  Its default value is the same as
 that of C<QRelation> and matters of its cardinality are determined
 likewise.
 
-=head2 sys.std.Core.Type.RelationD0
-
-This is an enumeration data type.  C<RelationD0> is a proper subtype of
-C<Relation> that has 0 attributes; the cardinality of this type is 2, and
-its default value is the same as that of C<Relation> and C<QRelation>.
+The only member value of C<Relation> that has exactly zero attributes and
+exactly zero tuples is also known by the special name C<Relation:d0c0>,
+which serves as the default value of the 2 types C<[Q|]Relation>.  The only
+member value of C<Relation> that has exactly zero attributes and exactly
+one tuple is also known by the special name C<Relation:d0c1>.
 
 =head2 sys.std.Core.Type.QSet
 
@@ -523,26 +513,28 @@ C<QMaybe> type.  Its default value has zero q/tuples.
 This is an enumeration data type.  C<Maybe> is the intersection type of
 C<QMaybe> and C<Set>.  The cardinality of this type is infinite.
 
-=head2 sys.std.Core.Type.Nothing
-
-This is an enumeration data type.  C<Nothing> is a proper subtype of
-C<Maybe> where its only member value has exactly zero elements; the
-cardinality of this type is 1 and its only value is its default.  The
-single C<Nothing> value, which is a relation with zero tuples and a single
+The only member value of C<Maybe> that has exactly zero elements is also
+known by the special name C<Maybe:nothing>, aka C<nothing>, which serves as
+the default value of the 4 types C<[Q|]Maybe> and C<[Q|]Set>.  The single
+C<nothing> value, which is a relation with zero tuples and a single
 attribute named C<value>, is Muldis D's answer to the SQL NULL and is
 intended to be used for the same purposes; that is, a special marker for
 missing or inapplicable information, that does not typically equal any
-normal/scalar value; however, in Muldis D, C<Nothing> I<is a value>, and it
-I<is> equal to itself.
+normal/scalar value; however, in Muldis D, C<nothing> I<is a value>, and it
+I<is> equal to itself.  To be more specific, the SQL NULL is very limited
+in what it actually can do, and can not be used to say anything other than
+"this isn't a normal value", similar to what Perl's "undef" says; if you
+want to actually indicate a reason why we don't have a normal value when
+more than one reason could possibly apply in the context, then using simply
+C<nothing> or SQL's NULL can't do it, and instead you'll have to use other
+normal values such as status flags to keep the appropriate metadata.
 
 =head2 sys.std.Core.Type.QSingle
 
 This is an enumeration data type.  C<QSingle> is a proper subtype of
 C<QMaybe> where all member values have exactly 1 element.  Its default
 value's only q/tuple's only attribute has the value C<Bool:false>.  The
-C<QSingle> type is complementary to the C<Nothing> type under C<QMaybe>;
-C<Nothing> consists of exactly 1 of C<QMaybe>'s values, and C<QSingle>
-consists of all of C<QMaybe>'s other values.
+C<QSingle> type consists of all of C<QMaybe>'s values except C<nothing>.
 
 =head2 sys.std.Core.Type.Single
 

@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_Tiny version 0.66.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_Tiny version 0.67.0.
 
 =head1 PREFACE
 
@@ -49,29 +49,22 @@ on the differences; you should read the L<Muldis::D::Dialect::PTMD_Tiny>
 file before the current one, so to provide a context for better
 understanding it.
 
-Fundamentally, the various Muldis D scalar and collection types are
-represented by their equivalent Perl native scalar and collection types.
-But since Muldis D is more strongly typed, or at least differently typed,
-than Perl, each Muldis D literal is represented by a Perl Seq|Array, whose
-elements include both the payload Perl literal plus explicit meta-data for
-how to interpret that Perl literal for mapping to Muldis D.
-
-=head1 REWRITE PROGRESS MARKER
-
-B<What follows next in this file, between this point and the SEE ALSO,
-still has to be rewritten according to certain TODO plans, after which this
-whole file should reflect what the DESCRIPTION etc above says.>
-
 =head1 GENERAL STRUCTURE
 
-A C<HDMD_Perl6_Tiny> Muldis D code file is a Perl 6 code file that defines
-a Perl value that is a tree of Perl Seq|Array, such that each Seq|Array is
-a tree I<node>; or such a Perl value definition may be embedded or
-constructed in one or more files of a larger Perl 6 program that does more
-than this.  The elements of each node/Seq|Array include typically a native
-Perl payload value, which may be a node itself, plus meta-data for that
-payload, that meta-data typically including the analogy of a class name,
-were nodes instead represented by a tree of node-specific objects.
+A C<HDMD_Perl6_Tiny> Muldis D code file is actually a Perl 6 code file that
+defines particular multi-dimensional Perl data structures which resemble
+possible concrete syntax trees (CSTs) from parsing C<PTMD_Tiny> Muldis D
+code.  Each component of a CST is called a I<node> or node element, and
+roughly corresponds to a capture by the C<PTMD_Tiny> parser.  A node is
+typically represened as a Perl Seq|Array, but could alternately be a Perl
+scalar or something else, and so C<HDMD_Perl6_Tiny> Muldis D code is
+typically a tree of Perl structures, called I<node trees>, with Perl
+Seq|Array as the central nodes and Perl scalars as the leaf nodes.  Often
+C<HDMD_Perl6_Tiny> code is embedded or constructed in one or more files of
+a larger Perl 5 program that does more than define this code, such as
+various non-database-related tasks.  A node tree is just composed using
+basic Perl data types, and there are no Muldis D node-specific Perl classes
+or objects required for doing this.
 
 Note that Perl undefined values are not allowed anywhere in a node in the
 general case; you must use only defined values instead.  This documentation
@@ -79,135 +72,78 @@ also assumes that only defined values are used, and that supplying a Perl
 undef will result in an error.  The few exceptions to this rule are
 explicitly stated.
 
-...
+The grammar in this file is informal and consists just of written
+descriptions of how each kind of I<node> must be composed and how to
+interpret such Perl data structures as Muldis D code.  Every named grammar
+node is a Perl Seq|Array unless otherwise stated, and every grammar element
+is a Seq|Array element; the first node element is the Seq|Array element at
+index zero, and so on.
 
-A PHMD value is composed mainly of a tree of Perl Seq|Array, such that each
-Seq|Array is a tree node.  The elements of each node/Seq|Array include
-typically a native Perl payload value, which may be a PHMD value itself,
-plus meta-data for that payload, that meta-data typically including the
-analogy of a class name, were PHMD nodes instead represented by a tree of
-PHMD-specific objects.  While a PHMD main node would generally be
-represented by an Seq|Array, Perl provides the extra option in common cases
-that a PHMD node may be represented by a Perl Pair value.
-
-Every PHMD node representing a Muldis D value literal has 1-3 elements:
-
-=over
-
-=item *
-
-Node kind: a Perl C<Str> value of the format C<< <[ a..z A..Z 0..9 _ ]>+
->>.  All of the PHMD node kinds for Muldis D value literals are these 32:
-C<Bool>, C<Int>, C<String>, C<Blob>, C<Text>, C<Rat>, C<Instant>,
-C<Duration>, C<Name>, C<NameChain>, C<DeclNameChain>, C<Comment>, C<Order>,
-C<RatRoundMeth>, C<[Q|]Scalar>, C<[Q|]Tuple>, C<[Q|]Relation>, C<[Q|]Set>,
-C<Nothing>, C<[Q|]Single>, C<[Q|]Array>, C<[Q|]Bag>, C<[UTC|Float]Instant>,
-C<UTCDuration>.  All of the non-value-literal PHMD node kinds currently
-defined are these 2: C<Muldis_D>, C<boot_stmt>.
-
-=item *
-
-Only when the node has 3 elements; type name: as per the payload of a
-C<NameChain> PHMD node.  PHMD nodes of all of the aforementioned 32
-value-specific kinds can have the 2nd type name node element except for
-these 4: C<Bool>, C<Order>, C<RatRoundMeth>, C<Nothing>; this isn't because
-those types can't be subtyped, but because in practice doing so isn't
-useful.  Furthermore, with just the C<[Q|]Scalar> kinds, having the second
-type name element is mandatory.  Non-value-literal PHMD nodes never have
-this type name element.
-
-=item *
-
-Only when the node kind is not C<Nothing>; the payload: its allowed formats
-depend on the node kind, and are defined separately per each node kind,
-further below.
-
-=back
-
-A Pair may alternately be used to represent a main PHMD node iff that node
-has exactly 2 elements (node kind and payload); in that case, the node kind
-is stored in that Pair's key, and the payload is stored in the Pair's
-value.
-
-For some data types, a GCVL PHMD node may alternately be just its payload
-for the sake of brevity.  If any Perl value of one of the following types
-is encountered where a GCVL PHMD node is expected, then it is interpreted
-as a full PHMD node as follows:
-
-    Muldis D <- Perl 6
-    --------------------
-    Bool     <- Bool
-    Int      <- Int
-    Blob     <- Blob
-    Text     <- Str
-    Rat      <- Rat|Num
-    Instant  <- Instant
-    Duration <- Duration
-    Order    <- Order
-
-The above details are subject to revision regarding when a Perl object
-might claim to do multiple type interfaces.
-
-Generally speaking, no Perl undefined values are allowed anywhere in a PHMD
-value; you must use only defined values instead.  This documentation also
-assumes that only defined values are used, and that supplying a Perl undef
-will result in an error.  Exceptions to this are explicitly noted.
+The root grammar node for the entire dialect is C<bootloader>.
 
 =head1 BOOTLOADER
 
-A full or partial Muldis D C<bootloader> routine consists of a language
-name declaration plus a series of 0..N imperative routine calls.  A
-C<bootloader> is formatted as a PHMD node having 1..N elements, where the
-first element is a PHMD node defining a Muldis D "language name", and each
-remaining element is a PHMD node defining a "bootloader imperative routine
-call".
+A C<bootloader> node has 1..N ordered elements where the first element is a
+C<language_name> node and then either: 1. there is exactly one (second)
+element that is a C<value> node or a C<depot> node; 2. there are 1..N
+ordered elements where each is a C<boot_stmt> node; 3. there are no other
+elements, making the bootloader a no-op.
 
-Examples:
+See the pod sections in this file named L</LANGUAGE NAME>, L</VALUE
+LITERALS AND SELECTORS>, L</DEPOT DECLARATION>, and L</BOOTLOADER
+STATEMENT> for more details about the aforementioned tokens/nodes.
 
-    [
-        [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl6_Tiny',
-            {} ],
-        [ 'boot_stmt', 'sys.std.Core.Cat.create_depot_procedure',
-            {}, { ... } ],
-    ]
+When Muldis D is being compiled and invoked piecemeal, such as because the
+Muldis D implementing virtual machine (VM) is attached to an interactive
+user terminal, or the VM is embedded in a host language where code in the
+host language invokes Muldis D code at various times, the conceptual
+C<bootloader> is usually split up, and so not every Muldis D code fragment
+would then have its own C<language_name>.  Usually a C<language_name> would
+be supplied to the Muldis D VM just once as a VM configuration step, which
+provides a context for further interaction with the VM that just involves
+Muldis D code that isn't itself qualified with a C<language_name>.
 
 =head1 LANGUAGE NAME
 
-As per the VERSIONING pod section of L<Muldis::D>, code written in
-Muldis D must start by declaring the fully-qualified Muldis D language name
-it is written in.  The C<HDMD_Perl6_Tiny> dialect formats this name as a
-PHMD node having the following 5 elements:
+As per the VERSIONING pod section of L<Muldis::D>, code written in Muldis D
+must start by declaring the fully-qualified Muldis D language name it is
+written in.  The C<HDMD_Perl6_Tiny> dialect formats this name as a
+C<language_name> node having 4-5 ordered elements:
 
 =over
 
-=item *
+=item C<ln_base_name>
 
-Node kind / language base name: the Perl C<Str> value C<Muldis_D>.
+This is the Muldis D language base name; it is simply the Perl C<Str> value
+C<Muldis_D>.
 
-=item *
+=item C<ln_base_authority>
 
-Base authority: a Perl C<Str> as per the payload of a C<Text> node;
-typically the Perl C<Str> value C<http://muldis.com>.
+This is the base authority; it is a Perl C<Str> formatted as per a
+specific-context C<Name> value literal; it is typically the Perl C<Str>
+value C<http://muldis.com>.
 
-=item *
+=item C<ln_base_version_number>
 
-Base version number: a Perl C<Str> as per the payload of a C<Text> node;
-typically a Perl C<Str> value like C<1.2.3>.
+This is the base version number; it is a Perl C<Str> formatted as per
+C<ln_base_authority>; it is typically a Perl C<Str> value like C<1.2.3>.
 
-=item *
+=item C<ln_dialect>
 
-Dialect: the Perl C<Str> value C<HDMD_Perl6_Tiny>.
+This is the dialect name; it is simply the Perl C<Str> value
+C<HDMD_Perl6_Tiny>.
 
-=item *
+=item C<ln_extensions>
 
-Extensions: a Perl C<Mapping|Hash> as per the payload of a C<Tuple> node;
-see the L</MULDIS D TINY DIALECT PRAGMAS> pod section for more details.
+Optional; this is a set of chosen pragma/parser-config options as per a
+C<Tuple> SCVL; see the L</MULDIS D TINY DIALECT PRAGMAS> pod section for
+more details.
 
 =back
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl6_Tiny', {} ]
+    [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl6_Tiny' ]
 
     [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl6_Tiny', {
         auto_add_attrs          => Bool::True,
@@ -215,29 +151,105 @@ Examples:
         auto_chains_from_names  => Bool::True,
     } ]
 
-More specifically, a language name PHMD node like the above would generally
-be the input for a Perl Hosted Muldis D implementating virtual machine's
-configuration step, which provides a context for subsequent feeding of
-other PHMD trees to said virtual machine.
+=head1 VALUE LITERALS AND SELECTORS
+
+A C<value> node is a Muldis D value literal, which is a common special case
+of a Muldis D value selector.
+
+There are 24 main varieties of C<value> node, each of which is a named node
+kind of its own:  C<Bool>, C<Order>, C<RatRoundMeth>, C<Int>, C<Rat>,
+C<Blob>, C<Text>, C<Name>, C<NameChain>, C<DeclNameChain>, C<Comment>,
+C<Instant>, C<Duration>, C<UTCInstant>, C<FloatInstant>, C<UTCDuration>,
+C<String>, C<QScalar>, C<QTuple>, C<QRelation>, C<QSet>, C<QMaybe>,
+C<QArray>, C<QBag>.
+
+Fundamentally, the various Muldis D scalar and collection types are
+represented by their equivalent Perl native scalar and collection types.
+But since Muldis D is more strongly typed, or at least differently typed,
+than Perl, each C<value> node is represented by a Perl Seq|Array, whose
+elements include both the payload Perl literal plus explicit meta-data for
+how to interpret that Perl literal for mapping to Muldis D.
+
+=head2 Value Literal Common Elements
+
+Every C<value> node is either a GCVL (generic context value literal) or a
+SCVL (specific context value literal).
+
+Every GCVL has 1-3 ordered elements:
+
+=over
+
+=item C<value_kind>
+
+This is a Perl C<Str> value of the format C<< <[A..Z]> <[ a..z A..Z ]>+ >>;
+it identifies the data type of the value literal in broad terms and is the
+only external meta-data of C<payload> generally necessary to interpret the
+latter; what grammars are valid for C<payload> depend just on
+C<value_kind>.
+
+Between the various kinds of C<value> node, these 48 values are allowed for
+C<value_kind>:  C<Bool>, C<Order>, C<RatRoundMeth>, C<[|NN|P]Int>,
+C<[|NN|P]Rat>, C<[|Octet]Blob>, C<Text>, C<Name>, C<NameChain>,
+C<DeclNameChain>, C<Comment>, C<Instant>, C<Duration>,
+C<UTC[Instant|DateTime|Date|Time]>, C<Float[Instant|DateTime|Date|Time]>,
+C<UTCDuration>, C<[|B|O|UCP]String>, C<[Q|]Scalar>, C<[Q|]Tuple|Database>,
+C<[Q|]Relation>, C<[Q|]Set>, C<[Q|][Maybe|Single]>, C<[Q|]Array>,
+C<[Q|]Bag>.
+
+For just some data types, the C<value_kind> may be omitted; see below.
+
+=item C<type_name>
+
+Only when the C<value> node has 3 elements:  This is a Muldis D data type
+name, for example C<sys.std.Core.Type.Int>; it identifies a specific
+subtype of the generic type denoted by C<value_kind>, and serves as an
+assertion that the Muldis D value denoted by C<payload> is a member of the
+named subtype.  Its format is a C<NameChain_payload> node.  Iff
+C<value_kind> is C<[Q|]Scalar> then C<type_name> is mandatory; otherwise,
+C<type_name> is optional for all C<value>, except that C<type_name> must be
+omitted when C<value_kind> is one of the 2 [C<Bool>, C<Order>]; this isn't
+because those 2 types can't be subtyped, but because in practice doing so
+isn't useful.
+
+=item C<payload>
+
+This is mandatory for all C<value>.  Format varies with C<value_kind>.
+
+=back
+
+A Perl Pair may alternately be used to represent a GCVL iff that node has
+exactly 2 elements (C<value_kind> and C<payload>); in that case, the
+C<value_kind> is stored in that Pair's key, and the C<payload> is stored in
+the Pair's value.
+
+For some data types, a GCVL may alternately be just its payload for the
+sake of brevity.  If any Perl value of one of the following types is
+encountered where a GCVL node is expected, then it is interpreted as a full
+C<value> node as follows:
+
+    Muldis D <- Perl 6
+    --------------------
+    Bool     <- Bool
+    Order    <- Order
+    Int      <- Int
+    Rat      <- Rat|Num
+    Blob     <- Blob
+    Text     <- Str
+    Instant  <- Instant
+    Duration <- Duration
+
+The above details are subject to revision regarding when a Perl object
+might claim to do multiple type interfaces.
+
+For GCVL and SCVL examples, see the subsequent documentation sections.
 
 =head1 OPAQUE VALUE LITERALS
 
-=head2 The Nothing Literal
-
-This node kind represents a 'nothing' value; it is interpreted as a Muldis
-D C<sys.std.Core.Type.Nothing>.  It has 1 element, which is the Perl C<Str>
-value C<Nothing>.
-
-Examples:
-
-    :Nothing()  # or how does Perl 6 make a Pair with undef/default value?
-
 =head2 Boolean Literals
 
-This node kind represents a logical boolean value.  It is interpreted as a
+A C<Bool> node represents a logical boolean value.  It is interpreted as a
 Muldis D C<sys.std.Core.Type.Bool> value as follows:  The payload must be a
-Perl C<Bool>, and so C<Bool::False> and C<Bool::True> are mapped
-directly.
+Perl C<Bool>, and so C<Bool::False> and C<Bool::True> are mapped directly.
 
 Examples:
 
@@ -247,9 +259,9 @@ Examples:
 
 =head2 Order-Determination Literals
 
-This node kind represents an order-determination.  This node is interpreted
-as a Muldis D C<sys.std.Core.Type.Cat.Order> value as follows:  The payload
-must be a Perl C<Order>, and so C<Order::Increase> and C<Order::Same> and
+A C<Order> node represents an order-determination.  It is interpreted as a
+Muldis D C<sys.std.Core.Type.Cat.Order> value as follows:  The payload must
+be a Perl C<Order>, and so C<Order::Increase> and C<Order::Same> and
 C<Order::Decrease> are mapped directly.
 
 Examples:
@@ -260,11 +272,11 @@ Examples:
 
 =head2 Rational Rounding Method Literals
 
-This node kind represents a rounding method.  This node is interpreted as a
-Muldis D C<sys.std.Core.Type.Cat.RatRoundMeth> value by directly mapping
-the payload.  The payload must be a Perl C<Str> having one of the 7
-values C<half_down>, C<half_up>, C<half_even>, C<to_floor>, C<to_ceiling>,
-C<to_zero>, C<to_inf>.
+A C<RatRoundMeth> node represents a rational rounding method.  It is
+interpreted as a Muldis D C<sys.std.Core.Type.Cat.RatRoundMeth> value by
+directly mapping the payload.  The payload must be a Perl C<Str> having one
+of the 7 values C<half_down>, C<half_up>, C<half_even>, C<to_floor>,
+C<to_ceiling>, C<to_zero>, C<to_inf>.
 
 Examples:
 
@@ -274,7 +286,7 @@ Examples:
 
 =head2 General Purpose Integer Numeric Literals
 
-This node kind represents an integer value.  This node is interpreted as a
+An C<Int> node represents an integer numeric value.  It is interpreted as a
 Muldis D C<sys.std.Core.Type.Int> value as follows:  The payload must be a
 Perl C<Int>, which is mapped directly.
 
@@ -300,7 +312,7 @@ Examples:
 
 =head2 General Purpose Rational Numeric Literals
 
-This node kind represents a rational value.  This node is interpreted as a
+A C<Rat> node represents a rational numeric value.  It is interpreted as a
 Muldis D C<sys.std.Core.Type.Rat> value as follows:  The payload must
 be a Perl C<Rat|Num|Int>, which is mapped directly.
 
@@ -332,9 +344,9 @@ Examples:
 
 =head2 General Purpose Binary String Literals
 
-This node kind represents a bit string.  This node is interpreted as a
-Muldis D C<sys.std.Core.Type.Blob> value as follows:  The payload must be a
-Perl C<Blob>, which is mapped directly.
+A C<Blob> node represents a general purpose bit string.  It is interpreted
+as a Muldis D C<sys.std.Core.Type.Blob> value as follows:  The payload must
+be a Perl C<Blob>, which is mapped directly.
 
 Examples I<TODO: What is the actual syntax for the P6 Blob type?>:
 
@@ -348,11 +360,9 @@ Examples I<TODO: What is the actual syntax for the P6 Blob type?>:
 
 =head2 General Purpose Character String Literals
 
-This node kind represents a character string.  This node is interpreted as
-a Muldis D C<sys.std.Core.Type.Text> value by directly mapping the payload.
-Note that, while Plain Text Muldis D may contain a few escape sequences,
-those would be replaced with what they represent prior to making a PHMD
-node.  The payload must be a Perl C<Str>.
+A C<Text> node represents a general purpose character string.  It is
+interpreted as a Muldis D C<sys.std.Core.Type.Text> value by directly
+mapping the payload.  The payload must be a Perl C<Str>.
 
 Examples:
 
@@ -368,26 +378,24 @@ Examples:
 
 =head2 DBMS Entity Name Literals
 
-C<Name> represents a canonical short name for any kind of DBMS
+A C<Name> node represents a canonical short name for any kind of DBMS
 entity when declaring it; it is a character string type, that is disjoint
-from C<Text>.  This node is interpreted as a Muldis D
-C<sys.std.Core.Type.Cat.Name> value by directly mapping the payload.  Note
-that, while Plain Text Muldis D may contain a few escape sequences, those
-would be replaced with what they represent prior to making a PHMD node.
-The payload must be as per the payload of a C<Text> PHMD node.
+from C<Text>.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.Cat.Name> value by directly mapping the payload.  The
+payload must be a Perl C<Str>.
 
-C<NameChain> represents a canonical long name for invoking a DBMS entity
-in some contexts; it is conceptually a sequence of entity short names.  Its
-payload is a Perl C<Seq|Array> value or C<Str> value.  This node is
-interpreted as a Muldis D C<sys.std.Core.Type.Cat.NameChain> value as
-follows:
+A C<NameChain> node represents a canonical long name for invoking a DBMS
+entity in some contexts; it is conceptually a sequence of entity short
+names.  Its payload is a Perl C<Seq|Array> value or C<Str> value.  This
+node is interpreted as a Muldis D C<sys.std.Core.Type.Cat.NameChain> value
+as follows:
 
 =over
 
 =item *
 
 If the payload is an C<Seq|Array>, then it must have at least 2 elements,
-and every element must be a valid payload for a C<Name> PHMD node (that
+and every element must be a valid payload for a C<Name>  node (that
 is, any Perl character string).  Each element of the payload, in order,
 defines an element of the C<array> possrep's attribute of a C<NameChain>.
 
@@ -402,13 +410,14 @@ into the C<Seq|Array> format, then processed as per the latter.
 
 =back
 
-C<DeclNameChain> is exactly the same as the C<NameChain> node kind, in both
-structure/constraints and interpretation, etc, except that it represents a
-canonical long name for declaring a DBMS entity in N-depth contexts, and
-that the chain may have as few as zero parts rather than as few as 2;
-however, a zero part chain can only be expressed with the C<Seq|Array>
-payload format; an empty string C<Str> format will be interpreted as having
-a single element that is the empty string.
+A C<DeclNameChain> node represents a canonical long name for declaring a
+DBMS entity in N-depth contexts; the format and interpretation of a
+C<DeclNameChain_payload> (but as a C<sys.std.Core.Type.Cat.DeclNameChain>
+value) is the same as a C<NameChain_payload> but that the chain may have as
+few as zero parts rather than as few as 2; however, a zero part chain can
+only be expressed with the C<Seq|Array> payload format; an empty string
+C<Str> format will be interpreted as having a single element that is the
+empty string.
 
 Examples:
 
@@ -428,31 +437,31 @@ Examples:
 
 =head2 Code Comment Literals
 
-This node kind represents the text of a Muldis D code comment; it is a
-character string type, that is disjoint from both C<Text> and C<Name>.
-This node is interpreted as a Muldis D C<sys.std.Core.Type.Cat.Comment>
-value by directly mapping the payload.  Note that, while Plain Text Muldis
-D may contain a few escape sequences, those would be replaced with what
-they represent prior to making a PHMD node.  The payload must be as per the
-payload of a C<Text> PHMD node.
+A C<Comment> node represents the text of a Muldis D code comment; it is a
+character string type, that is disjoint from both C<Text> and C<Name>.  It
+is interpreted as a Muldis D C<sys.std.Core.Type.Cat.Comment> value by
+directly mapping the payload.  The payload must be a Perl C<Str>.
 
 Examples:
 
     :Comment('This does something.')
 
+    :Comment('So does this.')
+
 =head2 TAI Temporal Literals
 
-C<Instant> represents a single point in time which is specified in
+An C<Instant> node represents a single point in time which is specified in
 terms of of atomic seconds.  This node is interpreted as a Muldis D
 C<sys.std.Core.Type.Instant> value as follows:  The payload must be a Perl
 C<Instant>, which is mapped directly.
 
-C<Duration> represents a single amount of time (the difference between
-two instants) which is specified in terms of of atomic seconds.  This node
-is interpreted as a Muldis D C<sys.std.Core.Type.Duration> value as
-follows:  The payload must be a Perl C<Duration>, which is mapped directly.
+A C<Duration> node represents a single amount of time (the difference
+between two instants) which is specified in terms of of atomic seconds.
+This node is interpreted as a Muldis D C<sys.std.Core.Type.Duration> value
+as follows:  The payload must be a Perl C<Duration>, which is mapped
+directly.
 
-Examples I<TODO: What is the actu syn for the P6 [Instant|Duration] type?>:
+Examples I<TODO: What is t actual syntax for P6 [Instant|Duration] types?>:
 
     :Instant( Instant.new(1235556432.0) )
 
@@ -470,11 +479,10 @@ Examples I<TODO: What is the actu syn for the P6 [Instant|Duration] type?>:
 
 =head2 UTC and Float Temporal Literals
 
-C<UTCFInstant> represents an "instant"/"datetime" value that is (affiliated
-with the UTC time-zone | "floating" / not affiliated with any time-zone).
-This node is interpreted as a Muldis D
-C<sys.std.Temporal.Type.[UTC|Float]Instant> value whose C<instant> possrep
-attribute values are defined by the payload.
+A C<UTCInstant> node represents an "instant"/"datetime" value that is
+affiliated with the UTC time-zone.  This node is interpreted as a Muldis D
+C<sys.std.Temporal.Type.UTCInstant> value whose C<instant> possrep
+attribute values are defined as follows:
 
 The payload must be a Perl C<Seq|Array> with 6 elements, where each element
 may be either undefined or defined; or if fewer than 6 elements are
@@ -482,26 +490,31 @@ provided, the C<Seq|Array> will be implicitly extended to 6, filling with
 undefs.  The 6 payload elements correspond in order, from the lowest to the
 highest indexed, to the 6 attributes: C<year>, C<month> C<day>, C<hour>,
 C<minute>, C<second>.  For each payload element that Perl considers
-undefined or defined, the corresponding attribute has a C<Nothing> or a
+undefined or defined, the corresponding attribute has the C<nothing> or a
 C<Single> value, respectively.  For each of the first 5 elements, when it
-is defined, it must qualify as a valid payload for an C<Int> PHMD node; for
+is defined, it must qualify as a valid payload for an C<Int> node; for
 the 6th element, when it is defined, it must qualify as a valid payload for
-a C<Rat> PHMD node.
+a C<Rat> node.
 
 A defined C<year> may be any integer, each of [C<month>, C<day>] must be a
 positive integer, each of [C<hour>, C<minute>] must be a non-negative
 integer, and C<second> must be a non-negative rational number.  If all 6
-attributes are defined, then the new C<[UTC|Float]Instant> value is also a
-C<[UTC|Float]DateTime>; if just the first 3 or last 3 are defined, then the
-value is not a C<[UTC|Float]DateTime> but rather a C<[UTC|Float]Date> or
-C<[UTC|Float]Time>, respectively; if any other combination of attributes
-are defined, then the value is just a C<[UTC|Float]Instant> and not of any
-of the other 3 subtypes.
+attributes are defined, then the new C<UTCInstant> value is also a
+C<UTCDateTime>; if just the first 3 or last 3 are defined, then the value
+is not a C<UTCDateTime> but rather a C<UTCDate> or C<UTCTime>,
+respectively; if any other combination of attributes are defined, then the
+value is just a C<UTCInstant> and not of any of the other 3 subtypes.
 
-C<UTCDuration> represents a duration value, an amount of time, which is not
-fixed to any instant in time.  This node is interpreted as a Muldis D
-C<sys.std.Temporal.Type.UTCDuration> value whose C<duration> possrep
-attribute values are defined by the payload.
+A C<FloatInstant> node represents an "instant"/"datetime" value that is
+"floating" / not affiliated with any time-zone.  This node is interpreted
+as a Muldis D C<sys.std.Temporal.Type.FloatInstant> value in an identical
+fashion to how a C<UTCInstant> node is interpreted, whose format it
+completely shares.  Likewise regarding C<Float[DateTime|Date|Time]>.
+
+A C<UTCDuration> node represents a duration value, an amount of time, which
+is not fixed to any instant in time.  This node is interpreted as a Muldis
+D C<sys.std.Temporal.Type.UTCDuration> value whose C<duration> possrep
+attribute values are defined as follows:
 
 The payload must be a Perl C<Seq|Array> with 6 elements, where each element
 may be either undefined or defined; or if fewer than 6 elements are
@@ -509,11 +522,11 @@ provided, the C<Seq|Array> will be implicitly extended to 6, filling with
 undefs.  The 6 payload elements correspond in order, from the lowest to the
 highest indexed, to the 6 attributes: C<years>, C<months> C<days>,
 C<hours>, C<minutes>, C<seconds>.  For each payload element that Perl
-considers undefined or defined, the corresponding attribute has a
-C<Nothing> or a C<Single> value, respectively.  For each of the first 5
+considers undefined or defined, the corresponding attribute has the
+C<nothing> or a C<Single> value, respectively.  For each of the first 5
 elements, when it is defined, it must qualify as a valid payload for an
-C<Int> PHMD node; for the 6th element, when it is defined, it must qualify
-as a valid payload for a C<Rat> PHMD node.
+C<Int>  node; for the 6th element, when it is defined, it must qualify
+as a valid payload for a C<Rat>  node.
 
 A defined [C<years>, C<months>, C<days>, C<hours>, C<minutes>] may be any
 integer, and C<seconds> may be any rational number.  I<Currently,
@@ -535,11 +548,11 @@ Examples:
 
 =head2 Low Level Integer String Literals
 
-This node kind represents an integer string value.  This node is
-interpreted as a Muldis D C<sys.std.Core.Type.Cat.String> value as follows:
-The payload must be a Perl C<Seq|Array>, whose elements are all Perl
-C<Int>, which is mapped directly; each payload element is mapped directly
-as per the payload of an C<Int> PHMD node.
+A C<String> node represents an integer string value.  It is interpreted as
+a Muldis D C<sys.std.Core.Type.Cat.String> value as follows:  The payload
+must be a Perl C<Seq|Array>, whose elements are all Perl C<Int>, which is
+mapped directly; each payload element is mapped directly as per the payload
+of an C<Int> node.
 
 Examples:
 
@@ -549,21 +562,28 @@ Examples:
 
 =head1 COLLECTION VALUE SELECTORS
 
+Note that, with each of the main value selector nodes documented in this
+main POD section, any occurrences
+of child C<expr> nodes should be read as being C<value> nodes instead in
+contexts where instances of the main nodes are being composed beneath
+C<value> nodes.  That is, any C<expr> node options beyond what C<value>
+options exist are only valid within a C<depot> node or C<boot_stmt> node.
+
 =head2 Scalar Selectors
 
-This node kind represents a scalar subtype value.  This node is interpreted
-as a Muldis D C<sys.std.Core.Type.[Q|]Scalar> subtype value whose declared
-type is specified by the PHMD node's (mandatory for C<[Q|]Scalar>) type
-name element and whose attributes are defined by the payload.  The payload
-must be a Perl C<Pair>, whose key and value, respectively, are designated
-I<possrep name> and I<possrep attrs>.  The possrep name and possrep attrs
-must be as per the payload of a C<Name> and C<Tuple> PHMD node payload,
-respectively.  The I<possrep attrs> is interpreted
-specifically as attributes of the declared type's possrep which is
-specified by the I<possrep name>.  Each key+value pair of the
-I<possrep attrs> defines a named possrep attribute of the new scalar; the
-pair's key and value are, respectively, a Perl C<Str> that specifies the
-possrep attribute name, and a PHMD node that specifies the possrep
+A C<QScalar> node represents a literal or selector invocation for a
+quasi-scalar subtype value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.QScalar> subtype value whose declared type is specified
+by the node's (mandatory for C<QScalar>) C<type_name> element and whose
+attributes are defined by the payload.  The payload must be a Perl C<Pair>,
+whose key and value, respectively, are designated I<possrep name> and
+I<possrep attrs>.  The possrep name and possrep attrs must be as per the
+payload of a C<Name> and C<QTuple> node, respectively.  The I<possrep
+attrs> is interpreted specifically as attributes of the declared type's
+possrep which is specified by the I<possrep name>.  Each key+value pair of
+the I<possrep attrs> defines a named possrep attribute of the new scalar;
+the pair's key and value are, respectively, a Perl C<Str> that specifies
+the possrep attribute name, and a C<expr> node that specifies the possrep
 attribute value.
 
 Examples:
@@ -593,13 +613,13 @@ Examples:
 
 =head2 Tuple and Database Selectors
 
-This node kind represents a tuple value.  This node is interpreted as a
-Muldis D C<sys.std.Core.Type.[Q|]Tuple> value whose attributes are defined
-by the payload.  Under Perl, the payload must be a Perl C<Mapping|Hash>.
-Each key+value pair of the payload defines a named attribute of the new
-tuple; the pair's key and value are, respectively, a Perl C<Str> that
-specifies the attribute name, and a PHMD node that specifies the attribute
-value.
+A C<QTuple> node represents a literal or selector invocation for a
+quasi-tuple value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.QTuple> value whose attributes are defined by the
+payload.  The payload must be a Perl C<Mapping|Hash>.  Each key+value pair
+of the payload defines a named attribute of the new tuple; the pair's key
+and value are, respectively, a Perl C<Str> that specifies the attribute
+name, and a C<expr> node that specifies the attribute value.
 
 Examples:
 
@@ -618,9 +638,10 @@ Examples:
 
 =head2 Relation Selectors
 
-This node kind represents a relation value.  This node is interpreted as a
-Muldis D C<sys.std.Core.Type.[Q|]Relation> value whose attributes and
-tuples are defined by the payload.  The payload is interpreted as follows:
+A C<QRelation> node represents a literal or selector invocation for a
+quasi-relation value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.QRelation> value whose attributes and tuples are
+defined by the payload, which is interpreted as follows:
 
 =over
 
@@ -632,15 +653,14 @@ defines the only relation value having zero attributes and zero tuples.
 =item *
 
 Iff the payload is a Perl C<Set|KeySet> with at least one element, and
-every element is a Perl C<Str> (as per a valid payload for a C<Name> PHMD
-node), then it defines the attribute names of a relation having zero
-tuples.
+every element is a Perl C<Str> (as per a valid payload for a C<Name> node),
+then it defines the attribute names of a relation having zero tuples.
 
 =item *
 
 Iff the payload is a Perl C<Set|KeySet> with at least one element, and
 every element is a Perl C<Mapping|Hash> (as per a valid payload for a
-C<Tuple> PHMD node), then each element of the payload defines a tuple of
+C<QTuple> node), then each element of the payload defines a tuple of
 the new relation; every tuple-defining element of the payload must be of
 the same degree and have the same attribute names as its sibling elements;
 these are the degree and attribute names of the relation as a whole, which
@@ -653,7 +673,7 @@ attribute names are defined by the payload's key, which is a Perl
 C<Seq|Array> of C<Str> (each as per a C<Name> node payload), and the
 relation body's tuples' attribute values are defined by the payload's
 value, which is a Perl C<Set|KeySet> of C<Seq|Array> of tuple attribute
-value defining PHMD nodes.  This format is meant to be the most compact of
+value defining  nodes.  This format is meant to be the most compact of
 the generic relation payload formats, as the attribute names only appear
 once for the relation rather than repeating for each tuple.  As a
 trade-off, the attribute values per tuple from the payload value must
@@ -685,11 +705,12 @@ Examples I<TODO: What is the actual syntax for the P6 Set type?>:
 
 =head2 Set Selectors
 
-This node kind represents a set value.  This node is interpreted as a
-Muldis D C<sys.std.Core.Type.[Q|]Set> value whose elements are defined by
-the payload.  The payload must be a Perl C<Set|KeySet>.  Each element of
-the payload defines a unary tuple of the new set; each element is a PHMD
-node that defines the C<value> attribute of the tuple.
+A C<QSet> node represents a literal or selector invocation for a quasi-set
+value.  It is interpreted as a Muldis D C<sys.std.Core.Type.QSet> value
+whose elements are defined by the payload.  The payload must be a Perl
+C<Set|KeySet>.  Each element of the payload defines a unary quasi-tuple of
+the new quasi-set; each element is a C<expr> node that defines the C<value>
+attribute of the quasi-tuple.
 
 Examples I<TODO: What is the actual syntax for the P6 Set type?>:
 
@@ -706,26 +727,33 @@ Examples I<TODO: What is the actual syntax for the P6 Set type?>:
         85,
     ) )
 
-=head2 Single Selectors
+=head2 Maybe Selectors
 
-This node kind represents a 'single' value.  Its payload is a PHMD node
-that defines a single scalar or nonscalar value.  This node is interpreted
-as a Muldis D C<sys.std.Core.Type.[Q|]Single> value whose element is
-defined by the payload.  The payload is a PHMD node that defines the
-C<value> attribute of the single tuple of the new 'single'.
+A C<QMaybe> node represents a literal or selector invocation for a
+quasi-maybe value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.QMaybe> value.  If the node payload is missing or
+undefined, then the node is interpreted as the special value
+C<Maybe:nothing>, aka C<nothing>, which is the only C<QMaybe> value with
+zero elements.  If the node payload is defined then the node is interpreted
+as a C<QSingle> whose element is defined by the payload.  The payload is a
+C<expr> node that defines the C<value> attribute of the single quasi-tuple
+of the new quasi-'single'.
 
 Examples:
 
-    :Single( 'I know this one!' )
+    :Maybe( 'I know this one!' )
+
+    :Maybe()  # or how does Perl 6 make a Pair with undef/default value?
 
 =head2 Array Selectors
 
-This node kind represents an array value.  This node is interpreted as a
-Muldis D C<sys.std.Core.Type.[Q|]Array> value whose elements are defined by
-the payload.  The payload must be a Perl C<Seq|Array>.  Each element of the
-payload defines a binary tuple of the new sequence; the element value is a
-PHMD node that defines the C<value> attribute of the tuple, and the element
-index is used as the C<index> attribute of the tuple.
+A C<QArray> node represents a literal or selector invocation for a
+quasi-array value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.QArray> value whose elements are defined by the
+payload.  The payload must be a Perl C<Seq|Array>.  Each element of the
+payload defines a binary quasi-tuple of the new sequence; the element value
+is a C<expr> node that defines the C<value> attribute of the quasi-tuple,
+and the element index is used as the C<index> attribute of the quasi-tuple.
 
 Examples:
 
@@ -744,14 +772,14 @@ Examples:
 
 =head2 Bag Selectors
 
-This node kind represents a bag value.  This node is interpreted as a
-Muldis D C<sys.std.Core.Type.[Q|]Bag> value whose elements are defined by
-the payload.  The payload must be a Perl C<Bag|KeyBag|Set|KeySet> value;
-the payload element keys are PHMD nodes corresponding to the C<value>
-attribute of the new bag's tuples, and the payload element values are
-positive integers (or C<Bool::True>, which counts as the number 1)
-corresponding to the C<count> attribute; the payload element mapping is as
-you should expect.
+A C<QBag> node represents a literal or selector invocation for a quasi-bag
+value.  It is interpreted as a Muldis D C<sys.std.Core.Type.QBag> value
+whose elements are defined by the payload.  The payload must be a Perl
+C<Bag|KeyBag|Set|KeySet> value; the payload element keys are C<expr> nodes
+corresponding to the C<value> attribute of the new quasi-bag's
+quasi-tuples, and the payload element values are positive integers (or
+C<Bool::True>, which counts as the number 1) corresponding to the C<count>
+attribute; the payload element mapping is as you should expect.
 
 Examples I<TODO: What is the actual syntax for the P6 Bag type?>:
 
@@ -770,12 +798,18 @@ Examples I<TODO: What is the actual syntax for the P6 Bag type?>:
         'Baz',
     ] ) )
 
+=head1 DEPOT DECLARATION
+
+B<TODO: ALL OF THIS HERE MAIN POD SECTION!>
+
 =head1 BOOTLOADER STATEMENT
 
-This PHMD node specifies one statement of a Muldis D C<bootloader> routine
+B<TODO/REDO: ALL OF THIS HERE MAIN POD SECTION!>
+
+This node specifies one statement of a Muldis D C<bootloader> routine
 which invokes an imperative routine, such statements being what the entire
 body of a C<bootloader> is composed of.  A bootloader imperative routine
-call is formatted as a PHMD node having the following 4 elements:
+call is formatted as a node having the following 4 elements:
 
 =over
 
@@ -786,19 +820,19 @@ Node kind: the Perl C<Str> value C<boot_stmt>.
 =item *
 
 Imperative routine name: a Perl C<Seq|Array|Str> as per the payload of a
-C<NameChain> PHMD node.
+C<NameChain> node.
 
 =item *
 
 Imperative routine subject-to-update args: a Perl C<Mapping|Hash> as per
-the payload of a C<Tuple> PHMD node except that every C<Mapping|Hash> value
-is just a Perl C<Seq|Array|Str> as per the payload of a C<NameChain> PHMD
-node (each value is the name of a global variable).
+the payload of a C<QTuple> node except that every C<Mapping|Hash> value is
+just a Perl C<Seq|Array|Str> as per the payload of a C<NameChain> node
+(each value is the name of a global variable).
 
 =item *
 
 Imperative routine read-only args: a Perl C<Mapping|Hash> as per the
-payload of a C<Tuple> PHMD node.
+payload of a C<QTuple> node.
 
 =back
 
@@ -807,6 +841,8 @@ Examples
     [ 'boot_stmt', 'sys.std.Core.Cat.create_depot_procedure', {}, { ... } ]
 
 =head1 MULDIS D TINY DIALECT PRAGMAS
+
+B<TODO/REDO: ALL OF THIS HERE MAIN POD SECTION!>
 
 All of the following pragmas apply to both the C<PTMD_Tiny> and
 C<HDMD_Perl[6|5]_Tiny> dialects, and have the same semantics with both.
