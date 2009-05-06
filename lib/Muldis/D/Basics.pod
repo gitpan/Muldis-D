@@ -9,7 +9,7 @@ Muldis::D::Basics -
 
 =head1 VERSION
 
-This document is Muldis::D::Basics version 0.67.0.
+This document is Muldis::D::Basics version 0.68.0.
 
 =head1 PREFACE
 
@@ -473,9 +473,9 @@ which is the host of Muldis D.  The Muldis D code is written here by way of
 writing code in the host language.
 
 Some official Muldis D dialects have their specifications bundled with the
-current multi-document: L<Muldis::D::Dialect::PTMD_Tiny>,
-L<Muldis::D::Dialect::HDMD_Perl6_Tiny>,
-L<Muldis::D::Dialect::HDMD_Perl5_Tiny>.  Other, unofficial Muldis D
+current multi-document: L<Muldis::D::Dialect::PTMD_STD>,
+L<Muldis::D::Dialect::HDMD_Perl6_STD>,
+L<Muldis::D::Dialect::HDMD_Perl5_STD>.  Other, unofficial Muldis D
 dialects may be made by third parties in the future, but none are currently
 known.
 
@@ -970,7 +970,7 @@ just relation-valued.
 As trivial cases, all 3 of the quasi-nonscalar values with zero attributes
 are just nonscalar values, and all quasi-relation values with zero q/tuples
 are just relation values.  (Hence the system-defined nonscalar values with
-additional special names, which are C<Tuple:d0>, C<Relation:d0c[0|1], and
+additional special names, which are C<Tuple:d0>, C<Relation:d0c[0|1]>, and
 C<nothing>, don't each come in 2 flavors.)
 
 A I<scalar value> is, by definition, any quasi-scalar value where all of
