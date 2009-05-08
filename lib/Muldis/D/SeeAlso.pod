@@ -9,7 +9,7 @@ External resources that you really ought to look at
 
 =head1 VERSION
 
-This document is Muldis::D::SeeAlso version 0.68.0.
+This document is Muldis::D::SeeAlso version 0.69.0.
 
 =head1 DESCRIPTION
 
@@ -146,7 +146,7 @@ reproduced several chapters and appendices from this book.  Chapter 4
 the rest of the book expands on, rationalizes, and gives examples of.
 Chapter 5
 (L<http://web.onetel.com/~hughdarwen/TheThirdManifesto/CHAP05.pdf>) gives
-the the complete grammar of "B<Tutorial D>", which is a computationally
+the complete grammar of "B<Tutorial D>", which is a computationally
 complete programming language with fully integrated database functionality,
 whose principal purpose is to serve as a teaching vehicle.
 

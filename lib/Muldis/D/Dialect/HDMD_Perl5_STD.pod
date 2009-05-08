@@ -9,7 +9,7 @@ How to format Perl 5 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.68.0.
+This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.69.0.
 
 =head1 PREFACE
 
@@ -146,9 +146,7 @@ Examples:
     [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl5_STD' ]
 
     [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl5_STD', {
-        auto_add_attrs          => [ 'Bool', 'true' ],
-        auto_unabbrev_std_names => [ 'Bool', 'true' ],
-        auto_chains_from_names  => [ 'Bool', 'true' ],
+        ...
     } ]
 
 =head1 VALUE LITERALS AND SELECTORS
@@ -156,12 +154,12 @@ Examples:
 A C<value> node is a Muldis D value literal, which is a common special case
 of a Muldis D value selector.
 
-There are 24 main varieties of C<value> node, each of which is a named node
+There are 25 main varieties of C<value> node, each of which is a named node
 kind of its own:  C<Bool>, C<Order>, C<RatRoundMeth>, C<Int>, C<Rat>,
 C<Blob>, C<Text>, C<Name>, C<NameChain>, C<DeclNameChain>, C<Comment>,
 C<Instant>, C<Duration>, C<UTCInstant>, C<FloatInstant>, C<UTCDuration>,
-C<String>, C<QScalar>, C<QTuple>, C<QRelation>, C<QSet>, C<QMaybe>,
-C<QArray>, C<QBag>.
+C<String>, C<QScalar>, C<QTuple>, C<Database>, C<QRelation>, C<QSet>,
+C<QMaybe>, C<QArray>, C<QBag>.
 
 Fundamentally, the various Muldis D scalar and collection types are
 represented by their equivalent Perl native scalar and collection types.
@@ -192,9 +190,9 @@ C<value_kind>:  C<Bool>, C<Order>, C<RatRoundMeth>, C<[|NN|P]Int>,
 C<[|NN|P]Rat>, C<[|Octet]Blob>, C<Text>, C<Name>, C<NameChain>,
 C<DeclNameChain>, C<Comment>, C<Instant>, C<Duration>,
 C<UTC[Instant|DateTime|Date|Time]>, C<Float[Instant|DateTime|Date|Time]>,
-C<UTCDuration>, C<[|B|O|UCP]String>, C<[Q|]Scalar>, C<[Q|]Tuple|Database>,
-C<[Q|]Relation>, C<[Q|]Set>, C<[Q|][Maybe|Single]>, C<[Q|]Array>,
-C<[Q|]Bag>.
+C<UTCDuration>, C<[|B|O|UCP]String>, C<[Q|]Scalar>, C<[Q|]Tuple>,
+C<Database>, C<[Q|]Relation>, C<[Q|]Set>, C<[Q|][Maybe|Single]>,
+C<[Q|]Array>, C<[Q|]Bag>.
 
 For just some data types, the C<value_kind> may be omitted; see below.
 
@@ -521,7 +519,7 @@ follows:
 
 =item *
 
-If the payload is an array ref, then it must have at least 2 elements,
+If the payload is an array ref, then it must have at least 1 element,
 and every element must be a valid payload for a C<Name>  node (that
 is, any Perl character string).  Each element of the payload, in order,
 defines an element of the C<array> possrep's attribute of a C<NameChain>.
@@ -529,7 +527,7 @@ defines an element of the C<array> possrep's attribute of a C<NameChain>.
 =item *
 
 If the payload is a char str, then it must be formatted as a catenation
-(using period (C<.>) separators) of at least 2 parts, where each part can
+(using period (C<.>) separators) of at least 1 part, where each part can
 not have any literal period (C<.>) characters (if you want literal periods
 then you can only use the array ref payload format to express it).  The
 char str format of payload is interpreted by splitting it on the separators
@@ -541,8 +539,8 @@ A C<DeclNameChain> node represents a canonical long name for declaring a
 DBMS entity in N-depth contexts; the format and interpretation of a
 C<DeclNameChain_payload> (but as a C<sys.std.Core.Type.Cat.DeclNameChain>
 value) is the same as a C<NameChain_payload> but that the chain may have as
-few as zero parts rather than as few as 2; however, a zero part chain can
-only be expressed with the array ref payload format; an empty string
+few as zero parts rather than as few as 1 or 2; however, a zero part chain
+can only be expressed with the array ref payload format; an empty string
 char str format will be interpreted as having a single element that is the
 empty string.
 
@@ -792,7 +790,7 @@ Examples:
         '' => 5,
     } ] ]
 
-=head2 Tuple and Database Selectors
+=head2 Tuple Selectors
 
 A C<QTuple> node represents a literal or selector invocation for a
 quasi-tuple value.  It is interpreted as a Muldis D
@@ -816,6 +814,17 @@ Examples:
         name => 'Michelle',
         age  => 17,
     } ]
+
+=head2 Database Selectors
+
+A C<Database> node represents a literal or selector invocation for a
+'database' value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.Database> value whose attributes are defined by the
+payload.  The payload must be a just a Perl hash ref.  Each key+value pair
+of the payload defines a named attribute of the new 'database'; the pair's
+key and value are, respectively, a Perl character string that specifies the
+attribute name, and a C<expr> node that specifies the attribute value,
+which must be represent a relation value.
 
 =head2 Relation Selectors
 
@@ -1056,169 +1065,6 @@ Examples
 =head1 MULDIS D TINY DIALECT PRAGMAS
 
 B<TODO/REDO: ALL OF THIS HERE MAIN POD SECTION!>
-
-All of the following pragmas apply to both the C<PTMD_STD> and
-C<HDMD_Perl[6|5]_STD> dialects, and have the same semantics with both.
-
-=head2 auto_add_attrs
-
-All Muldis D values are defined in
-terms of a collection of attribute values, and there is no such thing as an
-attribute being undefined; normally when one selects a value of a
-particular attribute-based type, they must supply values for I<all> of its
-attributes; this is true with values comprising the system catalog as with
-any other values.  Code written in the Muldis D C<PTMD_STD> or
-C<HDMD_Perl[6|5]_STD> dialect is comprised almost entirely of value
-literals, and by default all of the attribute values of said values must be
-explicitly given in the literals as sub-literals, even in the common case
-where some attributes just have the default values for their type.
-
-While this fact allows for parsers to be very simple and for sub-literals
-to be compilable into values without knowing the context they're compiled
-into, it means that programmers would have to write maybe about twice as
-much code as they otherwise would if they could simply not write out the
-default-valued attributes.
-
-If the 5th I<Extensions> portion of the fully-qualified Muldis D language
-name contains a name+value pair of C<auto_add_attrs> + C<Bool:true>, then
-this activates the optional C<auto_add_attrs> pragma, which provides one
-kind of automatic code completion.  When C<auto_add_attrs> is active,
-programmers may omit any literal attributes that they want, and those
-attributes will be automatically defined by the parser to have the default
-values for their type.  Or more specifically, the wider literal whose
-attributes are missing will be extended to become the default value of the
-type of the wider literal but that those attributes of its that I<were>
-explicitly given will override the default's values for those attributes.
-The actual behaviour is essentially what the
-C<sys.std.QTuple.subst_in_default> function does.
-
-But the C<auto_add_attrs> pragma is not simply an automatically invoked
-pre-processing Muldis D function, because it also serves the common case
-where one is defining relation literals that have different attributes
-specified per tuple; such a thing by itself isn't even valid as a generic
-relation, so it certainly can't be given to a Muldis D function; so the
-pragma has at least that advantage unique to itself.
-
-Note that the lexer is exactly the same regardless of whether the
-C<auto_add_attrs> pragma is turned on or off, because the matters of
-missing attributes were never tested or enforced at the lexical level in
-the first place; rather the pragma only affects the parsing stage that
-follows the lexing.  In other words, the actual syntax or grammar is
-identical regardless of the setting of this pragma.
-
-Now one consequence of using the C<auto_add_attrs> pragma is that in
-general the parser must be more complicated, and read type definitions from
-the DBMS information schema so that it knows what attributes each literal
-is supposed to have, and their declared types, and also sub-literals can no
-longer in general be fully converted to values in isolation; now the
-parent-most literal must be evaluated first, because its declared type
-generally determines the declared types of its attributes, and then their
-attributes recursively.  For nonscalar types, the initial declared type
-being looked at is the declared type of the bootloader-invoked routine's
-parameter that the literal is being given to as an argument.
-
-Now if the declared type of said parameter is just a generic type, such as
-C<Relation> or C<Array>, then often no information can be gleaned from this
-context for what attributes should exist, and so you will need to make the
-arg literal include treat-as-type metadata that explicitly provides the
-specific type information needed; otherwise, C<auto_add_attrs> won't help
-you and you must then fully define relation values with the same attributes
-per tuple.  But fortunately for brevity, a lot of the places where
-C<auto_add_attrs> would help you the most is when the bootloader is
-invoking system-defined data-defining procedures, and their parameters are
-all of attribute-specifying types, and it is in such data definition that
-you may be most likely to face a large number of default-valued attributes,
-such as C<comment>.
-
-Note that the reason the C<auto_add_attrs> behaviour is turned off by
-default is twofold.  First, the parser can be a lot simpler / more tiny
-with it off.  Second, requiring users to explicitly define even
-default-valued attributes can make the code more self-documenting and can
-help users avoid some kinds of bugs due to action from unseen values, or
-due to some default values "silently" changing between language versions.
-So then essentially, turning on C<auto_add_attrs> means the programmer is
-telling the parser "I know what I'm doing" by I<explicitly> asking for
-potentially less-safe behaviour.  Of course, even with C<auto_add_attrs>
-turned on, you can still explicitly define attribute values that are their
-type's default values, so it is possible to compromise such as you like.
-
-Also note that it should be trivial for a Muldis D implementation to let
-users input code written with C<auto_add_attrs> turned on, and then output
-the version of that code for their perusal with it turned off, so they can
-see what extra values were filled in without having to manually write said.
-
-=head2 auto_unabbrev_std_names
-
-Normally when one is specifying a C<NameChain> literal that is a
-reference to a standard system-defined type or routine, they must write out
-the name in full, starting with C<sys.std> and so on through the unique
-part of the entity name.  While this allows for clearly self-documenting
-code, as well as for relatively simple parsers, it can also be added tedium
-to programmers that would prefer to write out the names in a less verbose
-manner, especially since to a point, a slightly more complicated parser
-could still unambiguously resolve a much shorter substring of the name.
-
-If the 5th I<Extensions> portion of the fully-qualified Muldis D language
-name contains a name+value pair of C<auto_unabbrev_std_names> +
-C<Bool:true>, then this activates the optional C<auto_unabbrev_std_names>
-pragma, which provides one kind of automatic code completion.  When
-C<auto_unabbrev_std_names> is active, programmers may omit any number of
-consecutive leading chain elements from such a C<NameChain> literal, so
-long as the remaining unqualified chain is distinct among all standard
-system-defined (C<sys.std>-prefix) DBMS entities (but that as an exception,
-a non-distinct abbreviation is allowed iff exactly 1 of the candidate
-entities is in the language core, C<sys.std.Core>-prefix, in which case
-that 1 is unambiguously the entity that is resolved to).  This feature has
-no effect on the namespace prefixes like C<tuple_from> or C<array_of>; one
-still writes those as normal prepended to the otherwise shortened chains.
-
-So for example, one can just write C<Int> rather than
-C<sys.std.Core.Type.Int>, C<is_identical> rather than
-C<sys.std.Core.Universal.is_identical>, C<QTuple.attr> rather than
-C<sys.std.Core.QTuple.attr>, C<min> rather than C<sys.std.Ordered.min>,
-C<array_of.Rat> rather than C<array_of.sys.std.Core.Type.Rat>, and so
-on.
-
-The C<auto_unabbrev_std_names> pragma intentionally does not empower auto
-un-abbreviations of any namespaces other than C<sys.std>, to keep things
-simple for users to predict and for systems to implement; it does not
-affect C<sys.[imp|cat]>, nor any other top-level namespace.  When one is
-referencing either any system-defined implementation-specific
-(non-standard) types or routines, or any user-defined types or routines, or
-any dbvars or constraints or whatever, their names can not be written
-abbreviated due to the C<auto_unabbrev_std_names> pragma.
-
-Note that the lexer is exactly the same regardless of whether the
-C<auto_unabbrev_std_names> pragma is turned on or off, as per the
-C<auto_add_attrs> pragma.  Many other comments about the other pragma also
-apply to this one.
-
-=head2 auto_chains_from_names
-
-Iff both the C<auto_add_attrs> and C<auto_unabbrev_std_names> pragmas are
-active, then the optional C<auto_chains_from_names> dependent pragma may be
-activated in the same manner (as an I<Extensions> name+value pair with
-C<Bool:true>.  When C<auto_chains_from_names> is active, programmers may
-write an otherwise abbreviated-to-one-chain-element C<NameChain>
-literal as a plain C<Name> literal; this can chop the literal down to a
-third or fourth of its otherwise-length such as in the case of a reference
-to the C<Int> type.  When the parent literal of such a faux-C<Name>
-literal is examined for missing attributes, or examined that existing
-attributes are of the correct type, any attributes whose declared type says
-they are supposed to be C<NameChain> but that have an explicitly
-defined C<Name> child literal will have that literal mapped to and
-replaced with a single element C<NameChain> literal, which can be
-subsequently un-abbreviated into a standard system-defined type or routine
-name.  The C<auto_chains_from_names> pragma will not work when the declared
-type being applied to a faux-C<Name> is not a C<NameChain> subtype,
-and such literals will then be taken as actual C<Name>; where such
-declared type information is missing, you will need to write out the
-abbreviated chain as an actual C<NameChain> literal.  Note that the
-C<auto_chains_from_names> pragma has no effect on C<NameChain> literal
-bodies that don't comprise the payload portion of their parent literal,
-such as with the imperative routine name composed into a C<boot_stmt>
-literal; literal bodies in those positions will always be interpreted
-according to C<NameChain> literal body syntax.
 
 =head1 SEE ALSO
 

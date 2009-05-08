@@ -1,6 +1,56 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-05-08  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.69.0 is released on CPAN as
+    Muldis-D-0.69.0.tar.gz.
+
+    * (Types_Catalog.pod)  Fixed a fossil in the description of the
+    "namespaces" attribute of the "System" catalog type where mention of
+    the 2 namespaces "tpc" and "tpc.cat" had been omitted.
+
+    * (PTMD_STD.pod)  Corrected the "bootloader" grammar token, which
+    didn't have whitespace between its elements; added new token
+    "term_sep", which indicates mandatory whitespace.
+
+    * (PTMD_STD.pod)  Updated the "Value Literal Common Elements" pod
+    subsection to add a description on how a C<type_name> element of a
+    C<value> node is interpreted depending on context.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Took what used to be the
+    "auto_unabbrev_std_names" pragma and made it into standard behaviour,
+    also eliminating that pragma in the process.  Updated the "NameChain"
+    node payload definition so it now may have as few as 1 element rather
+    than as few as 2.  As per the old pragma, now any name chains for
+    invoking system-defined types and routines can be written typically as
+    its unqualified short name, eg "Int" for "sys.std.Core.Type.Int", and
+    it would be unambiguously expanded by the parser.  The Muldis D spec
+    itself had been using such abbreviations for a long time, but now that
+    practice has been formally specified.  As a new further expansion of
+    this feature, now any name chains for invoking named value expressions
+    or variables etc can have any leading "lex." element omitted, and it
+    would be unambiguously re-added by the parser.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Eliminated a fossil which is
+    the "auto_chains_from_names" pragma; this hasn't actually been useful
+    for awhile now.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Eliminated the last pragma,
+    "auto_add_attrs", since its usefulness is now questionable; however,
+    that functionality might return in the future, maybe with alterations,
+    or perhaps better as a feature in the system catalog itself.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  A bit of grammar refactoring:
+    Split "Tuple and Database Selectors" 2 ways into "Tuple Selectors" and
+    "Database Selectors".  Split the 2 "QTuple[|_payload]" nodes into
+    themselves and the 2 new "Database[|_payload]".
+
+    * (Basics.pod, [Types|Routines]_[|Catalog].pod, QBag.pod, SeeAlso.pod,
+    INSTALL)  Corrected several instances of repeated word typos.
+
+    * (PTMD_STD.pod)  Other minor fixes.
+
 2009-05-06  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.68.0 is released on CPAN as
