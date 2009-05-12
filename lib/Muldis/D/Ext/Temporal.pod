@@ -9,7 +9,7 @@ Muldis D extension for temporal data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Temporal version 0.69.0.
+This document is Muldis::D::Ext::Temporal version 0.70.0.
 
 =head1 PREFACE
 
@@ -391,7 +391,7 @@ This function results in the absolute value of its argument.
 =head2 sys.std.Temporal.Duration.sum
 
 C<< function sys.std.Temporal.Duration.sum (Duration <--
-bag_of.Duration $topic) >>
+bag_of.Duration $topic?) >>
 
 This function results in the sum of the N element values of its argument;
 it is a reduction operator that recursively takes each pair of input values
@@ -500,7 +500,7 @@ This function results in the absolute value of its argument.
 =head2 sys.std.Temporal.UTCDuration.sum
 
 C<< function sys.std.Temporal.UTCDuration.sum (UTCDuration <--
-bag_of.UTCDuration $topic) >>
+bag_of.UTCDuration $topic?) >>
 
 This function results in the sum of the N element values of its argument;
 it is a reduction operator that recursively takes each pair of input values
