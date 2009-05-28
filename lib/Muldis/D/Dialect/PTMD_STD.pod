@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.73.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.74.0.
 
 =head1 PREFACE
 
@@ -256,6 +256,7 @@ Grammar:
         | <UTCInstant>
         | <FloatInstant>
         | <UTCDuration>
+        | <RatRoundRule>
         | <String>
 
     <coll_value_selector> ::=
@@ -267,7 +268,6 @@ Grammar:
         | <QMaybe>
         | <QArray>
         | <QBag>
-        | <RatRoundRule>
 
 A C<value> node is a Muldis D value literal, which is a common special case
 of a Muldis D value selector.
@@ -353,6 +353,7 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | UTC [Instant | DateTime | Date | Time]
         | Float [Instant | DateTime | Date | Time]
         | UTCDuration
+        | RatRoundRule
         | String | BString | OString | UCPString
         | Q? Scalar
         | Q? Tuple
@@ -362,7 +363,6 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | Q? [Maybe | Single]
         | Q? Array
         | Q? Bag
-        | RatRoundRule
 
     <type_name> ::=
         <NameChain_payload>
@@ -384,6 +384,7 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | <UTCInstant_payload>
         | <FloatInstant_payload>
         | <UTCDuration_payload>
+        | <RatRoundRule_payload>
         | <String_payload>
         | <QScalar_payload>
         | <QTuple_payload>
@@ -393,7 +394,6 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | <QMaybe_payload>
         | <QArray_payload>
         | <QBag_payload>
-        | <RatRoundRule_payload>
 
 So a C<x_value>|C<value> node has 1-3 elements in general:
 
@@ -407,14 +407,21 @@ only external meta-data of C<payload> generally necessary to interpret the
 latter; what grammars are valid for C<payload> depend just on
 C<value_kind>.
 
-For all values of just the 8 data types [C<Bool>, C<Order>,
-C<RatRoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>, C<Comment>], the
+For all values of just the 7 data types [C<Bool>, C<Order>,
+C<RatRoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>], the
 C<value_kind> portion of a GCVL may be omitted for brevity, but the code
 parser should still be able to infer it easily by examining the first few
-characters of the C<payload>, which for each of said 8 data types has a
+characters of the C<payload>, which for each of said 7 data types has a
 mutually uniquely identifying format, which is also distinct from all
 possible C<value_kind>.  Note that omission of C<value_kind> is only
 allowed when the GCVL doesn't include a C<type_name> element.
+
+Note that, by the above criteria, the C<Comment> type could easily have
+been an 8th member of the list; however, it is excluded on purpose because
+in practice Muldis D code can contain SCVL C<Comment> literals almost
+anywhere as meta-data for that code, and so having an explicit
+C<value_kind> of C<Comment> means that that particular C<Comment> literal
+is to be treated as ordinary data like with any GCVL.
 
 For just these certain special values of other data types, the same option
 of omitting the C<value_kind> (and C<type_name>) applies: C<Maybe:nothing>.
@@ -462,7 +469,7 @@ Grammar:
         <Bool_payload>
 
     <Bool_payload> ::=
-        false | true
+        false | ⊥ | true | ⊤
 
 A C<Bool> node represents a logical boolean value.  It is interpreted as a
 Muldis D C<sys.std.Core.Type.Bool> value as follows:  The C<Bool_payload>
@@ -474,6 +481,10 @@ Examples:
     Bool:true
 
     false
+
+    ⊤
+
+    ⊥
 
 =head2 Order-Determination Literals
 
@@ -1009,25 +1020,24 @@ Examples:
 Grammar:
 
     <Comment> ::=
-        [
-            Comment \s* ':' \s*
-            [<type_name> \s* ':' \s*]?
-        ]?
+        Comment \s* ':' \s*
+        [<type_name> \s* ':' \s*]?
         <Comment_payload>
 
     <Comment_payload> ::=
         [
-            '#' ' '*
+            '#' ** 2..*
+          | '#' ' '*
                 [<-[\\\#\t\n\f\r]> | <escaped_char>]*
             ' '* '#'
-        ] ** \s*
+        ] ** \s+
 
 A C<Comment> node represents the text of a Muldis D code comment; it is a
 character string type, that is disjoint from both C<Text> and C<Name>.  It
 is interpreted as a Muldis D C<sys.std.Core.Type.Cat.Comment> value as
 follows:
 
-Fundamentally a C<Name> node is formatted and interpreted like a C<Text>
+Fundamentally a C<Comment> node is formatted and interpreted like a C<Text>
 node, and any similarities won't be repeated here.  The C<Comment_payload>
 differs from C<Text_payload> only in that each string segment is delimited
 by number-signs/hash-marks rather than apostrophes/single-quotes, and also
@@ -1039,7 +1049,18 @@ not part of the selected C<Comment> value; if you want to denote a
 C<Comment> value with leading or trailing space chars, you must write those
 space chars in an escaped form such as with C<\s>.
 
-Examples:
+Note that a run of 3+ C<#> is equivalent to exactly 2 adjacent ones, which
+denotes an empty comment segment.  This feature exists to empower things
+like making visual dividing lines in the code just out of hash-marks.
+
+Note that the hash-mark does have other uses in PTMD_STD code besides
+delimiting comments, so since C<Comment_payload> may conceptually be placed
+almost anywhere in code, the other parts of the grammar that specifically
+enable this need to ensure appropriate measures are taken to avoid
+ambiguity, for example mandating that the comments are bounded by
+whitespace.
+
+Examples (the first is GCVL, the second is a SCVL):
 
     Comment:# This does something. #
 
@@ -1209,6 +1230,45 @@ Examples:
     FloatInstant:[1407,,,,,] # just know its sometime in 1407 #
 
     UTCDuration:[3,5,1,6,15,45.000012]
+
+=head2 Rational Rounding Rule Literals
+
+Grammar:
+
+    <RatRoundRule> ::=
+        RatRoundRule \s* ':' \s*
+        [<type_name> \s* ':' \s*]?
+        <RatRoundRule_payload>
+
+    <RatRoundRule_payload> ::=
+        '[' \s*
+            <radix> \s* ',' \s* <min_exp> \s* ',' \s* <round_meth>
+        \s* ']'
+
+    <radix> ::=
+        <Int_payload>
+
+    <min_exp> ::=
+        <Int_payload>
+
+    <round_meth> ::=
+        <RatRoundMeth_payload>
+
+A C<RatRoundRule> node represents a rational rounding rule.  It is
+interpreted as a Muldis D C<sys.std.Core.Type.Cat.RatRoundRule> value whose
+attributes are defined by the C<RatRoundRule_payload>.  A
+C<RatRoundRule_payload> consists mainly of a bracket-delimited sequence of
+3 comma-separated elements, which correspond in order to the 3 attributes:
+C<radix> (a C<PInt2_N>), C<min_exp> (an C<Int>), and C<round_meth> (a
+C<RatRoundMeth>).  Each of C<radix> and C<min_exp> must qualify as a valid
+C<Int_payload>, and C<round_meth> must qualify as a valid
+C<RatRoundMeth_payload>.
+
+Examples:
+
+    RatRoundRule:[10,-2,half_even]
+
+    RatRoundRule:[2,-7,to_zero]
 
 =head2 Low Level Integer String Literals
 
@@ -1549,7 +1609,7 @@ Grammar:
         '{' \s* <expr> \s* '}'
 
     <maybe_nothing> ::=
-        nothing
+        nothing | '∅'
 
 A C<QMaybe> node represents a literal or selector invocation for a
 quasi-maybe value.  It is interpreted as a Muldis D
@@ -1565,11 +1625,12 @@ node is further restricted, either to not having any quasi- resulting
 C<expr> or to having exactly one C<expr>, as appropriate.
 
 Iff the C<QMaybe_payload> is a C<maybe_nothing> then the C<QMaybe> node is
-interpreted as the special value C<Maybe:nothing>, aka C<nothing>, which is
-the only C<QMaybe> value with zero elements.  Note that this is just an
-alternative syntax, as C<set_expr_list> can select that value too.  As a
-further restriction, the C<value_kind> must be just one of C<[Q|]Maybe>
-when the C<QMaybe_payload> is a C<maybe_nothing>.
+interpreted as the special value C<Maybe:nothing>, aka C<nothing>, aka
+I<empty set>, aka C<∅>, which is the only C<QMaybe> value with zero
+elements.  Note that this is just an alternative syntax, as
+C<set_expr_list> can select that value too.  As a further restriction, the
+C<value_kind> must be just one of C<[Q|]Maybe> when the C<QMaybe_payload>
+is a C<maybe_nothing>.
 
 See also the definition of the catalog data type
 C<sys.std.Core.Type.Cat.SetSelExprNodeSet>, a tuple of which is what in
@@ -1581,7 +1642,11 @@ Examples:
 
     Maybe:nothing
 
+    Maybe:∅
+
     nothing
+
+    ∅
 
 =head2 Array Selectors
 
@@ -1707,48 +1772,6 @@ Examples:
         'Baz'
     }
 
-=head2 Rational Rounding Rule Selectors
-
-Grammar:
-
-    <RatRoundRule> ::=
-        RatRoundRule \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
-        <RatRoundRule_payload>
-
-    <RatRoundRule_payload> ::=
-        '[' \s*
-            <radix> \s* ',' \s* <min_exp> \s* ',' \s* <round_meth>
-        \s* ']'
-
-    <radix> ::=
-        <expr>
-
-    <min_exp> ::=
-        <expr>
-
-    <round_meth> ::=
-        <expr>
-
-A C<RatRoundRule> node represents a literal or selector invocation for a
-rational rounding rule.  It is interpreted as a Muldis D
-C<sys.std.Core.Type.Cat.RatRoundRule> value whose attributes are defined by
-the C<RatRoundRule_payload>.  A C<RatRoundRule_payload> consists mainly of
-a bracket-delimited sequence of 3 comma-separated elements, which
-correspond in order to the 3 attributes: C<radix> (a C<PInt2_N>),
-C<min_exp> (an C<Int>), and C<round_meth> (a C<RatRoundMeth>).  Each of the
-3 C<RatRoundRule_payload> elements is an C<expr> node.
-
-See also the definition of the catalog data type
-C<sys.std.Core.Type.Cat.TupSelExprNodeSet>, a tuple of which is what in
-general a C<RatRoundRule> node distills to same as when C<QTuple> does.
-
-Examples:
-
-    RatRoundRule:[10,-2,half_even]
-
-    RatRoundRule:[2,-7,to_zero]
-
 =head1 GENERIC VALUE EXPRESSIONS
 
 Grammar:
@@ -1777,7 +1800,7 @@ Grammar:
         <data_sigil> <Name_payload>
 
     <infix_bind_op> ::=
-        '='
+        '::='
 
 An C<expr> node is the general case of a Muldis D value expression tree
 (which normally denotes a Muldis D value selector), which must be composed
@@ -1827,7 +1850,7 @@ Examples:
     $foo_expr
 
     # a named_expr node #
-    $bar_expr = factorial( $foo_expr )
+    $bar_expr ::= factorial( $foo_expr )
 
 =head2 Generic Function Invocation Expressions
 
@@ -1966,8 +1989,8 @@ Examples:
 
     (if ($ary is empty) then $empty_result else ($ary[0]))
 
-    (if (($x === nothing) or ($y === nothing)) then nothing
-        else Maybe:{ ($x{M:}) I+ (($y{M:}) I^ 3) }
+    (if (($x = ∅) or ($y = ∅)) then ∅
+        else Maybe:{ ($x{M:}) I+ (($y{M:}) I^ 3) })
 
     (if ($val isa T->Int) then ($val I^ 3)
         else if ($val isa T->Text) then ($val Tx 5)
@@ -2070,11 +2093,12 @@ Grammar:
     <func_invo_alt_syntax> ::=
           <comm_infix_reduce_op_invo>
         | <noncomm_infix_reduce_op_invo>
-        | <comm_dyadic_infix_op_invo>
-        | <noncomm_dyadic_infix_op_invo>
+        | <sym_dyadic_infix_op_invo>
+        | <nonsym_dyadic_infix_op_invo>
         | <monadic_prefix_op_invo>
         | <monadic_postfix_op_invo>
         | <rat_op_invo_with_round>
+        | <ord_compare_op_invo>
         | ...
 
 A C<func_invo_alt_syntax> node represents the result of invoking a named
@@ -2137,10 +2161,12 @@ Grammar:
         \s* ')'
 
     <comm_infix_reduce_op ::=
-          and | or | xor
+          and | '∧' | or | '∨' | xor | '⊻' | '↮' | xnor | '↔' | iff
         | 'I+' | 'I*'
         | 'N+' | 'N*'
-        | 'R+' | 'R*'
+        | '∪' | 'R+' | union | '∩' | 'R*' | intersect
+        | '∆' | 'R%' | exclude | symdiff
+        | '⋈' | join | '×' | times | 'cross join'
 
 A C<comm_infix_reduce_op_invo> node is for using infix notation to invoke a
 (homogenous) commutative N-adic reduction operator function.  Such a
@@ -2160,17 +2186,35 @@ function instead.  If C<comm_infix_reduce_op> matches more than once in the
 same C<comm_infix_reduce_op_invo>, then all of the C<comm_infix_reduce_op>
 matches must be identical / the same operator.
 
+Some of the keywords are aliases for each other:
+
+    keyword | aliases
+    --------+--------
+    and     | ∧
+    or      | ∨
+    xor     | ⊻ ↮
+    xnor    | ↔ iff
+    ∪       | R+ union
+    ∩       | R* intersect
+    ∆       | R% exclude symdiff
+    ⋈       | join
+    ×       | times 'cross join'
+
 This table indicates which function is invoked by each keyword:
 
-    and -> Core.Bool.and( Set:{ $expr[0], ..., $expr[n] } )
-    or  -> Core.Bool.or( Set:{ $expr[0], ..., $expr[n] } )
-    xor -> Core.Bool.xor( Bag:{ $expr[0], ..., $expr[n] } )
-    I+  -> Integer.sum( Bag:{ $expr[0], ..., $expr[n] } )
-    I*  -> Integer.product( Bag:{ $expr[0], ..., $expr[n] } )
-    N+  -> Rational.sum( Bag:{ $expr[0], ..., $expr[n] } )
-    N*  -> Rational.product( Bag:{ $expr[0], ..., $expr[n] } )
-    R+  -> Core.QRelation.union( QSet:{ $expr[0], ..., $expr[n] } )
-    R*  -> Core.QRelation.join( QSet:{ $expr[0], ..., $expr[n] } )
+    and  -> Core.Bool.and( Set:{ $expr[0], ..., $expr[n] } )
+    or   -> Core.Bool.or( Set:{ $expr[0], ..., $expr[n] } )
+    xor  -> Core.Bool.xor( Bag:{ $expr[0], ..., $expr[n] } )
+    xnor -> Bool.xnor( Bag:{ $expr[0], ..., $expr[n] } )
+    I+   -> Integer.sum( Bag:{ $expr[0], ..., $expr[n] } )
+    I*   -> Integer.product( Bag:{ $expr[0], ..., $expr[n] } )
+    N+   -> Rational.sum( Bag:{ $expr[0], ..., $expr[n] } )
+    N*   -> Rational.product( Bag:{ $expr[0], ..., $expr[n] } )
+    ∪    -> Core.QRelation.union( QSet:{ $expr[0], ..., $expr[n] } )
+    ∩    -> Core.QRelation.intersection( QSet:{ $expr[0], ..., $expr[n] } )
+    ∆    -> QRelation.exclusion( QBag:{ $expr[0], ..., $expr[n] } )
+    ⋈    -> Core.QRelation.join( QSet:{ $expr[0], ..., $expr[n] } )
+    ×    -> Core.QRelation.product( QSet:{ $expr[0], ..., $expr[n] } )
 
 Examples:
 
@@ -2188,9 +2232,9 @@ Examples:
 
     (69.3 N* 15*2^6 N* 49/23)
 
-    (Set:{ 1, 3, 5 } R+ Set:{ 4, 5, 6 } R+ Set:{ 0, 9 })
+    (Set:{ 1, 3, 5 } ∪ Set:{ 4, 5, 6 } ∪ Set:{ 0, 9 })
 
-    (Set:{ 1, 3, 5, 7, 9 } R* Set:{ 3, 4, 5, 6, 7, 8 } R* Set:{ 2, 5, 9 })
+    (Set:{ 1, 3, 5, 7, 9 } ∩ Set:{ 3, 4, 5, 6, 7, 8 } ∩ Set:{ 2, 5, 9 })
 
 =head2 Simple Non-commutative N-adic Infix Reduction Operators
 
@@ -2239,53 +2283,66 @@ Examples:
 
     (Array:[ 24, 52 ] A~ Array:[ -9 ] A~ Array:[ 0, 11, 24, 7 ])
 
-=head2 Simple Commutative Dyadic Infix Operators
+=head2 Simple Symmetric Dyadic Infix Operators
 
 Grammar:
 
-    <comm_dyadic_infix_op_invo> ::=
+    <sym_dyadic_infix_op_invo> ::=
         '(' \s*
-            <expr> \s+ <comm_dyadic_infix_op> \s+ <expr>
+            <expr> \s+ <sym_dyadic_infix_op> \s+ <expr>
         \s* ')'
 
-    <comm_dyadic_infix_op> ::=
-          '===' | '!==='
+    <sym_dyadic_infix_op> ::=
+          '=' | '≠' | '!=' | '<>'
+        | nand | '⊼' | '↑' | nor | '⊽' | '↓'
         | 'I|-|' | 'N|-|'
 
-A C<comm_dyadic_infix_op_invo> node is for using infix notation to invoke a
-commutative dyadic operator function.  Such a function takes exactly 2
+A C<sym_dyadic_infix_op_invo> node is for using infix notation to invoke a
+symmetric dyadic operator function.  Such a function takes exactly 2
 arguments, which are the inputs of the operation; the inputs are all of the
 same type as each other but the result might be of either that type or a
-different type.  A single C<comm_dyadic_infix_op_invo> node is equivalent
+different type.  A single C<sym_dyadic_infix_op_invo> node is equivalent
 to a single C<func_invo> node whose C<func_arg_list> element defines 2
-arguments, and the 2 C<expr> elements of the C<comm_dyadic_infix_op_invo>
+arguments, and the 2 C<expr> elements of the C<sym_dyadic_infix_op_invo>
 supply the values of those arguments, and which arguments get which C<expr>
 isn't significant.
 
+Some of the keywords are aliases for each other:
+
+    keyword | aliases
+    --------+--------
+    ≠       | != <>
+    nand    | ⊼ ↑
+    nor     | ⊽ ↓
+
 This table indicates which function is invoked by each keyword:
 
-    ===  -> Core.Universal.is_identical( $expr[0], $expr[1] )
-    !=== -> Core.Universal.is_not_identical( $expr[0], $expr[1] )
+    =    -> Core.Universal.is_identical( $expr[0], $expr[1] )
+    ≠    -> Core.Universal.is_not_identical( $expr[0], $expr[1] )
+    nand -> Bool.nand( $expr[0], $expr[1] )
+    nor  -> Bool.nor( $expr[0], $expr[1] )
     I|-| -> Integer.abs_difference( $expr[0], $expr[1] )
     N|-| -> Rational.abs_difference( $expr[0], $expr[1] )
 
 Examples:
 
-    ($foo === $bar)
+    ($foo = $bar)
 
-    ($foo !=== $bar)
+    ($foo ≠ $bar)
+
+    (false nand true)
 
     (15 I|-| 17)
 
     (7.5 N|-| 9.0)
 
-=head2 Simple Non-commutative Dyadic Infix Operators
+=head2 Simple Non-symmetric Dyadic Infix Operators
 
 Grammar:
 
-    <noncomm_dyadic_infix_op_invo> ::=
+    <nonsym_dyadic_infix_op_invo> ::=
         '(' \s*
-            <lhs> \s+ <noncomm_dyadic_infix_op> \s+ <rhs>
+            <lhs> \s+ <nonsym_dyadic_infix_op> \s+ <rhs>
         \s* ')'
 
     <lhs> ::=
@@ -2294,33 +2351,80 @@ Grammar:
     <rhs> ::=
         <expr>
 
-    <noncomm_dyadic_infix_op> ::=
-        | 'I-' | 'I/' | '%' | 'I^'
+    <nonsym_dyadic_infix_op> ::=
+        | imp | '→' | implies | nimp | '↛' | if | '←' | nif | '↚'
+        | 'I-' | 'I/' | '%' | mod | 'I^'
         | 'N-' | 'N/'
-        | 'R-' | 'R/'
+        | '∈' | '∉' | '∋' | '∌'
+        | '⊆' | '⊈' | '⊇' | '⊉'
+        | '⊂' | '⊄' | '⊃' | '⊅'
+        | '∖' | 'R-' | minus | except
+        | '⊿' | 'not matching' | antijoin | semiminus
+        | '⋉' | matching | semijoin
+        | '÷' | 'R/' | divideby
 
-A C<noncomm_dyadic_infix_op_invo> node is for using infix notation to
-invoke a non-commutative dyadic operator function.  Such a function takes
-exactly 2 arguments, which are the inputs of the operation; the inputs are
-all of the same type as each other but the result might be of either that
-type or a different type.  A single C<noncomm_dyadic_infix_op_invo> node is
+A C<nonsym_dyadic_infix_op_invo> node is for using infix notation to
+invoke a non-symmetric dyadic operator function.  Such a function takes
+exactly 2 arguments, which are the inputs of the operation; the inputs
+and the result may possibly be all of the same type, or they might all be
+of different types.  A single C<nonsym_dyadic_infix_op_invo> node is
 equivalent to a single C<func_invo> node whose C<func_arg_list> element
 defines 2 arguments, and the 2 C<expr> elements of the
-C<noncomm_dyadic_infix_op_invo> supply the values of those arguments, which
+C<nonsym_dyadic_infix_op_invo> supply the values of those arguments, which
 are associated in the appropriate sequence.
+
+Some of the keywords are aliases for each other:
+
+    keyword | aliases
+    --------+--------
+    imp     | → implies
+    nimp    | ↛
+    if      | ←
+    nif     | ↚
+    %       | mod
+    ∖       | R- minus except
+    ⊿       | 'not matching' antijoin semiminus
+    ⋉       | matching semijoin
+    ÷       | R/ divideby
+
+Currently the alternate syntaxes for 12 functions, those testing set
+membership or sub/superset relationships, only come in versions that use
+trans-ASCII characters; if you are stuck using plain ASCII then you'll just
+have to use the generic function invocation syntax to invoke them for now.
+Plain ASCII infix syntax that is reasonable is yet to be determined.
 
 This table indicates which function is invoked by each keyword:
 
-    I- -> Integer.difference( minuend => $lhs, subtrahend => $rhs )
-    I/ -> Integer.quotient( dividend => $lhs, divisor => $rhs )
-    %  -> Integer.remainder( dividend => $lhs, divisor => $rhs )
-    I^ -> Integer.power( radix => $lhs, exponent => $rhs )
-    N- -> Rational.difference( minuend => $lhs, subtrahend => $rhs )
-    N/ -> Rational.quotient( dividend => $lhs, divisor => $rhs )
-    R- -> Core.QRelation.difference( source => $lhs, filter => $rhs )
-    R/ -> Core.QRelation.quotient( dividend => $lhs, divisor => $rhs )
+    imp  -> Bool.imp( $lhs, $rhs )
+    nimp -> Bool.nimp( $lhs, $rhs )
+    if   -> Bool.if( $lhs, $rhs )
+    nif  -> Bool.nif( $lhs, $rhs )
+    I-   -> Integer.difference( minuend => $lhs, subtrahend => $rhs )
+    I/   -> Integer.quotient( dividend => $lhs, divisor => $rhs )
+    %    -> Integer.remainder( dividend => $lhs, divisor => $rhs )
+    I^   -> Integer.power( radix => $lhs, exponent => $rhs )
+    N-   -> Rational.difference( minuend => $lhs, subtrahend => $rhs )
+    N/   -> Rational.quotient( dividend => $lhs, divisor => $rhs )
+    ∈    -> Core.QTuple.is_member( t => $lhs, r => $rhs )
+    ∉    -> Core.QTuple.is_not_member( t => $lhs, r => $rhs )
+    ∋    -> Core.QRelation.has_member( r => $lhs, t => $rhs )
+    ∌    -> Core.QRelation.has_not_member( r => $lhs, t => $rhs )
+    ⊆    -> Core.QRelation.is_subset( $lhs, $rhs )
+    ⊈    -> Core.QRelation.is_not_subset( $lhs, $rhs )
+    ⊇    -> Core.QRelation.is_superset( $lhs, $rhs )
+    ⊉    -> Core.QRelation.is_not_superset( $lhs, $rhs )
+    ⊂    -> QRelation.is_proper_subset( $lhs, $rhs )
+    ⊄    -> QRelation.is_not_proper_subset( $lhs, $rhs )
+    ⊃    -> QRelation.is_proper_superset( $lhs, $rhs )
+    ⊅    -> QRelation.is_not_proper_superset( $lhs, $rhs )
+    ∖    -> Core.QRelation.difference( source => $lhs, filter => $rhs )
+    ⊿    -> Core.QRelation.semidifference( source => $lhs, filter => $rhs )
+    ⋉    -> Core.QRelation.semijoin( source => $lhs, filter => $rhs )
+    ÷    -> Core.QRelation.quotient( dividend => $lhs, divisor => $rhs )
 
 Examples:
+
+    (true implies false)
 
     (34 I- 21)
 
@@ -2334,9 +2438,9 @@ Examples:
 
     (1;101.01 N/ 1;11.0)
 
-    (Set:{ 8, 4, 6, 7 } R- Set:{ 9, 0, 7 })
+    (Set:{ 8, 4, 6, 7 } ∖ Set:{ 9, 0, 7 })
 
-    (Relation:[ x, y ];{ [ 5, 6 ], [ 3, 6 ] } R/ Relation:{ { y => 6 } })
+    (Relation:[ x, y ];{ [ 5, 6 ], [ 3, 6 ] } ÷ Relation:{ { y => 6 } })
 
 =head2 Simple Monadic Prefix Operators
 
@@ -2348,7 +2452,7 @@ Grammar:
         \s* ')'
 
     <monadic_prefix_op> ::=
-        not | 'I||' | 'N||'
+        not | ¬ | 'I||' | 'N||' | 'R#'
 
 A C<monadic_prefix_op_invo> node is for using prefix notation to invoke a
 monadic operator function.  Such a function takes exactly 1 argument, which
@@ -2357,11 +2461,18 @@ equivalent to a single C<func_invo> node whose C<func_arg_list> element
 defines 1 argument, and the 1 C<expr> element of the
 C<monadic_prefix_op_invo> supplies the value of that argument.
 
+Some of the keywords are aliases for each other:
+
+    keyword | aliases
+    --------+--------
+    not     | ¬
+
 This table indicates which function is invoked by each keyword:
 
     not -> Core.Bool.not( $expr )
     I|| -> Integer.abs( $expr )
     N|| -> Rational.abs( $expr )
+    R#  -> QRelation.cardinality( $expr )
 
 Examples:
 
@@ -2370,6 +2481,8 @@ Examples:
     (I|| -23)
 
     (N|| -4.59)
+
+    (R# Set:{ 5, -1, 2 })
 
 =head2 Simple Monadic Postfix Operators
 
@@ -2446,8 +2559,8 @@ Grammar:
 A C<rat_op_invo_with_round> node is for using infix or prefix or postfix
 notation to invoke a rational numeric operator function whose operation
 involve rounding a number to one with less precision.  Such a function
-takes exactly 1 (C<$expr>) or 2 (C<$lhs> and C<$rhs>) primary arguments,
-which are the inputs of the operation, plus a special C<$round_rule>
+takes exactly 1 (C<expr>) or 2 (C<lhs> and C<rhs>) primary arguments,
+which are the inputs of the operation, plus a special C<round_rule>
 argument which specifies explicitly the semantics of the numeric rounding
 in a declarative way (all 3 of these are I<main op args>).  A single
 C<rat_op_invo_with_round> node is equivalent to a single C<func_invo> node
@@ -2461,7 +2574,7 @@ This table indicates which function is invoked by each keyword:
          -> Rational.round( $expr, round_rule => $round_rule )
     N^   -> Rational.power( radix => $lhs, exponent => $rhs,
                 round_rule => $round_rule )
-    log  -> Rational.log( $lhs, $radix => $rhs, round_rule => $round_rule )
+    log  -> Rational.log( $lhs, radix => $rhs, round_rule => $round_rule )
     e^   -> Rational.natural_power( $expr, round_rule => $round_rule )
     loge -> Rational.natural_log( $expr, round_rule => $round_rule )
 
@@ -2476,6 +2589,141 @@ Examples:
     (e^ 6.3 round RatRoundRule:[10,-6,to_ceiling])
 
     (17.0 loge round RatRoundRule:[3,-5,to_floor])
+
+=head2 Order Comparison Operators
+
+Grammar:
+
+    <ord_compare_op_invo> ::=
+        '(' \s*
+            [<sca_ord_det_op_invo> | <gen_compare_op_invo>]
+        \s* ')'
+
+    <sca_ord_det_op_invo> ::=
+        <lhs> \s+ '<=>' \s+ <rhs>
+            [\s+ <assuming_clause>]?
+            [\s+ <reversed_clause>]?
+
+    <gen_compare_op_invo> ::=
+        [
+              <compare_reduce_op_invo>
+            | <dyadic_compare_op_invo>
+            | <triadic_compare_op_invo>
+        ]
+        [\s+ <gen_compare_op_ordered_clause>]?
+
+    <compare_reduce_op_invo> ::=
+        <expr> ** [\s+ <compare_reduce_op> \s+]
+
+    <compare_reduce_op ::=
+        min | max
+
+    <dyadic_compare_op_invo> ::=
+        <lhs> \s+ <dyadic_compare_op> \s+ <rhs>
+
+    <dyadic_compare_op> ::=
+        <is_before_op> | <is_after_op>
+
+    <is_before_op> ::=
+        '<' | '≤' | '<='
+
+    <is_after_op> ::=
+        '>' | '≥' | '>='
+
+    <triadic_compare_op_invo> ::=
+        [not \s+]?
+        <min> \s+ <is_before_op> \s+ <expr> \s+ <is_before_op> \s+ <max>
+
+    <min> ::=
+        <expr>
+
+    <max> ::=
+        <expr>
+
+    <gen_compare_op_ordered_clause> ::=
+        ordered \s+ <using_clause> | <ordered_by_clause>
+
+An C<ord_compare_op_invo> node is for using infix notation to invoke an
+order comparison operator function.  Such a function takes exactly 2
+(C<lhs> and C<rhs>) or 3 (C<min> and C<expr> and C<max>) or N/2+ (C<expr>)
+main op args, which are the inputs of the operation, plus 2 extra op args
+(C<assuming> and C<reversed> for the C<< <=> >> op, or C<func> and
+C<assuming> for any other op) which let you customize the semantics of the
+operation.  A single C<ord_compare_op_invo> node is equivalent to a single
+C<func_invo> node whose C<func_arg_list> element defines 2-N arguments, and
+the C<expr|lhs|rhs|min|max|func|assuming|reversed> elements of the
+C<ord_compare_op_invo> supply the values of those arguments, which are
+associated in the appropriate sequence, except for the N-adic operators
+which are commutative (and associative and idempotent) so the relative
+order of the main op args isn't significant.  Details on the extra op args
+are pending.
+
+Some of the keywords are aliases for each other:
+
+    keyword | aliases
+    --------+--------
+    ≤       | <=
+    ≥       | >=
+    ≤≤      | <=<=
+    ≤<      | <=<
+    <≤      | <<=
+    !≤≤     | !<=<=
+    !≤<     | !<=<
+    !<≤     | !<<=
+
+This table indicates which function is invoked by each keyword:
+
+    <=> -> Core.QScalar.order( $lhs, $rhs )
+
+    min -> Ordered.min( Set:{ $expr[0], ..., $expr[n] } )
+    max -> Ordered.max( Set:{ $expr[0], ..., $expr[n] } )
+
+    <   -> Ordered.is_before( $lhs, $rhs )
+    >   -> Ordered.is_after( $lhs, $rhs )
+    ≤   -> Ordered.is_before_or_same( $lhs, $rhs )
+    ≥   -> Ordered.is_after_or_same( $lhs, $rhs )
+
+    ≤≤  -> Ordered.is_inside_range( $expr, min => $min, max => $max )
+    ≤<  -> Ordered.is_inside_range( $expr, min => $min, max => $max
+                max_is_outside => true )
+    <≤  -> Ordered.is_inside_range( $expr, min => $min, max => $max
+                min_is_outside => true )
+    <<  -> Ordered.is_inside_range( $expr, min => $min, max => $max
+                min_is_outside => true, max_is_outside => true )
+    !≤≤ -> Ordered.is_outside_range( $expr, min => $min, max => $max )
+    !≤< -> Ordered.is_outside_range( $expr, min => $min, max => $max
+                max_is_outside => true )
+    !<≤ -> Ordered.is_outside_range( $expr, min => $min, max => $max
+                min_is_outside => true )
+    !<< -> Ordered.is_outside_range( $expr, min => $min, max => $max
+                min_is_outside => true, max_is_outside => true )
+
+Details regarding the extra op args is pending.  But most of the time you
+wouldn't be using them, so just the main args represents typical usage.
+
+Examples (for now sans any use of extra op args, which are atypical):
+
+    ($foo <=> $bar)
+
+    ($foo min $bar min $baz)
+
+    ($foo max $bar max $baz)
+
+    ($foo < $bar)
+
+    ($foo > $bar)
+
+    ($foo ≤ $bar)
+
+    ($foo ≥ $bar)
+
+    ($min ≤ $foo ≤ $max)
+
+    ($min ≤ $foo < $max)
+
+    (not $min < $foo ≤ $max)
+
+    (not $min < $foo < $max)
 
 =head1 DEPOT DECLARATION
 

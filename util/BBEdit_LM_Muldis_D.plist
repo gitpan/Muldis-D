@@ -28,6 +28,7 @@
     <string>PTMD_STD</string>
 
     <string>nothing</string>
+    <string>∅</string>
 
     <string>if</string>
     <string>then</string>
@@ -39,13 +40,40 @@
     <string>and</string>
     <string>or</string>
     <string>xor</string>
+    <string>xnor</string>
+    <string>iff</string>
+    <string>union</string>
+    <string>intersect</string>
+    <string>exclude</string>
+    <string>symdiff</string>
+    <string>join</string>
+    <string>times</string>
+    <string>cross</string>
 
+    <string>nand</string>
+    <string>nor</string>
+
+    <string>imp</string>
+    <string>implies</string>
+    <string>nimp</string>
+    <string>nif</string>
+    <string>mod</string>
+    <string>minus</string>
+    <string>except</string>
     <string>not</string>
+    <string>matching</string>
+    <string>antijoin</string>
+    <string>semiminus</string>
+    <string>semijoin</string>
+    <string>divideby</string>
 
     <string>log</string>
     <string>e</string>
     <string>loge</string>
     <string>round</string>
+
+    <string>min</string>
+    <string>max</string>
 
     <string>bootloader</string>
     <string>depot</string>
@@ -68,7 +96,6 @@
 
     <string>where</string>
     <string>matching</string>
-    <string>join</string>
 
     <string>tuple</string>
     <string>set</string>
@@ -78,24 +105,22 @@
 
     <string>ordered</string>
     <string>by</string>
-
-    <string>cardinality</string>
-    <string>of</string>
   </array>
   <key>Language Features</key>
   <dict>
     <key>Identifier and Keyword Character Class</key>
-    <string><![CDATA[a-zA-Z0-9_-]]></string>
+    <string><![CDATA[a-zA-Z0-9_∅-]]></string>
 
     <key>Comment Pattern</key>
     <string><![CDATA[(?x:
-      (Comment \s* : \s*)? \# [^\#]* \# ( \s* \# [^\#]* \# )*
+      \s+ (Comment \s* : \s*)?
+        (\#{2,} | \# [^\#]* \#) (\s+ (\#{2,} | \# [^\#]* \#))* \s+
     )]]></string>
 
     <key>String Pattern</key>
     <string><![CDATA[(?x:
       (
-        (Bool \s* : \s*)? (?<!\w) (false | true)
+        (Bool \s* : \s*)? (?<!\w) (false | ⊥ | true | ⊤)
       | (Order \s* : \s*)? (?<!\w) (increase | same | decrease)
       | (RatRoundMeth \s* : \s*)? (?<!\w)
         (

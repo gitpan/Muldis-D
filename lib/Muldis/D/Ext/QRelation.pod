@@ -9,7 +9,7 @@ Muldis D extension adding more generic relational operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::QRelation version 0.73.0.
+This document is Muldis::D::Ext::QRelation version 0.74.0.
 
 =head1 PREFACE
 
@@ -252,38 +252,61 @@ in that they typically work with any q/relation types.
 =head2 sys.std.QRelation.is_proper_subset
 
 C<< function sys.std.QRelation.is_proper_subset (Bool <--
-QRelation $look_in, QRelation $look_for) >>
+QRelation $topic, QRelation $other) >>
 
 This function is exactly the same as C<sys.std.Core.QRelation.is_subset>
 except that it results in C<Bool:false> if its 2 arguments are identical.
+Note that this operation is also known as C<⊂>.
 
 =head2 sys.std.QRelation.is_not_proper_subset
 
 C<< function sys.std.QRelation.is_not_proper_subset (Bool <--
-QRelation $look_in, QRelation $look_for) >>
+QRelation $topic, QRelation $other) >>
 
 This function is exactly the same as C<sys.std.QRelation.is_proper_subset>
 except that it results in the opposite boolean value when given the same
-arguments.
+arguments.  Note that this operation is also known as C<⊄>.
+
+=head2 sys.std.QRelation.is_proper_superset
+
+C<< function sys.std.QRelation.is_proper_superset (Bool <--
+QRelation $topic, QRelation $other) >>
+
+This function is an alias for C<sys.std.QRelation.is_proper_subset> except
+that it transposes the C<topic> and C<other> arguments.  This function
+is exactly the same as C<sys.std.Core.QRelation.is_superset> except that it
+results in C<Bool:false> if its 2 arguments are identical.  Note that this
+operation is also known as C<⊃>.
+
+=head2 sys.std.QRelation.is_not_proper_superset
+
+C<< function sys.std.QRelation.is_not_proper_superset (Bool <--
+QRelation $topic, QRelation $other) >>
+
+This function is an alias for C<sys.std.QRelation.is_not_proper_subset>
+except that it transposes the C<topic> and C<other> arguments.  This
+function is exactly the same as C<sys.std.QRelation.is_proper_superset>
+except that it results in the opposite boolean value when given the same
+arguments.  Note that this operation is also known as C<⊅>.
 
 =head2 sys.std.QRelation.is_disjoint
 
 C<< function sys.std.QRelation.is_disjoint (Bool <-- QRelation $topic,
 QRelation $other) >>
 
-This function results in C<Bool:true> iff the set of q/tuples comprising
-each of its 2 arguments are mutually disjoint, that is, iff the
+This symmetric function results in C<Bool:true> iff the set of q/tuples
+comprising each of its 2 arguments are mutually disjoint, that is, iff the
 intersection of the 2 arguments is empty; it results in C<Bool:false>
-otherwise.  This function's 2 parameters are mutually commutative.
+otherwise.
 
 =head2 sys.std.QRelation.is_not_disjoint
 
 C<< function sys.std.QRelation.is_not_disjoint (Bool <-- QRelation $topic,
 QRelation $other) >>
 
-This function is exactly the same as C<sys.std.QRelation.is_disjoint>
-except that it results in the opposite boolean value when given the same
-arguments.
+This symmetric function is exactly the same as
+C<sys.std.QRelation.is_disjoint> except that it results in the opposite
+boolean value when given the same arguments.
 
 =head2 sys.std.QRelation.exclusion
 
@@ -300,15 +323,22 @@ of the input q/relations.  Matters concerning a C<topic> with zero values
 are as per C<sys.std.Core.QRelation.union>; this function will fail when
 given such, and the per-distinct-heading identity value for relational
 exclusion is the same as for relational union.  Note that this operation is
-also legitimately known as I<symmetric difference>.
+also known as I<symmetric difference> or C<∆>.
+
+=head2 sys.std.QRelation.symmetric_diff
+
+C<< function sys.std.QRelation.symmetric_diff (QRelation <--
+quasi_bag_of.QRelation $topic) >>
+
+This function is an alias for C<sys.std.QRelation.exclusion>.
 
 =head2 sys.std.QRelation.composition
 
 C<< function sys.std.QRelation.composition (QRelation <-- QRelation $topic,
 QRelation $other) >>
 
-This function results in the relational composition of its (mutually
-commutative) 2 arguments.  It is conceptually a short-hand for first doing
+This symmetric function results in the relational composition of its
+2 arguments.  It is conceptually a short-hand for first doing
 an ordinary relational join between its 2 arguments, and then performing a
 relational projection on all of the attributes that only one of the
 arguments has; that is, the result has all of and just the attributes that

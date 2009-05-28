@@ -9,7 +9,7 @@ Muldis D general purpose routines
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Routines version 0.73.0.
+This document is Muldis::D::Core::Routines version 0.74.0.
 
 =head1 PREFACE
 
@@ -33,23 +33,25 @@ These functions are applicable to values of any data type at all.
 C<< function sys.std.Core.Universal.is_identical (Bool <--
 Universal $topic, Universal $other) >>
 
-This function results in C<Bool:true> iff its (mutually commutative) 2
+This symmetric function results in C<Bool:true> iff its 2
 arguments are exactly the same value, and C<Bool:false> otherwise.  This
 function will warn if, in regards to the declared types of its arguments,
 none of the following are true: 1. they are both subtypes of a common
 q/scalar root type; 2. they are both subtypes of a common complete q/tuple
 or q/relation type, that is they essentially have the same headings; 3. at
 least one type is a generic (eg-C<Universal>) or incomplete
-(eg-C<Relation>) type, and it is a supertype of the other.
+(eg-C<Relation>) type, and it is a supertype of the other.  Note that
+this operation is also known as I<is equal> or C<=>.
 
 =head2 sys.std.Core.Universal.is_not_identical
 
 C<< function sys.std.Core.Universal.is_not_identical (Bool <--
 Universal $topic, Universal $other) >>
 
-This function is exactly the same as C<sys.std.Core.Universal.is_identical>
-except that it results in the opposite boolean value when given the same
-arguments.
+This symmetric function is exactly the same as
+C<sys.std.Core.Universal.is_identical> except that it results in the
+opposite boolean value when given the same arguments.  Note that this
+operation is also known as I<is not equal> or C<≠>.
 
 =head2 sys.std.Core.Universal.is_value_of_type
 
@@ -295,33 +297,50 @@ C<topic> argument's possrep whose name is given by C<possrep>.
 
 =head1 SYSTEM-DEFINED BOOLEAN-CONCERNING FUNCTIONS
 
-These functions implement commonly used boolean operations.
+These functions implement commonly used boolean logic operations.  See also
+L<Muldis::D::Ext::Bool> for all the other standard boolean logic operators
+which aren't shown below.
 
 =head2 sys.std.Core.Bool.not
 
 C<< function sys.std.Core.Bool.not (Bool <-- Bool $topic) >>
 
-This function results in the logical I<not> of its argument.
+This function results in the logical I<not> of its argument.  This function
+results in C<Bool:true> iff its argument is C<Bool:false>, and
+C<Bool:false> otherwise.  Note that this operation is also known as
+I<negation> or C<¬>.
+
+There also exists conceptually the logical monadic operation called
+I<proposition> which results simply in its argument; this is the complement
+operation of I<negation>.  Now in practice any value expression that is an
+invocation of I<proposition> can simply be replaced with its argument, so
+there is no reason for I<proposition> to exist as an actual function.
 
 =head2 sys.std.Core.Bool.and
 
 C<< function sys.std.Core.Bool.and (Bool <-- set_of.Bool $topic?) >>
 
 This function is a reduction operator that recursively takes each pair of
-its N input element values and does a logical I<and> (which is both
-commutative and associative) on them until just one is left, which is the
-function's result.  If C<topic> has zero values, then C<and> results in
-C<Bool:true>, which is the identity value for logical I<and>.
+its N input element values and does a logical I<and> (which is commutative,
+associative, and idempotent) on them until just one is left, which is the
+function's result.  For each pair of input values, the I<and> of that pair
+is C<Bool:true> iff both input values are C<Bool:true>, and C<Bool:false>
+otherwise.  If C<topic> has zero values, then C<and> results in
+C<Bool:true>, which is the identity value for logical I<and>.  Note that
+this operation is also known as I<all> or I<conjunction> or C<∧>.
 
 =head2 sys.std.Core.Bool.or
 
 C<< function sys.std.Core.Bool.or (Bool <-- set_of.Bool $topic?) >>
 
 This function is a reduction operator that recursively takes each pair of
-its N input element values and does a logical inclusive-or (which is both
-commutative and associative) on them until just one is left, which is the
-function's result.  If C<topic> has zero values, then C<or> results in
-C<Bool:false>, which is the identity value for logical inclusive-or.
+its N input element values and does a logical inclusive-or (which is
+commutative, associative, and idempotent) on them until just one is left,
+which is the function's result.  For each pair of input values, the I<or>
+of that pair is C<Bool:false> iff both input values are C<Bool:false>, and
+C<Bool:true> otherwise.  If C<topic> has zero values, then C<or> results in
+C<Bool:false>, which is the identity value for logical inclusive-or.  Note
+that this operation is also known as I<any> or I<disjunction> or C<∨>.
 
 =head2 sys.std.Core.Bool.xor
 
@@ -330,8 +349,15 @@ C<< function sys.std.Core.Bool.xor (Bool <-- bag_of.Bool $topic?) >>
 This function is a reduction operator that recursively takes each pair of
 its N input element values and does a logical exclusive-or (which is both
 commutative and associative) on them until just one is left, which is the
-function's result.  If C<topic> has zero values, then C<xor> results in
-C<Bool:false>, which is the identity value for logical exclusive-or.
+function's result.  For each pair of input values, the I<xor> of that pair
+is C<Bool:false> iff both input values are exactly the same value, and
+C<Bool:true> otherwise.  If C<topic> has zero values, then C<xor> results
+in C<Bool:false>, which is the identity value for logical exclusive-or.
+Note that this operation is also known as I<exclusive disjunction> or
+I<not equivalent> (dyadic usage) or C<⊻> or C<↮>.  Note that a dyadic (2
+input value) invocation of C<xor> is exactly the same operation as a
+C<sys.std.Core.Universal.is_not_identical> invocation whose arguments are
+both C<Bool>-typed.
 
 =head1 SYSTEM-DEFINED GENERIC QUASI-/TUPLE-CONCERNING FUNCTIONS
 
@@ -466,6 +492,26 @@ works with q/tuples rather than q/relations.  This function is mainly
 intended for use in connecting q/tuples that have all disjoint headings,
 such as for extending one q/tuple with additional attributes.
 
+=head2 sys.std.Core.QTuple.is_member
+
+C<< function sys.std.Core.QTuple.is_member (Bool <--
+QTuple $t, QRelation $r) >>
+
+This function is an alias for C<sys.std.Core.QRelation.has_member>.  This
+function results in C<Bool:true> iff its C<t> argument matches a q/tuple of
+its C<r> argument (that is, iff conceptually C<t> is a member of C<r>), and
+C<Bool:false> otherwise.  Note that this operation is also known as C<∈>.
+
+=head2 sys.std.Core.QTuple.is_not_member
+
+C<< function sys.std.Core.QTuple.is_not_member (Bool <--
+QTuple $t, QRelation $r) >>
+
+This function is an alias for C<sys.std.Core.QRelation.has_not_member>.
+This function is exactly the same as C<sys.std.Core.QTuple.is_member>
+except that it results in the opposite boolean value when given the same
+arguments.  Note that this operation is also known as C<∉>.
+
 =head1 SYSTEM-DEFINED GENERIC SINGLE INPUT QUASI-/RELATION FUNCTIONS
 
 These functions are applicable to mainly q/relation types, but are generic
@@ -479,29 +525,35 @@ C<< function sys.std.Core.QRelation.cardinality (NNInt <--
 QRelation $topic) >>
 
 This function results in the cardinality of its argument (that is, the
-count of q/tuples its body has).
+count of q/tuples its body has).  Note that this operation is also known as
+I<count> or C<R#>.
 
-=head2 sys.std.Core.QRelation.is_member
+=head2 sys.std.Core.QRelation.count
 
-C<< function sys.std.Core.QRelation.is_member (Bool <-- QRelation $r,
+C<< function sys.std.Core.QRelation.count (NNInt <-- QRelation $topic) >>
+
+This function is an alias for C<sys.std.Core.QRelation.cardinality>.
+
+=head2 sys.std.Core.QRelation.has_member
+
+C<< function sys.std.Core.QRelation.has_member (Bool <-- QRelation $r,
 QTuple $t) >>
 
 This function results in C<Bool:true> iff its C<t> argument matches a
 q/tuple of its C<r> argument (that is, iff conceptually C<t> is a member of
-C<r>), and C<Bool:false> otherwise.  This function is like
-C<sys.std.Core.QRelation.is_subset> except that the q/tuple being looked
-for doesn't have to be wrapped in a q/relation.  This function will warn if
-its 2 arguments' common-named attributes have declared types that are
-incompatible as per C<is_identical>.
+C<r>), and C<Bool:false> otherwise.  This function will warn if its 2
+arguments' common-named attributes have declared types that are
+incompatible as per C<is_identical>.  Note that this operation is also
+known as C<∋>.
 
-=head2 sys.std.Core.QRelation.is_not_member
+=head2 sys.std.Core.QRelation.has_not_member
 
-C<< function sys.std.Core.QRelation.is_not_member (Bool <-- QRelation $r,
+C<< function sys.std.Core.QRelation.has_not_member (Bool <-- QRelation $r,
 QTuple $t) >>
 
-This function is exactly the same as C<sys.std.Core.QRelation.is_member>
+This function is exactly the same as C<sys.std.Core.QRelation.has_member>
 except that it results in the opposite boolean value when given the same
-arguments.
+arguments.  Note that this operation is also known as C<∌>.
 
 =head2 sys.std.Core.QRelation.QTuple_from_QRelation
 
@@ -692,7 +744,7 @@ as its C<topic> argument and C<assuming> as its C<assuming> argument.  As a
 trivial case, if C<func> is defined to unconditionally result in
 C<Bool:true>, then this function results simply in C<topic>; or, for an
 unconditional C<Bool:false>, this function results in the empty relation
-with the same heading.  Note that this operation is also legitimately known
+with the same heading.  Note that this operation is also known
 as I<where>.  See also the C<sys.std.Core.QRelation.semijoin> function,
 which is a simpler-syntax alternative for
 C<sys.std.Core.QRelation.restriction> in its typical usage where
@@ -818,23 +870,45 @@ in that they typically work with any q/relation types.
 
 =head2 sys.std.Core.QRelation.is_subset
 
-C<< function sys.std.Core.QRelation.is_subset (Bool <-- QRelation $look_in,
-QRelation $look_for) >>
+C<< function sys.std.Core.QRelation.is_subset (Bool <--
+QRelation $topic, QRelation $other) >>
 
 This function results in C<Bool:true> iff the set of q/tuples comprising
-C<look_for> is a subset of the set of q/tuples comprising C<look_in>, and
+C<topic> is a subset of the set of q/tuples comprising C<other>, and
 C<Bool:false> otherwise.  This function will warn if the input q/relations
 common-named attributes have declared types that are incompatible as per
-C<is_identical>.
+C<is_identical>.  Note that this operation is also known as C<⊆>.
 
 =head2 sys.std.Core.QRelation.is_not_subset
 
 C<< function sys.std.Core.QRelation.is_not_subset (Bool <--
-QRelation $look_in, QRelation $look_for) >>
+QRelation $topic, QRelation $other) >>
 
 This function is exactly the same as C<sys.std.Core.QRelation.is_subset>
 except that it results in the opposite boolean value when given the same
-arguments.
+arguments.  Note that this operation is also known as C<⊈>.
+
+=head2 sys.std.Core.QRelation.is_superset
+
+C<< function sys.std.Core.QRelation.is_superset (Bool <--
+QRelation $topic, QRelation $other) >>
+
+This function is an alias for C<sys.std.Core.QRelation.is_subset> except
+that it transposes the C<topic> and C<other> arguments.  This function
+results in C<Bool:true> iff the set of q/tuples comprising C<topic> is a
+superset of the set of q/tuples comprising C<other>, and C<Bool:false>
+otherwise.  Note that this operation is also known as C<⊇>.
+
+=head2 sys.std.Core.QRelation.is_not_superset
+
+C<< function sys.std.Core.QRelation.is_not_superset (Bool <--
+QRelation $topic, QRelation $other) >>
+
+This function is an alias for C<sys.std.Core.QRelation.is_not_subset>
+except that it transposes the C<topic> and C<other> arguments.  This
+function is exactly the same as C<sys.std.Core.QRelation.is_superset>
+except that it results in the opposite boolean value when given the same
+arguments.  Note that this operation is also known as C<⊉>.
 
 =head2 sys.std.Core.QRelation.union
 
@@ -843,8 +917,8 @@ quasi_set_of.QRelation $topic) >>
 
 This function results in the relational union/inclusive-or of the N element
 values of its argument; it is a reduction operator that recursively takes
-each pair of input values and relationally unions (which is both
-commutative and associative) them together until just one is left, which is
+each pair of input values and relationally unions (which is commutative,
+associative, and idempotent) them together until just one is left, which is
 the result.  The result q/relation has the same heading as all of its
 inputs, and its body contains every q/tuple that is in any of the input
 q/relations.  If C<topic> has zero values, then this function will fail.
@@ -855,7 +929,8 @@ value for relational union; however, since a C<topic> with zero values
 wouldn't know the heading / attribute names for the result q/relation in
 question, it seems the best alternative is to require invoking code to work
 around the limitation somehow, which might mean it will supply the identity
-value explicitly as an extra C<topic> element.
+value explicitly as an extra C<topic> element.  Note that this operation is
+also known as C<∪>.
 
 =head2 sys.std.Core.QRelation.disjoint_union
 
@@ -872,8 +947,9 @@ quasi_set_of.QRelation $topic) >>
 
 This function results in the relational intersection/and of the N element
 values of its argument; it is a reduction operator that recursively takes
-each pair of input values and relationally intersects (which is both
-commutative and associative) them together until just one is left, which is
+each pair of input values and relationally intersects (which is
+commutative, associative, and idempotent) them together until just one is
+left, which is
 the result.  The result q/relation has the same heading as all of its
 inputs, and its body contains only the q/tuples that are in every one of
 the input q/relations.  If C<topic> has zero values, then this function
@@ -893,7 +969,8 @@ an extra C<topic> element.  Note that this I<intersection> operator is
 conceptually a special case of C<join>, applicable when the headings of the
 inputs are the same, and the other will produce the same result as this
 when given the same inputs, but with the exception that I<intersection> has
-a different identity value when given zero inputs.
+a different identity value when given zero inputs.  Note that this
+operation is also known as C<∩>.
 
 =head2 sys.std.Core.QRelation.difference
 
@@ -907,7 +984,8 @@ the q/tuples that are in C<source> and are not in C<filter>.  This function
 will warn if the input q/relations common-named attributes have declared
 types that are incompatible as per C<is_identical>.  Note that this
 I<difference> operator is conceptually a special case of I<semidifference>,
-applicable when the headings of the inputs are the same.
+applicable when the headings of the inputs are the same.  Note that this
+operation is also known as I<minus> or I<except> or C<∖>.
 
 =head2 sys.std.Core.QRelation.semidifference
 
@@ -916,8 +994,15 @@ QRelation $source, QRelation $filter) >>
 
 This function is the same as C<semijoin> but that it results in the
 complementary subset of q/tuples of C<source> when given the same
-arguments.  Note that this operation is also legitimately known as
-I<antijoin> or I<anti-semijoin>.
+arguments.  Note that this operation is also known as I<antijoin> or
+I<anti-semijoin> or I<semiminus> or I<not matching> or C<⊿>.
+
+=head2 sys.std.Core.QRelation.antijoin
+
+C<< function sys.std.Core.QRelation.antijoin (QRelation <--
+QRelation $source, QRelation $filter) >>
+
+This function is an alias for C<sys.std.Core.QRelation.semidifference>.
 
 =head2 sys.std.Core.QRelation.semijoin_and_diff
 
@@ -945,6 +1030,7 @@ conceptually a short-hand for first doing an ordinary relational join
 between its 2 arguments, and then performing a relational projection on all
 of the attributes that just C<source> has.  This function will fail|warn
 any time that C<join> would fail|warn on the same 2 input q/relations.
+Note that this operation is also known as I<matching> or C<⋉>.
 
 =head2 sys.std.Core.QRelation.join
 
@@ -953,8 +1039,8 @@ quasi_set_of.QRelation $topic?) >>
 
 This function results in the relational join of the N element values of its
 argument; it is a reduction operator that recursively takes each pair of
-input values and relationally joins (which is both commutative and
-associative) them together until just one is left, which is the result.
+input values and relationally joins (which is commutative, associative, and
+idempotent) them together until just one is left, which is the result.
 The result q/relation has a heading that is a union of all of the headings
 of its inputs, and its body is the result of first pairwise-matching every
 q/tuple of each input q/relation with every q/tuple of each other input
@@ -974,7 +1060,7 @@ subset of another's, then the join of just those two is a semijoin with the
 former filtering the latter.  This function will warn if any input
 q/relations have attributes with common names where their declared types
 are incompatible as per C<is_identical>.  Note that this operation is also
-legitimately known as I<natural inner join>.
+known as I<natural inner join> or C<⋈>.
 
 =head2 sys.std.Core.QRelation.product
 
@@ -985,8 +1071,8 @@ This function results in the relational cartesian/cross product of the N
 element values of its argument; it is conceptually a special case of
 C<join> where all input q/relations have mutually distinct attribute names;
 unlike C<join>, C<product> will fail if any inputs have attribute names in
-common.  Note that this operation is also legitimately known as
-I<cartesian/cross join>.
+common.  Note that this operation is also known as I<cartesian/cross join>
+or C<×>.
 
 =head2 sys.std.Core.QRelation.quotient
 
@@ -1001,8 +1087,8 @@ C<{Y}>, then the result q/relation has a heading composed of attributes
 C<{X}> (so the result and C<divisor> headings are both complementary
 subsets of the C<dividend> heading); the result has all q/tuples C<{X}>
 such that a q/tuple C<{X,Y}> appears in C<A> for all q/tuples C<{Y}>
-appearing in C<B>; that is, C<A / B> is shorthand for C<A{X} - ((A{X} * B)
-- A){X}>.
+appearing in C<B>; that is, C<A ÷ B> is shorthand for C<A{X} ∖ ((A{X} × B)
+∖ A){X}>.  Note that this operation is also known as I<divideby> or C<÷>.
 
 =head1 SYSTEM-DEFINED GENERIC CONTROL FLOW FUNCTIONS
 
@@ -1196,6 +1282,14 @@ C<sys.std.Core.QRelation.semidifference> function with the same arguments,
 and then assigning the result of that function to C<source>.  This updater
 is analagous to the common case of the SQL "DELETE" statement where the
 criteria is simply a set of and-ed and or-ed value equality tests.
+
+=head2 sys.std.Core.QRelation.assign_antijoin
+
+C<updater sys.std.Core.QRelation.assign_antijoin (QRelation &$source,
+QRelation $filter)>
+
+This update operator is an alias for
+C<sys.std.Core.QRelation.assign_semidifference>.
 
 =head2 sys.std.Core.QRelation.assign_semijoin
 

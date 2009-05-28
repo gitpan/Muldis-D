@@ -9,7 +9,7 @@ How to format Perl 5 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.73.0.
+This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.74.0.
 
 =head1 PREFACE
 
@@ -158,8 +158,8 @@ There are 26 main varieties of C<value> node, each of which is a named node
 kind of its own:  C<Bool>, C<Order>, C<RatRoundMeth>, C<Int>, C<Rat>,
 C<Blob>, C<Text>, C<Name>, C<NameChain>, C<DeclNameChain>, C<Comment>,
 C<Instant>, C<Duration>, C<UTCInstant>, C<FloatInstant>, C<UTCDuration>,
-C<String>, C<QScalar>, C<QTuple>, C<Database>, C<QRelation>, C<QSet>,
-C<QMaybe>, C<QArray>, C<QBag>, C<RatRoundRule>.
+C<RatRoundRule>, C<String>, C<QScalar>, C<QTuple>, C<Database>,
+C<QRelation>, C<QSet>, C<QMaybe>, C<QArray>, C<QBag>.
 
 Fundamentally, the various Muldis D scalar and collection types are
 represented by their equivalent Perl native scalar and collection types.
@@ -190,9 +190,9 @@ C<value_kind>:  C<Bool>, C<Order>, C<RatRoundMeth>, C<[|NN|P]Int>,
 C<[|NN|P]Rat>, C<[|Octet]Blob>, C<Text>, C<Name>, C<NameChain>,
 C<DeclNameChain>, C<Comment>, C<Instant>, C<Duration>,
 C<UTC[Instant|DateTime|Date|Time]>, C<Float[Instant|DateTime|Date|Time]>,
-C<UTCDuration>, C<[|B|O|UCP]String>, C<[Q|]Scalar>, C<[Q|]Tuple>,
-C<Database>, C<[Q|]Relation>, C<[Q|]Set>, C<[Q|][Maybe|Single]>,
-C<[Q|]Array>, C<[Q|]Bag>, C<RatRoundRule>.
+C<UTCDuration>, C<RatRoundRule>, C<[|B|O|UCP]String>, C<[Q|]Scalar>,
+C<[Q|]Tuple>, C<Database>, C<[Q|]Relation>, C<[Q|]Set>,
+C<[Q|][Maybe|Single]>, C<[Q|]Array>, C<[Q|]Bag>.
 
 For just some data types, the C<value_kind> may be omitted; see below.
 
@@ -252,8 +252,9 @@ values are probably the empty string and number 1, respectively.
 =item *
 
 A few alternative payload formats are supported:  The Perl value literals
-[C<'false'>, C<'0'>, C<0>, C<''>] all map to C<Bool:false>, and the Perl
-value literals [C<'true'>, C<'1'>, C<1>] all map to C<Bool:true>.
+[C<'false'>, C<'0'>, C<0>, C<''>, C<'⊥'>] all map to C<Bool:false>,
+and the Perl value literals [C<'true'>, C<'1'>, C<1>, C<'⊤'>] all
+map to C<Bool:true>.
 
 =back
 
@@ -262,6 +263,8 @@ Examples:
     ['Bool','true']
 
     ['Bool',(1 == 0)]
+
+    ['Bool','⊤']
 
 =head2 Order-Determination Literals
 
@@ -710,6 +713,23 @@ Examples:
 
     [ 'UTCDuration', [3,5,1,6,15,45.000012] ]
 
+=head2 Rational Rounding Rule Literals
+
+A C<RatRoundRule> node represents a rational rounding rule.  It is
+interpreted as a Muldis D C<sys.std.Core.Type.Cat.RatRoundRule> value whose
+attributes are defined by the C<RatRoundRule_payload>.  A
+C<RatRoundRule_payload> must be a Perl array ref with 3 elements, which
+correspond in order to the 3 attributes: C<radix> (a C<PInt2_N>),
+C<min_exp> (an C<Int>), and C<round_meth> (a C<RatRoundMeth>).  Each of
+C<radix> and C<min_exp> must qualify as a valid C<Int_payload>, and
+C<round_meth> must qualify as a valid C<RatRoundMeth_payload>.
+
+Examples:
+
+    [ 'RatRoundRule', [10,-2,'half_even'] ]
+
+    [ 'RatRoundRule', [2,-7,'to_zero'] ]
+
 =head2 Low Level Integer String Literals
 
 A C<String> node represents an integer string value.  This node is
@@ -1020,23 +1040,6 @@ Examples:
         'Baz',
     ] ]
 
-=head2 Rational Rounding Rule Selectors
-
-A C<RatRoundRule> node represents a literal or selector invocation for a
-rational rounding rule.  It is interpreted as a Muldis D
-C<sys.std.Core.Type.Cat.RatRoundRule> value whose attributes are defined by
-the C<RatRoundRule_payload>.  A C<RatRoundRule_payload> must be a Perl
-array ref with 3 elements, which correspond in order to the 3 attributes:
-C<radix> (a C<PInt2_N>), C<min_exp> (an C<Int>), and C<round_meth> (a
-C<RatRoundMeth>).  Each of the 3 C<RatRoundRule_payload> elements is an
-C<expr> node.
-
-Examples:
-
-    [ 'RatRoundRule', [10,-2,half_even] ]
-
-    [ 'RatRoundRule', [2,-7,to_zero] ]
-
 =head1 GENERIC VALUE EXPRESSIONS
 
 An C<expr_name> node has 2 ordered elements:  The first element is the Perl
@@ -1107,7 +1110,7 @@ Perl character string C<if_else_expr>.  The optional second element is
 I<if_then>, a Perl array ref with 0..N elements, each of those being a
 2-element Perl array ref, where each element is an C<expr> node; the first
 element is an I<if> condition expression, and the second element is the
-associated <then> result expression.  The 3rd/last element of an
+associated I<then> result expression.  The 3rd/last element of an
 C<if_else_expr> node is I<else> result expression, which is an C<expr>
 node.
 
@@ -1136,7 +1139,7 @@ an C<expr> node which is the I<given> common comparand.  The optional third
 element is I<when_then>, a Perl array ref with 0..N elements, each of those
 being a 2-element Perl array ref, where each element is an C<expr> node;
 the first element is a I<when> comparand, and the second element is the
-associated <then> result expression.  The 4th/last element of an
+associated I<then> result expression.  The 4th/last element of an
 C<given_when_def_expr> node is I<default> result expression, which is an
 C<expr> node.
 
@@ -1205,10 +1208,10 @@ Examples:
 
     [ 'op', 'N*', [ 69.3, [ 'Rat', [15,2,6] ], [ 'Rat', [49,23] ] ] ]
 
-    [ 'op', 'R+', [ [ 'Set', [ 1, 3, 5 ] ],
+    [ 'op', '∪', [ [ 'Set', [ 1, 3, 5 ] ],
         [ 'Set', [ 4, 5, 6 ] ], [ 'Set', [ 0, 9 ] ] ] ]
 
-    [ 'op', 'R*', [ [ 'Set', [ 1, 3, 5, 7, 9 ] ],
+    [ 'op', '∩', [ [ 'Set', [ 1, 3, 5, 7, 9 ] ],
         [ 'Set', [ 3, 4, 5, 6, 7, 8 ] ], [ 'Set', [ 2, 5, 9 ] ] ] ]
 
 =head2 Simple Non-commutative N-adic Infix Reduction Operators
@@ -1229,29 +1232,33 @@ Examples:
     [ 'op', 'A~', [ [ 'Array', [ 24, 52 ] ],
         [ 'Array', [ -9 ] ], [ 'Array', [ 0, 11, 24, 7 ] ] ] ]
 
-=head2 Simple Commutative Dyadic Infix Operators
+=head2 Simple Symmetric Dyadic Infix Operators
 
-A C<comm_dyadic_infix_op_invo> node has exactly 2 main op args, each of
+A C<sym_dyadic_infix_op_invo> node has exactly 2 main op args, each of
 which is an C<expr> node; which function arguments get which main op args
 isn't significant.
 
 Examples:
 
-    [ 'op', '===', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
+    [ 'op', '=', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
 
-    [ 'op', '!===', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
+    [ 'op', '≠', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
+
+    [ 'op', 'nand', [ ['Bool','false'], ['Bool','true'] ] ]
 
     [ 'op', 'I|-|', [ 15, 17 ] ]
 
     [ 'op', 'N|-|', [ 7.5, 9.0 ] ]
 
-=head2 Simple Non-commutative Dyadic Infix Operators
+=head2 Simple Non-symmetric Dyadic Infix Operators
 
-A C<noncomm_dyadic_infix_op_invo> node has exactly 2 main op args, each of
+A C<nonsym_dyadic_infix_op_invo> node has exactly 2 main op args, each of
 which is an C<expr> node; the first and second main op args are C<lhs> and
 C<rhs>, respectively.
 
 Examples:
+
+    [ 'op', 'implies', [ ['Bool','true'], ['Bool','false'] ] ]
 
     [ 'op', 'I-', [ 34, 21 ] ]
 
@@ -1265,9 +1272,9 @@ Examples:
 
     [ 'op', 'N/', [[ 'Rat', {1 => '101.01'} ], [ 'Rat', {1 => '11.0'} ]] ]
 
-    [ 'op', 'R-', [ [ 'Set', [ 8, 4, 6, 7 ] ], [ 'Set', [ 9, 0, 7 ] ] ] ]
+    [ 'op', '∖', [ [ 'Set', [ 8, 4, 6, 7 ] ], [ 'Set', [ 9, 0, 7 ] ] ] ]
 
-    [ 'op', 'R/', [ [ 'Relation', [ ['x', 'y'] => [ [5, 6], [3, 6] ] ] ],
+    [ 'op', '÷', [ [ 'Relation', [ ['x', 'y'] => [ [5, 6], [3, 6] ] ] ],
         [ 'Relation', [ { y => 6 } ] ] ] ]
 
 =head2 Simple Monadic Prefix Operators
@@ -1282,6 +1289,8 @@ Examples:
     [ 'op', 'I||', -23 ]
 
     [ 'op', 'N||', -4.59 ]
+
+    [ 'op', 'R#', [ [ 'Set', [ 5, -1, 2 ] ] ] ]
 
 =head2 Simple Monadic Postfix Operators
 
@@ -1307,15 +1316,55 @@ second and third args are C<lhs>, C<rhs> and C<round_rule>, respectively.
 Examples:
 
     [ 'op', 'round', [ ['expr_name','foo'],
-        [ 'RatRoundRule', [10,-2,half_even] ] ] ]
+        [ 'RatRoundRule', [10,-2,'half_even'] ] ] ]
 
-    [ 'op', 'N^', [ 2.0, 0.5, [ 'RatRoundRule', [2,-7,to_zero] ] ] ]
+    [ 'op', 'N^', [ 2.0, 0.5, [ 'RatRoundRule', [2,-7,'to_zero'] ] ] ]
 
-    [ 'op', 'log', [ 309.1, 5.4, [ 'RatRoundRule', [10,-4,half_up] ] ] ]
+    [ 'op', 'log', [ 309.1, 5.4, [ 'RatRoundRule', [10,-4,'half_up'] ] ] ]
 
-    [ 'op', 'e^', [ 6.3, [ 'RatRoundRule', [10,-6,to_ceiling] ] ] ]
+    [ 'op', 'e^', [ 6.3, [ 'RatRoundRule', [10,-6,'to_ceiling'] ] ] ]
 
-    [ 'op', 'loge', [ 17.0, [ 'RatRoundRule', [3,-5,to_floor] ] ] ]
+    [ 'op', 'loge', [ 17.0, [ 'RatRoundRule', [3,-5,'to_floor'] ] ] ]
+
+=head2 Order Comparison Operators
+
+An C<ord_compare_op_invo> node has exactly 2 or 3 or 2-N main op args,
+depending on the op, each of which is an C<expr> node.  When the op
+requires exactly 2 main op args, the first and second args are C<lhs> and
+C<rhs>, respectively.  When the op requires exactly 2 main op args, the
+first, second and third args are C<min>, C<expr>, and C<max>, respectively.
+When the op is N-adic, requiring 2-N main op args, then the order of the
+main op args isn't significant.  Details on the extra op args are pending.
+
+Examples (for now sans any use of extra op args, which are atypical):
+
+    [ 'op', '<=>', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
+
+    [ 'op', 'min', [ ['expr_name','foo'], ['expr_name','bar'],
+        ['expr_name','baz'] ] ]
+
+    [ 'op', 'max', [ ['expr_name','foo'], ['expr_name','bar'],
+        ['expr_name','baz'] ] ]
+
+    [ 'op', '<', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
+
+    [ 'op', '>', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
+
+    [ 'op', '≤', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
+
+    [ 'op', '≥', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
+
+    [ 'op', '≤≤', [ ['expr_name','min'], ['expr_name','foo'],
+        ['expr_name','max'] ] ]
+
+    [ 'op', '≤<', [ ['expr_name','min'], ['expr_name','foo'],
+        ['expr_name','max'] ] ]
+
+    [ 'op', '!<≤', [ ['expr_name','min'], ['expr_name','foo'],
+        ['expr_name','max'] ] ]
+
+    [ 'op', '!<<', [ ['expr_name','min'], ['expr_name','foo'],
+        ['expr_name','max'] ] ]
 
 =head1 DEPOT DECLARATION
 
