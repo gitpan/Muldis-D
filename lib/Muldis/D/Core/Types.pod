@@ -9,7 +9,7 @@ Muldis D general purpose data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types version 0.74.0.
+This document is Muldis::D::Core::Types version 0.75.0.
 
 =head1 PREFACE
 
@@ -271,9 +271,9 @@ in canonical decomposed normal form (NFD).  Two C<Text> will generally
 match at the grapheme abstraction level.  Of course, a Muldis D
 implementation doesn't actually have to store character data in NFD; but
 default matching semantics need to be as if it did.  A C<Text> has 1
-system-defined possrep named C<nfd_codepoints> which consists of 1
+system-defined possrep named C<nfd_codes> which consists of 1
 C<UCPString>-typed attribute whose name is the empty string; each element
-of C<nfd_codepoints> represents a Unicode standard version 5.1.0 character
+of C<nfd_codes> represents a Unicode standard version 5.1.0 character
 abstract codepoint number.  A C<Text> is a simple wrapper for a
 C<UCPString> and all of its other details such as default and minimum and
 maximum values and cardinality and default ordering algorithm (sorting is
@@ -519,7 +519,7 @@ C<QMaybe> and C<Set>.  The cardinality of this type is infinite.
 
 The only member value of C<Maybe> that has exactly zero elements is also
 known by the special name C<Maybe:nothing>, aka C<nothing>,
-aka I<empty set>, aka I<∅>, which serves as
+aka I<empty set>, aka C<∅>, which serves as
 the default value of the 4 types C<[Q|]Maybe> and C<[Q|]Set>.  The single
 C<nothing> value, which is a relation with zero tuples and a single
 attribute named C<value>, is Muldis D's answer to the SQL NULL and is

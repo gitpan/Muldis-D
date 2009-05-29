@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.74.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.75.0.
 
 =head1 PREFACE
 
@@ -125,7 +125,7 @@ than the Perl 6 way like C<token footok { ... }> or C<rule footok { ... }>.
 3. All non-quoted whitespace is not significant and just is formatting the
 grammar itself; rather, whitespace rules in the grammar are spelled out
 explicitly such as with C<\s*> (optional whitespace) and C<\s+> (mandatory
-whitespace.
+whitespace).
 
 The root grammar token for the entire dialect is C<bootloader>.
 
@@ -2321,8 +2321,8 @@ This table indicates which function is invoked by each keyword:
     ≠    -> Core.Universal.is_not_identical( $expr[0], $expr[1] )
     nand -> Bool.nand( $expr[0], $expr[1] )
     nor  -> Bool.nor( $expr[0], $expr[1] )
-    I|-| -> Integer.abs_difference( $expr[0], $expr[1] )
-    N|-| -> Rational.abs_difference( $expr[0], $expr[1] )
+    I|-| -> Integer.abs_diff( $expr[0], $expr[1] )
+    N|-| -> Rational.abs_diff( $expr[0], $expr[1] )
 
 Examples:
 
@@ -2362,6 +2362,7 @@ Grammar:
         | '⊿' | 'not matching' | antijoin | semiminus
         | '⋉' | matching | semijoin
         | '÷' | 'R/' | divideby
+        | like | 'not like'
 
 A C<nonsym_dyadic_infix_op_invo> node is for using infix notation to
 invoke a non-symmetric dyadic operator function.  Such a function takes
@@ -2399,11 +2400,11 @@ This table indicates which function is invoked by each keyword:
     nimp -> Bool.nimp( $lhs, $rhs )
     if   -> Bool.if( $lhs, $rhs )
     nif  -> Bool.nif( $lhs, $rhs )
-    I-   -> Integer.difference( minuend => $lhs, subtrahend => $rhs )
+    I-   -> Integer.diff( minuend => $lhs, subtrahend => $rhs )
     I/   -> Integer.quotient( dividend => $lhs, divisor => $rhs )
     %    -> Integer.remainder( dividend => $lhs, divisor => $rhs )
     I^   -> Integer.power( radix => $lhs, exponent => $rhs )
-    N-   -> Rational.difference( minuend => $lhs, subtrahend => $rhs )
+    N-   -> Rational.diff( minuend => $lhs, subtrahend => $rhs )
     N/   -> Rational.quotient( dividend => $lhs, divisor => $rhs )
     ∈    -> Core.QTuple.is_member( t => $lhs, r => $rhs )
     ∉    -> Core.QTuple.is_not_member( t => $lhs, r => $rhs )
@@ -2417,10 +2418,18 @@ This table indicates which function is invoked by each keyword:
     ⊄    -> QRelation.is_not_proper_subset( $lhs, $rhs )
     ⊃    -> QRelation.is_proper_superset( $lhs, $rhs )
     ⊅    -> QRelation.is_not_proper_superset( $lhs, $rhs )
-    ∖    -> Core.QRelation.difference( source => $lhs, filter => $rhs )
-    ⊿    -> Core.QRelation.semidifference( source => $lhs, filter => $rhs )
+    ∖    -> Core.QRelation.diff( source => $lhs, filter => $rhs )
+    ⊿    -> Core.QRelation.semidiff( source => $lhs, filter => $rhs )
     ⋉    -> Core.QRelation.semijoin( source => $lhs, filter => $rhs )
     ÷    -> Core.QRelation.quotient( dividend => $lhs, divisor => $rhs )
+
+    like     -> sys.std.Text.is_like( look_in => $lhs, look_for => $rhs )
+    not like -> sys.std.Text.is_not_like(look_in => $lhs, look_for => $rhs)
+
+Note that while the C<is[|_not]_like> functions also have an optional third
+parameter C<escape>, you will have to use a C<func_invo> node to exploit
+it; for simplicity, the infix C<like> and C<not like> don't support that
+customization; but most actual uses of like/etc don't use C<escape> anyway.
 
 Examples:
 
@@ -2505,8 +2514,8 @@ C<monadic_postfix_op_invo> supplies the value of that argument.
 
 This table indicates which function is invoked by each keyword:
 
-    ++ -> Integer.increment( $expr )
-    -- -> Integer.decrement( $expr )
+    ++ -> Integer.inc( $expr )
+    -- -> Integer.dec( $expr )
     !  -> Integer.factorial( $expr )
 
 Examples:
