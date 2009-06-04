@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.75.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.76.0.
 
 =head1 PREFACE
 
@@ -888,7 +888,7 @@ Grammar:
         <NameChain_payload>
 
     <NameChain_payload> ::=
-        <Name_payload> ** [\s* '.' \s*]
+        ['.' \s*]? <Name_payload> ** [\s* '.' \s*]
 
     <DeclNameChain> ::=
         DeclNameChain \s* ':' \s*
@@ -971,14 +971,30 @@ The second special case involves any context where a value expression
 (including a parameter) or a variable is being referenced by name, such as
 with an C<expr_name> node.  In such a context, any leading C<lex> element
 may be omitted; when a C<NameChain_payload>, whose context indicates it is
-a type or routine invocation, is encountered by the parser, and its
+a value expression / etc reference, is encountered by the parser, and its
 existing first chain element isn't one of the other 8 top-level namespaces,
 then the parser will assume it is an unqualified chain in the C<lex>
 namespace and will prepend a C<lex> element to it.  So for example a
 C<$foo> is treated as being C<$lex.foo> while a C<$dep.data.foo> is treated
 as itself.
 
-The third special case involves any context where a type is being
+The third special case is an extension to the second special case that
+involves any context where a referenced-by-name value expression / etc has
+the declaration name C<topic>.  In only such a context, a
+C<NameChain_payload> may be prefixed with a chain-element-separator /
+period token instead of having a leading (post C<lex> omission) C<topic>
+element; a parser encountering a chain with a leading period will assume
+the chain sans that period is unqualified and will prepend both a C<lex>
+and C<topic> element to it.  So for example a C<$.foo> is treated as being
+C<$lex.topic.foo>.  Note that PTMD_STD doesn't confuse this with the use of
+an empty string chain element because those must always be delimited, so
+C<$"".foo> is still treated as C<$lex."".foo>.  Note that the third special
+case may only be used to reference attributes of C<$lex.topic> (or
+attributes of those, etc), not C<$lex.topic> itself; you still have to use
+C<$topic> for that.  Note that if C<$topic> is a q/scalar value, you still
+have to write the possrep name as normal, such as C<$.possrep.attr>.
+
+The fourth special case involves any context where a type is being
 referenced using the C<type> namespace prefix feature described in
 L<Muldis::D::Basics/Referencing Data Types>.  In such a context, when the
 namespace prefix contains either of the optional chain elements
@@ -987,10 +1003,10 @@ C<[|quasi_][set|maybe|single|array|bag]_of>, programmers may omit the
 single prefix-leading C<type> chain element.  So for example, one can just
 write C<array_of.Rat> rather than C<type.array_of.Rat>, or
 C<tuple_from.var.lex.myrelvar> rather than
-C<type.tuple_from.var.lex.myrelvar>.  This third special case is completely
-orthogonal to which of the 9 normal top-level namespaces is in use
-(implicitly or explicitly) by the chain being prefixed, and works for all 9
-of them.
+C<type.tuple_from.var.lex.myrelvar>.  This fourth special case is
+completely orthogonal to which of the 9 normal top-level namespaces is in
+use (implicitly or explicitly) by the chain being prefixed, and works for
+all 9 of them.
 
 A C<DeclNameChain> node represents a canonical long name for declaring a
 DBMS entity in N-depth contexts; the format and interpretation of a
@@ -1008,6 +1024,8 @@ Examples:
     NameChain:fed.data.the_db.gene.sorted_person_names
 
     NameChain:fed.data.the_db.stats."samples by order"
+
+    NameChain:.attr  # same as NameChain:lex.topic.attr #
 
     DeclNameChain:gene.sorted_person_name
 
@@ -1164,7 +1182,7 @@ attribute values are defined as follows:
 A C<UTCInstant_payload> consists mainly of a bracket-delimited sequence of
 6 comma-separated elements, where each element is either a valid numeric
 literal or is completely absent.  The 6 elements correspond in order to
-the 6 attributes: C<year>, C<month> C<day>, C<hour>, C<minute>, C<second>.
+the 6 attributes: C<year>, C<month>, C<day>, C<hour>, C<minute>, C<second>.
 For each element that is absent or defined, the corresponding attribute has
 the C<nothing> or a C<Single> value, respectively.  For each of the first 5
 elements, when it is defined, it must qualify as a valid I<body> part of an
@@ -1203,7 +1221,7 @@ attribute values are defined as follows:
 A C<UTCDuration_payload> consists mainly of a bracket-delimited sequence of
 6 comma-separated elements, where each element is either a valid numeric
 literal or is completely absent.  The 6 elements correspond in order to the
-6 attributes: C<years>, C<months> C<days>, C<hours>, C<minutes>,
+6 attributes: C<years>, C<months>, C<days>, C<hours>, C<minutes>,
 C<seconds>.  For each element that is absent or defined, the corresponding
 attribute has the C<nothing> or a C<Single> value, respectively.  For each
 of the first 5 elements, when it is defined, it must qualify as a valid
@@ -1958,7 +1976,10 @@ Grammar:
 
     <if_else_expr> ::=
         '(' \s*
-            [if \s+ <if_expr> \s+ then \s+ <then_expr> \s+ else \s+]*
+            [
+                  [if \s+ <if_expr> \s+ then \s+ <then_expr> \s+ else \s+]*
+                | [<if_expr> \s+ '??' \s+ <then_expr> \s+ '!!' \s+]*
+            ]
             <else_expr>
         \s* ')'
 
@@ -1990,11 +2011,13 @@ Examples:
     (if ($ary is empty) then $empty_result else ($ary[0]))
 
     (if (($x = ∅) or ($y = ∅)) then ∅
-        else Maybe:{ ($x{M:}) I+ (($y{M:}) I^ 3) })
+        else (s ((v $x) I+ ((v $y) I^ 3)))
 
     (if ($val isa T->Int) then ($val I^ 3)
         else if ($val isa T->Text) then ($val Tx 5)
         else true)
+
+    ('My answer is: ' T~ ($maybe ?? 'yes' !! 'no'))
 
 =head2 Generic Given-When-Default Expressions
 
@@ -2246,7 +2269,9 @@ Grammar:
         \s* ')'
 
     <noncomm_infix_reduce_op ::=
-        '[<=>]' | 'B~' | 'T~' | 'A~'
+          '[<=>]'
+        | 'B~' | 'T~' | 'A~'
+        | '//' | '//d'
 
 A C<noncomm_infix_reduce_op_invo> node is for using infix notation to
 invoke a (homogenous) non-commutative N-adic reduction operator function.
@@ -2265,6 +2290,9 @@ a single collection-valued node then use C<func_invo> to invoke the
 function instead.  If C<noncomm_infix_reduce_op> matches more than once in
 the same C<noncomm_infix_reduce_op_invo>, then all of the
 C<noncomm_infix_reduce_op> matches must be identical / the same operator.
+Exception: with some of these, the actual C<func_arg_list> derived from
+this has 2 actual arguments, the first a collection and the second taking a
+different type of value, from the last op input list element.
 
 This table indicates which function is invoked by each keyword:
 
@@ -2272,6 +2300,11 @@ This table indicates which function is invoked by each keyword:
     B~    -> Blob.catenation( Array:{ $expr[0], ..., $expr[n] } )
     T~    -> Text.catenation( Array:{ $expr[0], ..., $expr[n] } )
     A~    -> QArray.catenation( QArray:{ $expr[0], ..., $expr[n] } )
+
+    //    -> QSet.QMaybe.attr_or_value(
+                QArray:{ $expr[0], ..., $expr[n-1] }, value => $expr[n] )
+    //d   -> QSet.QMaybe.attr_or_default(
+                QArray:{ $expr[0], ..., $expr[n-1] }, default => $expr[n] )
 
 Examples:
 
@@ -2282,6 +2315,10 @@ Examples:
     ('hello' T~ ' ' T~ 'world')
 
     (Array:[ 24, 52 ] A~ Array:[ -9 ] A~ Array:[ 0, 11, 24, 7 ])
+
+    ($a // $b // 42)
+
+    ($a //d $b //d T->inn.foo_type)
 
 =head2 Simple Symmetric Dyadic Infix Operators
 
@@ -2352,9 +2389,11 @@ Grammar:
         <expr>
 
     <nonsym_dyadic_infix_op> ::=
+        | isa | !isa | as | asserting
         | imp | '→' | implies | nimp | '↛' | if | '←' | nif | '↚'
         | 'I-' | 'I/' | '%' | mod | 'I^'
         | 'N-' | 'N/'
+        | Bx | Tx | Ax
         | '∈' | '∉' | '∋' | '∌'
         | '⊆' | '⊈' | '⊇' | '⊉'
         | '⊂' | '⊄' | '⊃' | '⊅'
@@ -2396,6 +2435,10 @@ Plain ASCII infix syntax that is reasonable is yet to be determined.
 
 This table indicates which function is invoked by each keyword:
 
+    isa  -> Core.Universal.is_value_of_type( $lhs, type => $rhs )
+    !isa -> Core.Universal.is_not_value_of_type( $lhs, type => $rhs )
+    as   -> Core.Universal.treated( $lhs, as => $rhs )
+    asserting -> Core.Universal.assertion( $lhs, is_true => $rhs )
     imp  -> Bool.imp( $lhs, $rhs )
     nimp -> Bool.nimp( $lhs, $rhs )
     if   -> Bool.if( $lhs, $rhs )
@@ -2406,6 +2449,9 @@ This table indicates which function is invoked by each keyword:
     I^   -> Integer.power( radix => $lhs, exponent => $rhs )
     N-   -> Rational.diff( minuend => $lhs, subtrahend => $rhs )
     N/   -> Rational.quotient( dividend => $lhs, divisor => $rhs )
+    Bx   -> Blob.replication( $lhs, count => $rhs )
+    Tx   -> Text.replication( $lhs, count => $rhs )
+    Ax   -> QArray.replication( $lhs, count => $rhs )
     ∈    -> Core.QTuple.is_member( t => $lhs, r => $rhs )
     ∉    -> Core.QTuple.is_not_member( t => $lhs, r => $rhs )
     ∋    -> Core.QRelation.has_member( r => $lhs, t => $rhs )
@@ -2433,6 +2479,14 @@ customization; but most actual uses of like/etc don't use C<escape> anyway.
 
 Examples:
 
+    ($bar isa T->inn.foo_type)
+
+    ($bar !isa T->inn.foo_type)
+
+    ($scalar as T->Int)
+
+    ($int asserting ($int ≠ 0))
+
     (true implies false)
 
     (34 I- 21)
@@ -2446,6 +2500,8 @@ Examples:
     (9.2 N- 0.1)
 
     (1;101.01 N/ 1;11.0)
+
+    ('-' Tx 80)
 
     (Set:{ 8, 4, 6, 7 } ∖ Set:{ 9, 0, 7 })
 
@@ -2461,7 +2517,7 @@ Grammar:
         \s* ')'
 
     <monadic_prefix_op> ::=
-        not | ¬ | 'I||' | 'N||' | 'R#'
+        d | not | ¬ | 'I||' | 'N||' | 'R#' | t | r | s | v
 
 A C<monadic_prefix_op_invo> node is for using prefix notation to invoke a
 monadic operator function.  Such a function takes exactly 1 argument, which
@@ -2478,12 +2534,19 @@ Some of the keywords are aliases for each other:
 
 This table indicates which function is invoked by each keyword:
 
+    d   -> Core.Universal.default( of => $expr )
     not -> Core.Bool.not( $expr )
     I|| -> Integer.abs( $expr )
     N|| -> Rational.abs( $expr )
-    R#  -> QRelation.cardinality( $expr )
+    R#  -> Core.QRelation.cardinality( $expr )
+    t   -> Core.QRelation.QTuple_from_QRelation( $expr )
+    r   -> Core.QRelation.QRelation_from_QTuple( $expr )
+    s   -> QSet.QMaybe.single( value => $expr )
+    v   -> QSet.QMaybe.attr( $expr )
 
 Examples:
+
+    (d T->inn.foo_type)
 
     (not true)
 
@@ -2492,6 +2555,12 @@ Examples:
     (N|| -4.59)
 
     (R# Set:{ 5, -1, 2 })
+
+    (t $relvar)
+
+    (r $tupvar)
+
+    (s ((v $a) N+ (v $b)))
 
 =head2 Simple Monadic Postfix Operators
 
@@ -2714,9 +2783,9 @@ Examples (for now sans any use of extra op args, which are atypical):
 
     ($foo <=> $bar)
 
-    ($foo min $bar min $baz)
+    ($a min $b min $c)
 
-    ($foo max $bar max $baz)
+    ($a max $b max $c)
 
     ($foo < $bar)
 

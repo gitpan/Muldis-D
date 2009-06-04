@@ -9,7 +9,7 @@ Muldis::D::Basics -
 
 =head1 VERSION
 
-This document is Muldis::D::Basics version 0.75.0.
+This document is Muldis::D::Basics version 0.76.0.
 
 =head1 PREFACE
 
@@ -1133,8 +1133,8 @@ declared type and be a relation type.  A I<scalar type> is a I<quasi-scalar
 type> whose values are all scalar values.
 
 And so, the 8 system-defined enumeration types [C<Tuple>, C<Database>,
-C<Relation>, C<Set>, C<Maybe>, C<Single> C<Array>, C<Bag>] are actually not
-nonscalar types like their namesakes at all, but they are all
+C<Relation>, C<Set>, C<Maybe>, C<Single>, C<Array>, C<Bag>] are actually
+not nonscalar types like their namesakes at all, but they are all
 quasi-nonscalar types; no scalar or nonscalar types could use those as
 declared types of any attributes.
 
@@ -2633,6 +2633,13 @@ that extracts C<bar>.  When C<lex.foo.bar> is used as the target of a value
 assignment, say the value 42, that is a short-hand for selecting the
 q/tuple value that is equal to what C<lex.foo>'s value is except for its
 C<bar> attribute being 42, and assigning that q/tuple to C<lex.foo>.
+
+With q/scalars, referencing a possrep attribute requires 2 name elements,
+where the first indicates a possrep name and the second an attribute name
+of that possrep; for example, C<lex.scalar1.possrep1.attr1>.  Now as you
+might expect, you can also just reference a q/scalar possrep as a whole, as
+if it were a q/tuple-typed pseudo-variable, by using just 1 name element;
+for example, C<lex.scalar1.possrep1>.
 
 With q/relations, this kind of terse syntax may also be used in some,
 though not all, situations as the syntax may be with q/tuples and q/scalar

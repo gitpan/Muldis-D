@@ -9,7 +9,7 @@ How to format Perl 5 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.75.0.
+This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.76.0.
 
 =head1 PREFACE
 
@@ -523,7 +523,7 @@ follows:
 =item *
 
 If the payload is an array ref, then it must have at least 1 element,
-and every element must be a valid payload for a C<Name>  node (that
+and every element must be a valid payload for a C<Name> node (that
 is, any Perl character string).  Each element of the payload, in order,
 defines an element of the C<array> possrep's attribute of a C<NameChain>.
 
@@ -534,7 +534,12 @@ If the payload is a char str, then it must be formatted as a catenation
 not have any literal period (C<.>) characters (if you want literal periods
 then you can only use the array ref payload format to express it).  The
 char str format of payload is interpreted by splitting it on the separators
-into the array ref format, then processed as per the latter.
+into the array ref format, then processed as per the latter.  As a special
+case, if the C<NameChain> payload begins with a period separator, then the
+first element of the post-split result is treated not as the empty string
+C<Name>, but rather as the C<Name> value C<topic>; that is, C<.foo> means
+the same thing as C<topic.foo> (if you want a literal empty string first
+element, then you can only use the array ref payload format to express it).
 
 =back
 
@@ -556,6 +561,8 @@ Examples:
     [ 'NameChain', ['fed','data','the_db','gene','sorted_person_names'] ]
 
     [ 'NameChain', 'fed.data.the_db.stats.samples by order' ]
+
+    [ 'NameChain', '.attr' ]  # same as [ 'NameChain', 'lex.topic.attr' ] #
 
     [ 'DeclNameChain', ['gene','sorted_person_name'] ]
 
@@ -623,7 +630,7 @@ If the payload is a Perl array ref, then it must have 6 elements, where
 each element may be either undefined or defined; or if fewer than 6
 elements are provided, the array ref will be implicitly extended to 6,
 filling with undefs.  The 6 payload elements correspond in order, from the
-lowest to the highest indexed, to the 6 attributes: C<year>, C<month>
+lowest to the highest indexed, to the 6 attributes: C<year>, C<month>,
 C<day>, C<hour>, C<minute>, C<second>.  For each payload element that Perl
 considers undefined or defined, the corresponding attribute has the
 C<nothing> or a C<Single> value, respectively.  For each of the first 5
@@ -673,7 +680,7 @@ If the payload is a Perl array ref, then it must have 6 elements, where
 each element may be either undefined or defined; or if fewer than 6
 elements are provided, the array ref will be implicitly extended to 6,
 filling with undefs.  The 6 payload elements correspond in order, from the
-lowest to the highest indexed, to the 6 attributes: C<years>, C<months>
+lowest to the highest indexed, to the 6 attributes: C<years>, C<months>,
 C<days>, C<hours>, C<minutes>, C<seconds>.  For each payload element that
 Perl considers undefined or defined, the corresponding attribute has the
 C<nothing> or a C<Single> value, respectively.  For each of the first 5
@@ -1105,14 +1112,14 @@ Examples:
 
 =head2 Generic If-Else Expressions
 
-An C<if_else_expr> node has 2-3 ordered elements:  The first element is the
-Perl character string C<if_else_expr>.  The optional second element is
-I<if_then>, a Perl array ref with 0..N elements, each of those being a
-2-element Perl array ref, where each element is an C<expr> node; the first
-element is an I<if> condition expression, and the second element is the
-associated I<then> result expression.  The 3rd/last element of an
-C<if_else_expr> node is I<else> result expression, which is an C<expr>
-node.
+An C<if_else_expr> node has 2-3 ordered elements:  The first element is
+either of the 2 Perl character strings C<if_else_expr> and C<??!!>.  The
+optional second element is I<if_then>, a Perl array ref with 0..N elements,
+each of those being a 2-element Perl array ref, where each element is an
+C<expr> node; the first element is an I<if> condition expression, and the
+second element is the associated I<then> result expression.  The 3rd/last
+element of an C<if_else_expr> node is I<else> result expression, which is
+an C<expr> node.
 
 Examples:
 
@@ -1130,6 +1137,10 @@ Examples:
         ],
         [ 'op', 'QArray.value', ['expr_name','ary'], 0 ]
     ]
+
+    [ 'op', 'T~', [ 'My answer is: ',
+        [ '??!!', [ [['expr_name','maybe'] => 'yes'] ], 'no' ]
+    ] ]
 
 =head2 Generic Given-When-Default Expressions
 
@@ -1232,6 +1243,11 @@ Examples:
     [ 'op', 'A~', [ [ 'Array', [ 24, 52 ] ],
         [ 'Array', [ -9 ] ], [ 'Array', [ 0, 11, 24, 7 ] ] ] ]
 
+    [ 'op', '//', [ ['expr_name','a'], ['expr_name','b'], 42 ] ]
+
+    [ 'op', '//d', [ ['expr_name','a'], ['expr_name','b'],
+        ['type_ref','inn.foo_type'] ] ]
+
 =head2 Simple Symmetric Dyadic Infix Operators
 
 A C<sym_dyadic_infix_op_invo> node has exactly 2 main op args, each of
@@ -1258,6 +1274,15 @@ C<rhs>, respectively.
 
 Examples:
 
+    [ 'op', 'isa', [ ['expr_name','bar'], ['type_ref','inn.foo_type'] ] ]
+
+    [ 'op', '!isa', [ ['expr_name','bar'], ['type_ref','inn.foo_type'] ] ]
+
+    [ 'op', 'as', [ ['expr_name','scalar'], ['type_ref','Int'] ] ]
+
+    [ 'op', 'asserting', [ ['expr_name','int'],
+        [ 'op', '≠', [ ['expr_name','int'], 0 ] ] ] ]
+
     [ 'op', 'implies', [ ['Bool','true'], ['Bool','false'] ] ]
 
     [ 'op', 'I-', [ 34, 21 ] ]
@@ -1272,6 +1297,8 @@ Examples:
 
     [ 'op', 'N/', [[ 'Rat', {1 => '101.01'} ], [ 'Rat', {1 => '11.0'} ]] ]
 
+    [ 'op', 'Tx', [ '-', 80 ] ]
+
     [ 'op', '∖', [ [ 'Set', [ 8, 4, 6, 7 ] ], [ 'Set', [ 9, 0, 7 ] ] ] ]
 
     [ 'op', '÷', [ [ 'Relation', [ ['x', 'y'] => [ [5, 6], [3, 6] ] ] ],
@@ -1284,6 +1311,8 @@ C<expr> node.
 
 Examples:
 
+    [ 'op', 'd', ['type_ref','inn.foo_type'] ]
+
     [ 'op', 'not', [ ['Bool','true'] ] ]
 
     [ 'op', 'I||', -23 ]
@@ -1291,6 +1320,15 @@ Examples:
     [ 'op', 'N||', -4.59 ]
 
     [ 'op', 'R#', [ [ 'Set', [ 5, -1, 2 ] ] ] ]
+
+    [ 'op', 't', [ ['expr_name','relvar'] ] ]
+
+    [ 'op', 'r', [ ['expr_name','tupvar'] ] ]
+
+    [ 'op', 's', [ [ 'op', 'N+', [
+        [ 'op', 'v', [ ['expr_name','a'] ] ],
+        [ 'op', 'v', [ ['expr_name','b'] ] ]
+    ] ] ] ]
 
 =head2 Simple Monadic Postfix Operators
 
@@ -1340,11 +1378,11 @@ Examples (for now sans any use of extra op args, which are atypical):
 
     [ 'op', '<=>', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
 
-    [ 'op', 'min', [ ['expr_name','foo'], ['expr_name','bar'],
-        ['expr_name','baz'] ] ]
+    [ 'op', 'min', [ ['expr_name','a'], ['expr_name','b'],
+        ['expr_name','c'] ] ]
 
-    [ 'op', 'max', [ ['expr_name','foo'], ['expr_name','bar'],
-        ['expr_name','baz'] ] ]
+    [ 'op', 'max', [ ['expr_name','a'], ['expr_name','b'],
+        ['expr_name','c'] ] ]
 
     [ 'op', '<', [ ['expr_name','foo'], ['expr_name','bar'] ] ]
 
