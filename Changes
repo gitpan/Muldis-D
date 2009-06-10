@@ -1,6 +1,89 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-06-09  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.78.0 is released on CPAN as
+    Muldis-D-0.78.0.tar.gz.
+
+    * This release features a refactoring of the system catalog types and
+    routines concerning types for defining "outer" routines and types, such
+    that 13 catalog types were merged into 3, and 16 catalog routines were
+    merged into 4, and in other types 8 attributes were merged into 2; this
+    had the side-effect of making Types_Catalog.pod about 7K lighter, and
+    Routines_Catalog.pod about 2K lighter.
+
+    * (Types_Catalog.pod)  Multiple updates of the catalog types for
+    defining data types, so to help Muldis D code be less verbose.  With
+    the "PossrepSet" type, updated its "constraint" attr's declared type to
+    be a Maybe of its prior type; a programmer may now leave that attribute
+    undefined, and the semantics are as if they defined a function that
+    unconditionally resulted in true.  With the 3 types
+    "Inner[Scalar|Nonscalar|Restr]Type", updated each of the total of 4
+    attrs "default[|_tuple|_relation]" by changing its declared type to be
+    a Maybe of its prior type; a programmer may now leave that attribute
+    undefined, and the semantics are as if they either picked the same
+    value as the base type, if defining a subtype, or they picked a value
+    with all attributes being their declared types' default values, if
+    defining a base type.
+
+    * (Types_Catalog.pod)  Renamed the main pod section "TYPES FOR DEFINING
+    ROUTINE HEADINGS" to "TYPES FOR DEFINING INNER ROUTINE HEADINGS".  Then
+    merged the 2 main pod sections "TYPES FOR DEFINING [ROUTINE BODIES|DATA
+    TYPES]" into the 1 main pod section "TYPES FOR DEFINING ROUTINES AND
+    DATA TYPES" and placed the post-merge section just prior to the renamed
+    section.  No changes to the catalog types themselves in this chg item.
+
+    * (Types_Catalog.pod)  Merged the 5 catalog data types
+    "sys.std.Core.Type.Cat.[[Func|Upd|Proc]Body|Type|InnerTypeSet]" into
+    the 1 catalog data type "sys.std.Core.Type.Cat.Material".  The new type
+    has a union of all the relation-typed attributes of the 5 old types,
+    the 7 "inner_[func|upd|proc|[sca|nonsca|uni|restr]_type]s".  The new
+    type also introduces a design change by eliminating the "main_body"
+    attribute of the 3 old "Body" types; now, a main routine is always
+    represented by an inner routine of the same kind, which must have the
+    empty string as its name.  Further to that design change, while the old
+    3 types "[Func|Upd|Proc]Body" did not include the definition of the
+    main routine's heading and users of them had to pair a "Body" value
+    with a corresponding "[Func|Upd|Proc]Body" value, the new "Material"
+    internalizes the "Head" and so defines a whole routine sans name
+    internally, same as the old "Type" defined a whole type sans name, the
+    latter also being what "Material" still does.
+
+    * (Types_Catalog.pod)  Updated all the other catalog data types that
+    embedded the old data types which became "Material" so to use that new
+    type instead.  Merged the 8 old data types
+    "sys.std.Core.Type.Cat.[Dep|Pkg][Func|Upd|Proc|Type]Set" into the new 2
+    data types "sys.std.Core.Type.Cat.[Dep|Pkg]MaterialSet"; where each of
+    the old types had either the 2 attributes "head"+"body" or the 1
+    attribute "type", the new types have just the 1 attribute "material".
+    Also updated the 2 data types "sys.std.Core.Type.Cat.[Depot|Package]"
+    so that in each, their 4 attributes
+    "[functions|updaters|procedures|types]" were merged into the 1
+    attribute "materials".  Also updated the 1 data type
+    "sys.std.Core.Type.Cat.SysTypeSet" to change the declared type of its
+    "type" attribute from "Type" to "Material".
+
+    * (Routines_Catalog.pod)  Updated all the catalog routines that worked
+    with the old data types which became "Material" so to work with that
+    new type instead.  Merged the 16 old procedures in the
+    "sys.std.Core.Cat.\w+" namespace named
+    "[create|drop]_[depot|package]_[function|updater|procedure|type]" into
+    the 4 new "[create|drop]_[depot|package]_material" procedures.
+
+    * (Set.pod, Bag.pod)  Added 4 functions where each is an alias for
+    another function.  The 4 "sys.std.[Set|Bag].value_is[|_not]_member"
+    alias the 4 "sys.std.[Set|Bag].has[|_not]_member".
+
+    * (Text.pod, Set.pod, Bag.pod)  Updated the descriptions of 6
+    otherwise-unaltered functions to add or update notes about alternate
+    names or symbols that the function or its operation are known as.
+
+    * (PTMD_STD.pod)  Within the pod sub-section "Simple Non-symmetric
+    Dyadic Infix Operators", added function-specific concrete syntaxes for
+    8 more functions, having 1 special syntax each: "S∈", "S∉", "S∋", "S∌",
+    "B∈", "B∉", "B∋", "B∌"; none of these has a code example.
+
 2009-06-06  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.77.0 is released on CPAN as
