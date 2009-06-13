@@ -9,7 +9,7 @@ Muldis D extension adding more generic tuple operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Tuple version 0.78.0.
+This document is Muldis::D::Ext::Tuple version 0.79.0.
 
 =head1 PREFACE
 
@@ -41,6 +41,13 @@ I<This documentation is pending.>
 
 These functions are applicable to mainly tuple types, but are generic
 in that they typically work with any tuple types.
+
+=head2 sys.std.Tuple.d0
+
+C<< function sys.std.Tuple.d0 (Tuple <--) >>
+
+This C<named_value> selector function results in the only zero-attribute
+Tuple value, which is known by the special name C<Tuple:d0>, aka C<d0>.
 
 =head2 sys.std.Tuple.degree
 

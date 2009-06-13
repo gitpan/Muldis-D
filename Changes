@@ -1,6 +1,134 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-06-13  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.79.0 is released on CPAN as
+    Muldis-D-0.79.0.tar.gz.
+
+    * (Types_Catalog.pod)  Removed the catalog type
+    "sys.std.Core.Type.Cat.OrdDetFuncNameChain", which had only been used
+    for the first 3 releases of its existence (0.36-38.0), and since
+    release 0.39.0 only the "OrdDetFuncRef" type was used instead of it.
+
+    * (Types_Catalog.pod, Types.pod, PTMD_STD.pod)  Added new reference
+    root catalog type "sys.std.Core.Type.Cat.MaterialRef" and redefined the
+    4 existing "sys.std.Core.Type.Cat.[Func|OrdDetFunc|Proc|Type]Ref"
+    catalog types as enumeration types that are proper subtypes of the new
+    one, rather than being distinct root types of their own.  The 4
+    redefined types are practically exactly the same as before except that
+    the default value of "TypeRef" is now "Universal" rather than "Bool",
+    reflecting the default of the "InnerRestrType" and "Material" catalog
+    types, and "MaterialRef" also has the same default.  Corresponding to
+    the reorg, merged the 4 nonscalar catalog types
+    "sys.std.Core.Type.Cat.[Func|OrdDetFunc|Proc|Type]RefSelExprNodeSet"
+    into the 1 "sys.std.Core.Type.Cat.MaterialRefSelExprNodeSet", and
+    merged the corresponding 4 attributes of the "ExprNodeSet" catalog type
+    into 1.  Also updated the "special_types" attribute of the "System"
+    catalog type to reflect just the "MaterialRef" type and not the 4 old
+    reference types that are now its subtypes.  In Types.pod, updated the
+    definition of the "Reference" type to say its default value is now
+    "Universal", following the "TypeRef" change.  In PTMD_STD.pod, updated
+    the "Library Entity Reference Selector" pod sub-section to reflect the
+    rearranging of the reference types.
+
+    * (Types_Catalog.pod, Routines.pod, Basics.pod, PTMD_STD.pod,
+    HDMD_Perl[6|5]_STD.pod)  Renamed the 2 catalog types
+    "sys.std.Core.Type.Cat.Proc[Ref|InvoStmtNodeSet]" to the 2
+    "Imp[Ref|InvoStmtNodeSet]" since they reference any imperative routine,
+    not just a procedure.  Also renamed the "ImpInvoStmtNodeSet" attribute
+    "procedure" to "imperative", and renamed the "StmtNodeSet" attribute
+    "proc_invo_stmts" to "imp_invo_stmts".  Also renamed the
+    "sys.std.Core.Control.proc_invo" procedure to "imp_invo" and renamed
+    its "procedure" parameter to "imperative"; this routine also now can
+    invoke any imperative, even an updater.  In the STD files, renamed the
+    "proc_ref" node kind to "imp_ref".
+
+    * (Types_Catalog.pod, Routines.pod)  Added new catalog type
+    "sys.std.Core.Type.Cat.UpdRef", a proper subtype of "ImpRef", and
+    updated the updater "sys.std.Core.Control.upd_invo" to use it as the
+    type of its "updater" parameter.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Corrected examples fossil.
+
+    * (Relation.pod, Array.pod)  Updated each of the 4 functions
+    "sys.std.Relation.[rank|limit]",
+    "sys.std.Array.[|limit_of_]Array_from_wrap" to change the declared type
+    of its "ord_func" parameter from "FuncRef" to "OrdDetFuncRef".
+
+    * (Basics.pod)  In the "ROUTINES" main pod section, some pod
+    reformatting where the group of list items was changed to a group of
+    pod sub-sections; each list item title became a level-2 pod heading;
+    also the text that followed the old list got a level-2 heading of its
+    own, "Other Matters".
+
+    * (Basics.pod, Types_Catalog.pod, Routines.pod, Set.pod)  In the
+    "ROUTINES" main pod section, renamed the routine kind "type_default" to
+    "named_value" and made its description more general, though its actual
+    structure (any niladic function) is unchanged.  Then updated any
+    references to that routine kind.  Then updated the
+    "sys.std.Set.Maybe.nothing" function description to explicitly say it
+    is a "named_value" function.
+
+    * (Tuple.pod, Relation.pod, Types.pod, Basics.pod)  Added 3 new
+    "named_value" functions "sys.std.Tuple.d0", "sys.std.Relation.d0c[0|1]"
+    which result in all 3 of the nonscalar values with zero attributes,
+    which have special names; also tweaked docs about said special names.
+
+    * (PTMD_STD.pod, BBEdit_LM_Muldis_D.plist)  Added special literal
+    syntax to the "Tuple" and "Relation" node kinds, similar to what exists
+    for "Maybe", so the plain barewords "d0", "d0c0", "d0c1" are now
+    nonscalar GCVLs by themselves, like "nothing" or "∅" are.  Note that
+    this feature is in PTMD_STD alone; the Perl-STD dialects don't have it.
+
+    * (Routines.pod)  Updated the "sys.std.Core.Relation.summary" function
+    to make it more standardized relative to other system-defined
+    conceptually monadic mapping functions; the function given to its
+    "summ_func" parameter must now have a single varying parameter named
+    "topic" taking a binary tuple with "summarize" and "per" attributes,
+    rather than having 2 varying parameters named "summarize" and "per".
+
+    * (Relation.pod)  Fixed 3 instances of a fossil:  Updated each of the 3
+    updaters "assign_subst[itution|_in_[restr|semijoin]]" to add a single
+    parameter "[|subst_]attr_names".  The corresponding 3 non-"assign_"
+    functions had said parameter added in release 0.59.0 and the 3
+    "assign_" updaters should have gained them too, but didn't.
+
+    * (Basics.pod, Types_Catalog.pod, Routines_Catalog.pod)  In the
+    "ROUTINES" main pod section of Basics.pod, added 3 more routine kinds
+    named "value_[filter|map|reduction]", which describe all the kinds of
+    closures that system-defined functions take as arguments, besides the
+    single generic "func_invo"; each has either a single "topic" parameter
+    or a "v1"+"v2" parameter, and each has an "assuming" parameter.  Added
+    3 catalog reference types
+    "sys.std.Core.Type.Cat.Val[Filt|Map|Red]FuncRef", each of which points
+    to just one kind of function.  In Routines_Catalog.pod, added new main
+    pod section "FUNCTIONS FOR SPECIAL ENTITY REFERENCE DEFAULT VALUES"
+    which defines 3 new catalog functions
+    "sys.std.Core.Cat.[[pass|map_to]_topic|reduce_to_v1]" whose main
+    purpose is that refs to them are the default values of the 3 new types.
+
+    * (Routines.pod, Relation.pod, Set.pod, Array.pod, Bag.pod,
+    Counted.pod)  Updated 1 or 2 parameters each of 31 routines to change
+    each of the parameter's declared types from "FuncRef" to one of the new
+    3 kinds.  In 9 routines, replaced 1 param type with "ValFiltFuncRef":
+    "sys.std.Core.Relation.[|assign_][restriction|cmpl_restr]",
+    "sys.std.Core.Relation.restr_and_cmpl",
+    "sys.std.Relation.[|assign_][|static_]subst_in_restr]".  In 14
+    routines, replaced 1 param type with "ValMapFuncRef":
+    "sys.std.Core.Relation.[|assign_]extension",
+    "sys.std.Core.Relation.summary",
+    "sys.std.Relation.[classification|map]",
+    "sys.std.Relation.[|assign_]subst[itution|_in_[restr|semijoin]]",
+    "sys.std.Relation.outer_join_with_exten",
+    "sys.std.Counted.counted_[map|substitution]".  In 10 routines, replaced
+    1 param type with "ValRedFuncRef":
+    "sys.std.[Relation|Set|Array|Bag].[|maybe_]reduction",
+    "sys.std.Counted.counted_[|maybe_]reduction".
+
+    * (Basics.pod, Types_Catalog.pod, BBEdit_LM_Muldis_D.plist)  Various
+    minor updates and fixes.
+
 2009-06-09  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.78.0 is released on CPAN as
