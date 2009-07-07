@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.79.1.
+This document is Muldis::D::Core::Types_Catalog version 0.80.0.
 
 =head1 PREFACE
 
@@ -1940,7 +1940,9 @@ attribute.  Its default value is empty.
 
 A C<MaterialRefSelExprNodeSet> is a C<DHRelation> that specifies a set of
 expression nodes where each node represents a value of the special
-C<sys.std.Core.Type.Cat.MaterialRef> type.
+C<sys.std.Core.Type.Cat.MaterialRef> type.  None of the represented values
+have any pre-bound routine parameters where applicable, and those can be
+added afterwards with the system-defined currying routines.
 
 A C<MaterialRefSelExprNodeSet> has these 3 attributes:
 
@@ -2549,11 +2551,11 @@ total ordering function associated with it (a type being defined as a
 subtype may not); iff the type being defined qualifies and desires such an
 associated function, then C<order> is a C<Single> whose sole element
 defines the entire (main) body of an C<order_determination> function.  The
-implicit function heading that this goes with has 4 parameters; the first
-two parameters, named C<topic> and C<other>, each have declared types that
-are the same as the scalar root type whose declaration the
+implicit function heading that this goes with has exactly 4 parameters; the
+first two parameters, named C<topic> and C<other>, each have declared types
+that are the same as the scalar root type whose declaration the
 function is part of, and this function is said root type's type-default
-ordering function; the third parameter, named C<assuming>, is
+ordering function; the third parameter, named C<misc_args>, is
 C<Tuple>-typed; the fourth parameter, named C<is_reverse_order>, is
 C<Bool>-typed; the function's implicit result type is C<Order>.  Iff
 the type being defined is a subtype of some other type or does not desire
@@ -3621,20 +3623,37 @@ There are also similar special types here for referencing data types, but
 not for as many of the reasons.  Maybe another advantage of all of the
 above is that this can help compile-time type checking.
 
+Extending the previously discussed notions, the special types here for
+referencing functions also support currying which is another feature of
+generic closures.  When defining a value of a special type, you can also
+supply argument values from the context of definition, effectively turning
+the corresponding parameters into constants, and so the actual closure has
+appropriately fewer effective parameters.  Similarly, one can take an
+already existing value of a special type and curry that to derive another
+one with arguments from the context of the derivation.
+
+I<For now, only functions may be curried, and imperative routines can't be;
+the latter might be supported in the future but then it has to be worked
+out how to best support currying of updateable parameters, especially how
+to define imperative versions of C<sys.std.Core.Control.curried_func>.>
+
 =head2 sys.std.Core.Type.Cat.MaterialRef
 
 This is a reference data type.  A C<MaterialRef> is functionally like a
 smart C<NameChain> that holds a routine or type name but it remembers the
-context of its creation.  Its default value is as per C<Material>, which is
-a reference to the C<sys.std.Core.Type.Universal> data type.
+context of its creation, and it may also hold other context-specific
+information such as pre-bound function parameters.  Its default value is as
+per C<Material>, which is a reference to the C<sys.std.Core.Type.Universal>
+data type.
 
 =head2 sys.std.Core.Type.Cat.FuncRef
 
 This is an enumeration data type.  C<FuncRef> is a proper subtype of
 C<MaterialRef> where every member value's conceptual C<NameChain> is a
-function name.  It is used to implement a higher-order function or a
-functional closure.  Its default value is a reference to the
-C<sys.std.Core.Universal.is_identical> function.
+function name plus optional pre-bound read-only parameters.  It is used to
+implement a higher-order function or a functional closure.  Its default
+value is a reference to the C<sys.std.Core.Universal.is_identical>
+function.
 
 =head2 sys.std.Core.Type.Cat.OrdDetFuncRef
 
@@ -3670,14 +3689,13 @@ function.
 This is an enumeration data type.  C<ImpRef> is a proper subtype of
 C<MaterialRef> where every member value's conceptual C<NameChain> is an
 imperative routine name.  It is used to implement an imperative closure.
-Its default value is a reference to the C<sys.std.Core.Universal.assign>
-updater.
+Its default value is a reference to the C<sys.std.Core.Cat.noop> procedure.
 
 =head2 sys.std.Core.Type.Cat.UpdRef
 
 This is an enumeration data type.  C<UpdRef> is a proper subtype of
-C<ImpRef> that is a reference to an updater.  Its default value is the same
-as that of C<ImpRef>.
+C<ImpRef> that is a reference to an updater.  Its default value is a
+reference to the C<sys.std.Core.Universal.assign> updater.
 
 =head2 sys.std.Core.Type.Cat.TypeRef
 
