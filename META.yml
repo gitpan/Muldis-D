@@ -1,14 +1,22 @@
 --- #YAML:1.0
-name:                Muldis-D
-version:             0.80.0
-abstract:            Formal spec of Muldis D relational DBMS lang
-license:             gpl
-author:              
+name:               Muldis-D
+version:            0.81.0
+abstract:           Formal spec of Muldis D relational DBMS lang
+author:
     - Darren Duncan <perl@DarrenDuncan.net>
-generated_by:        ExtUtils::MakeMaker version 6.42
-distribution_type:   module
-requires:     
-    version:                       0.74
+license:            gpl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    version:  0.74
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.53_03
 meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
-    version: 1.3
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4

@@ -1,6 +1,102 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-07-15  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.81.0 is released on CPAN as
+    Muldis-D-0.81.0.tar.gz.
+
+    * This release features some refactoring of the system catalog, mainly
+    to make it less wide and more deep, which incidentally is what release
+    0.78.0 was mainly doing as well.  Benefits of these changes include
+    that for any formats of the system catalog that are fully
+    unwrapped/ungrouped as a set of relvars with just scalar attributes,
+    such as it would likely be when represented by a typical SQL DBMS, the
+    catalog might require a few orders of magnitude fewer relvars/tables.
+    Less wide and more deep means that what otherwise might be multiple
+    relvars/tables with a very similar structure and differing mainly/just
+    on their extra foreign-key attributes/columns, are now merged into
+    fewer relvars/tables with simple generalizations of said structures.
+
+    * (Types_Catalog.pod, Routines_Catalog.pod)  Merged the catalog types
+    for defining depots with those for defining packages to produce common
+    catalog types for defining both.  In Types_Catalog.pod, merged the 2
+    main pod sections "TYPES FOR DEFINING [DEPOTS AND SUBDEPOTS|PACKAGES]"
+    into the 1 main pod section "TYPES FOR DEFINING DEPOTS AND SUBDEPOTS
+    AND PACKAGES", and merged the 4 catalog types "[Depot|Package]" and
+    "[Dep|Pkg]MaterialSet" into the 2 catalog types "DepotOrPackage" and
+    "MaterialSet".  The new "DepotOrPackage" has the same 5 attributes at a
+    high level that "Depot" had, a proper superset of the 3 that "Package"
+    had, and its 2 "[subdepots|packages]" attributes simply are empty sets
+    when defining a package.  The "PackageSet" type was modified to remove
+    its "package" attribute, so it is now structurally identical to the
+    "SubdepotSet" type, and now just declares the existence of packages not
+    their contents.  The new "MaterialSet" type has 6 attributes where the
+    old analagous types each had 4; 3 of these are identical between each
+    of the 3 old/new types, ["name", "comment", "material"]; 1 of these,
+    "is_public" is in both the new and Pkg, and is changed from a "Bool" to
+    a "maybe_of.Bool"; 1 of these is the "parent" in Dep and is renamed to
+    "subdepot" in the new; "MaterialSet" also has 1 attribute that neither
+    of Dep|Pkg had, which is "package", that serves a similar purpose to
+    "subdepot" for package materials.  In Routines_Catalog.pod, updated the
+    "create_package" procedure to remove its "package" parameter, and made
+    some updates to the descriptions of a few related procedures.
+
+    * (Types_Catalog.pod)  Refactored the inner types such that rather than
+    embedding special-purpose "InnerFuncBody" associated with implicit
+    function headings, they now just make use of actual named inner
+    functions with explicit headings, which the inner types refer to by
+    declaration name; all of the parts of what was an inner type still must
+    have a common (outer) material.  Also deleted the catalog type
+    "sys.std.Core.Type.Cat.ConstraintSet", which is no longer useful since
+    all constraint functions now have names by virtue of being actual inner
+    functions.  The updated 7 catalog types are:"Possrep[|Map]Set",
+    "Inner[[S|Nons]calar|Union|Restr]Type", "VirtualAttrMapSet".
+
+    * (Types_Catalog.pod)  Split 3 catalog types 2 ways each, with some
+    renaming, where the members of each post-split pair are initially
+    clones of their original; "NameExprMap" became itself plus
+    "IISArgVarMap", "IfThenMap" became "IfThen[Expr|VarStmt]Map",
+    "WhenThenMap" became "WhenThen[Expr|VarStmt]Map".  Updated attr types
+    of 5 other catalog types to use either of the 5 new type names:
+    "[IfElse|GivenWhenDef][Expr|Stmt]NodeSet", "ImpInvoStmtNodeSet".  Given
+    that, post the above changes, all of the 6 post-split catalog types
+    except "NameExprMap" are used by exactly 1 other type, moved the
+    definitions of said 5 post-split types to be just after their users;
+    moved them from the "SIMPLE GENERIC NONSCALAR TYPES" main pod section
+    to the "TYPES FOR DEFINING INNER ROUTINE BODIES" main pod section.
+
+    * (Types_Catalog.pod)  Fixed all catalog type attributes that held
+    names of procedure statement nodes so that the types of said attributes
+    are now "Name" rather than "NameChain".  Using a "NameChain" on a
+    statement node name never really made sense as it is never referencable
+    outside its own lexical context and, unlike the expression node it was
+    modelled after, it doesn't represent a value nor have a type so it
+    can't be drilled into.  These 8 catalog types had one or more
+    attributes so fixed:
+    "[Leave|Compound|IfElse|GivenWhenDef|Iterate|Loop]StmtNodeSet",
+    "[If|When]ThenVarStmtMap".  Also updated the "IISArgVarMap" type to
+    rename its 2 attributes from "[name|expr]" to "[arg|var]".
+
+    * (Types_Catalog.pod)  Refactored the catalog types for defining
+    expression nodes so that the ability to drill into an expression node
+    or parameter etc value with the "NameChain" shorthand is now restricted
+    to being used with just one kind of expression node, and all other
+    expression node kinds can now only use "Name" values to reference child
+    nodes.  Added new catalog node type "AliasExprNodeSet" for defining
+    expression nodes that just alias or drill into attributes of other
+    nodes or parameters, and updated the "ExprNodeSet" type to add a new
+    "alias_exprs" attribute of the new type.  Then updated these 8 catalog
+    types whose attributes held names of expression nodes so that the types
+    of said attributes are now "Name" rather than "NameChain":
+    "[Set|Ary|Bag]SelExprNodeSet", "[IfElse|GivenWhenDef]ExprNodeSet",
+    "[If|When]ThenExprMap", "NameExprMap".
+
+    * (Types_Catalog.pod)  Updated the "TYPES FOR SPECIAL ENTITY
+    REFERENCES" main pod section in regards to when two distinct selections
+    of "MaterialRef" values would produce identical or distinct values, and
+    how currying affects identity.  The new version is more DWIM.
+
 2009-07-06  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.80.0 is released on CPAN as
