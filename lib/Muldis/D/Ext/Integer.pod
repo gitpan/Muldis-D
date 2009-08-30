@@ -9,7 +9,7 @@ Muldis D extension for integer data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Integer version 0.84.0.
+This document is Muldis::D::Ext::Integer version 0.85.0.
 
 =head1 PREFACE
 
@@ -247,7 +247,7 @@ C<< function sys.std.Integer.factorial (PInt <-- NNInt $topic) >>
 This function results in the factorial of its argument (it is defined for
 an argument of zero to result in 1, as per the identity value for
 multiplication of an empty set).  Note that this operation is also known as
-C<!>.
+C<I!>.
 
 =head1 FUNCTIONS FOR INTEGER CONVERSION WITH TEXT
 

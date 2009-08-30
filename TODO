@@ -380,6 +380,12 @@ some in Perl 5's List::MoreUtils module.
 * Consider adding random value generators for data types other than integer
 and rational numerics, such as for character strings or binary strings.
 
+* Consider analogy to SQL's "[UNION|EXCEPT|INTERSECT] CORRESPONDING BY
+(attr1,attr2,...)", which is a shorthand for combining projection and
+union, that takes a list of attributes and unions the projections of those
+attributes from every input relation; so this means, as with join(), that
+the input relations don't need to have the same headings.
+
 * Make further updates to Temporal.pod to improve correctness or
 normalization, particularly with durations, maybe add some UTCDuration
 subtypes.  Also expand the selection of routines to allow more control over
