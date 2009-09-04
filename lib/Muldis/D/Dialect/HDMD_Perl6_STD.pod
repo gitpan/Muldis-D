@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.86.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.87.0.
 
 =head1 PREFACE
 
@@ -599,10 +599,12 @@ A C<Scalar> node represents a literal or selector invocation for a
 scalar subtype value.  It is interpreted as a Muldis D
 C<sys.std.Core.Type.Scalar> subtype value whose declared type is specified
 by the node's (mandatory for C<Scalar>) C<type_name> element and whose
-attributes are defined by the payload.  The payload must be a Perl C<Pair>,
-whose key and value, respectively, are designated I<possrep name> and
-I<possrep attrs>.  The possrep name and possrep attrs must be as per the
-payload of a C<Name> and C<Tuple> node, respectively.  The I<possrep
+attributes are defined by the payload.  If the payload is a Perl C<Pair>,
+then its key and value, respectively, are designated I<possrep name> and
+I<possrep attrs>; if the payload is not a Perl C<Pair>, then it is
+interpreted as if it was just the I<possrep attrs>, and the I<possrep name>
+was the empty string.  The possrep name and possrep attrs must be as per
+the payload of a C<Name> and C<Tuple> node, respectively.  The I<possrep
 attrs> is interpreted specifically as attributes of the declared type's
 possrep which is specified by the I<possrep name>.  Each key+value pair of
 the I<possrep attrs> defines a named possrep attribute of the new scalar;
@@ -611,6 +613,8 @@ the possrep attribute name, and a C<expr> node that specifies the possrep
 attribute value.
 
 Examples:
+
+    [ 'Scalar', 'sys.std.Core.Type.Cat.Name', { '' => 'the_thing' } ]
 
     [ 'Scalar', 'sys.std.Core.Type.Rat', float => {
         mantissa => 45207196,
@@ -868,10 +872,10 @@ C<acc_via_anon> is a C<DeclNameChain_payload> and names the attribute.
 
 Examples:
 
-    # an accessor node of a named node #
+    # an accessor node of a named tuple-valued node #
     ['$.','foo_t.bar_attr']
 
-    # an accessor node of an anonymous node #
+    # an accessor node of an anonymous tuple-valued node #
     ['$.',[ 'func_invo', 'inn.tuple_res_func', [['$','arg']] ],'quux_attr']
 
 =head2 Generic Function Invocation Expressions
@@ -929,16 +933,16 @@ Examples:
 
     [ 'if_else_expr',
         [
-            [ 'op', '>', ['$','foo'], 5 ] => ['$','bar'],
+            [ 'op', '>', [['$','foo'], 5] ] => ['$','bar'],
         ],
         ['$','baz']
     ]
 
     [ 'if_else_expr',
         [
-            [ 'op', 'is_empty', ['$','ary'] ] => ['$','empty_result'],
+            [ 'op', 'is_empty', [['$','ary']] ] => ['$','empty_result'],
         ],
-        [ 'op', 'Array.value', ['$','ary'], 0 ]
+        [ 'op', '.[]', [['$','ary'], 0] ]
     ]
 
     [ 'op', 'T~', ['My answer is: ',
@@ -1153,44 +1157,54 @@ operation.
 
 Examples:
 
-    [ 'op', '{<-}', [['$','pt'], {pnum=>'pno', locale=>'city'}] ]
+    [ 'op', '.${}', [['$','birthday'], 'date', 'day'] ]
 
-    [ 'op', '{{<-}}', [['$','pr'], {pnum=>'pno', locale=>'city'}] ]
+    [ 'op', '.%{}', [['$','pt'], 'city'] ]
 
-    [ 'op', '{}', [['$','pt'], ['color','city']] ]
+    [ 'op', '%{<-}', [['$','pt'], {pnum=>'pno', locale=>'city'}] ]
 
-    [ 'op', '{{}}', [['$','pr'], ['color','city']] ]
+    [ 'op', '@{<-}', [['$','pr'], {pnum=>'pno', locale=>'city'}] ]
 
-    [ 'op', '{}', [['$','pt'], []] ]  # null projection #
+    [ 'op', '${}', [['$','birthday'], 'date', ['year','month']] ]
 
-    [ 'op', '{{}}', [['$','pr'], []] ]  # null projection #
+    [ 'op', '%{}', [['$','pt'], ['color','city']] ]
 
-    [ 'op', '{!}', [['$','pt'], ['pno','pname','weight']] ]
+    [ 'op', '@{}', [['$','pr'], ['color','city']] ]
 
-    [ 'op', '{{!}}', [['$','pr'], ['pno','pname','weight']] ]
+    [ 'op', '%{}', [['$','pt'], []] ]  # null projection #
 
-    [ 'op', '{@<-}', [['$','person'], 'name', ['fname','lname']] ]
+    [ 'op', '@{}', [['$','pr'], []] ]  # null projection #
 
-    [ 'op', '{{@<-}}', [['$','people'], 'name', ['fname','lname']] ]
+    [ 'op', '${!}', [['$','rnd_rule'], ['round_meth']] ]  # radix,min_exp #
 
-    [ 'op', '{@<-!}', [['$','person'], 'all_but_name', ['fname','lname']] ]
+    [ 'op', '%{!}', [['$','pt'], ['pno','pname','weight']] ]
 
-    [ 'op', '{{@<-!}}',
-        [['$','people'], 'all_but_name', ['fname','lname']] ]
+    [ 'op', '@{!}', [['$','pr'], ['pno','pname','weight']] ]
 
-    [ 'op', '{<-@}', [['$','person'], ['fname','lname'], 'name'] ]
+    [ 'op', '%{%<-}', [['$','person'], 'name', ['fname','lname']] ]
 
-    [ 'op', '{{<-@}}', [['$','people'], ['fname','lname'], 'name'] ]
+    [ 'op', '@{%<-}', [['$','people'], 'name', ['fname','lname']] ]
 
-    [ 'op', '{{@@<-}}', [['$','orders'], 'vendors', ['vendor']] ]
+    [ 'op', '%{%<-!}', [['$','person'],'all_but_name',['fname','lname']] ]
 
-    [ 'op', '{{@@<-!}}',
-        [['$','orders'], 'all_but_vendors', ['vendor']] ]
+    [ 'op', '@{%<-!}', [['$','people'],'all_but_name',['fname','lname']] ]
 
-    [ 'op', '{{<-@@}}', [['$','orders'], ['vendor'], 'vendors'] ]
+    [ 'op', '%{<-%}', [['$','person'], ['fname','lname'], 'name'] ]
 
-    [ 'op', '{{#@@<-!}}',
+    [ 'op', '@{<-%}', [['$','people'], ['fname','lname'], 'name'] ]
+
+    [ 'op', '@{@<-}', [['$','orders'], 'vendors', ['vendor']] ]
+
+    [ 'op', '@{@<-!}', [['$','orders'], 'all_but_vendors', ['vendor']] ]
+
+    [ 'op', '@{<-@}', [['$','orders'], ['vendor'], 'vendors'] ]
+
+    [ 'op', '@{#@<-!}',
         [['$','people'], 'count_per_age_ctry', ['age','ctry']] ]
+
+    [ 'op', '.[]', [['$','ary'], 3] ]
+
+    [ 'op', '[..]', [['$','ary'], [10,14]] ]
 
 =head2 Rational Operators That Do Rounding
 

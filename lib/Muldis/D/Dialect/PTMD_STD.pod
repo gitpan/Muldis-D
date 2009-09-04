@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.86.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.87.0.
 
 =head1 PREFACE
 
@@ -559,6 +559,9 @@ Grammar:
     <int_body> ::=
         [0 | \-?<pint_body>]
 
+    <nnint_body> ::=
+        [0 | <pint_body>]
+
     <pint_body> ::=
         <pint_head> <pint_tail>?
 
@@ -570,6 +573,9 @@ Grammar:
 
     <d_int_body> ::=
         [0 | \-?<d_pint_body>]
+
+    <d_nnint_body> ::=
+        [0 | <d_pint_body>]
 
     <d_pint_body> ::=
         <d_pint_head> <d_pint_tail>?
@@ -977,11 +983,14 @@ existing first chain element isn't one of the other 8 top-level namespaces,
 then the parser will assume it is an unqualified chain in the C<lex>
 namespace and will prepend a C<lex> element to it.  So for example a
 C<$foo> is treated as being C<$lex.foo> while a C<$dep.data.foo> is treated
-as itself.
+as itself.  Furthermore, if such an unqualified chain has more than exactly
+1 element in it, it is further assumed that the chain is referring to an
+attribute of a tuple (or database) typed value expression / etc.
 
 The third special case is an extension to the second special case that
 involves any context where a referenced-by-name value expression / etc has
-the declaration name C<topic>.  In only such a context, a
+the declaration name C<topic>, I<and> C<topic> is tuple (or database)
+typed.  In only such a context, a
 C<NameChain_payload> may be prefixed with a chain-element-separator /
 period token instead of having a leading (post C<lex> omission) C<topic>
 element; a parser encountering a chain with a leading period will assume
@@ -992,8 +1001,7 @@ an empty string chain element because those must always be delimited, so
 C<$"".foo> is still treated as C<$lex."".foo>.  Note that the third special
 case may only be used to reference attributes of C<$lex.topic> (or
 attributes of those, etc), not C<$lex.topic> itself; you still have to use
-C<$topic> for that.  Note that if C<$topic> is a scalar value, you still
-have to write the possrep name as normal, such as C<$.possrep.attr>.
+C<$topic> for that.
 
 The fourth special case involves any context where a type is being
 referenced using the C<type> namespace prefix feature described in
@@ -1346,7 +1354,8 @@ Grammar:
         <Scalar_payload>
 
     <Scalar_payload> ::=
-        <possrep_name> \s* ';' \s* <possrep_attrs>
+          <possrep_name> \s* ';' \s* <possrep_attrs>
+        | <possrep_attrs>
 
     <possrep_name> ::=
         <Name_payload>
@@ -1358,9 +1367,11 @@ A C<Scalar> node represents a literal or selector invocation for a
 scalar subtype value.  It is interpreted as a Muldis D
 C<sys.std.Core.Type.Scalar> subtype value whose declared type is specified
 by the node's (mandatory for C<Scalar>) C<type_name> and whose attributes
-are defined by the C<Scalar_payload>.  The C<possrep_attrs> is interpreted
-specifically as attributes of the declared type's possrep which is
-specified by the C<possrep_name>.  Each name+expr pair of the
+are defined by the C<Scalar_payload>.  If the C<Scalar_payload> is just a
+C<possrep_attrs>, then it is interpreted as if it also had an explicit
+C<possrep_name> that is the empty string.  The C<possrep_attrs> is
+interpreted specifically as attributes of the declared type's possrep which
+is specified by the C<possrep_name>.  Each name+expr pair of the
 C<possrep_attrs> defines a named possrep attribute of the new scalar;
 the pair's name and expr specify, respectively, the possrep attribute name,
 and the possrep attribute value.  If the C<value_kind> of a C<value> node
@@ -1375,6 +1386,8 @@ general a C<Scalar> node distills to when it is beneath the context of a
 C<depot> or C<boot_stmt> node, as it describes some semantics.
 
 Examples:
+
+    Scalar:sys.std.Core.Type.Cat.Name:{ "" => 'the_thing' }
 
     Scalar:sys.std.Core.Type.Rat:float;{
         mantissa => 45207196,
@@ -1918,9 +1931,9 @@ Grammar:
         <expr> \s* '.' \s* <DeclNameChain_payload>
 
 An C<accessor> node represents an accessor or alias for an attribute of
-another expression node.  It is interpreted as a tuple of a Muldis D
-C<sys.std.Core.Type.Cat.AccExprNodeSet> value.  If an C<accessor> is an
-C<acc_via_named>, then the C<NameChain_payload> element specifies the
+another, tuple-valued expression node.  It is interpreted as a tuple of a
+Muldis D C<sys.std.Core.Type.Cat.AccExprNodeSet> value.  If an C<accessor>
+is an C<acc_via_named>, then the C<NameChain_payload> element specifies the
 C<target> attribute of the new C<AccExprNodeSet>.  If an C<accessor> is an
 C<acc_via_anon>, then the C<target> is derived from a catenation of the
 node name that C<expr> has (explicitly or that will be generated for it by
@@ -1930,10 +1943,10 @@ C<acc_via_named>, and vice-versa.
 
 Examples:
 
-    # an accessor node of a named node #
+    # an accessor node of a named tuple-valued node #
     $foo_t.bar_attr
 
-    # an accessor node of an anonymous node #
+    # an accessor node of an anonymous tuple-valued node #
     inn.tuple_res_func( $arg ).quux_attr
 
 =head2 Generic Function Invocation Expressions
@@ -2074,7 +2087,7 @@ Examples:
 
     (if ($foo > 5) then $bar else $baz)
 
-    (if ($ary is empty) then $empty_result else ($ary[0]))
+    (if ($ary is empty) then $empty_result else $ary.[0])
 
     (if (($x = ∅) or ($y = ∅)) then ∅
         else (s ((v $x) I+ ((v $y) I^ 3)))
@@ -2678,10 +2691,28 @@ Examples:
 Grammar:
 
     <postcircumfix_op_invo> ::=
-        <t_pcf_op_invo> | <r_pcf_op_invo>
+          <pcf_acc_op_invo>
+        | <s_pcf_op_invo> | <t_pcf_op_invo> | <r_pcf_op_invo>
+        | <pcf_ary_op_invo>
+
+    <pcf_acc_op_invo> ::=
+        <pcf_s_acc_op_invo> | <pcf_t_acc_op_invo>
+
+    <pcf_s_acc_op_invo> ::=
+        <expr> \s* '.${' [\s* <possrep_name> \s* ';']? \s*
+            <attr_name>
+        \s* '}'
+
+    <pcf_t_acc_op_invo> ::=
+        <expr> \s* '.%{' \s* <attr_name> \s* '}'
+
+    <s_pcf_op_invo> ::=
+        <expr> \s* '${' [\s* <possrep_name> \s* ';']? \s*
+            [<pcf_projection> | <pcf_cmpl_proj>]
+        \s* '}'
 
     <t_pcf_op_invo> ::=
-        <expr> \s* '{' \s*
+        <expr> \s* '%{' \s*
             [
                   <pcf_rename>
                 | <pcf_projection> | <pcf_cmpl_proj>
@@ -2691,7 +2722,7 @@ Grammar:
         \s* '}'
 
     <r_pcf_op_invo> ::=
-        <expr> \s* '{{' \s*
+        <expr> \s* '@{' \s*
             [
                   <pcf_rename>
                 | <pcf_projection> | <pcf_cmpl_proj>
@@ -2701,7 +2732,7 @@ Grammar:
                 | <pcf_ungroup>
                 | <pcf_count_per_group>
             ]
-        \s* '}}'
+        \s* '}'
 
     <pcf_rename> ::=
         <pcf_rename_map>
@@ -2725,25 +2756,25 @@ Grammar:
         <attr_name> ** [\s* ',' \s*]
 
     <pcf_wrap> ::=
-        '@' <outer_atnm> \s* '<-' \s* <inner_atnms>
+        '%' <outer_atnm> \s* '<-' \s* <inner_atnms>
 
     <pcf_cmpl_wrap> ::=
-        '@' <outer_atnm> \s* '<-' \s* '!' \s* <cmpl_inner_atnms>
+        '%' <outer_atnm> \s* '<-' \s* '!' \s* <cmpl_inner_atnms>
 
     <pcf_unwrap> ::=
-         <inner_atnms> \s* '<-' \s* '@' <outer_atnm>
+         <inner_atnms> \s* '<-' \s* '%' <outer_atnm>
 
     <pcf_group> ::=
-        '@@' <outer_atnm> \s* '<-' \s* <inner_atnms>
+        '@' <outer_atnm> \s* '<-' \s* <inner_atnms>
 
     <pcf_cmpl_group> ::=
-        '@@' <outer_atnm> \s* '<-' \s* '!' \s* <cmpl_inner_atnms>
+        '@' <outer_atnm> \s* '<-' \s* '!' \s* <cmpl_inner_atnms>
 
     <pcf_ungroup> ::=
-         <inner_atnms> \s* '<-' \s* '@@' <outer_atnm>
+         <inner_atnms> \s* '<-' \s* '@' <outer_atnm>
 
     <pcf_count_per_group> ::=
-        '#@@' <count_atnm> \s* '<-' \s* '!' \s* <cmpl_inner_atnms>
+        '#@' <count_atnm> \s* '<-' \s* '!' \s* <cmpl_inner_atnms>
 
     <outer_atnm> ::=
         <attr_name>
@@ -2756,6 +2787,25 @@ Grammar:
 
     <cmpl_inner_atnms> ::=
         <pcf_atnms>
+
+    <pcf_ary_op_invo> ::=
+        <pcf_ary_acc_op_invo> | <pcf_ary_slice_op_invo>
+
+    <pcf_ary_value_op_invo> ::=
+        <expr> \s* '.[' \s* <index> \s* ']'
+
+    <index> ::=
+          <num_max_col_val> \s* ';' \s* <nnint_body>
+        | <d_nnint_body>
+
+    <pcf_ary_slice_op_invo> ::=
+        <expr> \s* '[' \s* <first_index> \s* '..' \s* <last_index> \s* ']'
+
+    <first_index> ::=
+        <index>
+
+    <last_index> ::=
+        <index>
 
 A C<postcircumfix_op_invo> node is for using postcircumfix notation to
 invoke a relational operator function whose operation involves deriving a
@@ -2773,92 +2823,116 @@ arguments, which are associated in the appropriate sequence.
 
 This table indicates which function is invoked by each format-keyword:
 
-    {<-}   -> Core.Tuple.rename( $expr,
+    .${} -> Core.Scalar.attr( $expr, possrep => $possrep_name,
+                name => $attr_name )
+    .%{} -> Core.Tuple.attr( $expr, name => $attr_name )
+
+    %{<-} -> Core.Tuple.rename( $expr,
                 map => Relation:{
                     { after => $atnm_after[0], before => $atnm_before[0] },
                     ...,
                     { after => $atnm_after[n], before => $atnm_before[n] },
                 } )
-    {{<-}} -> Core.Relation.rename( $expr,
+    @{<-} -> Core.Relation.rename( $expr,
                 map => Relation:{
                     { after => $atnm_after[0], before => $atnm_before[0] },
                     ...,
                     { after => $atnm_after[n], before => $atnm_before[n] },
                 } )
 
-    {}    -> Core.Tuple.projection( $expr,
+    ${}  -> Core.Scalar.projection( $expr, possrep => $possrep_name,
                 attr_names => Set:{ $pcf_atnms[0], ..., $pcf_atnms[n] } )
-    {{}}  -> Core.Relation.projection( $expr,
+    %{}  -> Core.Tuple.projection( $expr,
                 attr_names => Set:{ $pcf_atnms[0], ..., $pcf_atnms[n] } )
-    {!}   -> Core.Tuple.cmpl_proj( $expr,
+    @{}  -> Core.Relation.projection( $expr,
                 attr_names => Set:{ $pcf_atnms[0], ..., $pcf_atnms[n] } )
-    {{!}} -> Core.Relation.cmpl_proj( $expr,
+    ${!} -> Core.Scalar.cmpl_proj( $expr, possrep => $possrep_name,
+                attr_names => Set:{ $pcf_atnms[0], ..., $pcf_atnms[n] } )
+    %{!} -> Core.Tuple.cmpl_proj( $expr,
+                attr_names => Set:{ $pcf_atnms[0], ..., $pcf_atnms[n] } )
+    @{!} -> Core.Relation.cmpl_proj( $expr,
                 attr_names => Set:{ $pcf_atnms[0], ..., $pcf_atnms[n] } )
 
-    {@<-}    -> Core.Tuple.wrap( $expr, outer => $outer_atnm,
+    %{%<-}  -> Core.Tuple.wrap( $expr, outer => $outer_atnm,
                    inner => Set:{ $inner_atnms[0], ..., $inner_atnms[n] } )
-    {{@<-}}  -> Core.Relation.wrap( $expr, outer => $outer_atnm,
+    @{%<-}  -> Core.Relation.wrap( $expr, outer => $outer_atnm,
                    inner => Set:{ $inner_atnms[0], ..., $inner_atnms[n] } )
-    {@<-!}   -> Core.Tuple.cmpl_wrap( $expr, outer => $outer_atnm,
+    %{%<-!} -> Core.Tuple.cmpl_wrap( $expr, outer => $outer_atnm,
                    cmpl_inner => Set:{ $cmpl_inner_atnms[0], ... } )
-    {{@<-!}} -> Core.Relation.cmpl_wrap( $expr, outer => $outer_atnm,
+    @{%<-!} -> Core.Relation.cmpl_wrap( $expr, outer => $outer_atnm,
                    cmpl_inner => Set:{ $cmpl_inner_atnms[0], ... } )
-    {<-@}    -> Core.Tuple.unwrap( $expr,
+    %{<-%}  -> Core.Tuple.unwrap( $expr,
                    inner => Set:{ $inner_atnms[0], ..., $inner_atnms[n] },
                    outer => $outer_atnm )
-    {{<-@}}  -> Core.Relation.unwrap( $expr,
+    @{<-%}  -> Core.Relation.unwrap( $expr,
                    inner => Set:{ $inner_atnms[0], ..., $inner_atnms[n] },
                    outer => $outer_atnm )
 
-    {{@@<-}}  -> Core.Relation.group( $expr, outer => $outer_atnm,
+    @{@<-}  -> Core.Relation.group( $expr, outer => $outer_atnm,
                    inner => Set:{ $inner_atnms[0], ..., $inner_atnms[n] } )
-    {{@@<-!}} -> Core.Relation.cmpl_group( $expr, outer => $outer_atnm,
+    @{@<-!} -> Core.Relation.cmpl_group( $expr, outer => $outer_atnm,
                    group_per => Set:{ $cmpl_inner_atnms[0], ... } )
-    {{<-@@}}  -> Core.Relation.ungroup( $expr,
+    @{<-@}  -> Core.Relation.ungroup( $expr,
                    inner => Set:{ $inner_atnms[0], ..., $inner_atnms[n] },
                    outer => $outer_atnm )
 
-    {{#@@<-!}} -> Core.Relation.cardinality_per_group( $expr,
+    @{#@<-!} -> Core.Relation.cardinality_per_group( $expr,
                    count_attr_name => $count_atnm,
                    group_per => Set:{ $cmpl_inner_atnms[0], ... } )
 
+    .[]  -> Array.value( $expr, index => $index )
+    [..] -> Array.slice( $expr, first_index => $first_index,
+                last_index => $last_index )
+
 Examples:
 
-    $pt{pnum<-pno, locale<-city}
+    $birthday.${date;day}
 
-    $pr{{pnum<-pno, locale<-city}}
+    $pt.%{city}
 
-    $pt{color,city}
+    $pt%{pnum<-pno, locale<-city}
 
-    $pr{{color,city}}
+    $pr@{pnum<-pno, locale<-city}
 
-    $pt{}  # null projection #
+    $birthday${date;year,month}
 
-    $pr{{}}  # null projection #
+    $pt%{color,city}
 
-    $pt{!pno,pname,weight}
+    $pr@{color,city}
 
-    $pr{{!pno,pname,weight}}
+    $pt%{}  # null projection #
 
-    $person{@name <- fname,lname}
+    $pr@{}  # null projection #
 
-    $people{{@name <- fname,lname}}
+    $rnd_rule${!round_meth}  # radix,min_exp #
 
-    $person{@all_but_name <- !fname,lname}
+    $pt%{!pno,pname,weight}
 
-    $people{{@all_but_name <- !fname,lname}}
+    $pr@{!pno,pname,weight}
 
-    $person{fname,lname <- @name}
+    $person%{%name <- fname,lname}
 
-    $people{{fname,lname <- @name}}
+    $people@{%name <- fname,lname}
 
-    $orders{{@@vendors <- vendor}}
+    $person%{%all_but_name <- !fname,lname}
 
-    $orders{{@@all_but_vendors <- !vendor}}
+    $people@{%all_but_name <- !fname,lname}
 
-    $orders{{vendor <- @@vendors}}
+    $person%{fname,lname <- %name}
 
-    $people{{#@@count_per_age_ctry <- !age,ctry}}
+    $people@{fname,lname <- %name}
+
+    $orders@{@vendors <- vendor}
+
+    $orders@{@all_but_vendors <- !vendor}
+
+    $orders@{vendor <- @vendors}
+
+    $people@{#@count_per_age_ctry <- !age,ctry}
+
+    $ary.[3]
+
+    $ary[10..14]
 
 =head2 Rational Operators That Do Rounding
 
