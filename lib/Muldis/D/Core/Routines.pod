@@ -9,7 +9,7 @@ Muldis D general purpose routines
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Routines version 0.87.0.
+This document is Muldis::D::Core::Routines version 0.88.0.
 
 =head1 PREFACE
 
@@ -1563,31 +1563,6 @@ C<try> routine succeeds (doesn't throw an exception), then the C<catch>
 routine is not called.  Each of the C<[try|catch]_[upd|ro]_args>
 parameters is optional and defaults to the zero-attribute tuple if no
 explicit argument is given to it.
-
-=head1 SYSTEM-DEFINED GENERIC BOOTLOADER EXCLUSIVES
-
-These system services may only be invoked directly by a C<bootloader>
-routine.
-
-=head2 sys.std.Core.Control.start_trans
-
-C<bootloader_exclusive sys.std.Core.Control.start_trans ()>
-
-This system service starts a new child-most transaction.
-
-=head2 sys.std.Core.Control.commit_trans
-
-C<bootloader_exclusive sys.std.Core.Control.commit_trans ()>
-
-This system service commits the child-most transaction; it will fail if
-there isn't one.
-
-=head2 sys.std.Core.Control.rollback_trans
-
-C<bootloader_exclusive sys.std.Core.Control.rollback_trans ()>
-
-This system service rolls back the child-most transaction; it will fail if
-there isn't one.
 
 =head1 SEE ALSO
 
