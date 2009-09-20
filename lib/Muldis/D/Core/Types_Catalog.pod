@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.89.0.
+This document is Muldis::D::Core::Types_Catalog version 0.90.0.
 
 =head1 PREFACE
 
@@ -75,19 +75,18 @@ more or less:
 
                 # The following are all regular tuple types.
 
-                sys.std.Core.Type.Cat.Material
                 sys.std.Core.Type.Cat.FuncHead
-                sys.std.Core.Type.Cat.UpdHead
-                sys.std.Core.Type.Cat.ProcHead
-                sys.std.Core.Type.Cat.InnerFuncBody
+                sys.std.Core.Type.Cat.FuncBody
                 sys.std.Core.Type.Cat.IfThenExprMap
-                sys.std.Core.Type.Cat.InnerUpdBody
-                sys.std.Core.Type.Cat.InnerProcBody
+                sys.std.Core.Type.Cat.UpdHead
+                sys.std.Core.Type.Cat.UpdBody
+                sys.std.Core.Type.Cat.ProcHead
+                sys.std.Core.Type.Cat.ProcBody
                 sys.std.Core.Type.Cat.IfThenVarStmtMap
-                sys.std.Core.Type.Cat.InnerScalarType
-                sys.std.Core.Type.Cat.InnerNonscalarType
-                sys.std.Core.Type.Cat.InnerUnionType
-                sys.std.Core.Type.Cat.InnerRestrType
+                sys.std.Core.Type.Cat.ScalarType
+                sys.std.Core.Type.Cat.NonscalarType
+                sys.std.Core.Type.Cat.UnionType
+                sys.std.Core.Type.Cat.RestrType
                 sys.std.Core.Type.Cat.OrderByName
 
                 sys.std.Core.Type.Database
@@ -98,7 +97,7 @@ more or less:
                     sys.std.Core.Type.Cat.MountControlCat
                     sys.std.Core.Type.Cat.TopicNSControlCat
                     sys.std.Core.Type.Cat.Federation
-                    sys.std.Core.Type.Cat.DepotOrPackage
+                    sys.std.Core.Type.Cat.Depot
                     sys.std.Core.Type.Cat.ExprNodeSet
                     sys.std.Core.Type.Cat.StmtNodeSet
 
@@ -110,17 +109,16 @@ more or less:
                 sys.std.Core.Type.Cat.SysNspSet
                 sys.std.Core.Type.Cat.Sys[Func|Upd|Proc]Set
                 sys.std.Core.Type.Cat.SysSpecTypeSet
-                sys.std.Core.Type.Cat.SysTypeSet
+                sys.std.Core.Type.Cat.Sys[Scalar|Nonscalar]TypeSet
+                sys.std.Core.Type.Cat.Sys[Union|Restr]TypeSet
                 sys.std.Core.Type.Cat.SysCatSet
                 sys.std.Core.Type.Cat.MountControlSet
                 sys.std.Core.Type.Cat.DepotMountSet
                 sys.std.Core.Type.Cat.FedTypeMapSet
                 sys.std.Core.Type.Cat.FedTypeMap
                 sys.std.Core.Type.Cat.SubdepotSet
-                sys.std.Core.Type.Cat.PackageSet
-                sys.std.Core.Type.Cat.MaterialSet
-                sys.std.Core.Type.Cat.Inner[Func|Upd|Proc]Set
-                sys.std.Core.Type.Cat.Inner[Sca|Nonsca|Uni|Restr]TypeSet
+                sys.std.Core.Type.Cat.[Func|Upd|Proc]Set
+                sys.std.Core.Type.Cat.[Scalar|Nonscalar|Union|Restr]TypeSet
                 sys.std.Core.Type.Cat.ScaValExprNodeSet
                 sys.std.Core.Type.Cat.ScaPRSelExprNodeSet
                 sys.std.Core.Type.Cat.TupSelExprNodeSet
@@ -432,10 +430,10 @@ system-defined entities, specifically all the system-defined types,
 routines, and catalogs.  Both standard system-defined entities and
 implementation-specific system-defined entities are specified here,
 specifically all the relcons and relvars with the names
-C<[sys|mnt|fed|dep|sdp|pkg].cat>.  The system catalog constant named
+C<[sys|mnt|fed|dep|sdp].cat>.  The system catalog constant named
 C<sys.cat> is of the C<System> type.
 
-A C<System> has these 8 attributes:
+A C<System> has these 11 attributes:
 
 =over
 
@@ -448,20 +446,20 @@ system-defined entities as a whole.
 
 These are all the system-defined namespaces where DBMS entities may live,
 or that otherwise always exist due to being system-defined.  Specifically,
-it declares these 29 standard language namespaces:
-C<[sys|mnt|tpc|fed|dep|sdp|pkg|inn|lex]> (which have the nameless global
+it declares these 24 standard language namespaces:
+C<[sys|mnt|tpc|fed|dep|sdp|lex]> (which have the nameless global
 root namespace as their parent, spelled as the empty C<DeclNameChain>
 value, that isn't also declared here), C<sys.[cat|std|imp]>,
-C<[mnt|tpc].cat>, C<[fed|dep|sdp|pkg].[cat|lib|data]>, C<sys.std.Core>,
+C<[mnt|tpc].cat>, C<[fed|dep|sdp].[cat|lib|data]>, C<sys.std.Core>,
 C<sys.std.Core.Type>, C<sys.std.Core.Type.Cat>; it also declares other
 C<Core> namespaces, and where applicable, standard extensions or
 implementation-specific extensions.
 
 =item C<functions|updaters|procedures> - C<Sys[Func|Upd|Proc]Set>
 
-These are the interfaces of all the system-defined
-functions|updaters|procedures.  (Note that C<procedures> also specifies the
-system-defined system services.)
+These are the interfaces, or definitions in some cases, of all the
+system-defined functions|updaters|procedures.  (Note that C<procedures>
+also specifies the system-defined system services.)
 
 =item C<special_types> - C<SysSpecTypeSet>
 
@@ -481,7 +479,8 @@ an infinite number of singleton structure types (and those structure types
 are not listed individually in the system catalog at all, for what should
 be obvious reasons).
 
-=item C<types> - C<SysTypeSet>
+=item C<[scalar|nonscalar|union|restr]_types> -
+C<Sys[Scalar|Nonscalar|Union|Restr]TypeSet>
 
 These are all the system-defined scalar types, except for
 C<String> because it can't be defined like user-defined types, and complete
@@ -490,8 +489,8 @@ nonscalar types, and union types, and restriction types.
 =item C<catalogs> - C<SysCatSet>
 
 These are the interfaces of all the catalog relcons and relvars.
-Specifically, it declares these 6 standard catalogs:
-C<[sys|mnt|fed|dep|sdp|pkg].cat>; the first is a relcon, the others not.
+Specifically, it declares these 5 standard catalogs:
+C<[sys|mnt|fed|dep|sdp].cat>; the first is a relcon, the others not.
 
 =back
 
@@ -537,7 +536,7 @@ A C<Sys[Func|Upd|Proc]Set> is a C<DHRelation> that specifies a set of
 system-defined functions|updaters|procedures.  (Note that C<SysProcSet>
 also specifies the system-defined system services.)
 
-A C<Sys[Func|Upd|Proc]Set> has these 4 attributes:
+A C<Sys[Func|Upd|Proc]Set> has these 5|4|4 attributes:
 
 =over
 
@@ -560,8 +559,18 @@ as a whole.
 =item C<head> - C<[Func|Upd|Proc]Head>
 
 This defines the entire function|updater|procedure heading, that is its
-public interface sans the name, which is all the details of how to use it
+public interface sans its name, which is all the details of how to use it
 and no more detail than necessary about how it is implemented.
+
+=item C<body> - C<maybe_of.FuncBody>
+
+Iff the function exists for the sole purpose of being part of a
+system-defined type's definition, then it is fully defined in the system
+catalog as well, and C<body> is a C<Single> whose sole element defines the
+entire function body, that is its implementation, besides what C<head>
+defines.  Iff the function exists for another purpose, because it is a
+normal system-defined function, then only the function's interface is
+defined in the system catalog, and C<body> is C<nothing>.
 
 =back
 
@@ -599,38 +608,40 @@ This is an optional programmer comment about the type as a whole.
 A C<SysSpecTypeSet> has a binary primary key on the C<parent> plus
 C<name> attributes.  Its default value is empty.
 
-=head2 sys.std.Core.Type.Cat.SysTypeSet
+=head2 sys.std.Core.Type.Cat.Sys[Scalar|Nonscalar|Union|Restr]TypeSet
 
-A C<SysTypeSet> is a C<DHRelation> that specifies a set of system-defined
-types.
+A C<Sys[Scalar|Nonscalar|Union|Restr]TypeSet> is a C<DHRelation> that
+specifies a set of scalar|nonscalar|union|restriction system-defined types.
 
-A C<SysTypeSet> has these 4 attributes:
+A C<Sys[Scalar|Nonscalar|Union|Restr]TypeSet> has these 4 attributes:
 
 =over
 
 =item C<parent> - C<DeclNameChain>
 
 This is the fully-qualified name, in the nameless global root namespace, of
-the type's parent system namespace.
+the scalar|nonscalar|union|restriction type's parent system namespace.
 
 =item C<name> - C<Name>
 
-This is the declared name of the type within the namespace defined by
-C<parent>; other Muldis D code would reference it with the combination of
-C<parent> and C<name>.
+This is the declared name of the scalar|nonscalar|union|restriction type
+within the namespace defined by C<parent>; other Muldis D code would
+reference it with the combination of C<parent> and C<name>.
 
 =item C<comment> - C<Comment>
 
-This is an optional programmer comment about the type as a whole.
+This is an optional programmer comment about the
+scalar|nonscalar|union|restriction type as a whole.
 
-=item C<type> - C<Material>
+=item C<type> - C<[Scalar|Nonscalar|Union|Restr]Type>
 
-This defines the entire type sans the name.
+This defines the entire scalar|nonscalar|union|restriction type sans its
+name.
 
 =back
 
-A C<SysTypeSet> has a binary primary key on the C<parent> plus C<name>
-attributes.  Its default value is empty.
+A C<Sys[Scalar|Nonscalar|Union|Restr]TypeSet> has a binary primary key on
+the C<parent> plus C<name> attributes.  Its default value is empty.
 
 =head2 sys.std.Core.Type.Cat.SysCatSet
 
@@ -813,11 +824,11 @@ These are all enumeration data types.
 =head2 sys.std.Core.Type.Cat.TopicNSControlCat
 
 A C<TopicNSControlCat> is a C<Database>.  It specifies the control
-interface for what depot|subdepot|package is the current topic for DBMS
+interface for what depot|subdepot is the current topic for DBMS
 entity referencing code.  The system catalog variable named C<tpc.cat> is
 of the C<TopicNSControlCat> type.
 
-A C<TopicNSControlCat> has these 4 attributes:
+A C<TopicNSControlCat> has these 3 attributes:
 
 =over
 
@@ -836,12 +847,6 @@ C<nothing>, then the DBMS has no topic depot.
 This specifies a topic subdepot for the DBMS within a specified
 C<topic_depot> if it is a C<Single>; if it is C<nothing>, then the DBMS has
 no topic subdepot.
-
-=item C<topic_package> - C<maybe_of.Name>
-
-This specifies a topic package for the DBMS within a specified
-C<topic_subdepot> if it is a C<Single>; if it is C<nothing>, then the DBMS
-has no topic package.
 
 =back
 
@@ -911,7 +916,7 @@ reference it with this name.
 This is an optional programmer comment about this specific mount of the
 depot.
 
-=item C<depot> - C<DepotOrPackage>
+=item C<depot> - C<Depot>
 
 This defines the entire system catalog of the depot that this mount has
 made visible to the DBMS.
@@ -957,79 +962,72 @@ C<depot> is the declared name of the depot mount that the data type lives
 in; the C<type> is the C<dep.>-qualified name of the data type living in
 it.  Its default value has zero tuples.
 
-=head1 TYPES FOR DEFINING DEPOTS AND SUBDEPOTS AND PACKAGES
+=head1 TYPES FOR DEFINING DEPOTS AND SUBDEPOTS
 
 These are all enumeration data types.
 
-=head2 sys.std.Core.Type.Cat.DepotOrPackage
+=head2 sys.std.Core.Type.Cat.Depot
 
-A C<DepotOrPackage> is a C<Database>.  It specifies the entire system
+A C<Depot> is a C<Database>.  It specifies the entire system
 catalog of a single depot, that is, the widest scope within which all
 entities must be fully defined in terms of just user-defined entities
 within the same scope or of system-defined entities.  It also doubles to
 specify the system catalog of a subdepot, which is an arbitrary subset of a
 depot's entities that internally looks like a depot; a depot can have 0..N
 subdepots, and any that exist are arranged in a hierarchy with the depot as
-the root.  It also triples to specify the entire system catalog of a single
-package, which provides a privatizing namespace for a subset of a depot's
-entities; entities outside a package can only directly invoke that
-package's entities which have been declared part of its public interface.
-A package internally looks like a depot but that it doesn't contain
-subdepots or other packages.  The system catalog variables named C<dep.cat>
-and C<sdp.cat> and C<pkg.cat> are all of the C<DepotOrPackage> type.
+the root.  The system catalog variables named C<dep.cat>
+and C<sdp.cat> are all of the C<Depot> type.
 
-Directly within every namespace defined by a depot or subdepot or package,
+Directly within every namespace defined by a depot or subdepot,
 the empty string entity declaration name is reserved for use by a material
 that is a database type definition.  Iff said type exists, then it is the
-declared data type of the self-local dbvar that this [|sub]depot or package
-contains; if said type doesn't exist, then this [|sub]depot or package does
+declared data type of the self-local dbvar that this [|sub]depot
+contains; if said type doesn't exist, then this [|sub]depot does
 not have a self-local dbvar.
 
-A C<DepotOrPackage> has these 4 attributes:
+A C<Depot> has these 9 attributes:
 
 =over
 
 =item C<comment> - C<single_of.Comment>
 
-This is an optional programmer comment about the [|sub]depot or package as
-a whole.
+This is an optional programmer comment about the [|sub]depot as a whole.
 
 =item C<subdepots> - C<SubdepotSet>
 
 These are all the subdepots that this system catalog contains (which might
-be none), iff this system catalog is a [|sub]depot; iff this system catalog
-is a package, then C<subdepots> is not applicable and is empty.
+be none).
 
-=item C<packages> - C<PackageSet>
+=item C<functions|updaters|procedures> - C<[Func|Upd|Proc]Set>
 
-These are all the packages that this system catalog contains (which might
-be none), iff this system catalog is a [|sub]depot; iff this system catalog
-is a package, then C<packages> is not applicable and is empty.
+These are all the definitions that this [|sub]depot contains of functions,
+updaters, procedures.
 
-=item C<materials> - C<MaterialSet>
+=item C<[scalar|nonscalar|union|restr]_types> -
+C<[Scalar|Nonscalar|Union|Restr]TypeSet>
 
-These are all the definitions that this [|sub]depot or package contains of
-functions, updaters, procedures, scalar types with possreps, complete
-nonscalar types, union types, and restriction types.
+These are all the definitions that this [|sub]depot contains of scalar
+types with possreps, complete nonscalar types, union types, and restriction
+types.
 
 =back
 
-There is a distributed primary key over the C<name> attributes of all 3 of
-a C<DepotOrPackage>'s main C<DHRelation>-typed attributes.  Moreover, iff
+There is a distributed primary key over the C<name> attributes of all 8 of
+a C<Depot>'s main C<DHRelation>-typed attributes.  Moreover, iff
 any of those C<name> is the empty string, then the distributed primary key
-also extends over all of the inner types and routines of that material,
+also extends over all of the types and routines of that material,
 I<except> the one with the empty string as its name.
 
-The default value of C<DepotOrPackage> defines an empty [|sub]depot or
-package that does not have any self-local dbvar.
+The default value of C<Depot> defines an empty [|sub]depot
+that does not have any self-local dbvar.
 
 =head2 sys.std.Core.Type.Cat.SubdepotSet
 
 A C<SubdepotSet> is a C<DHRelation> that specifies the set of subdepots
-that a depot might optionally have for organizing its public entities;
+that a depot might optionally have for organizing its entities;
 these subdepots are organized into a tree whose root is the depot.  A
 C<SubdepotSet> only specifies that a subdepot exists, not which depot
-entities it contains; see the C<DepotOrPackage> which contains it for that.
+entities it contains; see the C<Depot> which contains it for that.
 
 A C<SubdepotSet> has these 3 attributes:
 
@@ -1048,230 +1046,116 @@ C<parent> and C<name>.
 
 =item C<comment> - C<Comment>
 
-This is an optional programmer comment about this specific subdepot.
+This is an optional programmer comment about this specific subdepot as
+associated with this subdepot name.
 
 =back
 
 A C<SubdepotSet> has a binary primary key on the C<parent> plus
 C<name> attributes.  Its default value is empty.
 
-=head2 sys.std.Core.Type.Cat.PackageSet
+=head2 sys.std.Core.Type.Cat.[Func|Upd|Proc]Set
 
-A C<PackageSet> is a C<DHRelation> that specifies the set of packages that
-a depot might optionally have for organizing its possibly private entities.
-A C<PackageSet> only specifies that a package exists, not which package
-entities it contains; see the C<DepotOrPackage> which contains it for that.
+An C<[Func|Upd|Proc]Set> is a C<DHRelation> that specifies a set of
+functions|updaters|procedures that a [|sub]depot might directly contain;
+each routine may be either public for the DBMS as a whole or private to the
+subdepot.
 
-A C<PackageSet> has these 3 attributes:
-
-=over
-
-=item C<parent> - C<DeclNameChain>
-
-This is the fully-qualified name, in the C<dep.[cat|lib|data]> namespace,
-of the packages's parent [|sub]depot.
-
-=item C<name> - C<Name>
-
-This is the declared name of the package within the namespace defined by
-C<parent>; other Muldis D code would reference it with the combination of
-C<parent> and C<name>.
-
-=item C<comment> - C<Comment>
-
-This is an optional programmer comment about the package definition as
-associated with this package name.
-
-=back
-
-A C<PackageSet> has a binary primary key on the C<parent> plus
-C<name> attributes.  Its default value is empty.
-
-=head2 sys.std.Core.Type.Cat.MaterialSet
-
-A C<MaterialSet> is a C<DHRelation> that specifies a set of routines and
-types that a [|sub]depot or package might directly contain; in the case of
-a package, each routine or type may be either public for the DBMS as a
-whole or private to the package.
-
-A C<MaterialSet> has these 6 attributes:
+An C<[Func|Upd|Proc]Set> has these 6 attributes:
 
 =over
 
 =item C<subdepot> - C<DeclNameChain>
 
 This is the fully-qualified name, in the C<dep.[cat|lib|data]> namespace,
-of the routine's or type's parent [|sub]depot, or of the routine's or
-type's parent package's parent [|sub]depot.
-
-=item C<package> - C<maybe_of.Name>
-
-This is the declared name of the routine's or type's parent package within
-the namespace defined by C<subdepot>, iff the routine or type belongs to a
-package; iff the routine or type directly belongs to a [|sub]depot, then
-C<package> is not applicable and is C<nothing>.
+of the function|updater|procedure's parent [|sub]depot.
 
 =item C<name> - C<Name>
 
-This is the declared name of the routine or type within the namespace
-defined by C<subdepot>, plus C<package> if it is a C<Single>; other Muldis
-D code would reference it with the combination of C<subdepot> and
-C<package> if applicable and C<name>.
+This is the declared name of the function|updater|procedure within the
+namespace defined by C<subdepot>; other Muldis D code would reference it
+with the combination of C<subdepot> and C<name>.
 
 =item C<comment> - C<Comment>
 
-This is an optional programmer comment about the routine or type as a
-whole.
+This is an optional programmer comment about the function|updater|procedure
+as a whole.
 
-=item C<is_public> - C<maybe_of.Bool>
+=item C<is_public> - C<Bool>
 
-Iff the routine or type being defined lives directly in a [|sub]depot, then
-C<is_public> is not applicable and is C<nothing>.  Iff the routine or type
-being defined is part of a package, then C<is_public> is a C<Single>:  This
-is C<Bool:true> if the routine or type is part of the package's own public
-interface and may be invoked from outside the package; it is C<Bool:false>
-if it is just part of the package's internals.
-
-=item C<material> - C<Material>
-
-This defines the entire routine or type sans its name.
-
-=back
-
-A C<MaterialSet> has a ternary primary key on the C<subdepot> plus
-C<package> plus C<name> attributes.  Its default value is empty.
-
-=head1 TYPES FOR DEFINING ROUTINES AND DATA TYPES
-
-These are all enumeration data types.
-
-=head2 sys.std.Core.Type.Cat.Material
-
-A C<Material> is a C<DHTuple> that specifies a named routine or type, both
-its public interface and its implementation details, except for its name
-and public/private status; the latter are provided by any depot or package
-embedding the material when applicable.  Its purpose is as per
-C<Inner[[[Func|Upd|Proc][Head|Body]]|[Scalar|Nonscalar|Union|Restr]Type]>,
-one of which it is a proxy-wrapper for along with other inner routines and
-types that are composed into it.  A C<Material> is used to define any DBMS
-entity that would be invoked via the second-level namespace C<lib> (hence
-its name is derived from the concept of a library's materials), such as
-C<[fed|dep|sdp|pkg].lib>.  A C<Material> is composed of 1 or more named
-inner routines or types, exactly 1 of which must have the empty string as
-its name; that inner routine or type defines the actual main routine or
-type that the C<Material> is a proxy-wrapper for, and the other inner
-routines and types, if any, support it.  A C<Material> is typically
-composed into a C<DepotOrPackage>.
-
-A C<Material> has these 8 attributes:
-
-=over
-
-=item C<comment> - C<Comment>
-
-This is an optional programmer comment about the material as a whole.
-
-=item C<inner_funcs> - C<InnerFuncSet>
-
-These are all the inner function definitions that this material contains.
-
-=item C<inner_upds> - C<InnerUpdSet>
-
-These are all the inner updater definitions that this material contains.
-This attribute must be empty unless the material is a procedure or updater.
-
-=item C<inner_procs> - C<InnerProcSet>
-
-These are all the inner procedure definitions that this material contains.
-This attribute must be empty unless the material is a procedure.
-
-=item C<inner_[sca|nonsca|uni|restr]_types> -
-C<Inner[Sca|Nonsca|Uni|Restr]TypeSet>
-
-These are all the inner scalar|nonscalar|union|restriction type definitions
-that this material contains.
-
-=back
-
-There is a distributed primary key over the C<name> attributes of all 7 of
-a C<Material>'s C<DHRelation>-typed attributes.
-
-The default value of C<Material> is as per C<InnerRestrType>.
-
-=head2 sys.std.Core.Type.Cat.Inner[Func|Upd|Proc]Set
-
-An C<Inner[Func|Upd|Proc]Set> is a C<DHRelation> that specifies a set of
-inner functions|updaters|procedures that a function|updater|procedure might
-contain.
-
-An C<Inner[Func|Upd|Proc]Set> has these 4 attributes:
-
-=over
-
-=item C<name> - C<Name>
-
-This is the declared name of the inner function|updater|procedure.
-
-=item C<comment> - C<Comment>
-
-This is an optional programmer comment about the inner
-function|updater|procedure as a whole.
+This is C<Bool:true> if the function|updater|procedure is part of the
+subdepot's own public interface and may be invoked from outside the
+subdepot; it is C<Bool:false> if it is just part of the subdepot's
+internals.
 
 =item C<head> - C<[Func|Upd|Proc]Head>
 
-This defines the entire inner function|updater|procedure heading, that is
-its public interface sans the name, which is all the details of how to use
-it and no more detail than necessary about how it is implemented.
+This defines the entire function|updater|procedure heading, that is its
+public interface sans its name, which is all the details of how to use it
+and no more detail than necessary about how it is implemented.
 
-=item C<body> - C<Inner[Func|Upd|Proc]Body>
+=item C<body> - C<[Func|Upd|Proc]Body>
 
-This defines the entire inner function|updater|procedure body, that is its
+This defines the entire function|updater|procedure body, that is its
 implementation, besides what C<head> defines.
 
 =back
 
-An C<Inner[Func|Upd|Proc]Set> has a unary primary key on the C<name>
-attribute.  Its default value is empty.
+An C<[Func|Upd|Proc]Set> has a binary primary key on the C<subdepot> plus
+C<name> attributes.  Its default value is empty.
 
-=head2 sys.std.Core.Type.Cat.Inner[Sca|Nonsca|Uni|Restr]TypeSet
+=head2 sys.std.Core.Type.Cat.[Scalar|Nonscalar|Union|Restr]TypeSet
 
-An C<Inner[Sca|Nonsca|Uni|Restr]TypeSet> is a C<DHRelation> that specifies
-a set of inner scalar|nonscalar|union|restriction types that a
-function|updater|procedure or scalar|nonscalar|union|restriction type might
-contain.
+An C<[Scalar|Nonscalar|Union|Restr]TypeSet> is a C<DHRelation> that
+specifies a set of scalar|nonscalar|union|restriction types that a
+[|sub]depot might directly contain; each type may be either public for the
+DBMS as a whole or private to the subdepot.
 
-An C<Inner[Sca|Nonsca|Uni|Restr]TypeSet> has these 3 attributes:
+An C<[Scalar|Nonscalar|Union|Restr]TypeSet> has these 5 attributes:
 
 =over
 
+=item C<subdepot> - C<DeclNameChain>
+
+This is the fully-qualified name, in the C<dep.[cat|lib|data]> namespace,
+of the scalar|nonscalar|union|restriction type's parent [|sub]depot.
+
 =item C<name> - C<Name>
 
-This is the declared name of the inner scalar|nonscalar|union|restriction
-type.
+This is the declared name of the scalar|nonscalar|union|restriction type
+within the namespace defined by C<subdepot>; other Muldis D code would
+reference it with the combination of C<subdepot> and C<name>.
 
 =item C<comment> - C<Comment>
 
-This is an optional programmer comment about the inner
+This is an optional programmer comment about the
 scalar|nonscalar|union|restriction type as a whole.
 
-=item C<type> - C<Inner[Scalar|Nonscalar|Union|Restr]Type>
+=item C<is_public> - C<Bool>
 
-This defines the entire inner scalar|nonscalar|union|restriction type sans
-the name.
+This is C<Bool:true> if the scalar|nonscalar|union|restriction type is part
+of the subdepot's own public interface and may be invoked from outside the
+subdepot; it is C<Bool:false> if it is just part of the subdepot's
+internals.
+
+=item C<type> - C<[Scalar|Nonscalar|Union|Restr]Type>
+
+This defines the entire scalar|nonscalar|union|restriction type sans
+its name.
 
 =back
 
-An C<Inner[Sca|Nonsca|Uni|Restr]TypeSet> has a unary primary key on the
-C<name> attribute.  Its default value is empty.
+An C<[Scalar|Nonscalar|Union|Restr]TypeSet> has a binary primary key on the
+C<subdepot> plus C<name> attributes.  Its default value is empty.
 
-=head1 TYPES FOR DEFINING INNER ROUTINE HEADINGS
+=head1 TYPES FOR DEFINING ROUTINES
 
 These are all enumeration data types.
 
 =head2 sys.std.Core.Type.Cat.FuncHead
 
 A C<FuncHead> is a C<DHTuple>.  It specifies the entire heading or public
-interface of a function or inner function, except for its name and
+interface of a function or function, except for its name and
 public/private status; the latter are provided by any type embedding this
 one when applicable.
 
@@ -1306,164 +1190,74 @@ Each element of C<opt_params> must match a parameter name in C<params>.
 The default value of C<FuncHead> has zero parameters and a result type
 of C<Bool>; by default, its parameters are all non-optional.
 
-=head2 sys.std.Core.Type.Cat.UpdHead
+=head2 sys.std.Core.Type.Cat.FuncBody
 
-An C<UpdHead> is a C<DHTuple>.  It specifies the entire heading or public
-interface of an updater or inner updater, except for its name and
-public/private status; the latter are provided by any type embedding this
-one when applicable.
-
-An C<UpdHead> has these 4 attributes:
-
-=over
-
-=item C<comment> - C<Comment>
-
-This is an optional programmer comment about the updater heading.
-
-=item C<upd_params> - C<NameTypeMap>
-
-This is the declared subject-to-update parameter list of the updater, which
-has 1..N named and typed such parameters.  It must have at least 1 element.
-
-=item C<ro_params> - C<NameTypeMap>
-
-This is the declared read-only parameter list of the updater, which has
-0..N named and typed such parameters.
-
-=item C<opt_params> - C<set_of.Name>
-
-This indicates the subset of the updater's subject-to-update or read-only
-parameters that are optional, that is, do not need to be supplied explicit
-arguments when the function is invoked; any updater parameters not named
-here must be supplied explicit arguments.  Any parameter marked as optional
-which is not given an explicit argument will implicitly default to the
-default value of its declared type; any subject-to-update parameter marked
-as optional which is not given an explicit argument will implicitly bind to
-a new anonymous variable (with the aforementioned default value) which is
-discarded after the updater finishes executing.  Each element of
-C<opt_params> must match a parameter name in either C<upd_params> or
-C<ro_params>.
-
-=back
-
-There is a distributed primary key over the C<name> attributes of
-C<upd_params> and C<ro_params>.
-
-The default value of C<UpdHead> has 1 subject-to-update parameter whose
-name is C<topic> and whose declared type is C<Bool>; it has zero read-only
-parameters; by default, its parameters are all non-optional.
-
-=head2 sys.std.Core.Type.Cat.ProcHead
-
-A C<ProcHead> is a C<DHTuple>.  It specifies the entire heading or public
-interface of a procedure or inner procedure, except for its name and
-public/private status; the latter are provided by any type embedding this
-one when applicable.
-
-A C<ProcHead> has these 4 attributes:
-
-=over
-
-=item C<comment> - C<Comment>
-
-This is an optional programmer comment about the procedure heading.
-
-=item C<upd_params> - C<NameTypeMap>
-
-This is the declared subject-to-update parameter list of the procedure,
-which has 0..N named and typed such parameters.
-
-=item C<ro_params> - C<NameTypeMap>
-
-This is the declared read-only parameter list of the procedure, which has
-0..N named and typed such parameters.
-
-=item C<opt_params> - C<set_of.Name>
-
-This is as per the same-named attribute of C<UpdHead>.
-
-=back
-
-There is a distributed primary key over the C<name> attributes of
-C<upd_params> and C<ro_params>.
-
-The default value of C<ProcHead> has zero parameters; by default, its
-parameters are all non-optional.
-
-=head1 TYPES FOR DEFINING INNER ROUTINE BODIES
-
-These are all enumeration data types.
-
-=head2 sys.std.Core.Type.Cat.InnerFuncBody
-
-An C<InnerFuncBody> is a C<DHTuple>.  It specifies the entire body or
-implementation of an inner function (or the main body of a function),
+An C<FuncBody> is a C<DHTuple>.  It specifies the entire body or
+implementation of an function (or the main body of a function),
 besides the details that a C<FuncHead> has, one of which each
-C<InnerFuncBody> typically must be paired with.
+C<FuncBody> typically must be paired with.
 
-An C<InnerFuncBody> has these 2 attributes:
+An C<FuncBody> has these 2 attributes:
 
 =over
 
 =item C<comment> - C<Comment>
 
-This is an optional programmer comment about the [|inner ]function body.
+This is an optional programmer comment about the function body.
 
 =item C<expr> - C<ExprNodeSet>
 
-This defines the value expression tree that comprises the entire [|inner
-]function body.
+This defines the value expression tree that comprises the entire
+function body.
 
 =back
 
 There is a distributed primary key over the C<name> attributes of all the
-attributes of C<expr>; and if this C<InnerFuncBody> is paired with a
+attributes of C<expr>; and if this C<FuncBody> is paired with a
 C<FuncHead>, then the distributed key also extends over the head's
 parameter names.
 
-An C<InnerFuncBody> specifies a simple value expression tree of named
+An C<FuncBody> specifies a simple value expression tree of named
 expression nodes, each of which is a tuple of one of its C<expr.\w+_exprs>
 attributes.  It must have at least 1 member node, except that it may have
-zero member nodes iff the [|inner ]function it is composed into has exactly
+zero member nodes iff the function it is composed into has exactly
 1 parameter, in which case the value expression tree implicitly results in
 the argument to said parameter.  Otherwise:  All member nodes must define a
 simple expression node tree, such that every member except one (which is
 the root node) has one of its peers as a parent node, and no direct cycles
-between members are permitted (only indirect cycles based on [|inner
-]function invocations are allowed); the name of the root node must be the
-empty string.  Note that the composed-into [|inner ]function's parameters
+between members are permitted (only indirect cycles based on
+function invocations are allowed); the name of the root node must be the
+empty string.  Note that the composed-into function's parameters
 are also implicitly tree nodes, and are referenced by name into the
 expression the same way as any other named expression node is.  Regardless
 of whether the node count is zero or 1+, the tree must denote a value
-expression whose result type is of the result type of the [|inner ]function
-it is composed into, and which invokes all of the [|inner ]function's
-parameters.
+expression whose result type is of the result type of the function
+it is composed into, and which invokes all of the function's parameters.
 
-The default value of C<InnerFuncBody> directly corresponds to the
+The default value of C<FuncBody> directly corresponds to the
 default value of C<FuncHead> and unconditionally results in the value
 C<Bool:false>.
 
 =head2 sys.std.Core.Type.Cat.ExprNodeSet
 
 An C<ExprNodeSet> is a C<Database> that specifies a set of named value
-expression nodes.  It is typically composed into a [|inner
-][function|updater].  Each tuple of an C<ExprNodeSet> attribute is a
+expression nodes.  It is typically composed into a
+[function|updater].  Each tuple of an C<ExprNodeSet> attribute is a
 named expression node, which is the majority component of functional Muldis
 D code.  All arbitrarily complex Muldis D expression trees, including
 relational queries, are composed of just expression nodes, either directly,
-or indirectly by way of [|inner ]function invocations, as each [|inner
-]function body is itself composed entirely of a single expression tree (of
+or indirectly by way of function invocations, as each
+function body is itself composed entirely of a single expression tree (of
 at least 1 node).  Only functions and updaters may contain expression
 nodes, so for any procedures that would conceptually include them, those
 portions of the procedures need to be separated out and encapsulated by
-named [|inner ]functions or [|inner ]updaters.  Note that, while the
+named functions or updaters.  Note that, while the
 general case has expression trees simply denoting a value, in some cases
 they may instead define a pseudo-variable / virtual variable; that only
-happens in [|inner ]updaters where the expression is used as an argument
-for a subject-to-update parameter of an [|inner ]update operator call; in
+happens in updaters where the expression is used as an argument
+for a subject-to-update parameter of an update operator call; in
 that case the leaf nodes / only node of the expression must map to a
-subject-to-update parameter of the containing [|inner ]update operator.
+subject-to-update parameter of the containing update operator.
 
 An C<ExprNodeSet> has these 12 attributes:
 
@@ -1507,7 +1301,7 @@ tuple-valued expression nodes, or aliases of other expression nodes.
 
 =item C<func_invo_exprs> - C<FuncInvoExprNodeSet>
 
-These are expression nodes that represent [|inner ]function invocations.
+These are expression nodes that represent function invocations.
 
 =item C<if_else_exprs> - C<IfElseExprNodeSet>
 
@@ -1792,7 +1586,7 @@ attribute.  Its default value is empty.
 
 A C<FuncInvoExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents the result of invoking a named
-[|inner ]function with specific arguments.
+function with specific arguments.
 
 A C<FuncInvoExprNodeSet> has these 4 attributes:
 
@@ -1809,13 +1603,13 @@ the expression node (sub-)tree it is the root of.
 
 =item C<function> - C<NameChain>
 
-This is the name of the [|inner ]function being invoked.
+This is the name of the function being invoked.
 
 =item C<args> - C<NameExprMap>
 
-These are the arguments for the [|inner ]function invocation.  Each element
+These are the arguments for the function invocation.  Each element
 defines one argument value, with the element C<name> matching the invoked
-[|inner ]function's parameter name, and the element C<expr> naming another
+function's parameter name, and the element C<expr> naming another
 local expression node which defines the value.
 
 =back
@@ -1987,41 +1781,89 @@ A C<MaterialRefSelExprNodeSet> has a unary (unique) key on the C<name>
 attribute, plus another such key on the C<referencing> attribute.  Its
 default value is empty.
 
-=head2 sys.std.Core.Type.Cat.InnerUpdBody
+=head2 sys.std.Core.Type.Cat.UpdHead
 
-An C<InnerUpdBody> is a C<DHTuple>.  It specifies the entire body or
-implementation of an inner updater (or the main body of a updater), besides
-the details that an C<UpdHead> has, one of which each
-C<InnerUpdBody> typically must be paired with.
+An C<UpdHead> is a C<DHTuple>.  It specifies the entire heading or public
+interface of an updater or updater, except for its name and
+public/private status; the latter are provided by any type embedding this
+one when applicable.
 
-An C<InnerUpdBody> has these 3 attributes:
+An C<UpdHead> has these 4 attributes:
 
 =over
 
 =item C<comment> - C<Comment>
 
-This is an optional programmer comment about the [|inner ]updater body.
+This is an optional programmer comment about the updater heading.
+
+=item C<upd_params> - C<NameTypeMap>
+
+This is the declared subject-to-update parameter list of the updater, which
+has 1..N named and typed such parameters.  It must have at least 1 element.
+
+=item C<ro_params> - C<NameTypeMap>
+
+This is the declared read-only parameter list of the updater, which has
+0..N named and typed such parameters.
+
+=item C<opt_params> - C<set_of.Name>
+
+This indicates the subset of the updater's subject-to-update or read-only
+parameters that are optional, that is, do not need to be supplied explicit
+arguments when the function is invoked; any updater parameters not named
+here must be supplied explicit arguments.  Any parameter marked as optional
+which is not given an explicit argument will implicitly default to the
+default value of its declared type; any subject-to-update parameter marked
+as optional which is not given an explicit argument will implicitly bind to
+a new anonymous variable (with the aforementioned default value) which is
+discarded after the updater finishes executing.  Each element of
+C<opt_params> must match a parameter name in either C<upd_params> or
+C<ro_params>.
+
+=back
+
+There is a distributed primary key over the C<name> attributes of
+C<upd_params> and C<ro_params>.
+
+The default value of C<UpdHead> has 1 subject-to-update parameter whose
+name is C<topic> and whose declared type is C<Bool>; it has zero read-only
+parameters; by default, its parameters are all non-optional.
+
+=head2 sys.std.Core.Type.Cat.UpdBody
+
+An C<UpdBody> is a C<DHTuple>.  It specifies the entire body or
+implementation of an updater (or the main body of a updater), besides
+the details that an C<UpdHead> has, one of which each
+C<UpdBody> typically must be paired with.
+
+An C<UpdBody> has these 3 attributes:
+
+=over
+
+=item C<comment> - C<Comment>
+
+This is an optional programmer comment about the updater body.
 
 =item C<exprs> - C<ExprNodeSet>
 
 This defines the expression trees that are arguments to the update
 operators that C<stmt> invokes.  These expression trees must reference all
-of the read-only parameters that the inner update operator has.
+of the read-only parameters that the update operator has.
 
 =item C<stmt> - C<MultiUpdStmt>
 
-This defines the entire body of the [|inner ]updater, which is composed of
+This defines the entire body of the updater, which is composed of
 a single multi-update statement.  This multi-update statement must
-reference all of the parameters that the [|inner ]updater has.
+reference all of the parameters that the updater has.
 
 =back
 
 There is a distributed primary key over the C<name> attributes of all the
-attributes of C<exprs>; and if this C<InnerUpdBody> is paired with an
+attributes of C<exprs>; and if this C<UpdBody> is paired with an
 C<UpdHead>, then the distributed key also extends over the head's
 parameter names.
 
-The default value of C<InnerUpdBody> directly corresponds to the
+The default value of C<UpdBody> directly corresponds to the
 default value of C<UpdHead> and unconditionally updates its C<topic>
 argument to the value C<Bool:false>.
 
@@ -2031,17 +1873,17 @@ A C<MultiUpdStmt> is a C<DHRelation> that specifies a multi-update
 statement (of 1..N variables), which is the narrowest scope implicitly
 atomic component of procedural Muldis D code.  It is the most fundamental
 component of procedural Muldis D code.  The variables being updated are
-accessed via the host [|inner ]updater's subject-to-update parameters.  All
+accessed via the host updater's subject-to-update parameters.  All
 arbitrarily complex Muldis D value assignments, including relational
 assignments, are composed of just C<MultiUpdStmt>, either directly, or
-indirectly by way of [|inner ]updater invocations, as each [|inner ]updater
+indirectly by way of updater invocations, as each updater
 body is itself composed entirely of 1 multi-update statement (plus
-supporting value expressions).  Only [|inner ]updaters may contain
+supporting value expressions).  Only updaters may contain
 C<MultiUpdStmt>, so for any procedures that would conceptually include
 them, those portions of the procedures need to be separated out and
-encapsulated by named [|inner ]updaters.  Each tuple of a multi-update
+encapsulated by named updaters.  Each tuple of a multi-update
 statement is a single update statement, which represents a single
-invocation of an [|inner ]updater, and at least 1 tuple is required.
+invocation of an updater, and at least 1 tuple is required.
 
 A C<MultiUpdStmt> has these 4 attributes:
 
@@ -2054,11 +1896,11 @@ a whole.
 
 =item C<updater> - C<NameChain>
 
-This is the name of the [|inner ]updater being invoked.
+This is the name of the updater being invoked.
 
 =item C<upd_args> - C<NameExprMap>
 
-These are the 1..N subject-to-update arguments to the [|inner ]updater
+These are the 1..N subject-to-update arguments to the updater
 invocation, as-per C<ro_args>.  But since each expression tree in
 C<upd_args> is binding to a subject-to-update parameter, the expression
 tree actually is defining a pseudo-variable / virtual-variable over 1..N
@@ -2067,7 +1909,7 @@ common) case, the parameter is referenced directly.
 
 =item C<ro_args> - C<NameExprMap>
 
-These are the 0..N read-only arguments to the [|inner ]updater invocation.
+These are the 0..N read-only arguments to the updater invocation.
 Each element defines one argument value, with the element C<name> matching
 the invoked routine's parameter name, and the element C<expr> naming a
 local expression node (or parameter) which defines the value.
@@ -2078,62 +1920,98 @@ There is a distributed primary key over the C<name> attributes of
 C<upd_args> and C<ro_args>.
 
 The default value of C<MultiUpdStmt> directly corresponds to the
-default value of C<InnerUpdBody> and unconditionally updates its
-containing [|inner ]updater's C<topic> argument to the value C<Bool:false>.
+default value of C<UpdBody> and unconditionally updates its
+containing updater's C<topic> argument to the value C<Bool:false>.
 
-=head2 sys.std.Core.Type.Cat.InnerProcBody
+=head2 sys.std.Core.Type.Cat.ProcHead
 
-An C<InnerProcBody> is a C<DHTuple>.  It specifies the entire body or
-implementation of an inner procedure (or the main body of a procedure),
-besides the details that a C<ProcHead> has, one of which each
-C<InnerProcBody> typically must be paired with.
+A C<ProcHead> is a C<DHTuple>.  It specifies the entire heading or public
+interface of a procedure or procedure, except for its name and
+public/private status; the latter are provided by any type embedding this
+one when applicable.
 
-An C<InnerProcBody> has these 3 attributes:
+A C<ProcHead> has these 4 attributes:
 
 =over
 
 =item C<comment> - C<Comment>
 
-This is an optional programmer comment about the [|inner ]procedure body.
+This is an optional programmer comment about the procedure heading.
+
+=item C<upd_params> - C<NameTypeMap>
+
+This is the declared subject-to-update parameter list of the procedure,
+which has 0..N named and typed such parameters.
+
+=item C<ro_params> - C<NameTypeMap>
+
+This is the declared read-only parameter list of the procedure, which has
+0..N named and typed such parameters.
+
+=item C<opt_params> - C<set_of.Name>
+
+This is as per the same-named attribute of C<UpdHead>.
+
+=back
+
+There is a distributed primary key over the C<name> attributes of
+C<upd_params> and C<ro_params>.
+
+The default value of C<ProcHead> has zero parameters; by default, its
+parameters are all non-optional.
+
+=head2 sys.std.Core.Type.Cat.ProcBody
+
+An C<ProcBody> is a C<DHTuple>.  It specifies the entire body or
+implementation of an procedure (or the main body of a procedure),
+besides the details that a C<ProcHead> has, one of which each
+C<ProcBody> typically must be paired with.
+
+An C<ProcBody> has these 3 attributes:
+
+=over
+
+=item C<comment> - C<Comment>
+
+This is an optional programmer comment about the procedure body.
 
 =item C<vars> - C<NameTypeMap>
 
-This defines the 0..N (non-parameter) lexical variables of the [|inner
-]procedure; they initialize to the default values of their declared types.
+This defines the 0..N (non-parameter) lexical variables of the
+procedure; they initialize to the default values of their declared types.
 
 =item C<stmt> - C<StmtNodeSet>
 
-This defines the statement tree that comprises the entire [|inner
-]procedure body.
+This defines the statement tree that comprises the entire procedure body.
 
 =back
 
 There is a distributed primary key over the C<name> attribute of C<vars>
 and the C<name> attributes of all the attributes of C<stmt>; and if this
-C<InnerProcBody> is paired with a C<ProcHead>, then the distributed
+C<ProcBody> is paired with a C<ProcHead>, then the distributed
 key also extends over the head's parameter names.
 
-An C<InnerProcBody> specifies a simple statement tree of named statement
+An C<ProcBody> specifies a simple statement tree of named statement
 nodes, each of which is a tuple of one of its C<stmt.\w+_stmts> attributes.
-If it has zero member nodes, then the [|inner ]procedure is a no-op.
+If it has zero member nodes, then the procedure is a no-op.
 Otherwise:  All member nodes must define a simple statement node tree, such
 that every member except one (which is the root node) has one of its peers
 as a parent node, and no direct cycles between members are permitted (only
-indirect cycles based on [|inner ]procedure invocations are allowed); the
+indirect cycles based on procedure invocations are allowed); the
 name of the root node must be the empty string.  Note that the
-composed-into [|inner ]procedure's parameters are also implicitly tree
+composed-into procedure's parameters are also implicitly tree
 nodes, and are referenced by name into the statement tree the same way as
 any other named statement node is.  The statement tree should reference all
-of the parameters and lexical variables that the [|inner ]procedure has,
+of the parameters and lexical variables that the procedure has,
 but this isn't a strict requirement.
 
-The default value of C<InnerProcBody> directly corresponds to the default
+The default value of C<ProcBody> directly corresponds to the default
 value of C<ProcHead> and is a no-op, having an empty statement tree.
 
 =head2 sys.std.Core.Type.Cat.StmtNodeSet
 
 A C<StmtNodeSet> is a C<Database> that specifies a set of named
-statement nodes.  It is typically composed into a [|inner ]procedure.  Each
+statement nodes.  It is typically composed into a procedure.  Each
 tuple of a C<StmtNodeSet> attribute is a named statement node, from
 which non-implicitly-atomic procedural Muldis D code is composed.
 
@@ -2187,7 +2065,7 @@ A C<LeaveStmtNodeSet> is a C<DHRelation> that specifies a set of
 statement leaf nodes where each node represents an instruction to
 abnormally exit the block defined by a parent statement node (a normal exit
 is to simply execute to the end of the block).  If the parent node in
-question is the root statement node for the containing [|inner ]procedure,
+question is the root statement node for the containing procedure,
 then the latter will be exited; this is how a "return" statement is
 represented, but "return" is still easy to recognize because the root node
 always has the empty string as its name.  If the parent node in question is
@@ -2252,7 +2130,7 @@ attribute.  Its default value is empty.
 
 An C<ImpInvoStmtNodeSet> is a C<DHRelation> that specifies a set of
 statement nodes where each node is an invocation of some other imperative
-routine (eg, procedure, update operator, system service, 'inner' variant)
+routine (eg, procedure, update operator, system service)
 with specific arguments.  The invoked routine can be either user-defined or
 system-defined.
 
@@ -2486,13 +2364,13 @@ each iteration of the loop; typically it has a sub-tree of statement nodes.
 A C<LoopStmtNodeSet> has a unary primary key on the C<name> attribute.
 Its default value is empty.
 
-=head1 TYPES FOR DEFINING INNER DATA TYPES
+=head1 TYPES FOR DEFINING DATA TYPES
 
 These are all enumeration data types.
 
-=head2 sys.std.Core.Type.Cat.InnerScalarType
+=head2 sys.std.Core.Type.Cat.ScalarType
 
-An C<InnerScalarType> is a C<DHTuple>.  It defines either a new
+An C<ScalarType> is a C<DHTuple>.  It defines either a new
 scalar root type with at least 1 possrep, or it defines a subtype
 of some other scalar type which also adds at least one possrep to
 the other type.  Either way, every possrep defines a candidate
@@ -2503,10 +2381,10 @@ a declared type is scalar or dh-scalar depends only on the declared
 types of the attributes its possreps compose, whether any are
 non-deeply-homogeneous
 or none are.  You can not declare a scalar root type at all except
-by using a C<InnerScalarType>, and you can not define a scalar type
+by using a C<ScalarType>, and you can not define a scalar type
 with an incompletely defined attribute list at all.
 
-An C<InnerScalarType> has these 7 attributes:
+An C<ScalarType> has these 7 attributes:
 
 =over
 
@@ -2524,17 +2402,17 @@ is a C<Single> whose sole element is the name of that other type.  Note
 that any type named by C<base_type> must itself be a scalar root
 type or a subtype of one.
 
-=item C<subtype_constraint> - C<maybe_of.Name>
+=item C<subtype_constraint> - C<maybe_of.NameChain>
 
 Iff the type being defined is a scalar root type, or it is a
 non-proper subtype of some other type, then C<subtype_constraint> is not
 applicable and is C<nothing>.  Iff the type being defined is a proper
 subtype of some other scalar type, then C<subtype_constraint> is a
-C<Single> whose sole element matches the declared name of an inner
+C<Single> whose sole element matches the declared name of an
 C<type_constraint> function that determines what base type values are part
-of the subtype.  The inner function that this names must have a
+of the subtype.  The function that this names must have a
 single C<topic> parameter whose declared type is that named by
-C<base_type>, and whose argument is the value to test; the inner function's
+C<base_type>, and whose argument is the value to test; the function's
 result type must be C<Bool>.  This constraint function may only
 reference possreps of the base type, and may not reference possreps of the
 type being defined.  Note that, strictly speaking, C<subtype_constraint>
@@ -2578,10 +2456,10 @@ total number of bidirectional maps C<M> is in C<(P-1) ≤ M ≤ ((P-1)*P/2)>.
 When a subtype is adding possreps to an other base type, all of the mapping
 functions are defined with the subtype.
 
-=item C<default> - C<maybe_of.Name>
+=item C<default> - C<maybe_of.NameChain>
 
 Iff it is a C<Single>, then C<default>
-matches the declared name of an inner C<named_value> function that
+matches the declared name of an C<named_value> function that
 results in the default scalar value of the [|sub]type; it has
 zero parameters and its result type is the same as the scalar type
 whose declaration it is part of.  Iff C<default> is C<nothing> and
@@ -2596,14 +2474,14 @@ then the subtype will use the same default value as its base type; but if
 the subtype's value set excludes said value, then a C<default> of
 C<nothing> is invalid and C<default> must be a C<Single>.
 
-=item C<order> - C<maybe_of.Name>
+=item C<order> - C<maybe_of.NameChain>
 
 A scalar root type definition may optionally have a type-default
 total ordering function associated with it (a type being defined as a
 subtype may not); iff the type being defined qualifies and desires such an
 associated function, then C<order> is a C<Single> whose sole element
-matches the declared name of an inner C<order_determination> function.  The
-inner function that this names must have exactly 4 parameters; the
+matches the declared name of an C<order_determination> function.  The
+function that this names must have exactly 4 parameters; the
 first two parameters, named C<topic> and C<other>, each have declared types
 that are the same as the scalar root type whose declaration the
 function is part of, and this function is said root type's type-default
@@ -2615,7 +2493,7 @@ the function, then C<order> is C<nothing>.
 
 =back
 
-The default value of C<InnerScalarType> defines a scalar root type with
+The default value of C<ScalarType> defines a scalar root type with
 a single possrep whose name is the empty string and that has no attributes;
 it is a singleton type, whose default value is its only value.
 
@@ -2640,16 +2518,16 @@ This is an optional programmer comment about the possrep as a whole.
 
 This defines the 0..N attributes of the possrep.
 
-=item C<constraint> - C<maybe_of.Name>
+=item C<constraint> - C<maybe_of.NameChain>
 
 Iff it is a C<Single>, then C<constraint>
-matches the declared name of an inner C<type_constraint> function that
+matches the declared name of an C<type_constraint> function that
 determines what combinations of possrep attribute values denote values of
 the [|sub]type, besides the restrictions imposed by the declared types of
-the attributes individually.  The inner function that this names
+the attributes individually.  The function that this names
 must have a single C<topic> parameter whose declared type is a tuple whose
 attributes match those declared by C<attrs> and whose argument denotes the
-value to test; the inner function's result type must be C<Bool>.  If the
+value to test; the function's result type must be C<Bool>.  If the
 function unconditionally results in C<Bool:true>, then all possible
 combinations of attribute-allowable values are collectively allowed.  Note
 that, strictly speaking, any constraint defined as part of a possrep (where
@@ -2708,20 +2586,20 @@ distinct from that of C<p1>, and moreover, the 2 values must be mutually
 ordered so that the value of C<p1> is before the value of C<p2>; the latter
 constraint defines a C<PossrepMapSet>'s canonical form.
 
-=item C<p2_from_p1> - C<Name>
+=item C<p2_from_p1> - C<NameChain>
 
-This matches the declared name of an inner C<possrep_map> function that
+This matches the declared name of an C<possrep_map> function that
 derives the representation of the possrep named by C<p2> from that of the
-possrep named by C<p1>.  The inner function that this names must
+possrep named by C<p1>.  The function that this names must
 have a single C<topic> parameter whose declared type is a tuple whose
-attributes match those of C<p1>; the inner function's result type must be a
+attributes match those of C<p1>; the function's result type must be a
 tuple whose attributes match those of C<p2>.  Note that every distinct
 argument (domain) value of this function must have a distinct result
 (range) value.
 
-=item C<p1_from_p2> - C<Name>
+=item C<p1_from_p2> - C<NameChain>
 
-This matches the declared name of an inner inverse C<possrep_map> function
+This matches the declared name of an inverse C<possrep_map> function
 to that of C<p2_from_p1>.  I<Note that it would often be feasible for a
 Muldis D implementation to automatically infer a reverse function, but for
 now we still require it to be explicitly stated; the explicitly stated
@@ -2733,20 +2611,20 @@ change.>
 A C<PossrepMapSet> has a binary primary key on the C<p1> plus C<p2>
 attributes.  Its default value is empty.
 
-=head2 sys.std.Core.Type.Cat.InnerNonscalarType
+=head2 sys.std.Core.Type.Cat.NonscalarType
 
-An C<InnerNonscalarType> is a C<DHTuple>.  It defines either a new
+An C<NonscalarType> is a C<DHTuple>.  It defines either a new
 nonscalar heading (set of attributes) with associated constraints
 for a tuple and relation type having that heading, or it defines a
 subtype of some other nonscalar type.  That is, it defines 2 new
 data types, a tuple type and a relation type with matching headings.
-Note that you also declare a database type using C<InnerNonscalarType>, by
+Note that you also declare a database type using C<NonscalarType>, by
 declaring a tuple type whose attributes are all relation or database typed.
-Note that you can not use an C<InnerNonscalarType> to declare or subtype an
+Note that you can not use an C<NonscalarType> to declare or subtype an
 incomplete type, as it (or its supertype) must specify a complete set of
 attributes.
 
-An C<InnerNonscalarType> has these 13 attributes:
+An C<NonscalarType> has these 13 attributes:
 
 =over
 
@@ -2794,14 +2672,14 @@ and how they are defined in terms of the rest of this type's attributes.
 Note that the special functional dependencies between attributes defined
 herein mean that some kinds of tuple constraints would be redundant.
 
-=item C<tuple_constraints> - C<set_of.Name>
+=item C<tuple_constraints> - C<set_of.NameChain>
 
-This matches the declared names of 0..N inner C<type_constraint> functions
+This matches the declared names of 0..N C<type_constraint> functions
 that (when I<and>-ed together) determine what combinations of tuple
 attribute values denote values of the [|sub]type, besides the restrictions
 imposed by the declared types of the attributes individually; they are
 generalized type constraints that together validate a tuple as a whole.
-The inner function that each of these names must have a single
+The function that each of these names must have a single
 C<topic> parameter whose declared type is a tuple whose attributes match
 those declared by C<attrs> and whose argument denotes the value to test;
 the function's result type must be C<Bool>.  If the functions
@@ -2810,7 +2688,7 @@ attribute-allowable values are collectively allowed.  Each function is
 invoked either once to test a tuple value, or multiple times to
 individually test every tuple in a relation value.
 
-=item C<relation_constraints> - C<set_of.Name>
+=item C<relation_constraints> - C<set_of.NameChain>
 
 This is like C<tuple_constraint> but that each function's parameter is
 relation-typed rather than tuple-typed; each is a generalized type
@@ -2886,10 +2764,10 @@ of the type being defined; it is as per C<subset_constraints> except that
 the parent relation is the result of unioning appropriately renamed
 projections of the member relations of the distributed key.
 
-=item C<default_tuple> - C<maybe_of.Name>
+=item C<default_tuple> - C<maybe_of.NameChain>
 
 Iff it is a C<Single>, then C<default_tuple>
-matches the declared name of an inner C<named_value> function that
+matches the declared name of an C<named_value> function that
 results in the default tuple value of the [|sub]type; it has zero
 parameters and its result type is the same as the tuple type whose
 declaration it is part of.  Iff C<default_tuple> is C<nothing> and
@@ -2901,10 +2779,10 @@ subtype will use the same default tuple value as its base type; but if the
 subtype's value set excludes said value, then a C<default_tuple> of
 C<nothing> is invalid and C<default_tuple> must be a C<Single>.
 
-=item C<default_relation> - C<maybe_of.Name>
+=item C<default_relation> - C<maybe_of.NameChain>
 
 Iff it is a C<Single>, then C<default_relation>
-matches the declared name of an inner C<named_value> function that
+matches the declared name of an C<named_value> function that
 results in the default relation value of the [|sub]type; it has
 zero parameters and its result type is the same as the relation
 type whose declaration it is part of.  Iff C<default_relation> is
@@ -2922,7 +2800,7 @@ There is a distributed primary key over the elements of
 C<[tuple|relation]_constraints> and the C<name> attributes of
 C<[|distrib_][key|subset_constraint]s>.
 
-The default value of C<InnerNonscalarType> defines a relation type that has
+The default value of C<NonscalarType> defines a relation type that has
 zero attributes and whose default value is the one with zero tuples.
 
 =head2 sys.std.Core.Type.Cat.VirtualAttrMapSet
@@ -3037,13 +2915,13 @@ C<dependent_attrs> is as per C<determinant_attrs>; none of these may be the
 same as the names of the determinant attributes, since a virtual attribute
 can't be defined in terms of itself.
 
-=item C<virtual_attr_map> - C<Name>
+=item C<virtual_attr_map> - C<NameChain>
 
-This matches the declared name of an inner C<virtual_attr_map> function
+This matches the declared name of an C<virtual_attr_map> function
 that derives a tuple of dependent attribute values from a tuple of
-determinant attribute values.  The inner function that this names must
+determinant attribute values.  The function that this names must
 have a single C<topic> parameter whose declared type is a tuple whose
-attributes match those of C<determinant_attrs>; the inner function's
+attributes match those of C<determinant_attrs>; the function's
 result type must be a tuple whose attributes match those of
 C<dependent_attrs>.  Note that the range of this function is typically
 smaller than its domain, though it might not be.
@@ -3344,9 +3222,9 @@ attributes, C<child_attr> and C<parent_attr>, each of those being a
 C<Name>, and each of those being a unary key.  Its default value has zero
 tuples.
 
-=head2 sys.std.Core.Type.Cat.InnerUnionType
+=head2 sys.std.Core.Type.Cat.UnionType
 
-An C<InnerUnionType> is a C<DHTuple>.  It defines a new data type whose
+An C<UnionType> is a C<DHTuple>.  It defines a new data type whose
 values are all drawn from one or more specified other types (which can be
 any not-C<Empty> types at all), and that generally speaking it is an
 arbitrary subset of C<Universal> (and it has its own default value).  The
@@ -3363,17 +3241,16 @@ defined in this way is typically not considered to exist when the system
 wants to determine the MST (most specific type) of one of its values.  Note
 that if you want to define a possrep-adding scalar subtype whose base is
 a union/intersection/etc of other types (eg, to define a "Square" when you
-have "Rectangle", "Rhombus"), you have to first define a C<InnerUnionType>,
-and then use that as the base type of a C<InnerScalarType>.
+have "Rectangle", "Rhombus"), you have to first define a C<UnionType>,
+and then use that as the base type of a C<ScalarType>.
 
-An C<InnerUnionType> has these 7 attributes:
+An C<UnionType> has these 7 attributes:
 
 =over
 
 =item C<comment> - C<Comment>
 
-This is an optional programmer comment about the inner union type as a
-whole.
+This is an optional programmer comment about the union type as a whole.
 
 =item C<sources> - C<set_of.NameChain>
 
@@ -3405,11 +3282,11 @@ this is C<Bool:false> then the set of filter data types will be unioned to
 determine the complete set of filter values, and if C<filters> has no
 elements then the filter set is just C<Empty>.
 
-=item C<constraints> - C<set_of.Name>
+=item C<constraints> - C<set_of.NameChain>
 
-This matches the declared names of 0..N inner C<type_constraint> functions
+This matches the declared names of 0..N C<type_constraint> functions
 that (when I<and>-ed together) determine what filter-type-passing
-source-type values are part of the union type.  The inner function
+source-type values are part of the union type.  The function
 that each of these names must have a single C<topic> parameter whose
 declared type is C<Universal>, unless there is exactly 1 C<sources> element
 whereupon the declared type is the same as the source type, and whose
@@ -3417,25 +3294,25 @@ argument is the value to test; the function's result type must be
 C<Bool>.  If the functions unconditionally result in C<Bool:true>, then all
 filter-type-passing values are allowed.
 
-=item C<default> - C<Name>
+=item C<default> - C<NameChain>
 
-This matches the declared name of an inner C<named_value> function that
+This matches the declared name of an C<named_value> function that
 results in the default value of the union type; it has zero parameters and
 its result type is the same as the union type whose declaration it is part
 of.
 
 =back
 
-The default value of C<InnerUnionType> defines an alias for C<Universal>,
+The default value of C<UnionType> defines an alias for C<Universal>,
 with the same default value; it has just the source type C<Universal> and
 zero filter types, both type lists are unioned, and C<constraints> is empty
 (unconditionally C<Bool:true>).  Note that there is no valid combination of
-C<InnerUnionType> attribute values that would result in an alias for the
+C<UnionType> attribute values that would result in an alias for the
 C<Empty> type, due to a default value for the type being mandatory.
 
-=head2 sys.std.Core.Type.Cat.InnerRestrType
+=head2 sys.std.Core.Type.Cat.RestrType
 
-An C<InnerRestrType> is a C<DHTuple>.  It provides a relatively terse
+An C<RestrType> is a C<DHTuple>.  It provides a relatively terse
 method to define a simple restriction-defined subtype of a single other
 type (which can be any not-C<Empty> type at all), which is a common kind of
 type to have.  The new type is either a proper or non-proper subset of the
@@ -3449,15 +3326,15 @@ working with its values, instead simply using those of its declared parent
 type.  A data type defined in this way is typically not considered to exist
 when the system wants to determine the MST (most specific type) of one of
 its values.  You can only declare a nonscalar type with an incompletely
-defined attribute list using a C<InnerRestrType> (or a C<InnerUnionType>).
+defined attribute list using a C<RestrType> (or a C<UnionType>).
 
-An C<InnerRestrType> has these 4 attributes:
+An C<RestrType> has these 4 attributes:
 
 =over
 
 =item C<comment> - C<Comment>
 
-This is an optional programmer comment about the inner restriction type as
+This is an optional programmer comment about the restriction type as
 a whole.
 
 =item C<base_type> - C<NameChain>
@@ -3466,21 +3343,21 @@ This is the name of the not-C<Empty> other type that all the values of the
 new data type are drawn from; the new type is being declared as a subtype
 of that named by C<base_type>.
 
-=item C<constraints> - C<set_of.Name>
+=item C<constraints> - C<set_of.NameChain>
 
-This matches the declared names of 0..N inner C<type_constraint> functions
+This matches the declared names of 0..N C<type_constraint> functions
 that (when I<and>-ed together) determine what base type values are part of
-the restriction type.  The inner function that each of these names
+the restriction type.  The function that each of these names
 must have a single C<topic> parameter whose declared type is that named
 by C<base_type>, and whose argument is the value to test; the function's
 result type must be C<Bool>.  If the functions unconditionally result
 in C<Bool:true>, then the new type is a non-proper subtype of the base
 type.
 
-=item C<default> - C<maybe_of.Name>
+=item C<default> - C<maybe_of.NameChain>
 
 Iff it is a C<Single>, then C<default>
-matches the declared name of an inner C<named_value> function that
+matches the declared name of an C<named_value> function that
 results in the default value of the restriction type; it has zero
 parameters and its result type is the same as the restriction type whose
 declaration it is part of.  Iff C<default> is C<nothing>, then the
@@ -3490,10 +3367,10 @@ C<nothing> is invalid and C<default> must be a C<Single>.
 
 =back
 
-The default value of C<InnerRestrType> defines an alias for C<Universal>,
+The default value of C<RestrType> defines an alias for C<Universal>,
 with the same default value; it has the base type C<Universal> and
 C<constraints> is empty (unconditionally C<Bool:true>).  Note that there is
-no valid combination of C<InnerRestrType> attribute values that would
+no valid combination of C<RestrType> attribute values that would
 result in an alias for the C<Empty> type, due to a default value for the
 type being mandatory.
 
@@ -3555,6 +3432,8 @@ TODO:  Make C<name> a C<NameChain> instead to drill into TVAs or SVAs.>
 
 =head1 TYPES FOR SPECIAL ENTITY REFERENCES
 
+TODO: HEAVILY UPDATE THIS SECTION.
+
 Muldis D needs to support the concept of a closure or higher-order
 function, mainly for functions but also to a smaller extent for imperative
 routines.  For example, the generic relational restriction operator is
@@ -3566,17 +3445,19 @@ Conceptually, all that is needed is to pass the fully-qualified name of the
 routine as such an argument, which in the system catalog is represented as
 a C<NameChain>.  But using an actual C<NameChain> frequently
 doesn't work to support closures because the typical closure is defined as
-an I<inner routine> and those are expressly private to the context of the
-outer entity that the inner is embedded in.  There is no valid
+a I<X routine> and those are expressly private to the context of the
+Y entity that the X is embedded in.  There is no valid
 C<NameChain> value for referencing it from outside that context
-(likewise for routines declared private to a package), and outside that
+(likewise for routines declared private to a subdepot), and outside that
 context is typically where the routines that take closures as arguments
-would live.  For example, if public function C<dep.lib.mymain> had an inner
-function C<inn.mytest> and C<dep.lib.mymain> invoked the public function
-C<dep.lib.myfilter> with an argument value of C<inn.mytest>, then if
+would live.  For example, if public function C<dep.lib.mymain> had an
+function C<sdp.lib.mytest> and C<dep.lib.mymain> invoked the public
+function
+C<dep.lib.myfilter> with an argument value of C<sdp.lib.mytest>, then if
 C<dep.lib.myfilter> tried to invoke the function it was passed, it would
-actually be trying to invoke an inner function of C<dep.lib.myfilter> named
-C<inn.mytest>, which won't work.  Conceptually, a solution to this problem
+actually be trying to invoke an function of C<dep.lib.myfilter> named
+C<sdp.lib.mytest>, which won't work.  Conceptually, a solution to this
+problem
 is to actually pass a routine name in a more fully-qualified form,
 conceptually like C<dep.lib.mymain.mytest>, which then C<dep.lib.myfilter>
 could correctly invoke.  However, if that was made to work literally with a
@@ -3601,9 +3482,9 @@ C<NameChain> differing are guaranteed to be non-identical.  Now, whether or
 not 2 distinct selections are considered to have the same context (so their
 identity varies only on their C<NameChain>) depends on what namespace the
 referenced entity is relative to the referencing entity; for a reference to
-C<inn>, the context is the outer entity containing that inner; for a
+C<x>, the context is the Y entity containing that X; for a
 reference to C<sys> or C<fed>, the context is global; for C<dep> or C<sdp>
-or C<pkg> the context is that same depot/subdepot/package.  I<These spec
+the context is that same depot/subdepot.  I<These spec
 details may be adjusted.>  Currently, selecting these special values can't
 be done with an ordinary routine, but only with a special catalog type for
 an expression or statement node, due to the unusualness of this.  It is
@@ -3644,9 +3525,8 @@ to define imperative versions of C<sys.std.Core.Control.curried_func>.>
 This is a reference data type.  A C<MaterialRef> is functionally like a
 smart C<NameChain> that holds a routine or type name but it remembers the
 context of its creation, and it may also hold other context-specific
-information such as pre-bound function parameters.  Its default value is as
-per C<Material>, which is a reference to the C<sys.std.Core.Type.Universal>
-data type.
+information such as pre-bound function parameters.  Its default value
+is a reference to the C<sys.std.Core.Type.Universal> data type.
 
 =head2 sys.std.Core.Type.Cat.FuncRef
 
