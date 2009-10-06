@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.93.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.94.0.
 
 =head1 PREFACE
 
@@ -166,10 +166,10 @@ Grammar:
 
     <language_name> ::=
         <ln_base_name>
-        \s* ':' \s* <ln_base_authority>
-        \s* ':' \s* <ln_base_version_number>
-        \s* ':' \s* <ln_dialect>
-        [\s* ':' \s* <ln_extensions>]?
+        \s* ':' <ln_base_authority>
+        \s* ':' <ln_base_version_number>
+        \s* ':' <ln_dialect>
+        [\s* ':' <ln_extensions>]?
 
     <ln_base_name> ::=
         Muldis_D
@@ -267,6 +267,7 @@ Grammar:
         | <Maybe>
         | <Array>
         | <Bag>
+        | <Interval>
 
 A C<value> node is a Muldis D value literal, which is a common special case
 of a Muldis D value selector.
@@ -330,8 +331,8 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
 
     <x_value> ::=
         [
-            <value_kind> \s* ':' \s*
-            [<type_name> \s* ':' \s*]?
+            <value_kind> ':' \s*
+            [<type_name> ':' \s*]?
         ]?
         <payload>
 
@@ -362,6 +363,7 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | DH? [Maybe | Single]
         | DH? Array
         | DH? Bag
+        | DH? Interval
 
     <type_name> ::=
         <NameChain_payload>
@@ -393,6 +395,7 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | <Maybe_payload>
         | <Array_payload>
         | <Bag_payload>
+        | <Interval_payload>
 
 So a C<x_value>|C<value> node has 1-3 elements in general:
 
@@ -465,7 +468,7 @@ For GCVL and SCVL examples, see the subsequent documentation sections.
 Grammar:
 
     <Bool> ::=
-        [Bool \s* ':' \s*]?
+        [Bool ':' \s*]?
         <Bool_payload>
 
     <Bool_payload> ::=
@@ -491,7 +494,7 @@ Examples:
 Grammar:
 
     <Order> ::=
-        [Order \s* ':' \s*]?
+        [Order ':' \s*]?
         <Order_payload>
 
     <Order_payload> ::=
@@ -514,8 +517,8 @@ Grammar:
 
     <RatRoundMeth> ::=
         [
-            RatRoundMeth \s* ':' \s*
-            [<type_name> \s* ':' \s*]?
+            RatRoundMeth ':' \s*
+            [<type_name> ':' \s*]?
         ]?
         <RatRoundMeth_payload>
 
@@ -543,13 +546,13 @@ Grammar:
 
     <Int> ::=
         [
-            [Int | NNInt | PInt] \s* ':' \s*
-            [<type_name> \s* ':' \s*]?
+            [Int | NNInt | PInt] ':' \s*
+            [<type_name> ':' \s*]?
         ]?
         <Int_payload>
 
     <Int_payload> ::=
-          <num_max_col_val> \s* ';' \s* <int_body>
+          <num_max_col_val> ';' \s* <int_body>
         | <d_int_body>
 
     <num_max_col_val> ::=
@@ -642,13 +645,13 @@ Grammar:
 
     <Rat> ::=
         [
-            [Rat | NNRat | PRat] \s* ':' \s*
-            [<type_name> \s* ':' \s*]?
+            [Rat | NNRat | PRat] ':' \s*
+            [<type_name> ':' \s*]?
         ]?
         <Rat_payload>
 
     <Rat_payload> ::=
-          <num_max_col_val> \s* ';' \s* <rat_body>
+          <num_max_col_val> ';' \s* <rat_body>
         | <d_rat_body>
 
     <rat_body> ::=
@@ -718,13 +721,13 @@ Grammar:
 
     <Blob> ::=
         [
-            [Blob | OctetBlob] \s* ':' \s*
-            [<type_name> \s* ':' \s*]?
+            [Blob | OctetBlob] ':' \s*
+            [<type_name> ':' \s*]?
         ]?
         <Blob_payload>
 
     <Blob_payload> ::=
-        <blob_max_col_val> \s* ';' \s* <blob_body>
+        <blob_max_col_val> ';' \s* <blob_body>
 
     <blob_max_col_val> ::=
         <[137F]>
@@ -766,8 +769,8 @@ Grammar:
 
     <Text> ::=
         [
-            Text \s* ':' \s*
-            [<type_name> \s* ':' \s*]?
+            Text ':' \s*
+            [<type_name> ':' \s*]?
         ]?
         <Text_payload>
 
@@ -871,8 +874,8 @@ Examples:
 Grammar:
 
     <Name> ::=
-        Name \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        Name ':' \s*
+        [<type_name> ':' \s*]?
         <Name_payload>
 
     <Name_payload> ::=
@@ -889,16 +892,16 @@ Grammar:
         ] ** [\s* '~' \s*]
 
     <NameChain> ::=
-        NameChain \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        NameChain ':' \s*
+        [<type_name> ':' \s*]?
         <NameChain_payload>
 
     <NameChain_payload> ::=
         ['.' \s*]? <Name_payload> ** [\s* '.' \s*]
 
     <DeclNameChain> ::=
-        DeclNameChain \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        DeclNameChain ':' \s*
+        [<type_name> ':' \s*]?
         <DeclNameChain_payload>
 
     <DeclNameChain_payload> ::=
@@ -1007,7 +1010,7 @@ referenced using the C<type> namespace prefix feature described in
 L<Muldis::D::Basics/Referencing Data Types>.  In such a context, when the
 namespace prefix contains either of the optional chain elements
 C<[|dh_][tuple|relation]_from> or
-C<[|dh_][set|maybe|single|array|bag]_of>, programmers may omit the
+C<[|dh_][set|maybe|single|array|bag|interval]_of>, programmers may omit the
 single prefix-leading C<type> chain element.  So for example, one can just
 write C<array_of.Rat> rather than C<type.array_of.Rat>, or
 C<tuple_from.var.lex.myrelvar> rather than
@@ -1046,8 +1049,8 @@ Examples:
 Grammar:
 
     <Comment> ::=
-        Comment \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        Comment ':' \s*
+        [<type_name> ':' \s*]?
         <Comment_payload>
 
     <Comment_payload> ::=
@@ -1097,16 +1100,16 @@ Examples (the first is GCVL, the second is a SCVL):
 Grammar:
 
     <Instant> ::=
-        Instant \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        Instant ':' \s*
+        [<type_name> ':' \s*]?
         <Instant_payload>
 
     <Instant_payload> ::=
         <Rat_payload>
 
     <Duration> ::=
-        Duration \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        Duration ':' \s*
+        [<type_name> ':' \s*]?
         <Duration_payload>
 
     <Duration_payload> ::=
@@ -1146,28 +1149,28 @@ Examples:
 Grammar:
 
     <UTCInstant> ::=
-        UTC [Instant | DateTime | Date | Time] \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        UTC [Instant | DateTime | Date | Time] ':' \s*
+        [<type_name> ':' \s*]?
         <UTCInstant_payload>
 
     <UTCInstant_payload> ::=
         <UTCDuration_payload>
 
     <FloatInstant> ::=
-        Float [Instant | DateTime | Date | Time] \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        Float [Instant | DateTime | Date | Time] ':' \s*
+        [<type_name> ':' \s*]?
         <FloatInstant_payload>
 
     <FloatInstant_payload> ::=
         <UTCDuration_payload>
 
     <UTCDuration> ::=
-        UTCDuration \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        UTCDuration ':' \s*
+        [<type_name> ':' \s*]?
         <UTCDuration_payload>
 
     <UTCDuration_payload> ::=
-          <num_max_col_val> \s* ';' \s* <utc_duration_body>
+          <num_max_col_val> ';' \s* <utc_duration_body>
         | <d_utc_duration_body>
 
     <utc_duration_body> ::=
@@ -1247,7 +1250,7 @@ Examples:
 
     UTCInstant:[1964,10,16,16,12,47.5] # a UTCDateTime #
 
-    UTCInstant:[2002,12,16,,,] # a UTCDate #
+    UTCInstant:[2002,12,6,,,] # a UTCDate #
 
     UTCInstant:[,,,14,2,29.0] # a UTCTime #
 
@@ -1262,8 +1265,8 @@ Examples:
 Grammar:
 
     <RatRoundRule> ::=
-        RatRoundRule \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        RatRoundRule ':' \s*
+        [<type_name> ':' \s*]?
         <RatRoundRule_payload>
 
     <RatRoundRule_payload> ::=
@@ -1301,12 +1304,12 @@ Examples:
 Grammar:
 
     <String> ::=
-        [String | BString | OString | UCPString] \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        [String | BString | OString | UCPString] ':' \s*
+        [<type_name> ':' \s*]?
         <String_payload>
 
     <String_payload> ::=
-          <num_max_col_val> \s* ';' \s* <string_body>
+          <num_max_col_val> ';' \s* <string_body>
         | <d_string_body>
 
     <string_body> ::=
@@ -1348,12 +1351,12 @@ options exist are only valid within a C<depot> node.
 Grammar:
 
     <Scalar> ::=
-        DH? Scalar \s* ':' \s*
-        <type_name> \s* ':' \s*
+        DH? Scalar ':' \s*
+        <type_name> ':' \s*
         <Scalar_payload>
 
     <Scalar_payload> ::=
-          <possrep_name> \s* ';' \s* <possrep_attrs>
+          <possrep_name> ';' \s* <possrep_attrs>
         | <possrep_attrs>
 
     <possrep_name> ::=
@@ -1416,8 +1419,8 @@ Examples:
 Grammar:
 
     <Tuple> ::=
-        DH? Tuple \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        DH? Tuple ':' \s*
+        [<type_name> ':' \s*]?
         <Tuple_payload>
 
     <Tuple_payload> ::=
@@ -1480,8 +1483,8 @@ Examples:
 Grammar:
 
     <Database> ::=
-        Database \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        Database ':' \s*
+        [<type_name> ':' \s*]?
         <Database_payload>
 
     <Database_payload> ::=
@@ -1506,8 +1509,8 @@ general a C<Database> node distills to same as when C<Tuple> does.
 Grammar:
 
     <Relation> ::=
-        DH? Relation \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        DH? Relation ':' \s*
+        [<type_name> ':' \s*]?
         <Relation_payload>
 
     <Relation_payload> ::=
@@ -1530,7 +1533,7 @@ Grammar:
         '[' \s*
             [<attr_name> ** [\s* ',' \s*]]?
         \s* ']'
-        \s* ';' \s*
+        ';' \s*
         '{' \s*
             [<ordered_tuple_attrs> ** [\s* ',' \s*]]?
         \s* '}'
@@ -1620,8 +1623,8 @@ Examples:
 Grammar:
 
     <Set> ::=
-        DH? Set \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        DH? Set ':' \s*
+        [<type_name> ':' \s*]?
         <Set_payload>
 
     <Set_payload> ::=
@@ -1662,8 +1665,8 @@ Examples:
 Grammar:
 
     <Maybe> ::=
-        DH? [Maybe | Single] \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        DH? [Maybe | Single] ':' \s*
+        [<type_name> ':' \s*]?
         <Maybe_payload>
 
     <Maybe_payload> ::=
@@ -1716,8 +1719,8 @@ Examples:
 Grammar:
 
     <Array> ::=
-        DH? Array \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        DH? Array ':' \s*
+        [<type_name> ':' \s*]?
         <Array_payload>
 
     <Array_payload> ::=
@@ -1761,8 +1764,8 @@ Examples:
 Grammar:
 
     <Bag> ::=
-        DH? Bag \s* ':' \s*
-        [<type_name> \s* ':' \s*]?
+        DH? Bag ':' \s*
+        [<type_name> ':' \s*]?
         <Bag_payload>
 
     <Bag_payload> ::=
@@ -1775,7 +1778,7 @@ Grammar:
         \s* '}'
 
     <count> ::=
-          <num_max_col_val> \s* ';' \s* <pint_body>
+          <num_max_col_val> ';' \s* <pint_body>
         | <d_pint_body>
 
     <bag_payload_repeated_values> ::=
@@ -1835,6 +1838,55 @@ Examples:
         'Baz'
     }
 
+=head2 Interval Selectors
+
+Grammar:
+
+    <Interval> ::=
+        DH? Interval ':' \s*
+        [<type_name> ':' \s*]?
+        <Interval_payload>
+
+    <Interval_payload> ::=
+        '{' \s*
+            <min> \s* <interval_boundary_kind> \s* <max>
+        \s* '}'
+
+    <min> ::=
+        <expr>
+
+    <max> ::=
+        <expr>
+
+    <interval_boundary_kind> ::=
+        '..' | '..^' | '^..' | '^..^'
+
+An C<Interval> node represents a literal or selector invocation for an
+interval value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.Interval> value whose attributes are defined by the
+C<Interval_payload>.  Each of C<min> and C<max> is an C<expr> node that
+defines the C<min> and C<max> attribute value, respectively, of the new
+interval.  Each of the 4 C<interval_boundary_kind> values C<..>, C<..^>,
+C<^..>, C<^..^> corresponds to one of the 4 possible combinations of
+C<excludes_min> and C<excludes_max> values that the new interval can have,
+which in order are: C<[false,false]>, C<[false,true]>, C<[true,false]>,
+C<[true,true]>.
+
+See also the definition of the catalog data type
+C<sys.std.Core.Type.Cat.IvlSelExprNodeSet>, a tuple of which is what in
+general an C<Interval> node distills to when it is beneath the context of a
+C<depot> node, as it describes some semantics.
+
+Examples:
+
+    Interval:{1..10}
+
+    Interval:{2.7..^9.3}
+
+    Interval:{'a'^..'z'}
+
+    Interval:{ UTCInstant:[2002,12,6,,,] ^..^ UTCInstant:[2002,12,20,,,] }
+
 =head1 DEPOT DECLARATION
 
 B<TODO: ALL OF THIS HERE MAIN POD SECTION!>
@@ -1888,7 +1940,7 @@ Grammar:
         '$'
 
     <named_expr> ::=
-        <expr_name> \s* <infix_bind_op> \s* <expr>
+        <expr_name> \s+ <infix_bind_op> \s+ <expr>
 
     <infix_bind_op> ::=
         '::='
@@ -1991,7 +2043,7 @@ Examples:
 Grammar:
 
     <func_invo> ::=
-        <routine_name> \s* <func_arg_list>
+        <routine_name> <func_arg_list>
 
     <routine_name> ::=
         <NameChain_payload>
@@ -2752,7 +2804,7 @@ Grammar:
         <pcf_s_acc_op_invo> | <pcf_t_acc_op_invo>
 
     <pcf_s_acc_op_invo> ::=
-        <expr> \s* '.${' [\s* <possrep_name> \s* ';']? \s*
+        <expr> \s* '.${' [\s* <possrep_name> ';']? \s*
             <attr_name>
         \s* '}'
 
@@ -2760,7 +2812,7 @@ Grammar:
         <expr> \s* '.%{' \s* <attr_name> \s* '}'
 
     <s_pcf_op_invo> ::=
-        <expr> \s* '${' [\s* <possrep_name> \s* ';']? \s*
+        <expr> \s* '${' [\s* <possrep_name> ';']? \s*
             [<pcf_projection> | <pcf_cmpl_proj>]
         \s* '}'
 
@@ -2848,16 +2900,18 @@ Grammar:
         <expr> \s* '.[' \s* <index> \s* ']'
 
     <index> ::=
-          <num_max_col_val> \s* ';' \s* <nnint_body>
+          <num_max_col_val> ';' \s* <nnint_body>
         | <d_nnint_body>
 
     <pcf_ary_slice_op_invo> ::=
-        <expr> \s* '[' \s* <first_index> \s* '..' \s* <last_index> \s* ']'
+        <expr> \s* '[' \s*
+            <min_index> \s* <interval_boundary_kind> \s* <max_index>
+        \s* ']'
 
-    <first_index> ::=
+    <min_index> ::=
         <index>
 
-    <last_index> ::=
+    <max_index> ::=
         <index>
 
 A C<postcircumfix_op_invo> node is for using postcircumfix notation to
@@ -2933,9 +2987,9 @@ This table indicates which function is invoked by each format-keyword:
                    count_attr_name => $count_atnm,
                    group_per => Set:{ $cmpl_inner_atnms[0], ... } )
 
-    .[]  -> Array.value( $expr, index => $index )
-    [..] -> Array.slice( $expr, first_index => $first_index,
-                last_index => $last_index )
+    .[] -> Array.value( $expr, index => $index )
+    []  -> Array.slice( $expr, index_interval => Interval:{
+                $min_index $interval_boundary_kind $max_index } )
 
 Examples:
 
@@ -3088,7 +3142,7 @@ Grammar:
         <lhs> \s+ <dyadic_compare_op> \s+ <rhs>
 
     <dyadic_compare_op> ::=
-        <is_before_op> | <is_after_op>
+        <is_before_op> | <is_after_op> | <interval_membership_op>
 
     <is_before_op> ::=
         '<' | '≤' | '<='
@@ -3096,15 +3150,12 @@ Grammar:
     <is_after_op> ::=
         '>' | '≥' | '>='
 
+    <interval_membership_op> ::=
+        'I∈' | 'I∉' | 'I∋' | 'I∌'
+
     <triadic_compare_op_invo> ::=
         [[not | '!'] \s+]?
         <min> \s+ <is_before_op> \s+ <expr> \s+ <is_before_op> \s+ <max>
-
-    <min> ::=
-        <expr>
-
-    <max> ::=
-        <expr>
 
     <gen_compare_op_ordered_clause> ::=
         ordered \s+ <using_clause> | <ordered_by_clause>
@@ -3148,21 +3199,27 @@ This table indicates which function is invoked by each keyword:
     >   -> Ordered.is_after( $lhs, $rhs )
     ≤   -> Ordered.is_before_or_same( $lhs, $rhs )
     ≥   -> Ordered.is_after_or_same( $lhs, $rhs )
+    I∈  -> Ordered.is_member( value => $lhs, interval => $rhs )
+    I∉  -> Ordered.is_not_member( value => $lhs, interval => $rhs )
+    I∋  -> Interval.has_member( interval => $lhs, value => $rhs )
+    I∌  -> Interval.has_not_member( interval => $lhs, value => $rhs )
 
-    ≤≤  -> Ordered.is_inside_range( $expr, min => $min, max => $max )
-    ≤<  -> Ordered.is_inside_range( $expr, min => $min, max => $max
-                max_is_outside => true )
-    <≤  -> Ordered.is_inside_range( $expr, min => $min, max => $max
-                min_is_outside => true )
-    <<  -> Ordered.is_inside_range( $expr, min => $min, max => $max
-                min_is_outside => true, max_is_outside => true )
-    !≤≤ -> Ordered.is_outside_range( $expr, min => $min, max => $max )
-    !≤< -> Ordered.is_outside_range( $expr, min => $min, max => $max
-                max_is_outside => true )
-    !<≤ -> Ordered.is_outside_range( $expr, min => $min, max => $max
-                min_is_outside => true )
-    !<< -> Ordered.is_outside_range( $expr, min => $min, max => $max
-                min_is_outside => true, max_is_outside => true )
+    ≤≤  -> Ordered.is_member( value => $expr,
+                interval => Interval:{ $min .. $max } )
+    ≤<  -> Ordered.is_member( value => $expr,
+                interval => Interval:{ $min ..^ $max } )
+    <≤  -> Ordered.is_member( value => $expr,
+                interval => Interval:{ $min ^.. $max } )
+    <<  -> Ordered.is_member( value => $expr,
+                interval => Interval:{ $min ^..^ $max } )
+    !≤≤ -> Ordered.is_not_member( value => $expr,
+                interval => Interval:{ $min .. $max } )
+    !≤< -> Ordered.is_not_member( value => $expr,
+                interval => Interval:{ $min ..^ $max } )
+    !<≤ -> Ordered.is_not_member( value => $expr,
+                interval => Interval:{ $min ^.. $max } )
+    !<< -> Ordered.is_not_member( value => $expr,
+                interval => Interval:{ $min ^..^ $max } )
 
 Details regarding the extra op args is pending.  But most of the time you
 wouldn't be using them, so just the main args represents typical usage.
@@ -3183,6 +3240,8 @@ Examples (for now sans any use of extra op args, which are atypical):
 
     $foo ≥ $bar
 
+    $a I∈ Interval:{1..5}
+
     $min ≤ $foo ≤ $max
 
     $min ≤ $foo < $max
@@ -3199,13 +3258,13 @@ expression delimiters and implicitly delimits the expressions therein, in a
 fully deterministic manner.
 
 Unlike many languages which can have over a dozen precedence levels, such
-as Perl (about 24) or C, PTMD_STD only has about 7 precedence levels in the
+as Perl (about 24) or C, PTMD_STD only has about 8 precedence levels in the
 interest of simplicity, and so you will likely have to use more explicit
-expression delimiters to force the nesting precedence you want.  That 7
+expression delimiters to force the nesting precedence you want.  That 8
 figure assumes the C<with_rtn_inv_alt_syn> pragma is active; if it isn't,
 then 3 of the levels can be eliminated, so then PTMD_STD has just 4.
 
-Here we list the 7 levels from "tightest" to "loosest":
+Here we list the 8 levels from "tightest" to "loosest":
 
 =over
 
@@ -3229,6 +3288,16 @@ which includes every kind of C<< <accessor> >> and C<<
 
 =item *
 
+Every C<< <ord_compare_op_invo> >> that is a C<< <triadic_compare_op_invo>
+>>.  The C<< <triadic_compare_op_invo> >> have been special-cased with
+their own higher precedence level so that, for example, C<< not $min < $foo
+≤ $max >> could be recognizable as its own entity rather than the C<not
+$min> or C<< $min < $foo >> substrings always being eaten on their own
+before the larger entity has a chance to be considered.  These are
+left-associative.
+
+=item *
+
 The I<prefix operators>, which includes every kind of
 C<< <monadic_prefix_op_invo> >> and C<< <prefix_rat_op_invo> >>.  These are
 right-associative.
@@ -3238,7 +3307,8 @@ right-associative.
 The I<dyadic infix operators>, which includes every kind of C<<
 <sym_dyadic_infix_op_invo> >> and C<< <nonsym_dyadic_infix_op_invo> >> and
 C<< <infix_rat_op_invo> >> and every C<< <ord_compare_op_invo> >> that is
-not also a C<< <compare_reduce_op_invo> >>.  These are left-associative.
+not also a C<< <triadic_compare_op_invo> >> or C<< <compare_reduce_op_invo>
+>>.  These are left-associative.
 
 =item *
 
@@ -3248,7 +3318,7 @@ These are left-associative.
 
 =item *
 
-Every C<< <if_else_expr> >> and C<< <given_when_def_expr> >>.  The C<<??!!>
+Every C<< <if_else_expr> >> and C<< <given_when_def_expr> >>.  The C<??!!>
 form is right-associative, meaning that C<$a ?? $b !! $c ?? $d !! $e> will
 parse as C<$a ?? $b !! ($c ?? $d !! $e)> (like most languages) and not as
 C<($a ?? $b !! $c) ?? $d !! $e> (like PHP).  The C<if-then-else> and
