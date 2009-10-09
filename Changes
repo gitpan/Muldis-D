@@ -1,6 +1,91 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-10-08  Darren Duncan <perl@DarrenDuncan.net>
+
+    * Muldis::D version 0.95.0 is released on CPAN as
+    Muldis-D-0.95.0.tar.gz.
+
+    * Oops, the previous releases 0.9[3|4].0 shipped with code all decl as
+    version 0.092000 rather than 0.09[3|4]000; metadata was correct though.
+
+    * (PTMD_STD.pod, Basics.pod)  In the PTMD_STD dialect, split up the
+    "Comment" node into itself and the new "non_value_comment" node, where
+    each is now specialized for particular disjoint purposes.  "Comment"
+    now has a payload delimited by backticks ("`") rather than hash-marks
+    ("#"), with simple rules the same as "Text", and it is just used in
+    code like normal data is, and is the only version that a "value" or
+    "expr" node may "be".  The new "non_value_comment" retains the more
+    complicated hash-mark-delimited syntax of the old version, and is now
+    just used in the "put it anywhere as meta-data" use, and it never has a
+    prefix such as "Comment:".  The new "Comment" is also now an 8th type
+    whose literals may always be a SCVL format in a GCVL context, because
+    it is distinguished as the only thing to use backticks.  This split was
+    done partly to avoid the problems arising from when the same syntax was
+    useable both in a normal expression as well as sprinklable anywhere.
+    Both versions are members of the tightest nesting precedence level.
+    Also added new "escaped_char" "\g" to repr a backtick/grave-accent.
+    In Basics.pod, updated "NOTES ON TEXT CHARACTER LITERALS" re backticks.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Renamed the "payload" node to
+    "value_payload", so the name wouldn't conflict with future additions.
+
+    * As a new general design change, all multi-word keywords in Muldis D
+    that would otherwise be written out either with single underscores
+    between the words or whitespace between the words will instead have
+    single hyphens between the words officially.  This affects all the
+    names of routine kinds, and the leading keywords for many kinds of
+    entity definitions in the concrete grammars, and any infix/etc operator
+    name tokens in the grammars.  A benefit of this change is that
+    tokenizing Muldis D code should be easier, and there is more
+    consistency between the plain-text and Perl-hosted-data dialects as to
+    how the various keywords are spelled, especially since possibly
+    variable whitespace in the middle of a keyword (or alternately the
+    enforcement of user-error-prone single spaces) is now off the table.
+    Also, hyphens were used instead of underscores because arguably they
+    read better, more like the whitespace they mean to loosely represent,
+    and hyphens are easier to type, and also hyphens stand out more
+    visually since multi-word entity names (materials, variables, etc) are
+    typically underscore-sep by convention (hyphens legal there though).
+
+    * (Basics.pod, Types.pod, Types_Catalog.pod, Routines.pod,
+    Routines_Catalog.pod, Ordered.pod, Integer.pod, Rational.pod,
+    Tuple.pod, Relation.pod, Set.pod, Array.pod, Interval.pod,
+    Temporal.pod)  In the "ROUTINES" main pod section of Basics.pod,
+    renamed all 11 routine kinds whose names had multiple words, replacing
+    any underscores with hyphens; the new names of those 11 routine kinds
+    are: "system-service", "[type|state|transition]-constraint",
+    "named-value", "possrep-map", "virtual-attr-map",
+    "order-determination", "value-[filter|map|reduction]".  In all 14
+    files, updated any references on those routine kinds to the new names.
+    In the case of "system-catalog", some of these references were in the
+    signatures of the system-defined routines in the routine references.
+
+    * (HDMD_Perl[6|5]_STD.pod)  Renamed 7 node kind keywords to replace any
+    underscores with hyphens; their new names are: "func-invo",
+    "if-else-expr", "given-when-def-expr",
+    "[func|proc|type|ord-det-func]-ref".
+
+    * (PTMD_STD.pod)  Renamed 4 infix operator multi-word keywords from
+    forms that had exactly 1 space character between the words to have
+    single hyphens instead; their new names are: "cross-join", "not-isa",
+    "not-matching", "not-like".  These were the only instances of
+    fixed-length whitespace inside multi-word keywords.
+
+    * (PTMD_STD.pod)  In the "DEPOT DECLARATION" main pod section, changed
+    the syntaxes "depot \s+ [catalog|data]" to "'depot-[catalog|data]'",
+    respectively.  These were the only instances of variable-length
+    whitespace inside multi-word keywords.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  In the "Rational Operators
+    That Do Rounding" pod sub-section, renamed the "loge" postfix operator
+    keyword to "log-e", which is easier to read.
+
+    * (Routines.pod, Rational.pod, Text.pod)  Updated the also-known-as
+    notes for 5 functions in correspondence to above-mentioned changes.
+
+    * (Types.pod, Array.pod)  Typo fixes.
+
 2009-10-05  Darren Duncan <perl@DarrenDuncan.net>
 
     * Muldis::D version 0.94.0 is released on CPAN as

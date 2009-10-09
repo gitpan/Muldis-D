@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.94.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.95.0.
 
 =head1 PREFACE
 
@@ -180,9 +180,9 @@ Every GCVL has 1-3 ordered elements:
 
 This is a Perl C<Str> value of the format C<< <[A..Z]> <[ a..z A..Z ]>+ >>;
 it identifies the data type of the value literal in broad terms and is the
-only external meta-data of C<payload> generally necessary to interpret the
-latter; what grammars are valid for C<payload> depend just on
-C<value_kind>.
+only external meta-data of C<value_payload> generally necessary to
+interpret the latter; what grammars are valid for C<value_payload> depend
+just on C<value_kind>.
 
 Between the various kinds of C<value> node, these 51 values are allowed for
 C<value_kind>:  C<Bool>, C<Order>, C<RatRoundMeth>, C<[|NN|P]Int>,
@@ -200,24 +200,24 @@ For just some data types, the C<value_kind> may be omitted; see below.
 Only when the C<value> node has 3 elements:  This is a Muldis D data type
 name, for example C<sys.std.Core.Type.Int>; it identifies a specific
 subtype of the generic type denoted by C<value_kind>, and serves as an
-assertion that the Muldis D value denoted by C<payload> is a member of the
-named subtype.  Its format is a C<NameChain_payload> node.  Iff
+assertion that the Muldis D value denoted by C<value_payload> is a member
+of the named subtype.  Its format is a C<NameChain_payload> node.  Iff
 C<value_kind> is C<[|DH]Scalar> then C<type_name> is mandatory; otherwise,
 C<type_name> is optional for all C<value>, except that C<type_name> must be
 omitted when C<value_kind> is one of the 2 [C<Bool>, C<Order>]; this isn't
 because those 2 types can't be subtyped, but because in practice doing so
 isn't useful.
 
-=item C<payload>
+=item C<value_payload>
 
 This is mandatory for all C<value>.  Format varies with C<value_kind>.
 
 =back
 
 A Perl Pair may alternately be used to represent a GCVL iff that node has
-exactly 2 elements (C<value_kind> and C<payload>); in that case, the
-C<value_kind> is stored in that Pair's key, and the C<payload> is stored in
-the Pair's value.
+exactly 2 elements (C<value_kind> and C<value_payload>); in that case, the
+C<value_kind> is stored in that Pair's key, and the C<value_payload> is
+stored in the Pair's value.
 
 For some data types, a GCVL may alternately be just its payload for the
 sake of brevity.  If any Perl value of one of the following types is
@@ -881,7 +881,7 @@ Examples:
     ['$','foo_expr']
 
     # a named_expr node #
-    [ '::=', 'bar_expr', [ 'func_invo', 'factorial', [['$','foo_expr']] ] ]
+    [ '::=', 'bar_expr', [ 'func-invo', 'factorial', [['$','foo_expr']] ] ]
 
 =head2 Generic Expression Attribute Accessors
 
@@ -900,12 +900,12 @@ Examples:
     ['$.','foo_t.bar_attr']
 
     # an accessor node of an anonymous tuple-valued node #
-    ['$.',['func_invo','sdp.lib.tuple_res_func',[['$','arg']]],'quux_attr']
+    ['$.',['func-invo','sdp.lib.tuple_res_func',[['$','arg']]],'quux_attr']
 
 =head2 Generic Function Invocation Expressions
 
 An C<func_invo> node has 2-4 ordered elements:  The first element is the
-Perl C<Str> value C<func_invo>.  The second element is a
+Perl C<Str> value C<func-invo>.  The second element is a
 C<NameChain_payload>, which names the function to invoke.  The last 1-2
 elements provide arguments to the function invocation; either or both or
 none of a C<Array_payload> element and a C<Tuple_payload> element may be
@@ -918,34 +918,34 @@ value.
 Examples:
 
     # zero params #
-    [ 'func_invo', 'nothing' ]
+    [ 'func-invo', 'nothing' ]
 
     # single mandatory param #
-    [ 'func_invo', 'Integer.median',
+    [ 'func-invo', 'Integer.median',
         [ :Bag( Bag.new( [ 22, 20, 21, 20, 21, 21, 23 ] ) ) ] ]
 
     # single mandatory param #
-    [ 'func_invo', 'factorial', { topic => 5 } ]
+    [ 'func-invo', 'factorial', { topic => 5 } ]
 
     # two mandatory params #
-    [ 'func_invo', 'Rational.quotient',
+    [ 'func-invo', 'Rational.quotient',
         { dividend => 43.7, divisor => 16.9 } ]
 
     # one mandatory 'topic' param, two optional #
-    [ 'func_invo', 'sdp.lib.barfunc', [ ['$','mand_arg'] ],
+    [ 'func-invo', 'sdp.lib.barfunc', [ ['$','mand_arg'] ],
         { oa1 => ['$','opt_arg1'], oa2 => ['$','opt_arg2'] } ]
 
     # a user-defined function #
-    [ 'func_invo', 'dep.lib.foodb.bazfunc',
+    [ 'func-invo', 'dep.lib.foodb.bazfunc',
         { a1 => 52, a2 => 'hello world' } ]
 
     # two params named 'topic' and 'other' #
-    [ 'func_invo', 'is_identical', [ ['$','foo'], ['$','bar'] ] ]
+    [ 'func-invo', 'is_identical', [ ['$','foo'], ['$','bar'] ] ]
 
 =head2 Generic If-Else Expressions
 
 An C<if_else_expr> node has 2-3 ordered elements:  The first element is
-either of the 2 Perl C<Str> values C<if_else_expr> and C<??!!>.  The
+either of the 2 Perl C<Str> values C<if-else-expr> and C<??!!>.  The
 optional second element is I<if_then>, a Perl C<Seq|Array> with 0..N
 elements, each of those being a 2-element Perl C<Seq|Array> or a Perl Pair,
 where each element is an C<expr> node; the first element / key is an I<if>
@@ -955,16 +955,16 @@ is I<else> result expression, which is an C<expr> node.
 
 Examples:
 
-    [ 'if_else_expr',
+    [ 'if-else-expr',
         [
             [ 'op', '>', [['$','foo'], 5] ] => ['$','bar'],
         ],
         ['$','baz']
     ]
 
-    [ 'if_else_expr',
+    [ 'if-else-expr',
         [
-            [ 'op', 'is_empty', [['$','ary']] ] => ['$','empty_result'],
+            [ 'op', 'is-empty', [['$','ary']] ] => ['$','empty_result'],
         ],
         [ 'op', '.[]', [['$','ary'], 0] ]
     ]
@@ -975,7 +975,7 @@ Examples:
 =head2 Generic Given-When-Default Expressions
 
 A C<given_when_def_expr> node has 3-4 ordered elements:  The first element
-is the Perl C<Str> value C<given_when_def_expr>.  The second element is an
+is the Perl C<Str> value C<given-when-def-expr>.  The second element is an
 C<expr> node which is the I<given> common comparand.  The optional third
 element is I<when_then>, a Perl C<Seq|Array> with 0..N elements, each of
 those being a 2-element Perl C<Seq|Array> or a Perl Pair, where each
@@ -986,7 +986,7 @@ expression, which is an C<expr> node.
 
 Examples:
 
-    [ 'given_when_def_expr',
+    [ 'given-when-def-expr',
         ['$','digit'],
         [
             'T' => 10,
@@ -999,22 +999,22 @@ Examples:
 
 A C<[func|proc|type|ord_det_func]_ref> node has 2 ordered elements:  The
 first element is the Perl C<Str> value
-C<[func|proc|type|ord_det_func]_ref>.  The second element is a
+C<[func|proc|type|ord-det-func]-ref>.  The second element is a
 C<NameChain_payload>, which names the routine|type to invoke.
 
-A C<[func|proc|type|ord_det_func]_ref> node may alternately be formatted as
+A C<[func|proc|type|ord-det-func]-ref> node may alternately be formatted as
 a Perl Pair whose key and value are what would otherwise be the first and
 second node elements, respectively.
 
 Examples:
 
-    :func_ref<sdp.lib.filter>
+    :func-ref<sdp.lib.filter>
 
-    :imp_ref<sdp.lib.try_block>
+    :imp-ref<sdp.lib.try_block>
 
-    :type_ref<sdp.lib.foo_type>
+    :type-ref<sdp.lib.foo_type>
 
-    :ord_det_func_ref<sdp.lib.order_bars>
+    :ord-det-func-ref<sdp.lib.order_bars>
 
 =head1 MULDIS D STANDARD DIALECT PRAGMAS
 
@@ -1084,7 +1084,7 @@ Examples:
 
     [ 'op', '//', [ ['$','a'], ['$','b'], 42 ] ]
 
-    [ 'op', '//d', [ ['$','a'], ['$','b'], :type_ref<sdp.lib.foo_type> ] ]
+    [ 'op', '//d', [ ['$','a'], ['$','b'], :type-ref<sdp.lib.foo_type> ] ]
 
 =head2 Simple Symmetric Dyadic Infix Operators
 
@@ -1112,11 +1112,11 @@ C<rhs>, respectively.
 
 Examples:
 
-    [ 'op', 'isa', [ ['$','bar'], :type_ref<sdp.lib.foo_type> ] ]
+    [ 'op', 'isa', [ ['$','bar'], :type-ref<sdp.lib.foo_type> ] ]
 
-    [ 'op', '!isa', [ ['$','bar'], :type_ref<sdp.lib.foo_type> ] ]
+    [ 'op', '!isa', [ ['$','bar'], :type-ref<sdp.lib.foo_type> ] ]
 
-    [ 'op', 'as', [ ['$','scalar'], :type_ref<Int> ] ]
+    [ 'op', 'as', [ ['$','scalar'], :type-ref<Int> ] ]
 
     [ 'op', 'asserting', [['$','int'], [ 'op', '≠', [['$','int'], 0] ]] ]
 
@@ -1148,7 +1148,7 @@ C<expr> node.
 
 Examples:
 
-    [ 'op', 'd', :type_ref<sdp.lib.foo_type> ]
+    [ 'op', 'd', :type-ref<sdp.lib.foo_type> ]
 
     [ 'op', 'not', Bool::True ]
 
@@ -1258,7 +1258,7 @@ Examples:
 
     [ 'op', 'e^', [ 6.3, :RatRoundRule[10,-6,'to_ceiling'] ] ]
 
-    [ 'op', 'loge', [ 17.0, :RatRoundRule[3,-5,'to_floor'] ] ]
+    [ 'op', 'log-e', [ 17.0, :RatRoundRule[3,-5,'to_floor'] ] ]
 
 =head2 Order Comparison Operators
 

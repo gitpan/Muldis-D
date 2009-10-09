@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.94.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.95.0.
 
 =head1 PREFACE
 
@@ -324,7 +324,7 @@ meta-data.  For example, in a tuple value literal it is assumed that a
 value literal in an attribute name position must denote a C<Name>.  The
 grammar token C<value>|C<x_value> denotes a GCVL, as do most short-named
 grammar tokens, like C<Int> or C<Name>; in contrast, a grammar token
-containing C<payload> denotes a SCVL, like C<Int_payload> or
+containing C<value_payload> denotes a SCVL, like C<Int_payload> or
 C<Name_payload>.
 
 Every GCVL has 1-3 elements, illustrated by this grammar:
@@ -334,7 +334,7 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
             <value_kind> ':' \s*
             [<type_name> ':' \s*]?
         ]?
-        <payload>
+        <value_payload>
 
     <value_kind> ::=
           Bool
@@ -368,7 +368,7 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
     <type_name> ::=
         <NameChain_payload>
 
-    <payload> ::=
+    <value_payload> ::=
           <Bool_payload>
         | <Order_payload>
         | <RatRoundMeth_payload>
@@ -405,25 +405,18 @@ So a C<x_value>|C<value> node has 1-3 elements in general:
 
 This is a character string of the format C<< <[A..Z]> <[ a..z A..Z ]>+ >>;
 it identifies the data type of the value literal in broad terms and is the
-only external meta-data of C<payload> generally necessary to interpret the
-latter; what grammars are valid for C<payload> depend just on
-C<value_kind>.
+only external meta-data of C<value_payload> generally necessary to
+interpret the latter; what grammars are valid for C<value_payload> depend
+just on C<value_kind>.
 
-For all values of just the 7 data types [C<Bool>, C<Order>,
-C<RatRoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>], the
+For all values of just the 8 data types [C<Bool>, C<Order>,
+C<RatRoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>, C<Comment>], the
 C<value_kind> portion of a GCVL may be omitted for brevity, but the code
 parser should still be able to infer it easily by examining the first few
-characters of the C<payload>, which for each of said 7 data types has a
-mutually uniquely identifying format, which is also distinct from all
+characters of the C<value_payload>, which for each of said 8 data types has
+a mutually uniquely identifying format, which is also distinct from all
 possible C<value_kind>.  Note that omission of C<value_kind> is only
 allowed when the GCVL doesn't include a C<type_name> element.
-
-Note that, by the above criteria, the C<Comment> type could easily have
-been an 8th member of the list; however, it is excluded on purpose because
-in practice Muldis D code can contain SCVL C<Comment> literals almost
-anywhere as meta-data for that code, and so having an explicit
-C<value_kind> of C<Comment> means that that particular C<Comment> literal
-is to be treated as ordinary data like with any GCVL.
 
 For just these certain special values of other data types, the same option
 of omitting the C<value_kind> (and C<type_name>) applies: C<Tuple:d0>,
@@ -433,12 +426,12 @@ C<Relation:d0c0>, C<Relation:d0c1>, C<Maybe:nothing>.
 
 This is a Muldis D data type name, for example C<sys.std.Core.Type.Int>; it
 identifies a specific subtype of the generic type denoted by C<value_kind>,
-and serves as an assertion that the Muldis D value denoted by C<payload> is
-a member of the named subtype.  Iff C<value_kind> is C<[|DH]Scalar> then
-C<type_name> is mandatory; otherwise, C<type_name> is optional for all
-C<value>, except that C<type_name> must be omitted when C<value_kind> is
-one of the 2 [C<Bool>, C<Order>]; this isn't because those 2 types can't be
-subtyped, but because in practice doing so isn't useful.
+and serves as an assertion that the Muldis D value denoted by
+C<value_payload> is a member of the named subtype.  Iff C<value_kind> is
+C<[|DH]Scalar> then C<type_name> is mandatory; otherwise, C<type_name> is
+optional for all C<value>, except that C<type_name> must be omitted when
+C<value_kind> is one of the 2 [C<Bool>, C<Order>]; this isn't because those
+2 types can't be subtyped, but because in practice doing so isn't useful.
 
 How a Muldis D parser treats a C<value> node with a C<type_name> element
 depends on the wider context.  In the general case where the C<value> is an
@@ -453,7 +446,7 @@ to a system-defined type, then the C<type_name> assertion is done at
 compile time, and then the C<type_name> element is simply eliminated, so
 the C<value> ends up simply as itself with no new C<func_invo> parent.
 
-=item C<payload>
+=item C<value_payload>
 
 This is mandatory for all C<value>.
 
@@ -782,7 +775,7 @@ Grammar:
         ] ** [\s* '~' \s*]
 
     <escaped_char> ::=
-          '\b' | '\a' | '\q' | '\h'
+          '\b' | '\a' | '\q' | '\g' | '\h'
         | '\s'
         | '\t' | '\n' | '\f' | '\r'
         | '\c<' [
@@ -820,7 +813,8 @@ The meanings of the simple escape sequences are:
     \b  | F;5C      | REVERSE SOLIDUS | \   | esc seq lead (aka backslash)
     \a  | F;27      | APOSTROPHE      | '   | delim Text literals
     \q  | F;22      | QUOTATION MARK  | "   | delim quoted Name literals
-    \h  | F;23      | NUMBER SIGN     | #   | delim Comment lit (aka hash)
+    \g  | F;60      | GRAVE ACCENT    | `   | delim as-val Comment literals
+    \h  | F;23      | NUMBER SIGN     | #   | dlm no-val Comment (aka hash)
     \s  | F;20      | SPACE           |     | space char
     \t  | F;9       | CHAR... TAB...  |     | control char horizontal tab
     \n  | F;A       | LINE FEED (LF)  |     | ctrl char line feed / newline
@@ -1049,11 +1043,20 @@ Examples:
 Grammar:
 
     <Comment> ::=
-        Comment ':' \s*
-        [<type_name> ':' \s*]?
+        [
+            Comment ':' \s*
+            [<type_name> ':' \s*]?
+        ]?
         <Comment_payload>
 
     <Comment_payload> ::=
+        [
+            <[`]>
+                [<-[\\\`\t\n\f\r]> | <escaped_char>]*
+            <[`]>
+        ] ** [\s* '~' \s*]
+
+    <non_value_comment> ::=
         [
             '#' ** 2..*
           | '#' ' '*
@@ -1069,12 +1072,36 @@ follows:
 Fundamentally a C<Comment> node is formatted and interpreted like a C<Text>
 node, and any similarities won't be repeated here.  The C<Comment_payload>
 differs from C<Text_payload> only in that each string segment is delimited
-by number-signs/hash-marks rather than apostrophes/single-quotes, and also
-that:
+by backticks/grave-accents (C<`>) rather than apostrophes/single-quotes.
+
+A C<non_value_comment> node is I<also> interpreted as a Muldis D
+C<sys.std.Core.Type.Cat.Comment> value in essentially the same way as a
+C<Comment>, but for a few formatting differences described further below.
+The primary reason for both C<Comment> and C<non_value_comment> to exist is
+so that code comments can be placed in Muldis D code in very different ways
+without there being any confusion on interpretation.
+
+A C<Comment> node is used when the comment is normal data that is an
+integral part of the Muldis D code proper, same as every part of the code
+that isn't a comment, such as when the comment I<is> an C<expr> or C<value>
+node.
+
+A C<non_value_comment> node, in contrast, is strictly not part of the code
+proper; Muldis D code can contain these almost anywhere as meta-data for
+the code, and in large part it is treated as if it were part of the
+insignificant whitespace; that all being said, generally speaking any
+C<non_value_comment> is retained in the parse tree adjusted to live in the
+contextually nearest place where a resulting system catalog node has a
+C<comment> attribute.  I<Details of determining the contextually nearest
+place for these comments to go is pending.>
+
+Syntactically, a C<non_value_comment> node differs from C<Comment_payload>
+only in that each string segment is delimited by number-signs/hash-marks
+rather than backticks/grave-accents, and also that:
 
 Note that any leading or trailing space (F;20) characters inside the C<#>
-delimiters of a C<Comment_payload> are also part of the delimiters, and are
-not part of the selected C<Comment> value; if you want to denote a
+delimiters of a C<non_value_comment> are also part of the delimiters, and
+are not part of the selected C<Comment> value; if you want to denote a
 C<Comment> value with leading or trailing space chars, you must write those
 space chars in an escaped form such as with C<\s>.
 
@@ -1083,17 +1110,19 @@ denotes an empty comment segment.  This feature exists to empower things
 like making visual dividing lines in the code just out of hash-marks.
 
 Note that the hash-mark does have other uses in PTMD_STD code besides
-delimiting comments, so since C<Comment_payload> may conceptually be placed
-almost anywhere in code, the other parts of the grammar that specifically
-enable this need to ensure appropriate measures are taken to avoid
-ambiguity, for example mandating that the comments are bounded by
+delimiting comments, so since C<non_value_comment> may conceptually be
+placed almost anywhere in code, the other parts of the grammar that
+specifically enable this need to ensure appropriate measures are taken to
+avoid ambiguity, for example mandating that the comments are bounded by
 whitespace.
 
-Examples (the first is GCVL, the second is a SCVL):
+Examples (the first 2 are as values, the third is not as a value):
 
-    Comment:# This does something. #
+    Comment:`This does something.`
 
-    # So does this. #
+    `So does this.`
+
+    # And also this. #
 
 =head2 TAI Temporal Literals
 
@@ -1894,8 +1923,8 @@ B<TODO: ALL OF THIS HERE MAIN POD SECTION!>
 Grammar:
 
     <depot> ::=
-        depot \s+ catalog \s+ [<Database> | <depot_or_subdepot>]
-        [\s+ depot \s+ data \s+ <Database>]?
+        'depot-catalog' \s+ [<Database> | <depot_or_subdepot>]
+        [\s+ 'depot-data' \s+ <Database>]?
 
     <depot_or_subdepot> ::=
         '{' \s*
@@ -2383,7 +2412,7 @@ Grammar:
         | 'N+' | 'N*'
         | '∪' | 'R+' | union | '∩' | 'R*' | intersect
         | '∆' | 'R%' | exclude | symdiff
-        | '⋈' | join | '×' | times | 'cross join'
+        | '⋈' | join | '×' | times | 'cross-join'
 
 A C<comm_infix_reduce_op_invo> node is for using infix notation to invoke a
 (homogenous) commutative N-adic reduction operator function.  Such a
@@ -2415,7 +2444,7 @@ Some of the keywords are aliases for each other:
     ∩       | R* intersect
     ∆       | R% exclude symdiff
     ⋈       | join
-    ×       | times 'cross join'
+    ×       | times cross-join
 
 This table indicates which function is invoked by each keyword:
 
@@ -2577,7 +2606,7 @@ Grammar:
         <expr>
 
     <nonsym_dyadic_infix_op> ::=
-        | isa | '!isa' | 'not isa' | as | asserting
+        | isa | '!isa' | 'not-isa' | as | asserting
         | imp | '→' | implies | nimp | '↛' | if | '←' | nif | '↚'
         | 'I-' | 'I/' | '%' | mod | 'I^'
         | 'N-' | 'N/'
@@ -2588,10 +2617,10 @@ Grammar:
         | '⊆' | '⊈' | '⊇' | '⊉'
         | '⊂' | '⊄' | '⊃' | '⊅'
         | '∖' | 'R-' | minus | except
-        | '⊿' | '!matching' | 'not matching' | antijoin | semiminus
+        | '⊿' | '!matching' | 'not-matching' | antijoin | semiminus
         | '⋉' | matching | semijoin
         | '÷' | 'R/' | divideby
-        | like | '!like' | 'not like'
+        | like | '!like' | 'not-like'
 
 A C<nonsym_dyadic_infix_op_invo> node is for using infix notation to
 invoke a non-symmetric dyadic operator function.  Such a function takes
@@ -2607,17 +2636,17 @@ Some of the keywords are aliases for each other:
 
     keyword | aliases
     --------+--------
-    !isa    | 'not isa'
+    !isa    | not-isa
     imp     | → implies
     nimp    | ↛
     if      | ←
     nif     | ↚
     %       | mod
     ∖       | R- minus except
-    ⊿       | !matching 'not matching' antijoin semiminus
+    ⊿       | !matching not-matching antijoin semiminus
     ⋉       | matching semijoin
     ÷       | R/ divideby
-    !like   | 'not like'
+    !like   | not-like
 
 Currently the alternate syntaxes for 20 functions, those testing set
 membership or sub/superset relationships, only come in versions that use
@@ -3070,7 +3099,7 @@ Grammar:
         <expr> \s+ <postfix_rat_op>
 
     <postfix_rat_op>
-        loge
+        'log-e'
 
     <rounded_with_rule_clause> ::=
         round \s+ <round_rule>
@@ -3093,12 +3122,12 @@ sequence.
 
 This table indicates which function is invoked by each keyword:
 
-         -> Rational.round( $expr, round_rule => $round_rule )
-    N^   -> Rational.power( radix => $lhs, exponent => $rhs,
+          -> Rational.round( $expr, round_rule => $round_rule )
+    N^    -> Rational.power( radix => $lhs, exponent => $rhs,
                 round_rule => $round_rule )
-    log  -> Rational.log( $lhs, radix => $rhs, round_rule => $round_rule )
-    e^   -> Rational.natural_power( $expr, round_rule => $round_rule )
-    loge -> Rational.natural_log( $expr, round_rule => $round_rule )
+    log   -> Rational.log( $lhs, radix => $rhs, round_rule => $round_rule )
+    e^    -> Rational.natural_power( $expr, round_rule => $round_rule )
+    log-e -> Rational.natural_log( $expr, round_rule => $round_rule )
 
 Examples:
 
@@ -3110,7 +3139,7 @@ Examples:
 
     e^ 6.3 round RatRoundRule:[10,-6,to_ceiling]
 
-    17.0 loge round RatRoundRule:[3,-5,to_floor]
+    17.0 log-e round RatRoundRule:[3,-5,to_floor]
 
 =head2 Order Comparison Operators
 
@@ -3273,7 +3302,8 @@ Here we list the 8 levels from "tightest" to "loosest":
 The I<terms> and I<delimited expressions> and I<tagged delimiteds>, which
 includes every kind of C<< <expr> >> that is also a C<< <value> >> (meaning
 any C<< <opaque_value_literal> >> and C<< <coll_value_selector> >>), as
-well as any C<< <delim_expr> >> and C<< <expr_name> >> and C<< <func_invo>
+well as any C<< <non_value_comment> >> and
+C<< <delim_expr> >> and C<< <expr_name> >> and C<< <func_invo>
 >> and C<< <lib_entity_ref_selector> >>.  In general these are very simple
 or are entirely or mostly surrounded by some kind of delimiters.  These are
 non-associative or associativity is not applicable.
