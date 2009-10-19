@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.96.1.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.97.0.
 
 =head1 PREFACE
 
@@ -89,8 +89,8 @@ C<language_name> node and the second element is either a C<value> node or a
 C<depot> node.
 
 See the pod sections in this file named L</LANGUAGE NAME>, L</VALUE
-LITERALS AND SELECTORS>, and L</DEPOT DECLARATION>, for more details about
-the aforementioned tokens/nodes.
+LITERALS AND SELECTORS>, and L</DEPOT SPECIFICATION>, for more details
+about the aforementioned tokens/nodes.
 
 When Muldis D is being compiled and invoked piecemeal, such as because the
 Muldis D implementing virtual machine (VM) is attached to an interactive
@@ -230,7 +230,7 @@ Examples:
        [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl6_STD', {
           catalog_abstraction_level => 'code_as_data'
        } ],
-       [ 'depot', [ 'Database', 'Depot', {
+       [ 'depot', :depot-catalog[ 'Database', 'Depot', {
           functions => :Relation( Set.new(
              {
                 name => :Name<cube>,
@@ -276,11 +276,11 @@ Examples:
         [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'plain_rtn_inv'
         } ],
-        [ 'depot', [
-            [ 'function', 'public', 'cube', 'Int', { topic => 'Int' }, [
+        [ 'depot', :depot-catalog[
+            [ 'function', 'public', 'cube', [ 'Int', { topic => 'Int' }, [
                 [ 'func-invo', 'Integer.power',
                     { radix => ['$','topic'], exponent => 3 } ]
-            ] ]
+            ] ] ]
         ] ]
     ]
 
@@ -300,10 +300,10 @@ Examples:
         [ 'Muldis_D', 'http://muldis.com', '1.2.3', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'rtn_inv_alt_syn'
         } ],
-        [ 'depot', [
-            [ 'function', 'public', 'cube', 'Int', { topic => 'Int' }, [
+        [ 'depot', :depot-catalog[
+            [ 'function', 'public', 'cube', [ 'Int', { topic => 'Int' }, [
                 [ 'op', 'I^', [ ['$','topic'], 3 ] ]
-            ] ]
+            ] ] ]
         ] ]
     ]
 
@@ -1022,9 +1022,135 @@ Examples:
 
     :UTCInstant[2002,12,6] ^..^ :UTCInstant[2002,12,20]
 
-=head1 DEPOT DECLARATION
+=head1 DEPOT SPECIFICATION
 
-B<TODO: ALL OF THIS HERE MAIN POD SECTION!>
+A C<depot> node has 2-3 ordered elements such that 3 elements means the
+depot has a normal-user-data database and 2 elements means it has just a
+(possibly empty) system catalog database:  The first element is the Perl
+C<Str> value C<depot>.  Iff the C<depot> has 3 elements then the third
+element specifies the normal-user-data database; it is a Perl C<Pair> whose
+key is the Perl C<Str> value C<depot-data> and whose value is a C<Database>
+node.  The second element specifies the system catalog database; it is a
+Perl C<Pair> whose key is the Perl C<Str> value C<depot-catalog> and whose
+value is either a C<Database> node or a Perl C<Seq|Array> which is
+hereafter referred to as C<depot_catalog_payload>.  A
+C<depot_catalog_payload> either has zero elements, designating an empty
+catalog, or all of its elements are Perl C<Seq|Array> (in particular, none
+of its elements is the Perl C<Str> value 'Database'), each of which is one
+of the following kinds of nodes: C<subdepot>, C<material>,
+C<self_local_dbvar_type>.
+
+A C<subdepot> node has 3 ordered elements:  The first element is the Perl
+C<Str> value C<subdepot>.  The second element is a C<Name_payload>,
+which is the declared name of the subdepot within the namespace defined by
+its parent subdepot (or depot).  The third element is a
+C<depot_catalog_payload>.
+
+A C<self_local_dbvar_type> node has 2 ordered elements:  The first element
+is the Perl C<Str> value C<self-local-dbvar-type>.  The second element
+is a C<NameChain_payload>, which specifies what the normal-user-data
+database has as its declared data type.
+
+Examples:
+
+    # A completely empty depot that doesn't have a self-local dbvar. #
+    [ 'depot', :depot-catalog[] ]
+
+    # Empty depot with self-local dbvar with unrestricted allowed values. #
+    [ 'depot',
+        :depot-catalog[
+            [ 'self-local-dbvar-type', 'Database' ]
+        ],
+        :depot-data[ 'Database', {} ]
+    ]
+
+    # A depot having just one function and no dbvar. #
+    [ 'depot', :depot-catalog[
+        [ 'function', 'public', 'cube', [ 'Int', { topic => 'Int' }, [
+            [ 'op', 'I^', [ ['$','topic'], 3 ] ]
+        ] ] ]
+    ] ]
+
+=head1 MATERIAL SPECIFICATION
+
+A C<material> node specifies a new material (routine or type) that lives in
+a depot or subdepot.
+
+There are 7 main varieties of C<material> node, each of which is a named
+node kind of its own:  <function>, C<updater>, C<procedure>,
+C<scalar_type>, C<nonscalar_type>, C<union_type>, C<subset_type>.
+
+=head2 Material Specification Common Elements
+
+A C<material> node has 2-4 ordered elements, such that a material that has
+2 elements is an C<anon_material> and a material with 3-4 elements is a
+C<named_material>:  The first element is C<material_kind>.  The last
+element is C<material_payload>.  Iff there are 3-4 elements then the
+second-to-last element is C<material_declared_name>.  Iff there are 4
+elements then the second element is C<priv_or_pub>.
+
+=over
+
+=item C<material_kind>
+
+This is a Perl C<Str> value of the format C<< [<[ a..z ]>+] ** '-' >>; it
+identifies the kind of the material and is the only external meta-data of
+C<material_payload> generally necessary to interpret the latter; what
+grammars are valid for C<material_payload> depend just on C<material_kind>.
+
+=item C<priv_or_pub>
+
+This is one of the 2 Perl C<Str> values [C<private>, C<public>]; it is
+C<public> if the material is part of its containing subdepot's own public
+interface and may be invoked from outside the subdepot; it is C<private> if
+it is just part of the subdepot's internals.  This is optional iff
+C<material> is a C<named_material>; this must be omitted iff C<material> is
+an C<anon_material>.  If C<priv_or_pub> is not explicitly specified then
+the C<material> is interpreted as if it were explicitly C<private> (so all
+C<anon_material> are private).
+
+=item C<material_declared_name>
+
+This is the declared name of the material within the namespace defined by
+its subdepot (or depot).  It is explicitly specified iff the C<material> is
+a C<named_material>
+
+=item C<material_payload>
+
+This is mandatory for all C<material>.  It specifies the entire material
+sans its name.  Format varies with C<material_kind>.
+
+=back
+
+For material examples, see the subsequent documentation sections.
+
+=head2 Function Specification
+
+I<TODO.>
+
+=head2 Updater Specification
+
+I<TODO.>
+
+=head2 Procedure Specification
+
+I<TODO.>
+
+=head2 Scalar Type Specification
+
+I<TODO.>
+
+=head2 Nonscalar Type Specification
+
+I<TODO.>
+
+=head2 Union Type Specification
+
+I<TODO.>
+
+=head2 Subset Type Specification
+
+I<TODO.>
 
 =head1 GENERIC VALUE EXPRESSIONS
 
@@ -1162,9 +1288,9 @@ Examples:
 
 =head2 Library Entity Reference Selector
 
-A C<[func|proc|type|ord_det_func]_ref> node has 2 ordered elements:  The
-first element is the Perl C<Str> value
-C<[func|proc|type|ord-det-func]-ref>.  The second element is a
+A C<[func|upd|proc|type|ord_det_func]_ref> node has 2 ordered elements:
+The first element is the Perl C<Str> value
+C<[func|upd|proc|type|ord-det-func]-ref>.  The second element is a
 C<NameChain_payload>, which names the routine|type to invoke.
 
 A C<[func|proc|type|ord-det-func]-ref> node may alternately be formatted as
@@ -1175,7 +1301,9 @@ Examples:
 
     :func-ref<sdp.lib.filter>
 
-    :imp-ref<sdp.lib.try_block>
+    :upd-ref<sdp.lib.swap>
+
+    :proc-ref<sdp.lib.try_block>
 
     :type-ref<sdp.lib.foo_type>
 
