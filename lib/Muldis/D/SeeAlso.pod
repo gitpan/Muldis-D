@@ -9,7 +9,7 @@ External resources that you really ought to look at
 
 =head1 VERSION
 
-This document is Muldis::D::SeeAlso version 0.98.0.
+This document is Muldis::D::SeeAlso version 0.99.0.
 
 =head1 DESCRIPTION
 
@@ -452,7 +452,7 @@ a relative few are listed here.
 
 =head1 AUTHOR
 
-Darren Duncan (C<perl@DarrenDuncan.net>)
+Darren Duncan (C<darren@DarrenDuncan.net>)
 
 =head1 LICENSE AND COPYRIGHT
 

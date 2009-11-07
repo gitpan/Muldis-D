@@ -9,7 +9,7 @@ Muldis D extension for spatial data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Spatial version 0.98.0.
+This document is Muldis::D::Ext::Spatial version 0.99.0.
 
 =head1 PREFACE
 
@@ -145,7 +145,7 @@ distribution-external references.
 
 =head1 AUTHOR
 
-Darren Duncan (C<perl@DarrenDuncan.net>)
+Darren Duncan (C<darren@DarrenDuncan.net>)
 
 =head1 LICENSE AND COPYRIGHT
 

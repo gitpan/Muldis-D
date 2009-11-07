@@ -1,22 +1,12 @@
-use 5.008001;
-use utf8;
+use 5.006;
 use strict;
-use warnings FATAL => 'all';
-
-###########################################################################
-###########################################################################
-
-{ package Muldis::D; # package
-    our $VERSION = '0.098000';
-    $VERSION = eval $VERSION;
-    # Note that Perl code only exists at all in this file in order to help
-    # the CPAN indexer handle the distribution properly.
-} # package Muldis::D
-
-###########################################################################
-###########################################################################
-
-1; # Magic true value required at end of a reusable file's code.
+use warnings;
+package Muldis::D;
+our $VERSION = '0.099000';
+$VERSION = eval $VERSION;
+# Note that Perl code only exists at all in this file in order to help
+# the CPAN indexer handle the distribution properly.
+1;
 __END__
 
 =pod
@@ -30,7 +20,7 @@ Formal spec of Muldis D relational DBMS lang
 
 =head1 VERSION
 
-This document is Muldis::D version 0.98.0.
+This document is Muldis::D version 0.99.0.
 
 =head1 PREFACE
 
@@ -60,9 +50,9 @@ at them.
 
 The fully-qualified name of this multi-part document and the language
 specification it contains (as a single composition) is
-C<Muldis_D:"http://muldis.com":"0.98.0">.  It is the official/original (not
+C<Muldis_D:"http://muldis.com":"0.99.0">.  It is the official/original (not
 embraced and extended) Muldis D language specification by the authority
-Darren Duncan (C<http://muldis.com>), version C<0.98.0> (this number
+Darren Duncan (C<http://muldis.com>), version C<0.99.0> (this number
 matches the VERSION pod in this file).  This multi-part document is named
 and organized with the expectation that many dialects, extensions, and core
 versions of it will exist over time, some of those under the original
@@ -280,7 +270,7 @@ references.
 
 =head1 AUTHOR
 
-Darren Duncan (C<perl@DarrenDuncan.net>)
+Darren Duncan (C<darren@DarrenDuncan.net>)
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -397,6 +387,6 @@ intended, but not yet started.
 
 Alternately, you can purchase more advanced commercial support for various
 Muldis D implementations, particularly Muldis Rosetta, from its author by
-way of Muldis Data Systems; see (L<http://www.muldis.com/>) for details.
+way of Muldis Data Systems; see L<http://www.muldis.com/> for details.
 
 =cut

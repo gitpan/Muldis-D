@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.98.0.
+This document is Muldis::D::Core::Types_Catalog version 0.99.0.
 
 =head1 PREFACE
 
@@ -133,6 +133,7 @@ more or less:
                 sys.std.Core.Type.Cat.WhenThenExprMap
                 sys.std.Core.Type.Cat.MaterialRefSelExprNodeSet
                 sys.std.Core.Type.Cat.MultiUpdStmt
+                sys.std.Core.Type.Cat.OVLScaValStmtNodeSet
                 sys.std.Core.Type.Cat.LeaveStmtNodeSet
                 sys.std.Core.Type.Cat.CompoundStmtNodeSet
                 sys.std.Core.Type.Cat.UpdInvoStmtNodeSet
@@ -3749,7 +3750,7 @@ distribution-external references.
 
 =head1 AUTHOR
 
-Darren Duncan (C<perl@DarrenDuncan.net>)
+Darren Duncan (C<darren@DarrenDuncan.net>)
 
 =head1 LICENSE AND COPYRIGHT
 
