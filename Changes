@@ -1,6 +1,44 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-11-21  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.100.0 is released on CPAN as
+    Muldis-D-0.100.0.tar.gz.
+
+    * (Basics.pod, Types_Catalog.pod, Routines_Catalog.pod, PTMD_STD.pod,
+    HDMD_Perl[6|5]_STD.pod)  Temporarily removed the concept of private
+    routines and types from Muldis D; now all entities living directly in a
+    depot or subdepot are public, end of story; only lexical entities are
+    still private.  This change was made to support some other language
+    simplifications to follow.  The concept of private vs public will
+    return in a future release, but will likely be supported in a different
+    manner than before, and will probably return around the same time that
+    the concept of per-database-user entity access privilages come to be
+    defined.  In Basics.pod, TODO-commented-out a few sentences in the 2
+    pod sub-sections "User-Defined Resources" and "Conceptions and
+    Requirements".  In Types_Catalog.pod, updated each of the 7 catalog
+    types "[Function|Updater|Procedure]Set",
+    "[Scalar|Nonscalar|Union|Subset]TypeSet" to remove its "is_public"
+    attribute (which is now effectively always true), and did a few
+    TODO-comment-out in the file.  In Routines_Catalog.pod, updated each of
+    the 7 routines "create_[function|updater|procedure]",
+    "create_[scalar|nonscalar|union|subset]_type" to remove its "is_public"
+    parameter.  In each of the 3 STD.pod files, updated "Material
+    Specification Common Elements" so that a "material" node no longer has
+    an optional "priv_or_pub" element; where omitting it before meant
+    "private", all "material" which now don't have it anyway are "public";
+    also updated all code examples in the files appropriately.
+
+    * (Basics.pod)  In the "ENTITY NAMES" main pod section, consolidated
+    each ".<type>" plus ".<routine>" line pair into a ".<material>" line.
+
+    * (HDMD_Perl6_STD.pod)  In accordance with the latest Perl 6 spec (an
+    update on 2009.11.17), mentioned that the Perl 6 "FatRat" type exists,
+    alongside its "Rat".  At this point, "FatRat" is actually the closest
+    approximation to the Muldis D "Rat", since the new Perl 6 "Rat" doesn't
+    have a denominator larger than a 64-bit integer can represent.
+
 2009-11-06  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.99.0 is released on CPAN as
@@ -15,7 +53,7 @@
     * (Makefile.PL, D.pm, Muldis_D_00_Compile.t)  Updated the distro so
     that normal users only need the most minimal dependencies reasonably
     possible, meaning it now only requires Perl 5.6.0+ rather than 5.8.1+,
-    and it requires no modules at all that weren't bundled with 5.6.0+. 
+    and it requires no modules at all that weren't bundled with 5.6.0+.
     This seemed appropriate since the distro is documentation-only and
     doesn't have any normal code to run, just POD to render (on the other
     hand, that POD *is* UTF-8).  Updated the test file, which exists just
