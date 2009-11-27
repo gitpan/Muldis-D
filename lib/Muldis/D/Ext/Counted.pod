@@ -9,7 +9,7 @@ Muldis D extension for count-sensitive relational operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Counted version 0.100.0.
+This document is Muldis::D::Ext::Counted version 0.101.0.
 
 =head1 PREFACE
 
@@ -22,10 +22,12 @@ before you read this one, which provides subservient details.
 Muldis D has a mandatory core set of system-defined (eternally available)
 entities, which is referred to as the I<Muldis D core> or the I<core>; they
 are the minimal entities that all Muldis D implementations need to provide;
-they are mutually self-describing and are used to bootstrap the language;
-any entities outside the core, called I<Muldis D extensions>, are
-non-mandatory and are defined in terms of the core or each other, but the
-reverse isn't true.
+they are mutually self-describing and are either used to bootstrap the
+language or they constitute a reasonable minimum level of functionality for
+a practically useable industrial-strength (and fully I<TTM>-conforming)
+programming language; any entities outside the core, called I<Muldis D
+extensions>, are non-mandatory and are defined in terms of the core or each
+other, but the reverse isn't true.
 
 This current C<Counted> document describes the system-defined I<Muldis D
 Counted Extension>, which consists of relational operators that are
@@ -49,7 +51,7 @@ operators are defined once for all types in L<Muldis::D::Core>.
 
 I<This documentation is pending.>
 
-=head1 SYSTEM-DEFINED COUNT-CONCERNING RELATIONAL FUNCTIONS
+=head1 GENERIC RELATIONAL FUNCTIONS THAT MAINTAIN COUNT ATTRIBUTES
 
 Every one of these functions that takes a C<count_attr_name> argument is
 expecting that each of any other applicable arguments will have an
@@ -165,7 +167,7 @@ C<< function sys.std.Counted.counted_reduction (Tuple <--
 $topic : Relation, $func : ValRedFuncRef, $identity : Tuple,
 $count_attr_name : Name) >>
 
-This function is the same as C<sys.std.Relation.reduction> except that
+This function is the same as C<sys.std.Core.Relation.reduction> except that
 C<func> is invoked extra times, where both its C<v1> and C<v2> arguments
 might be different instances of the same C<tattrs> tuple having >= 2
 multiplicity.  This function's C<topic> argument has a C<tcount> attribute
@@ -179,7 +181,8 @@ C<< function sys.std.Counted.counted_maybe_reduction (maybe_of.Tuple <--
 $topic : Relation, $func : ValRedFuncRef, $count_attr_name : Name) >>
 
 This function is to C<sys.std.Core.Relation.maybe_reduction> as
-C<sys.std.Counted.counted_reduction> is to C<sys.std.Relation.reduction>.
+C<sys.std.Counted.counted_reduction> is to
+C<sys.std.Core.Relation.reduction>.
 
 =head2 sys.std.Counted.counted_map
 
@@ -187,7 +190,7 @@ C<< function sys.std.Counted.counted_map (Relation <-- $topic : Relation,
 $result_attr_names : set_of.Name, $func : ValMapFuncRef,
 $count_attr_name : Name) >>
 
-This function is the same as C<sys.std.Relation.map> except that the
+This function is the same as C<sys.std.Core.Relation.map> except that the
 C<counted_cardinality> of the result is guaranteed to be the same as that
 of C<topic> rather than possibly less.  The C<topic> argument must have a
 C<tcount> attribute and C<result_attr_names> must not specify that
@@ -243,7 +246,7 @@ C<counted_is_superset>.
 C<< function sys.std.Counted.counted_is_proper_subset (Bool <--
 $topic : Relation, $other : Relation, $count_attr_name : Name) >>
 
-This function is like C<sys.std.Relation.is_proper_subset> as per
+This function is like C<sys.std.Core.Relation.is_proper_subset> as per
 C<counted_is_subset>.  I<TODO: What is its definition?>
 
 =head2 sys.std.Counted.counted_is_not_proper_subset
@@ -251,7 +254,7 @@ C<counted_is_subset>.  I<TODO: What is its definition?>
 C<< function sys.std.Counted.counted_is_not_proper_subset (Bool <--
 $topic : Relation, $other : Relation, $count_attr_name : Name) >>
 
-This function is like C<sys.std.Relation.is_not_proper_subset> as per
+This function is like C<sys.std.Core.Relation.is_not_proper_subset> as per
 C<counted_is_subset>.  I<TODO: What is its definition?>
 
 =head2 sys.std.Counted.counted_is_proper_superset
@@ -261,7 +264,7 @@ $topic : Relation, $other : Relation, $count_attr_name : Name) >>
 
 This function is an alias for C<sys.std.Counted.counted_is_proper_subset>
 except that it transposes the C<topic> and C<other> arguments.  This
-function is like C<sys.std.Relation.is_proper_superset> as per
+function is like C<sys.std.Core.Relation.is_proper_superset> as per
 C<counted_is_superset>.
 
 =head2 sys.std.Counted.counted_is_not_proper_superset
@@ -272,7 +275,8 @@ $topic : Relation, $other : Relation, $count_attr_name : Name) >>
 This function is an alias for
 C<sys.std.Counted.counted_is_not_proper_subset> except that it transposes
 the C<topic> and C<other> arguments.  This function is like
-C<sys.std.Relation.is_not_proper_superset> as per C<counted_is_superset>.
+C<sys.std.Core.Relation.is_not_proper_superset> as per
+C<counted_is_superset>.
 
 =head2 sys.std.Counted.counted_union
 
@@ -323,9 +327,9 @@ C<< function sys.std.Counted.counted_substitution (Relation <--
 $topic : Relation, $attr_names : set_of.Name, $func : ValMapFuncRef,
 $count_attr_name : Name) >>
 
-This function is the same as C<sys.std.Relation.substitution> except that
-the C<counted_cardinality> of the result is guaranteed to be the same as
-that of C<topic> rather than possibly less.  The C<topic> argument must
+This function is the same as C<sys.std.Core.Relation.substitution> except
+that the C<counted_cardinality> of the result is guaranteed to be the same
+as that of C<topic> rather than possibly less.  The C<topic> argument must
 have a C<tcount> attribute and C<attr_names> must not specify that
 attribute.
 
@@ -334,7 +338,7 @@ attribute.
 C<< function sys.std.Counted.counted_static_subst (Relation <--
 $topic : Relation, $attrs : Tuple, $count_attr_name : Name) >>
 
-This function is the same as C<sys.std.Relation.static_subst>
+This function is the same as C<sys.std.Core.Relation.static_subst>
 except that the C<counted_cardinality> of the result is guaranteed to be
 the same as that of C<topic> rather than possibly less.  The C<topic>
 argument must have a C<tcount> attribute and C<attrs> must not have that

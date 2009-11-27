@@ -1,0 +1,255 @@
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+Muldis::D::Core::Integer -
+Muldis D integer numeric operators
+
+=head1 VERSION
+
+This document is Muldis::D::Core::Integer version 0.101.0.
+
+=head1 PREFACE
+
+This document is part of the Muldis D language specification, whose root
+document is L<Muldis::D>; you should read that root document before
+you read this one, which provides subservient details.  Moreover, you
+should read the L<Muldis::D::Core> document before this current
+document, as that forms its own tree beneath a root document branch.
+
+=head1 DESCRIPTION
+
+This document describes essentially all of the core Muldis D operators that
+are specific to the core data type C<Int>, essentially all the generic ones
+that a typical programming language should have.
+
+I<This documentation is pending.>
+
+=head1 FUNCTIONS FOR INTEGER MATH
+
+These functions implement commonly used integer numeric operations.
+
+=head2 sys.std.Core.Integer.inc
+
+C<< function sys.std.Core.Integer.inc (Int <-- $topic : Int) >>
+
+This function results in its argument incremented by 1.  Note that this
+operation is also known as C<++>.
+
+=head2 sys.std.Core.Integer.dec
+
+C<< function sys.std.Core.Integer.dec (Int <-- $topic : Int) >>
+
+This function results in its argument decremented by 1.  Note that this
+operation is also known as C<-->.
+
+=head2 sys.std.Core.Integer.abs
+
+C<< function sys.std.Core.Integer.abs (NNInt <-- $topic : Int) >>
+
+This function results in the absolute value of its argument.  Note that
+this operation is also known as C<I||>.
+
+=head2 sys.std.Core.Integer.sum
+
+C<< function sys.std.Core.Integer.sum (Int <-- $topic? : bag_of.Int) >>
+
+This function results in the sum of the N element values of its argument;
+it is a reduction operator that recursively takes each pair of input values
+and adds (which is both commutative and associative) them together until
+just one is left, which is the result.  If C<topic> has zero values, then
+C<sum> results in the integer zero, which is the identity value for
+addition.  Note that this operation is also known as I<addition> or I<plus>
+or C<I+>.
+
+=head2 sys.std.Core.Integer.diff
+
+C<< function sys.std.Core.Integer.diff (Int <-- $minuend : Int,
+$subtrahend : Int) >>
+
+This function results in the difference when its C<subtrahend> argument is
+subtracted from its C<minuend> argument.  Note that this operation is also
+known as I<subtraction> or I<minus> or C<I->.
+
+=head2 sys.std.Core.Integer.abs_diff
+
+C<< function sys.std.Core.Integer.abs_diff (Int <-- $topic : Int,
+$other : Int) >>
+
+This symmetric function results in the absolute difference between its 2
+arguments.  Note that this operation is also known as C<I|-|>.
+
+=head2 sys.std.Core.Integer.product
+
+C<< function sys.std.Core.Integer.product (Int <-- $topic? : bag_of.Int) >>
+
+This function results in the product of the N element values of its
+argument; it is a reduction operator that recursively takes each pair of
+input values and multiplies (which is both commutative and associative)
+them together until just one is left, which is the result.  If C<topic>
+has zero values, then C<product> results in the integer 1, which is the
+identity value for multiplication.  Note that this operation is also known
+as I<multiply> or I<times> or C<I*>.
+
+=head2 sys.std.Core.Integer.quotient
+
+C<< function sys.std.Core.Integer.quotient (Int <-- $dividend : Int,
+$divisor : Int) >>
+
+This function results in the quotient when its C<dividend> argument is
+divided by its C<divisor> argument using integer division.  This function
+will fail if C<divisor> is zero.  Note that this operation is also known as
+I<divide> or C<I/>.
+
+=head2 sys.std.Core.Integer.remainder
+
+C<< function sys.std.Core.Integer.remainder (NNInt <-- $dividend : Int,
+$divisor : Int) >>
+
+This function results in the remainder when its C<dividend> argument is
+divided by its C<divisor> argument using integer division.  This function
+will fail if C<divisor> is zero.  Note that this operation is also known as
+I<modulus> or C<%>.
+
+=head2 sys.std.Core.Integer.quot_and_rem
+
+C<< function sys.std.Core.Integer.quot_and_rem (Tuple <--
+$dividend : Int, $divisor : Int) >>
+
+This function results in a binary tuple whose attribute names are
+C<quotient> (an C<Int>) and C<remainder> (a C<NNInt>) and whose respective
+attribute values are what C<sys.std.Core.Integer.quotient> and
+C<sys.std.Core.Integer.remainder> would result in when given the same
+arguments.  This function will fail if C<divisor> is zero.
+
+=head2 sys.std.Core.Integer.maybe_quotient
+
+C<< function sys.std.Core.Integer.maybe_quotient (maybe_of.Int <--
+$dividend : Int, $divisor : Int) >>
+
+This function is exactly the same as C<sys.std.Core.Integer.quotient>
+except that it results in a C<Maybe> of what is otherwise the result, and
+that result has zero elements if C<divisor> is zero.
+
+=head2 sys.std.Core.Integer.maybe_remainder
+
+C<< function sys.std.Core.Integer.maybe_remainder (maybe_of.NNInt <--
+$dividend : Int, $divisor : Int) >>
+
+This function is exactly the same as C<sys.std.Core.Integer.remainder>
+except that it results in a C<Maybe> of what is otherwise the result, and
+that result has zero elements if C<divisor> is zero.
+
+=head2 sys.std.Core.Integer.maybe_quot_and_rem
+
+C<< function sys.std.Core.Integer.maybe_quot_and_rem (Relation <--
+$dividend : Int, $divisor : Int) >>
+
+This function results in a binary relation whose attribute names are
+C<quotient> (an C<Int>) and C<remainder> (a C<NNInt>).  If C<divisor> is
+nonzero then the result has a single tuple whose respective attribute
+values are what C<sys.std.Core.Integer.quotient> and
+C<sys.std.Core.Integer.remainder> would result in when given the same
+arguments; if C<divisor> is zero, then the result has zero tuples.
+
+=head2 sys.std.Core.Integer.range
+
+C<< function sys.std.Core.Integer.range (Int <-- $topic : set_of.Int) >>
+
+This function results in the difference between the lowest and highest
+element values of its argument.  If C<topic> has zero values, then C<range>
+results in the integer zero.
+
+=head2 sys.std.Core.Integer.median
+
+C<< function sys.std.Core.Integer.median (set_of.Int <--
+$topic : bag_of.Int) >>
+
+This function results in the 1 or 2 median values of the N element values
+of its argument; they are returned as a set.  It is equivalent to first
+arranging the input values from least to greatest, and then taking the
+single middle value, if the count of input values is odd, or taking the 2
+middle values, if the count of input values is even (but if the 2 middle
+values are the same value, the output has one element).  If C<topic> has
+zero values, then the result set is empty.
+
+=head2 sys.std.Core.Integer.mode
+
+C<< function sys.std.Core.Integer.mode (set_of.Int <-- $topic : bag_of.Int)
+>>
+
+This function results in the mode of the N element values of its argument;
+it is the set of values that appear the most often as input elements, and
+all have the same count of occurrances.  As a trivial case, if all input
+elements have the same count of occurrances, then they will all be in the
+output.  If C<topic> has zero values, then the result set is empty.
+
+=head2 sys.std.Core.Integer.power
+
+C<< function sys.std.Core.Integer.power (Int <-- $radix : Int,
+$exponent : NNInt) >>
+
+This function results in its C<radix> argument taken to the power of its
+(non-negative integer) C<exponent> argument.  This function will result in
+1 if C<radix> and C<exponent> are both zero (rather than failing), which
+seems reasonable given that the C<Integer.power> function strictly has no
+numeric continuity (unlike C<Rational.power>) and that this is by far the
+most common practice in both pure integer math contexts and computer
+languages, including SQL.  Note that this operation is also known as
+I<exponentiation> or C<I^>.
+
+=head2 sys.std.Core.Integer.factorial
+
+C<< function sys.std.Core.Integer.factorial (PInt <-- $topic : NNInt) >>
+
+This function results in the factorial of its argument (it is defined for
+an argument of zero to result in 1, as per the identity value for
+multiplication of an empty set).  Note that this operation is also known as
+C<I!>.
+
+=head1 SYSTEM-SERVICES FOR RANDOM NUMBER GENERATORS
+
+These system-service routines provide ways to get random numbers from the
+system.  Where the results are in the range between truly random and
+pseudo-random is, for the moment, an implementation detail, but the details
+of these functions is subject to become more formalized later.
+
+=head2 sys.std.Core.Integer.fetch_random
+
+C<system-service sys.std.Core.Integer.fetch_random (&$target : Int,
+$interval : interval_of.Int)>
+
+This system-service routine will update the variable supplied as its
+C<target> argument so that it holds a randomly generated integer value that
+is included within the interval defined by its C<interval> argument.  This
+function will fail if C<interval> represents an empty interval.
+
+=head1 SEE ALSO
+
+Go to L<Muldis::D> for the majority of distribution-internal
+references, and L<Muldis::D::SeeAlso> for the majority of
+distribution-external references.
+
+=head1 AUTHOR
+
+Darren Duncan (C<darren@DarrenDuncan.net>)
+
+=head1 LICENSE AND COPYRIGHT
+
+This file is part of the formal specification of the Muldis D language.
+
+Muldis D is Copyright © 2002-2009, Muldis Data Systems, Inc.
+
+See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
+
+=head1 TRADEMARK POLICY
+
+The TRADEMARK POLICY in L<Muldis::D> applies to this file too.
+
+=head1 ACKNOWLEDGEMENTS
+
+The ACKNOWLEDGEMENTS in L<Muldis::D> apply to this file too.
+
+=cut

@@ -1,0 +1,305 @@
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+Muldis::D::Core::Universal -
+Muldis D generic operators for all data types
+
+=head1 VERSION
+
+This document is Muldis::D::Core::Universal version 0.101.0.
+
+=head1 PREFACE
+
+This document is part of the Muldis D language specification, whose root
+document is L<Muldis::D>; you should read that root document before
+you read this one, which provides subservient details.  Moreover, you
+should read the L<Muldis::D::Core> document before this current
+document, as that forms its own tree beneath a root document branch.
+
+=head1 DESCRIPTION
+
+This document describes essentially all of the core Muldis D generic
+universal operators, applicable to all data types.
+
+=head1 GENERIC FUNCTIONS FOR ALL DATA TYPES
+
+These functions are applicable to values of any data type at all.
+
+=head2 sys.std.Core.Universal.is_identical
+
+C<< function sys.std.Core.Universal.is_identical (Bool <--
+$topic : Universal, $other : Universal) >>
+
+This symmetric function results in C<Bool:true> iff its 2
+arguments are exactly the same value, and C<Bool:false> otherwise.  This
+function will warn if, in regards to the declared types of its arguments,
+none of the following are true: 1. they are both subtypes of a common
+scalar root type; 2. they are both subtypes of a common complete tuple
+or relation type, that is they essentially have the same headings; 3. at
+least one type is a generic (eg-C<Universal>) or incomplete
+(eg-C<Relation>) type, and it is a supertype of the other.  Note that
+this operation is also known as I<is equal> or C<=>.
+
+=head2 sys.std.Core.Universal.is_not_identical
+
+C<< function sys.std.Core.Universal.is_not_identical (Bool <--
+$topic : Universal, $other : Universal) >>
+
+This symmetric function is exactly the same as
+C<sys.std.Core.Universal.is_identical> except that it results in the
+opposite boolean value when given the same arguments.  Note that this
+operation is also known as I<is not equal> or C<≠> or C<!=>.
+
+=head2 sys.std.Core.Universal.is_value_of_type
+
+C<< function sys.std.Core.Universal.is_value_of_type (Bool <--
+$topic : Universal, $type : TypeRef) >>
+
+This function results in C<Bool:true> iff the value of its C<topic>
+argument is a member of the data type whose name is given in the C<type>
+argument, and C<Bool:false> otherwise.  As trivial cases, this function
+always results in C<Bool:true> if the named type is C<Universal>, and
+C<Bool:false> if it is C<Empty>.  This function will fail if the named type
+doesn't exist in the virtual machine.  Note that this operation is also
+known as C<isa>.
+
+=head2 sys.std.Core.Universal.is_not_value_of_type
+
+C<< function sys.std.Core.Universal.is_not_value_of_type (Bool <--
+$topic : Universal, $type : TypeRef) >>
+
+This function is exactly the same as
+C<sys.std.Core.Universal.is_value_of_type> except that it results in the
+opposite boolean value when given the same arguments.  Note that this
+operation is also known as C<!isa> or C<not-isa>.
+
+=head2 sys.std.Core.Universal.treated
+
+C<< function sys.std.Core.Universal.treated (Universal <--
+$topic : Universal, $as : TypeRef) >>
+
+This function results in the value of its C<topic> argument, but that the
+declared type of the result is the not-C<Empty> data type whose name is
+given in the C<as> argument.  This function will fail if the named type
+doesn't exist in the virtual machine, or if C<topic> isn't a member of the
+named type.  The purpose of C<treated> is to permit taking values from a
+context having a more generic declared type, and using them in a context
+having a more specific declared type; such an action would otherwise be
+blocked at compile time due to a type-mismatch error; C<treated> causes the
+type-mismatch validation, and possible failure, to happen at runtime
+instead, on the actual value rather than declared value.  For example, if
+you are storing an C<Int> value in a C<Scalar>-typed variable, using
+C<treated> will cause the compiler to let you use that variable as an
+argument to C<sys.std.Core.Integer.diff>, which it otherwise wouldn't.
+Note that this operation is also known as C<as>.
+
+=head2 sys.std.Core.Universal.default
+
+C<< function sys.std.Core.Universal.default (Universal <-- $of : TypeRef)
+>>
+
+This function is the externalization of a not-C<Empty> data type's I<type
+default> C<named-value> function.  This function results in the default
+value of the not-C<Empty> data type whose name is given in the C<of>
+argument, and the declared type of the result is that same type.  This
+function will fail if the named type doesn't exist in the virtual machine,
+either at compile or runtime depending whether the type is in the system or
+user namespace. This function is conceptually implicitly used to provide
+default values for variables, so they always hold valid values of their
+declared type.  Note that this operation is also known as C<d>.
+
+=head2 sys.std.Core.Universal.assertion
+
+C<< function sys.std.Core.Universal.assertion (Universal <--
+$is_true : Bool, $result : Universal) >>
+
+This function results in the value of its C<result> argument, when its
+C<is_true> argument is C<Bool:true>.  This function will fail if its
+C<is_true> argument is C<Bool:false>.  The purpose of C<assertion> is to
+perform condition assertions in a pure functional context that may be
+better done without the overhead of creating a new constrained data type,
+especially when the assertion is on some fact that is only known after
+performing calculations from multiple function arguments; this can
+potentially be done at compile time as per type constraints.  Note that
+this operation is also known as C<asserting>.
+
+=head1 GENERIC ORDERED-SENSITIVE FUNCTIONS FOR ALL DATA TYPES
+
+These are generic operators that are sensitive
+to an ordering of a type's values, and are used for such things as list
+sorting or quota queries or determining before/after/min/max/between/etc.
+They can potentially be used with values of any data type as long as said
+data type has a (total) C<order-determination> function defined for it,
+and all system-defined conceptually-ordered Muldis D scalar root types do.
+
+Each of these functions which has the parameter named C<func> is a wrapper
+over the C<order-determination> function named in its C<func> argument when
+the latter function is curried by a calling-function-specific
+C<is_reverse_order> argument value.  For any scalar root type's
+type-default order function, the argument for C<func> is
+C<sys.std.Core.Scalar.order>.  Each C<func> parameter is optional and
+defaults to C<sys.std.Core.Scalar.order> if no explicit argument is given
+to it.
+
+These functions' C<Interval>-typed arguments' C<min> and C<max> attribute
+values must be of compatible declared types with the wrapped functions'
+C<topic> and C<other> parameters; otherwise these functions will fail|warn
+when the wrapped function would.  Likewise, any other argument values would
+be compared to an interval's endpoints must be compatible with them.
+
+=head2 sys.std.Core.Universal.is_before
+
+C<< function sys.std.Core.Universal.is_before (Bool <-- $topic : Universal,
+$other : Universal, $func? : OrdDetFuncRef) >>
+
+This function results in C<Bool:true> iff the wrapped function would result
+in C<Order:increase> when given the same corresponding 2 arguments plus a
+C<is_reverse_order> argument of C<Bool:false>, and C<Bool:false> otherwise.
+Note that this operation is also known as I<less than> or C<< < >>.
+
+=head2 sys.std.Core.Universal.is_after
+
+C<< function sys.std.Core.Universal.is_after (Bool <-- $topic : Universal,
+$other : Universal, $func? : OrdDetFuncRef) >>
+
+This function is an alias for C<sys.std.Core.Universal.is_before> except
+that it transposes the C<topic> and C<other> arguments.  This function
+results in C<Bool:true> iff the wrapped function would result in
+C<Order:decrease> when given the same corresponding 2 arguments plus a
+C<is_reverse_order> argument of C<Bool:false>, and C<Bool:false> otherwise.
+Note that this operation is also known as I<greater than> or C<< > >>.
+
+=head2 sys.std.Core.Universal.is_before_or_same
+
+C<< function sys.std.Core.Universal.is_before_or_same (Bool <--
+$topic : Universal, $other : Universal, $func? : OrdDetFuncRef) >>
+
+This function is exactly the same as C<sys.std.Core.Universal.is_before>
+except that it results in C<Bool:true> if its 2 primary arguments are
+identical.  Note that this operation is also known as I<less than or equal
+to> or C<≤>.
+
+=head2 sys.std.Core.Universal.is_after_or_same
+
+C<< function sys.std.Core.Universal.is_after_or_same (Bool <--
+$topic : Universal, $other : Universal, $func? : OrdDetFuncRef) >>
+
+This function is an alias for C<sys.std.Core.Universal.is_before_or_same>
+except that it transposes the C<topic> and C<other> arguments.  This
+function is exactly the same as C<sys.std.Core.Universal.is_after> except
+that it results in C<Bool:true> if its 2 primary arguments are identical.
+Note that this operation is also known as I<greater than or equal to> or
+C<≥>.
+
+=head2 sys.std.Core.Universal.min
+
+C<< function sys.std.Core.Universal.min (Universal <-- $topic : Set,
+$func? : OrdDetFuncRef) >>
+
+This function is a reduction operator that recursively takes each pair of
+its N input element values and picks the minimum of the 2 (which is
+commutative, associative, and idempotent) until just one is left, which is
+the function's result.  If C<topic> has zero values, then this function
+will fail.  Note that, conceptually C<min> I<does> have an identity value
+which could be this function's result when C<topic> has zero values, which
+is the result type's concept of positive infinity; however, in practice
+there is little benefit to C<min> supporting this identity value, since the
+wrapped C<order-determination> function can't supply the value, and also
+many types' concept of positive infinity is impossible or impractically
+large to represent, such as with the infinite C<Text> type.
+
+=head2 sys.std.Core.Universal.max
+
+C<< function sys.std.Core.Universal.max (Universal <-- $topic : Set,
+$func? : OrdDetFuncRef) >>
+
+This function is exactly the same as C<sys.std.Core.Universal.min> except
+that it results in the maximum input element value rather than the minimum
+one.  (Note that, conceptually C<max> has an identity value which is the
+result type's concept of negative infinity, but it is unsupported here).
+
+=head2 sys.std.Core.Universal.minmax
+
+C<< function sys.std.Core.Universal.minmax (Tuple <-- $topic : Set,
+$func? : OrdDetFuncRef) >>
+
+This function results in a binary tuple whose attribute names are C<min>
+and C<max> and whose respective attribute values are what
+C<sys.std.Core.Universal.min> and C<sys.std.Core.Universal.max> would
+result in when given the same arguments.  If C<topic> has zero values, then
+this function will fail.
+
+=head2 sys.std.Core.Universal.maybe_min
+
+C<< function sys.std.Core.Universal.maybe_min (Maybe <-- $topic : Set,
+$func? : OrdDetFuncRef) >>
+
+This function is exactly the same as C<sys.std.Core.Universal.min> except
+that it results in a C<Maybe> of what is otherwise the result type, and
+that result has zero elements if the argument has zero elements, rather
+than the function failing.
+
+=head2 sys.std.Core.Universal.maybe_max
+
+C<< function sys.std.Core.Universal.maybe_max (Maybe <-- $topic : Set,
+$func? : OrdDetFuncRef) >>
+
+This function is to C<sys.std.Core.Universal.max> as
+C<sys.std.Core.Universal.maybe_min> is to C<sys.std.Core.Universal.min>.
+
+=head2 sys.std.Core.Universal.maybe_minmax
+
+C<< function sys.std.Core.Universal.maybe_minmax (Relation <--
+$topic : Set, $func? : OrdDetFuncRef) >>
+
+This function results in a binary relation whose attribute names are C<min>
+and C<max>.  If C<topic> has zero values then the result has a single tuple
+whose respective attribute values are what C<sys.std.Core.Universal.min>
+and C<sys.std.Core.Universal.max> would result in when given the same
+arguments; if C<topic> has zero values, then the result has zero tuples.
+
+=head1 GENERIC UPDATERS FOR ALL DATA TYPES
+
+These update operators are applicable to values of any data type at all.
+
+=head2 sys.std.Core.Universal.assign
+
+C<updater sys.std.Core.Universal.assign (&$target : Universal,
+$v : Universal)>
+
+This update operator will update the variable supplied as its C<target>
+argument so that it holds the value supplied as its C<v> argument.  This
+updater will fail if C<v> isn't of the declared type of the variable behind
+C<target>; this function will otherwise warn if the declared type of C<v>
+isn't a subtype of the declared type of the variable behind C<target>.
+
+=head1 SEE ALSO
+
+Go to L<Muldis::D> for the majority of distribution-internal
+references, and L<Muldis::D::SeeAlso> for the majority of
+distribution-external references.
+
+=head1 AUTHOR
+
+Darren Duncan (C<darren@DarrenDuncan.net>)
+
+=head1 LICENSE AND COPYRIGHT
+
+This file is part of the formal specification of the Muldis D language.
+
+Muldis D is Copyright © 2002-2009, Muldis Data Systems, Inc.
+
+See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
+
+=head1 TRADEMARK POLICY
+
+The TRADEMARK POLICY in L<Muldis::D> applies to this file too.
+
+=head1 ACKNOWLEDGEMENTS
+
+The ACKNOWLEDGEMENTS in L<Muldis::D> apply to this file too.
+
+=cut

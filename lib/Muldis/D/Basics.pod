@@ -9,7 +9,7 @@ Muldis::D::Basics -
 
 =head1 VERSION
 
-This document is Muldis::D::Basics version 0.100.0.
+This document is Muldis::D::Basics version 0.101.0.
 
 =head1 PREFACE
 
@@ -1623,7 +1623,7 @@ correspond to the official named parameters.  With all functional routines,
 there is exactly 1 positional parameter named C<args>; with all imperative
 routines, there are exactly 2 positional parameters named C<upd_args> and
 C<ro_args>.  This behind-the-scenes nature is exposed when you use
-system-defined routines such as C<sys.std.Core.Control.func_invo>, where
+system-defined routines such as C<sys.std.Core.Cat.func_invo>, where
 you actually are supplying a set of argument values for the routine to
 invoke as a C<Tuple> value.  Now this all being said, for the purposes of
 the rest of the Muldis D documentation, the term I<parameter> always refers
@@ -2958,7 +2958,7 @@ type.func_result[.<path-elem-to-func>]**1..*[.<path-elem-to-attr>]**0..*
 A slightly more complicated scenario is taking the declared type of a
 routine parameter, which takes the form C<<
 type.param[.<path-elem-to-rtn>]**1..*.<param-name>[.<path-elem-to-attr>]**0
-..* >>, for example C<type.param.sys.std.Integer.quotient.divisor>.
+..* >>, for example C<type.param.sys.std.Core.Integer.quotient.divisor>.
 
 Dealing with a nonscalar type is slightly more complicated yet, due
 to the fact that one tends to declare tuple+relation type pairs by

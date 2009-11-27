@@ -4,45 +4,34 @@
 
 =head1 NAME
 
-Muldis::D::Ext::Interval -
-Muldis D extension for Interval specific operators
+Muldis::D::Core::Interval -
+Muldis D Interval specific operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Interval version 0.100.0.
+This document is Muldis::D::Core::Interval version 0.101.0.
 
 =head1 PREFACE
 
 This document is part of the Muldis D language specification, whose root
-document is L<Muldis::D>; you should read that root document
-before you read this one, which provides subservient details.
+document is L<Muldis::D>; you should read that root document before
+you read this one, which provides subservient details.  Moreover, you
+should read the L<Muldis::D::Core> document before this current
+document, as that forms its own tree beneath a root document branch.
 
 =head1 DESCRIPTION
 
-Muldis D has a mandatory core set of system-defined (eternally available)
-entities, which is referred to as the I<Muldis D core> or the I<core>; they
-are the minimal entities that all Muldis D implementations need to provide;
-they are mutually self-describing and are used to bootstrap the language;
-any entities outside the core, called I<Muldis D extensions>, are
-non-mandatory and are defined in terms of the core or each other, but the
-reverse isn't true.
-
-This current C<Interval> document describes the system-defined I<Muldis D
-Interval Extension>, which consists of generic operators that are specific
+This document describes generic operators that are specific
 to the C<Interval> parameterized tuple type.  They can potentially be used
 with values of any data type as long as said data type has a (total)
 C<order-determination> function defined for it, and all system-defined
 conceptually-ordered Muldis D scalar root types do.
 
-This current document does not describe the polymorphic operators that all
-types, or some types including core types, have defined over them; said
-operators are defined once for all types in L<Muldis::D::Core>.
-
 I<This documentation is pending.>
 
-I<Most functions that should be in the Interval Extension are pending.>
+I<Most functions that should be in this document are pending.>
 
-=head1 SYSTEM-DEFINED INTERVAL-CONCERNING FUNCTIONS
+=head1 GENERIC RELATIONAL FUNCTIONS FOR INTERVALS
 
 Each of these functions which has the parameter named C<func> is a wrapper
 over the C<order-determination> function named in its C<func> argument when
@@ -60,10 +49,10 @@ be compared to an interval's endpoints must be compatible with them.
 Likewise, said attributes of any multiplicity of C<Interval>-typed
 arguments must be mutually compatible.
 
-=head2 sys.std.Interval.has_member
+=head2 sys.std.Core.Interval.has_member
 
-C<< function sys.std.Interval.has_member (Bool <-- $interval : Interval,
-$value : Universal, $func? : OrdDetFuncRef) >>
+C<< function sys.std.Core.Interval.has_member (Bool <--
+$interval : Interval, $value : Universal, $func? : OrdDetFuncRef) >>
 
 This function results in C<Bool:true> iff its C<value> argument is included
 within the interval defined by its C<interval> argument, and C<Bool:false>
@@ -71,14 +60,43 @@ otherwise.  That is, if conceptually the interval represents a set of
 values, this function tests if C<value> is a member of C<interval>.  Note
 that this operation is also known as C<I∋>.
 
-=head2 sys.std.Interval.has_not_member
+=head2 sys.std.Core.Interval.has_not_member
 
-C<< function sys.std.Interval.has_not_member (Bool <--
+C<< function sys.std.Core.Interval.has_not_member (Bool <--
 $interval : Interval, $value : Universal, $func? : OrdDetFuncRef) >>
 
-This function is exactly the same as C<sys.std.Interval.has_member> except
-that it results in the opposite boolean value when given the same
+This function is exactly the same as C<sys.std.Core.Interval.has_member>
+except that it results in the opposite boolean value when given the same
 arguments.  Note that this operation is also known as C<I∌>.
+
+=head2 sys.std.Core.Interval.value_is_member
+
+C<< function sys.std.Core.Interval.value_is_member (Bool <--
+$value : Universal, $interval : Interval, $func? : OrdDetFuncRef) >>
+
+This function is an alias for C<sys.std.Core.Interval.has_member>.  This
+function results in C<Bool:true> iff its C<value> argument is included
+within the interval defined by its C<interval> argument, and C<Bool:false>
+otherwise.  That is, if conceptually the interval represents a set of
+values, this function tests if C<value> is a member of C<interval>.  Note
+that this operation is also known as C<I∈> or I<between>, and depending on
+the combination of C<excludes_[min|max]> attributes of its C<interval>
+argument, it is alternately also known as one of [C<≤≤>, C<< ≤< >>, C<< <≤
+>>, C<< << >>].
+
+=head2 sys.std.Core.Interval.value_is_not_member
+
+C<< function sys.std.Core.Interval.value_is_not_member (Bool <--
+$value : Universal, $interval : Interval, $func? : OrdDetFuncRef) >>
+
+This function is an alias for C<sys.std.Core.Interval.has_not_member>.
+This function is exactly the same as
+C<sys.std.Core.Interval.value_is_member> except that it
+results in the opposite boolean value when given the same arguments.  Note
+that this operation is also known as C<I∉> or I<not between>, and depending
+on the combination of C<excludes_[min|max]> attributes of its C<interval>
+argument, it is alternately also known as one of [C<!≤≤>, C<< !≤< >>, C<<
+!<≤ >>, C<< !<< >>].
 
 =head1 SEE ALSO
 

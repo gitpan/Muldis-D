@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Muldis::D;
-our $VERSION = '0.100000';
+our $VERSION = '0.101000';
 $VERSION = eval $VERSION;
 # Note that Perl code only exists at all in this file in order to help
 # the CPAN indexer handle the distribution properly.
@@ -20,7 +20,7 @@ Formal spec of Muldis D relational DBMS lang
 
 =head1 VERSION
 
-This document is Muldis::D version 0.100.0.
+This document is Muldis::D version 0.101.0.
 
 =head1 PREFACE
 
@@ -31,13 +31,8 @@ L<Muldis::D::Basics>, L<Muldis::D::Core> (which has its own tree of parts
 to follow), L<Muldis::D::Dialect::PTMD_STD>,
 L<Muldis::D::Dialect::HDMD_Perl6_STD>,
 L<Muldis::D::Dialect::HDMD_Perl5_STD>, L<Muldis::D::Conventions>,
-L<Muldis::D::Ext::Ordered>, L<Muldis::D::Ext::Bool>,
-L<Muldis::D::Ext::Integer>, L<Muldis::D::Ext::Blob>,
-L<Muldis::D::Ext::Text>, L<Muldis::D::Ext::Rational>,
-L<Muldis::D::Ext::Tuple>, L<Muldis::D::Ext::Relation>,
-L<Muldis::D::Ext::Set>, L<Muldis::D::Ext::Array>, L<Muldis::D::Ext::Bag>,
-L<Muldis::D::Ext::Interval>, L<Muldis::D::Ext::Counted>,
-L<Muldis::D::Ext::Temporal>, L<Muldis::D::Ext::Spatial>.
+L<Muldis::D::Ext::Counted>, L<Muldis::D::Ext::DateTime>,
+L<Muldis::D::Ext::Spatial>.
 
 =head1 DESCRIPTION
 
@@ -50,10 +45,10 @@ at them.
 
 The fully-qualified name of this multi-part document and the language
 specification it contains (as a single composition) is
-C<Muldis_D:"http://muldis.com":"0.100.0">.  It is the official/original
+C<Muldis_D:"http://muldis.com":"0.101.0">.  It is the official/original
 (not
 embraced and extended) Muldis D language specification by the authority
-Darren Duncan (C<http://muldis.com>), version C<0.100.0> (this number
+Darren Duncan (C<http://muldis.com>), version C<0.101.0> (this number
 matches the VERSION pod in this file).  This multi-part document is named
 and organized with the expectation that many dialects, extensions, and core
 versions of it will exist over time, some of those under the original

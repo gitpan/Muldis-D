@@ -4,47 +4,33 @@
 
 =head1 NAME
 
-Muldis::D::Ext::Rational -
-Muldis D extension for rational data types and operators
+Muldis::D::Core::Rational -
+Muldis D rational numeric operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Rational version 0.100.0.
+This document is Muldis::D::Core::Rational version 0.101.0.
 
 =head1 PREFACE
 
 This document is part of the Muldis D language specification, whose root
-document is L<Muldis::D>; you should read that root document
-before you read this one, which provides subservient details.
+document is L<Muldis::D>; you should read that root document before
+you read this one, which provides subservient details.  Moreover, you
+should read the L<Muldis::D::Core> document before this current
+document, as that forms its own tree beneath a root document branch.
 
 =head1 DESCRIPTION
 
-Muldis D has a mandatory core set of system-defined (eternally available)
-entities, which is referred to as the I<Muldis D core> or the I<core>; they
-are the minimal entities that all Muldis D implementations need to provide;
-they are mutually self-describing and are used to bootstrap the language;
-any entities outside the core, called I<Muldis D extensions>, are
-non-mandatory and are defined in terms of the core or each other, but the
-reverse isn't true.
-
-This current C<Rational> document describes the system-defined I<Muldis D
-Rational Extension>, which consists of rational data types and operators,
-essentially all the generic ones that a typical programming language should
-have, but for the bare minimum needed for bootstrapping Muldis D, which are
-defined in the language core instead.
-
-This current document does not describe the polymorphic operators that all
-types, or some types including core types, have defined over them; said
-operators are defined once for all types in L<Muldis::D::Core>.
+This document describes essentially all of the core Muldis D operators that
+are specific to the core data type C<Rat>, essentially all the generic ones
+that a typical programming language should have.
 
 I<This documentation is pending.>
 
 =head1 TYPE SUMMARY
 
 Following are all the data types described in this document, arranged in a
-type graph according to their proper sub|supertype relationships (but that
-a few of them just reappear from the core set to provide a similar context,
-and aren't re-described here):
+type graph according to their proper sub|supertype relationships:
 
     sys.std.Core.Type.Universal
 
@@ -57,36 +43,21 @@ and aren't re-described here):
                     # The following are all regular ordered scalar types.
 
                     sys.std.Core.Type.Rat
-                        sys.std.Rational.Type.BRat
-                        sys.std.Rational.Type.DRat
-
-                    sys.std.Core.Type.Int
-                        sys.std.Core.Type.NNInt
-                            sys.std.Core.Type.PInt
-
-                                # These are all finite integer types.
-
-                                sys.std.Rational.Type.PInt2_36
+                        sys.std.Core.Type.Rational.BRat
+                        sys.std.Core.Type.Rational.DRat
 
 I<This documentation is pending.>
 
-=head1 SYSTEM-DEFINED RATIONAL-CONCERNING DATA TYPES
+=head1 DATA TYPES THAT SUBTYPE RATIONALS
 
-=head2 sys.std.Rational.Type.PInt2_36
-
-This is an enumeration data type.  C<PInt2_36> is a proper subtype of
-C<PInt> where all member values are between 2 and 36.  (The significance of
-the number 36 is 10 digits plus 26 letters.)  Its default and minimum value
-is 2.  Its maximum value is 36.  The cardinality of this type is 35.
-
-=head2 sys.std.Rational.Type.BRat
+=head2 sys.std.Core.Type.Rational.BRat
 
 This is an enumeration data type.  C<BRat> (binary rational) is a proper
 subtype of C<Rat> where the C<radix> is 2; it is the best option to exactly
 represent rational numbers that are conceptually binary or octal or
 hexadecimal, such as most IEEE-754 floating point numbers.
 
-=head2 sys.std.Rational.Type.DRat
+=head2 sys.std.Core.Type.Rational.DRat
 
 This is an enumeration data type.  C<DRat> (decimal rational) is a proper
 subtype of C<Rat> where the C<radix> is 10 (or if it could be without the
@@ -98,16 +69,16 @@ numbers that humans typically work with.
 
 These functions implement commonly used rational numeric operations.
 
-=head2 sys.std.Rational.abs
+=head2 sys.std.Core.Rational.abs
 
-C<< function sys.std.Rational.abs (NNRat <-- $topic : Rat) >>
+C<< function sys.std.Core.Rational.abs (NNRat <-- $topic : Rat) >>
 
 This function results in the absolute value of its argument.  Note that
 this operation is also known as C<N||>.
 
-=head2 sys.std.Rational.sum
+=head2 sys.std.Core.Rational.sum
 
-C<< function sys.std.Rational.sum (Rat <-- $topic? : bag_of.Rat) >>
+C<< function sys.std.Core.Rational.sum (Rat <-- $topic? : bag_of.Rat) >>
 
 This function results in the sum of the N element values of its argument;
 it is a reduction operator that recursively takes each pair of input values
@@ -117,26 +88,27 @@ C<sum> results in the rational zero, which is the identity value for
 addition.  Note that this operation is also known as I<addition> or I<plus>
 or C<N+>.
 
-=head2 sys.std.Rational.diff
+=head2 sys.std.Core.Rational.diff
 
-C<< function sys.std.Rational.diff (Rat <-- $minuend : Rat,
+C<< function sys.std.Core.Rational.diff (Rat <-- $minuend : Rat,
 $subtrahend : Rat) >>
 
 This function results in the difference when its C<subtrahend> argument is
 subtracted from its C<minuend> argument.  Note that this operation is also
 known as I<subtraction> or I<minus> or C<N->.
 
-=head2 sys.std.Rational.abs_diff
+=head2 sys.std.Core.Rational.abs_diff
 
-C<< function sys.std.Rational.abs_diff (Rat <-- $topic : Rat, $other : Rat)
->>
+C<< function sys.std.Core.Rational.abs_diff (Rat <-- $topic : Rat,
+$other : Rat) >>
 
 This symmetric function results in the absolute difference between its 2
 arguments.  Note that this operation is also known as C<N|-|>.
 
-=head2 sys.std.Rational.product
+=head2 sys.std.Core.Rational.product
 
-C<< function sys.std.Rational.product (Rat <-- $topic? : bag_of.Rat) >>
+C<< function sys.std.Core.Rational.product (Rat <-- $topic? : bag_of.Rat)
+>>
 
 This function results in the product of the N element values of its
 argument; it is a reduction operator that recursively takes each pair of
@@ -146,9 +118,9 @@ has zero values, then C<product> results in the rational 1, which is the
 identity value for multiplication.  Note that this operation is also known
 as I<multiply> or I<times> or C<N*>.
 
-=head2 sys.std.Rational.quotient
+=head2 sys.std.Core.Rational.quotient
 
-C<< function sys.std.Rational.quotient (Rat <-- $dividend : Rat,
+C<< function sys.std.Core.Rational.quotient (Rat <-- $dividend : Rat,
 $divisor : Rat) >>
 
 This function results in the quotient when its C<dividend> argument is
@@ -156,45 +128,45 @@ divided by its C<divisor> argument using rational division.  This function
 will fail if C<divisor> is zero.  Note that this operation is also known as
 I<divide> or C<N/>.
 
-=head2 sys.std.Rational.maybe_quotient
+=head2 sys.std.Core.Rational.maybe_quotient
 
-C<< function sys.std.Rational.maybe_quotient (maybe_of.Rat <--
+C<< function sys.std.Core.Rational.maybe_quotient (maybe_of.Rat <--
 $dividend : Rat, $divisor : Rat) >>
 
-This function is exactly the same as C<sys.std.Rational.quotient> except
-that it results in a C<Maybe> of what is otherwise the result, and that
-result has zero elements if C<divisor> is zero.
+This function is exactly the same as C<sys.std.Core.Rational.quotient>
+except that it results in a C<Maybe> of what is otherwise the result, and
+that result has zero elements if C<divisor> is zero.
 
-=head2 sys.std.Rational.range
+=head2 sys.std.Core.Rational.range
 
-C<< function sys.std.Rational.range (Rat <-- $topic : set_of.Rat) >>
+C<< function sys.std.Core.Rational.range (Rat <-- $topic : set_of.Rat) >>
 
 This function results in the difference between the lowest and highest
 element values of its argument.  If C<topic> has zero values, then C<range>
 results in the rational zero.
 
-=head2 sys.std.Rational.mean
+=head2 sys.std.Core.Rational.mean
 
-C<< function sys.std.Rational.mean (Rat <-- $topic : bag_of.Rat) >>
+C<< function sys.std.Core.Rational.mean (Rat <-- $topic : bag_of.Rat) >>
 
 This function results in the mean or arithmetic average of the N element
 values of its argument.  It is equivalent to first taking the sum of the
 input values, and dividing that sum by the count of the input values.  If
 C<topic> has zero values, then this function will fail.
 
-=head2 sys.std.Rational.maybe_mean
+=head2 sys.std.Core.Rational.maybe_mean
 
-C<< function sys.std.Rational.maybe_mean (maybe_of.Rat <--
+C<< function sys.std.Core.Rational.maybe_mean (maybe_of.Rat <--
 $topic : bag_of.Rat) >>
 
-This function is exactly the same as C<sys.std.Rational.mean> except that
-it results in a C<Maybe> of what is otherwise the result, and that result
-has zero elements if C<topic> has zero values.
+This function is exactly the same as C<sys.std.Core.Rational.mean> except
+that it results in a C<Maybe> of what is otherwise the result, and that
+result has zero elements if C<topic> has zero values.
 
-=head2 sys.std.Rational.median
+=head2 sys.std.Core.Rational.median
 
-C<< function sys.std.Rational.median (set_of.Rat <-- $topic : bag_of.Rat)
->>
+C<< function sys.std.Core.Rational.median (set_of.Rat <--
+$topic : bag_of.Rat) >>
 
 This function results in the 1 or 2 median values of the N element values
 of its argument; they are returned as a set.  It is equivalent to first
@@ -204,18 +176,19 @@ middle values, if the count of input values is even (but if the 2 middle
 values are the same value, the output has one element).  If C<topic> has
 zero values, then the result set is empty.
 
-=head2 sys.std.Rational.mean_of_median
+=head2 sys.std.Core.Rational.mean_of_median
 
-C<< function sys.std.Rational.mean_of_median (Rat <-- $topic : bag_of.Rat)
->>
+C<< function sys.std.Core.Rational.mean_of_median (Rat <--
+$topic : bag_of.Rat) >>
 
-This function is a wrapper over C<sys.std.Rational.median> that will result
-in the mean of its result elements; it will fail if there are zero
+This function is a wrapper over C<sys.std.Core.Rational.median> that will
+result in the mean of its result elements; it will fail if there are zero
 elements.
 
-=head2 sys.std.Rational.mode
+=head2 sys.std.Core.Rational.mode
 
-C<< function sys.std.Rational.mode (set_of.Rat <-- $topic : bag_of.Rat) >>
+C<< function sys.std.Core.Rational.mode (set_of.Rat <--
+$topic : bag_of.Rat) >>
 
 This function results in the mode of the N element values of its argument;
 it is the set of values that appear the most often as input elements, and
@@ -223,18 +196,18 @@ all have the same count of occurrances.  As a trivial case, if all input
 elements have the same count of occurrances, then they will all be in the
 output.  If C<topic> has zero values, then the result set is empty.
 
-=head2 sys.std.Rational.round
+=head2 sys.std.Core.Rational.round
 
-C<< function sys.std.Rational.round (Rat <-- $topic : Rat,
+C<< function sys.std.Core.Rational.round (Rat <-- $topic : Rat,
 $round_rule : RatRoundRule) >>
 
 This function results in the rational that is equal to or otherwise nearest
 to its C<topic> argument, where the nearest is determined by the rational
 rounding rule specified by the C<round_rule> argument.
 
-=head2 sys.std.Rational.power
+=head2 sys.std.Core.Rational.power
 
-C<< function sys.std.Rational.power (PRat <-- $radix : PRat,
+C<< function sys.std.Core.Rational.power (PRat <-- $radix : PRat,
 $exponent : Rat, $round_rule : RatRoundRule) >>
 
 This function results in its (positive rational) C<radix> argument taken to
@@ -246,18 +219,18 @@ multiple real number results for some fractional C<exponent>, it will
 always only result in the one that is positive.  Note that this operation
 is also known as I<exponentiation> or C<N^>.
 
-=head2 sys.std.Rational.log
+=head2 sys.std.Core.Rational.log
 
-C<< function sys.std.Rational.log (Rat <-- $topic : PRat, $radix : PRat,
-$round_rule : RatRoundRule) >>
+C<< function sys.std.Core.Rational.log (Rat <-- $topic : PRat,
+$radix : PRat, $round_rule : RatRoundRule) >>
 
 This function results in the logarithm of its C<topic> argument to the base
 given in its (positive rational) C<radix> argument.  The C<round_rule>
 parameter is as per C<power>.
 
-=head2 sys.std.Rational.natural_power
+=head2 sys.std.Core.Rational.natural_power
 
-C<< function sys.std.Rational.natural_power (PRat <-- $exponent : Rat,
+C<< function sys.std.Core.Rational.natural_power (PRat <-- $exponent : Rat,
 $round_rule : RatRoundRule) >>
 
 This function results in the special mathematical constant I<e> (which is
@@ -265,74 +238,28 @@ the base of the natural logarithm) taken to the power of its C<exponent>
 argument.  The C<round_rule> parameter is as per C<power>.  Note that this
 operation is also known as C<e^>.
 
-=head2 sys.std.Rational.natural_log
+=head2 sys.std.Core.Rational.natural_log
 
-C<< function sys.std.Rational.natural_log (Rat <-- $topic : PRat,
+C<< function sys.std.Core.Rational.natural_log (Rat <-- $topic : PRat,
 $round_rule : RatRoundRule) >>
 
 This function results in the natural logarithm of its C<topic> argument.
 The C<round_rule> parameter is as per C<power>.  Note that this operation
 is also known as C<log-e>.
 
-=head1 FUNCTIONS FOR RATIONAL CONVERSION WITH TEXT
+=head1 SYSTEM-SERVICES FOR RANDOM NUMBER GENERATORS
 
-These functions convert between C<Rat> values and canonically formatted
-representations of rationals as character strings.
-
-=head2 sys.std.Rational.Rat_from_Text
-
-C<< function sys.std.Rational.Rat_from_Text (Rat <-- $text : Text,
-$radix : PInt2_36) >>
-
-This selector function results in the C<Rat> value that its (not-empty)
-C<text> argument maps to when the whole character string is evaluated as a
-base-C<radix> rational.  Extending the typical formats of [base-2, base-8,
-base-10, base-16], this function supports base-2 through base-36; to get
-the latter, the characters 0-9 and A-Z represent values in 0-35.  This
-function will fail if C<text> can't be mapped as specified.
-
-=head2 sys.std.Rational.Text_from_Rat
-
-C<< function sys.std.Rational.Text_from_Rat (Text <-- $rat : Rat,
-$radix : PInt2_36) >>
-
-This selector function results in the (not-empty) C<Text> value where its
-C<rat> argument is formatted as a base-C<radix> rational.
-
-=head1 FUNCTIONS FOR RATIONAL CONVERSION WITH INTEGER
-
-These functions convert between C<Rat> values and equal or nearly equal
-C<Int> values.
-
-=head2 sys.std.Rational.Rat_from_Int
-
-C<< function sys.std.Rational.Rat_from_Int (Rat <-- $int : Int) >>
-
-This selector function results in the C<Rat> value that is conceptually
-equal to its C<Int> argument.
-
-=head2 sys.std.Rational.Int_from_Rat
-
-C<< function sys.std.Rational.Int_from_Rat (Int <-- $rat : Rat,
-$round_meth : RatRoundMeth) >>
-
-This selector function results in the C<Int> value that is conceptually
-equal to or otherwise nearest to its C<rat> argument, where the nearest is
-determined by the rounding method specified by the C<round_meth> argument.
-
-=head1 SYSTEM SERVICES FOR RANDOM NUMBER GENERATORS
-
-These system service routines provide ways to get random numbers from the
+These system-service routines provide ways to get random numbers from the
 system.  Where the results are in the range between truly random and
 pseudo-random is, for the moment, an implementation detail, but the details
 of these functions is subject to become more formalized later.
 
-=head2 sys.std.Rational.fetch_random
+=head2 sys.std.Core.Rational.fetch_random
 
-C<system-service sys.std.Rational.fetch_random (&$target : Rat,
+C<system-service sys.std.Core.Rational.fetch_random (&$target : Rat,
 $radix : PInt2_N, $max_denom : PInt, $interval : interval_of.Rat)>
 
-This system service routine will update the variable supplied as its
+This system-service routine will update the variable supplied as its
 C<target> argument so that it holds a randomly generated rational value
 that is included within the interval defined by its C<interval> argument.
 The denominator attribute of the generated value will be a non-negative

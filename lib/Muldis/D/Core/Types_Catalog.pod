@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.100.0.
+This document is Muldis::D::Core::Types_Catalog version 0.101.0.
 
 =head1 PREFACE
 
@@ -20,10 +20,6 @@ should read the L<Muldis::D::Core> document before this current
 document, as that forms its own tree beneath a root document branch.
 
 =head1 DESCRIPTION
-
-This document contains one or more sections that were moved here from
-L<Muldis::D::Core> so that said other document would not be too
-large.
 
 These core data types are more special-purpose in nature and are intended
 for use in defining or working with the system catalog.
@@ -480,7 +476,7 @@ C<Sys[Function|Updater|Procedure]Set>
 
 These are the interfaces, or definitions in some cases, of all the
 system-defined functions|updaters|procedures.  (Note that C<procedures>
-also specifies the system-defined system services.)
+also specifies the system-defined system-services.)
 
 =item C<special_types> - C<SysSpecTypeSet>
 
@@ -555,7 +551,7 @@ C<name> attributes.  Its default value is empty.
 
 A C<Sys[Function|Updater|Procedure]Set> is a C<DHRelation> that specifies a
 set of system-defined functions|updaters|procedures.  (Note that
-C<SysProcedureSet> also specifies the system-defined system services.)
+C<SysProcedureSet> also specifies the system-defined system-services.)
 
 A C<Sys[Function|Updater|Procedure]Set> has these 4 attributes:
 
@@ -2231,7 +2227,7 @@ key over the C<name> attributes of C<upd_args> and C<ro_args>.
 
 An C<ProcInvoStmtNodeSet> is a C<DHRelation> that specifies a set of
 statement nodes where each node is an invocation of some other procedure
-(or system service) with specific arguments.  The invoked procedure can be
+(or system-service) with specific arguments.  The invoked procedure can be
 either user-defined or system-defined.
 
 An C<ProcInvoStmtNodeSet> has these 5 attributes:
@@ -3656,7 +3652,7 @@ routine and parameter values.
 I<For now, only functions may be curried, and imperative routines can't be;
 the latter might be supported in the future but then it has to be worked
 out how to best support currying of updateable parameters, especially how
-to define imperative versions of C<sys.std.Core.Control.curried_func>.>
+to define imperative versions of C<sys.std.Core.Cat.curried_func>.>
 
 =head2 sys.std.Core.Type.Cat.MaterialRef
 
