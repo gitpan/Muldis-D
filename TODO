@@ -18,44 +18,14 @@ table for these items; they are simply to be done "as soon as possible".
 the progress is non-trivial, so there are regular public snapshots with
 nicely rendered documentation.
 
-* Replace dep.* and sdp.* namespaces with single nlx.* namespaces:
-    nlx  # non-lex entities ref own immed parent non-lex namespace w this
-        nlx[.par]**0..*
-            nlx[.par]**0..*.cat  # upd s-c db desc ent under fed.[lib|data]
-            nlx[.par]**0..*.lib  # invokable tps|rtns in this namespace
-                nlx[.par]**0..*.lib[.chi-nlx-nsp]**0..*
-                    nlx[.par]**0..*.lib[.chi-nlx-nsp]**0..*.<material>
-            nlx[.par]**0..*.data  # upd db of normal user data in this nsp
-... so that details of material defs can remain invariant and match their
-actual stored defs despite where in their parent namespace tree is actually
-mounted as a "depot" in some DBMS.
-
-* Add subtypes of NameChain such as the likes of:
-- LibNameChain restr to [fed,nlx].lib.*, sys.std.*
-- DataNameChain restr to [fed,nlx].[cat,data].*, lex.*
-- AbsPathLibNameChain restr to fed.lib.*, sys.std.*
-- AbsPathDataNameChain restr to fed.[cat,data].*, lex.*
-- RelPathLibNameChain restr to nlx.lib.*, sys.std.*
-- RelPathDataNameChain restr to nlx.[cat,data].*, lex.*
-... and use these in many/most of the places where plain NameChain is used
-as a declared type, so for example to help ensure that it is actually
-materials vs data, or same-depot vs anywhere references are used as approp.
-For example, any type def or function/updater def can never refer to u-d
-entities outside its own depot (uses nlx/sys/etc) for a direct invoc or as
-stored in code while entity names passed as "closures"/"higher-order-funcs"
-must always use the global (fed/sys/etc) names, and typically the latter
-should always be transient / not-persisted values as they may be invalidat.
-Also replace the material-ref-sel catalog types with ones that produce
-AbsPath values from RelPath values.
-Also eliminate the whole MaterialRef tree of types and add a tuple type to
-represent a curried function, which has the AbsPath and the arguments.
-
 * Add "recipe" routine type, which is like "procedure" in that it can see
 and update globals, but like "updater" in that it can't call system-service
 routines and it is generally deterministic.  Then change most of the s-d
 "procedure" routines to be "recipe" instead, like all the data-def ones.
 
 * Large updates to docs concerning transactions and resource locking.
+Note:  Supposedly PostgreSQL and MySQL use read-committed isolation by
+default while SQLite provides serializable.
 
 * Add new "material" kinds that define descriptions of resource locks that
 one wants to get, starting with basic whole dbvar, relvar locks (address as
@@ -242,7 +212,7 @@ role is defin shorthand.
 * IN PROGRESS ...
 A Muldis D host|peer language can probably hold lexical-to-them variables
 whose Muldis D value object is Reference typed, and so they could
-effectively pass around an anonymous Muldis D FuncRef etc like a closure of
+effectively pass around an anonymous closure of
 their own language.  Such a value object would be a black box to the host
 and can't be dumped to Muldis D source code.
 
@@ -280,16 +250,15 @@ foreign value is mutually distinct from every other foreign too, unless
 identity is overloaded by the foreign, like how Perl 6's .WHICH works.
 The foreign-access namespace may have a simple catalog variable
 representing what types and routines it is exposing, but to Muldis D this
-would be we_may_update=false.  It stands to reason that Muldis D's standard
-FuncRef etc can point to the name of a foreign routine as much as a native.
+would be we_may_update=false.
 TODO:  Figure out how to declare a Muldis D non-dh type whose attributes
 are declared of some foreign type ... or maybe we can't and all such
 attributes would simply be declared Universal all the time, might be enuf.
 
 * IN PROGRESS ...
 First round to above:  Add system-defined subtype of Reference called
-sys.std.Core.Type.Foreign (itself 'special' like FuncRef etc), the new
-one being a root type, and then we simply say that all values passed in
+sys.std.Core.Type.Foreign, the
+new one being a root type, and then we simply say that all values passed in
 from a host or peer language are of that root type, period; this new one is
 declared in Types.pod probably maybe I guess.  Then update Perl5_STD and
 Perl6_STD to add a new selector node kind 'Foreign' which takes any Perl
@@ -466,12 +435,13 @@ looking for consistent reads between statements, etc.
 
 * Restore the concept of public-vs-private entities directly in sub|depots.
 
+* Restore the concept of "topic namespaces" (analagous to SQL DBMS concept
+of "current database|schema" etc) in some form if not redundant.
+
 * Update the system catalog to deal with database users and privileges etc.
 
 * Flesh out matters related to starting or communicating between multiple
 autonomous in-DBMS processes, in general, besides the special case about
 sequence generators.
-
-* Consider some more elegant solution about matters of closures et al.
 
 * Whatever else needs doing, such as, fixing bugs.

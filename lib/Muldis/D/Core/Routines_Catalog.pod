@@ -9,7 +9,7 @@ Muldis D data definition routines
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Routines_Catalog version 0.101.0.
+This document is Muldis::D::Core::Routines_Catalog version 0.102.0.
 
 =head1 PREFACE
 
@@ -74,7 +74,7 @@ C<< [<=>] >>.
 =head2 sys.std.Core.Cat.func_invo
 
 C<< function sys.std.Core.Cat.func_invo (Universal <--
-$function : FuncRef, $args? : Tuple) >>
+$function : APFunctionNC, $args? : Tuple) >>
 
 This function results in the result of invoking the other function named in
 its C<function> argument with arguments supplied by this function's C<args>
@@ -92,34 +92,9 @@ invoke a function whose name they take as an argument.  The C<args>
 parameter is optional and defaults to the zero-attribute tuple if no
 explicit argument is given to it.
 
-=head2 sys.std.Core.Cat.curried_func
-
-C<< function sys.std.Core.Cat.curried_func (FuncRef <--
-$function : FuncRef, $args : Tuple) >>
-
-This function results in a reference to a new anonymous function which is
-the result of currying the other function named in its C<function> argument
-with 0..N arguments supplied by this function's C<args> argument; each
-attribute name of C<args> is mapped to a parameter name of the curried
-function, and the corresponding attribute value is the corresponding
-pre-bound parameter of the curried function.  This function will fail if
-there are any attributes in C<args> that don't have corresponding
-parameters, or if any attribute values aren't of the declared types of the
-corresponding parameters.  A curried function effectively does not have the
-parameters of the original function that were pre-bound, and attempts to
-supply arguments to those on the curried function will fail.  Note that the
-result of a C<curried_func> invocation can be used as input to another one,
-as there is effectively no difference in their kind.  The purpose of
-C<curried_func> is to support the passing of functions as arguments to
-invocations of other routines where the passed function wants to use
-runtime-defined information in the context that invoked routine, without
-having to pass that information separately as additional routine arguments.
-Or the purpose of C<curried_func> is just to easily support defining
-functions as simplified versions of others.
-
 =head2 sys.std.Core.Cat.upd_invo
 
-C<updater sys.std.Core.Cat.upd_invo ($updater : UpdRef,
+C<updater sys.std.Core.Cat.upd_invo ($updater : APUpdaterNC,
 &$upd_args : Tuple, $ro_args? : Tuple)>
 
 This update operator has the same purpose and features as
@@ -136,7 +111,7 @@ These procedures are applicable to use in all kinds of procedures.
 
 =head2 sys.std.Core.Cat.proc_invo
 
-C<procedure sys.std.Core.Cat.proc_invo ($procedure : ProcRef,
+C<procedure sys.std.Core.Cat.proc_invo ($procedure : APProcedureNC,
 &$upd_args? : Tuple, $ro_args? : Tuple)>
 
 This procedure is the same as C<sys.std.Core.Cat.upd_invo> but that it
@@ -155,8 +130,9 @@ in the call stack unwinding, and transaction rollbacks, until it is caught.
 =head2 sys.std.Core.Cat.try_catch
 
 C<procedure sys.std.Core.Cat.try_catch
-($try : ProcRef, &$try_upd_args? : Tuple, $try_ro_args? : Tuple,
-$catch? : ProcRef, &$catch_upd_args? : Tuple, $catch_ro_args? : Tuple)>
+($try : APProcedureNC, &$try_upd_args? : Tuple, $try_ro_args? : Tuple,
+$catch? : APProcedureNC, &$catch_upd_args? : Tuple,
+$catch_ro_args? : Tuple)>
 
 This procedure invokes the procedure (or system-service)
 named in its C<try> argument
@@ -219,7 +195,7 @@ This procedure has no parameters and doesn't do anything at all.
 These procedures comprise a set of commonly useful system-defined data
 definition routines, which simplify some tasks of manipulating the Muldis D
 system catalog dbvars.  The following procedures can do the following:
-create|mount and drop|unmount depots, set|clear topic namespaces,
+create|mount and drop|unmount depots,
 create|drop subdepots, create|drop user-defined routines and
 data types; they can not create or drop relvars.
 
@@ -258,32 +234,12 @@ This procedure is an abstraction over updating a tuple of the catalog
 relvar C<mnt.cat.mounts> such that its C<we_may_update> attribute is made
 C<Bool:false>.
 
-=head1 Procedures For Defining Topic Namespaces
-
-=head2 sys.std.Core.Cat.select_topic_namespaces
-
-C<procedure sys.std.Core.Cat.select_topic_namespaces
-($depot? : maybe_of.Name, $subdepot? : maybe_of.DeclNameChain,
-$comment? : Comment)>
-
-This procedure is an abstraction over assigning a new value to the catalog
-variable C<tpc.cat>; the 3 parameters correspond directly to the attributes
-of C<tpc.cat>.  If all the arguments are omitted, then C<tpc.cat> will have
-its default value of all-C<nothing> attributes, meaning there are no
-default namespaces.  If C<subdepot> is a C<Single> then C<depot> must be.
-
 =head1 Procedures For Defining In-Depot Namespaces
-
-These 2 procedures conceptually have the extra 2 parameters C<$depot :
-Name, $parent? : DeclNameChain>, whose values are implicitly supplied from
-C<tpc.cat.topic_[depot|subdepot]> respectively; those 1 or 2 (as
-applicable) catalog variables must be non-empty as a precondition to
-invoking the 2 procedures.
 
 =head2 sys.std.Core.Cat.create_subdepot
 
-C<procedure sys.std.Core.Cat.create_subdepot ($name : Name,
-$comment? : Comment)>
+C<procedure sys.std.Core.Cat.create_subdepot ($depot : Name,
+$parent? : DeclNameChain, $name : Name, $comment? : Comment)>
 
 This procedure is an abstraction over inserting a tuple into the catalog
 relvar C<fed.cat.mounts{name=$depot}.depot.subdepots>.  It will create a
@@ -294,7 +250,8 @@ PACKAGE statement.
 
 =head2 sys.std.Core.Cat.drop_subdepot
 
-C<procedure sys.std.Core.Cat.drop_subdepot ($name : Name)>
+C<procedure sys.std.Core.Cat.drop_subdepot ($depot : Name,
+$parent? : DeclNameChain, $name : Name)>
 
 This procedure is an abstraction over deleting a tuple from the catalog
 relvar C<fed.cat.mounts{name=$depot}.depot.subdepots>.  It will drop an
@@ -303,17 +260,11 @@ statement or an Oracle DROP PACKAGE statement.
 
 =head1 Procedures For Defining Depot Routines and Data Types
 
-These 14 procedures conceptually have the extra 2 parameters C<$depot :
-Name, $subdepot? : DeclNameChain>, whose values are implicitly supplied
-from C<tpc.cat.topic_[depot|subdepot]> respectively; those 1 or 2 (as
-applicable) catalog variables must be non-empty as a precondition to
-invoking the 14 procedures.
-
 =head2 sys.std.Core.Cat.create_[function|updater|procedure]
 
 C<procedure sys.std.Core.Cat.create_[function|updater|procedure]
-($name : Name, $comment? : Comment,
-[Function|Updater|Procedure] $material)>
+($depot : Name, $subdepot? : DeclNameChain, $name : Name,
+$comment? : Comment, [Function|Updater|Procedure] $material)>
 
 This procedure is an abstraction over inserting a tuple into the catalog
 relvar C<fed.cat.mounts{name=$depot}.depot.[function|updater|procedure]s>.
@@ -325,7 +276,7 @@ FUNCTION|PROCEDURE statement.
 =head2 sys.std.Core.Cat.drop_[function|updater|procedure]
 
 C<procedure sys.std.Core.Cat.drop_[function|updater|procedure]
-($name : Name)>
+($depot : Name, $subdepot? : DeclNameChain, $name : Name)>
 
 This procedure is an abstraction over deleting a tuple from the catalog
 relvar C<fed.cat.mounts{name=$depot}.depot.[function|updater|procedure]s>.
@@ -335,8 +286,8 @@ is analagous to a SQL DROP FUNCTION|PROCEDURE statement.
 =head2 sys.std.Core.Cat.create_[scalar|nonscalar|union|subset]_type
 
 C<procedure sys.std.Core.Cat.create_[scalar|nonscalar|union|subset]_type
-($name : Name, $comment? : Comment,
-[Scalar|Nonscalar|Union|Subset]$material : Type)>
+($depot : Name, $subdepot? : DeclNameChain, $name : Name,
+$comment? : Comment, [Scalar|Nonscalar|Union|Subset]$material : Type)>
 
 This procedure is an abstraction over inserting a tuple into the catalog
 relvar
@@ -348,7 +299,7 @@ This procedure is analagous to a SQL CREATE TYPE|DOMAIN statement.
 =head2 sys.std.Core.Cat.drop_[scalar|nonscalar|union|subset]_type
 
 C<procedure sys.std.Core.Cat.drop_[scalar|nonscalar|union|subset]_type
-($name : Name)>
+($depot : Name, $subdepot? : DeclNameChain, $name : Name)>
 
 This procedure is an abstraction over deleting a tuple from the catalog
 relvar

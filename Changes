@@ -1,6 +1,146 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2009-11-30  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.102.0 is released on CPAN as
+    Muldis-D-0.102.0.tar.gz.
+
+    * (Basics.pod, Types_Catalog.pod, Routines_Catalog.pod, PTMD_STD.pod)
+    In a reversal of one aspect of release 0.57.0, temporarily removed the
+    language concept of "topic namespaces".  This change was made so that
+    some other language changes would be easier do.  The concept of "topic
+    namespaces" will likely return in a future release, if other language
+    developments haven't made it redundant.  In Basics.pod, updated the
+    "ENTITY NAMES" main pod section to remove the primary namespace "tpc"
+    ("topic"), and removed the whole pod sub-section "Time-Varying Topic
+    Namespaces".  In Types_Catalog.pod, removed the catalog type
+    "TopicNSControlCat" (for "tpc.cat") plus the then-empty main pod
+    section "TYPES FOR DEFINING TOPIC NAMESPACE CONTROLS"; also updated the
+    description of the "namespaces" attribute of the "System" catalog type.
+    In Routines_Catalog.pod, removed the procedure
+    "select_topic_namespaces" plus the then-empty pod sub-section
+    "Procedures For Defining Topic Namespaces"; also updated the previously
+    existing 16 "create|drop" procedures for in-depot namespaces and
+    routines and types so they now have the explicit 2 parent
+    namespace-specifying parameters "depot" and "parent|subdepot".  In
+    PTMD_STD.pod, updated the "DBMS Entity Name Literals" pod sub-section
+    to remove all references to the "tpc" top-level namespace.
+
+    * (Types_Catalog.pod)  Simplified the "FedTypeMapSet" catalog type by
+    renaming its "map" attribute to "types" and retyping the attribute from
+    a "FedTypeMap" binary relation (that named type was then removed) to an
+    equivalent "set_of.NameChain".
+
+    * (Basics.pod, Types.pod, Types_Catalog.pod, PTMD_STD.pod,
+    HDMD_Perl[6|5]_STD.pod)  Replaced the 2 top-level entity namespaces
+    "dep" (depot) and "sdp" (subdepot) with the 1 top-level namespace "nlx"
+    (nonlexical).  Now, all non-lexical user-defined entities in a depot
+    are referenced in just 2 ways; the "fed" top-level provides an absolute
+    path and the "nlx" top-level provides a relative path.  The new "nlx"
+    is more like the old "sdp" than the old "dep" in that its path starts
+    in the most immediate subdepot (or depot) parent of the referencing
+    entity, but unlike "sdp", "nlx" can also navigate to parent namespaces,
+    and so is fully capable of referencing anything in the referencer's
+    depot.  The new "nlx" avoids the limitations of the old
+    quasi-absolute-path "dep|sdp" in that it still works regardless of
+    which of the referencing entity's parent namespaces is mounted in a
+    DBMS as a "depot"; it makes writing portable code much easier, such
+    that the code itself can be invariant between storage and live
+    representation.  In Basics.pod, updated the "ENTITY NAMES" main pod
+    section, and its pod sub-section "User-Defined Entities", with the
+    aforementioned primary namespace replacements.  In all 6 files,
+    replaced any references to "dep" or "sdp" in documentation and code
+    examples with "nlx" as appropriate.
+
+    * (Types_Catalog.pod)  Eliminated the catalog type "MaterialRef" and
+    all of its 8 subtypes (and the whole "TYPES FOR SPECIAL ENTITY
+    REFERENCES" main pod section), and so now the only "Reference" type
+    left in Muldis D is "External".  Replacing the "MaterialRef" types, for
+    purposes of passing references to materials as routine arguments or for
+    implementing higher-order functions or closures, is a new set of scalar
+    "NameChain" subtypes and a new set of possibly-not-dh tuple types.  For
+    each of the "MaterialRef" types, all uses of it have been replaced with
+    uses of generally a single new type; the replacements are as follows
+    (all types have "sys.std.Core.Type.Cat.\w+" names):
+    "MaterialRef" -> "AbsPathMaterialNC",
+    "FuncRef" -> "APFunctionNC" + "CurriedFuncNC",
+    "[OrdDet|Val[Filt|Map|Red]]FuncRef" ->
+        "[OrdDet|Val[Filt|Map|Red]]CFuncNC",
+    "[Upd|Proc|Type]Ref" -> "AP[Updater|Procedure|Type]NC";
+    also added the 3 closely related new types "MaterialNC", "APNonTypeNC",
+    "RelPathMaterialNC" which are not direct replacements for
+    "MaterialRef" types.  The 5 new types named "CurriedFuncNC" and
+    "\w+CFuncNC" are the tuple types, and all represent a function
+    reference plus 0..N prebound parameters; the other 8 new types are all
+    "NameChain" subtypes and represent just a plain entity reference.  The
+    5 new tuple types comprise a new main pod section named "TYPES FOR
+    POSSIBLY CURRIED HIGHER-ORDER FUNCTIONS".
+
+    * (Types_Catalog.pod)  Renamed the 2 catalog types
+    "MaterialRefSel[Expr|Stmt]NodeSet" to
+    "APMaterialNCSel[Expr|Stmt]NodeSet" and tightened the declared types of
+    each of their "referencing" parameters from "NameChain" to
+    "RelPathMaterialNC"; the purpose of these catalog types has been
+    modified to derive absolute path name chains from relative path
+    name-chains, rather than derive opaque reference values from name
+    chains.  Also updated each of the 2 catalog types "[Expr|Stmt]NodeSet"
+    to rename its "material_ref_sel_[expr|stmt]s" attribute to
+    "ap_material_nc_sel_[expr|stmt]s".
+
+    * (Routines_Catalog.pod)  Removed the "curried_func" catalog function,
+    which is no longer necessary since ordinary tuple operators can be used
+    instead for the same purpose.  (But a replacement function could be
+    added later as a useful alternate syntax perhaps.)
+
+    * (Basics.pod, Types.pod, Types_Catalog.pod, PTMD_STD.pod)  Excised any
+    references to the removed "MaterialRef" types.  In Basics.pod,
+    simplified the description of the "reference" type category so that
+    only the "External" type is mentioned as an example, rather than also
+    the "MaterialRef" types.  In Types.pod, updated the "Reference" type to
+    make its default value the same as "External" rather than the same as
+    "MaterialRef".  In Types_Catalog.pod, updated the description of the
+    "special_types" attribute of the "System" catalog type to remove
+    "MaterialRef" from its list.  In PTMD_STD.pod, substituted appropriate
+    type name references in the "MATERIAL SPECIFICATION" main pod section
+    and the "Library Entity Reference Selector" pod sub-section.
+
+    * (Universal.pod, Scalar.pod, Tuple.pod, Relation.pod, Set.pod,
+    Array.pod, Bag.pod, Interval.pod, Routines_Catalog.pod, Counted.pod)
+    Updated all system defined function signatures that take material
+    references or curried functions as arguments so that they take the new
+    scalar/tuple types rather than the old reference types.
+
+    * (Types_Catalog.pod)  Added these 4 catalog types that are all
+    "NameChain" subtypes, for support of the next change item:
+    "RPFunctionNC", "RPTypeNC", "DataNC", "LexDataNC".
+
+    * (Types_Catalog.pod)  For each tuple|relation catalog type, updated
+    each attribute whose declared type was "NameChain" so that it now has
+    one of these 6 more restricted declared types: "MaterialNC",
+    "APTypeNC", "RPFunctionNC", "RPTypeNC", "DataNC", "LexDataNC".  These 5
+    attributes are now declared with "MaterialNC": "SysCatSet.catalog",
+    "FuncInvoExprNodeSet.function", "MultiUpdStmt.updater",
+    "UpdInvoStmtNodeSet.updater", "ProcInvoStmtNodeSet.procedure".  These 1
+    attributes are now declared with "APTypeNC": "FedTypeMapSet.types".
+    These 15 attributes are now declared with "RPFunctionNC":
+    "ScalarType.[subtype_constraint|default|order]",
+    "PossrepSet.constraint", "PossrepMapSet.[p2_from_p1|p1_from_p2]",
+    "NonscalarType.[tuple|relation]_constraints",
+    "NonscalarType.default_[tuple|relation]",
+    "VirtualAttrMapSet.virtual_attr_map",
+    "[Union|Subset]Type.[constraints|default]".  These 9 attributes are now
+    declared with "RPTypeNC": "Depot.data", "Function.result_type",
+    "ScaSelExprNodeSet.type_name",
+    "[Scalar|Nonscalar|Subset]Type.base_type",
+    "UnionType.[sources|filters]", "NameTypeMap.type".  These 7 attributes
+    are now declared with "DataNC": "SysCatSet.name",
+    "OVLScaValStmtNodeSet.target", "IISArgVarMap.var",
+    "IfThenVarStmtMap.if", "GivenWhenDefStmtNodeSet.given",
+    "WhenThenVarStmtMap.when", "APMaterialNCSelStmtNodeSet.target".  These
+    1 attributes are now declared with "LexDataNC":
+    "AccExprNodeSet.target".
+
 2009-11-26  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.101.0 is released on CPAN as
