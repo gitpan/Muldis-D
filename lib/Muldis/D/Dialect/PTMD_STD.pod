@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.104.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.105.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":"0.104.0":PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":"0.105.0":PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -223,7 +223,7 @@ character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.104.0>.
+C<ln_base_authority>; it is typically a character string like C<0.105.0>.
 
 =item C<ln_dialect>
 
@@ -243,11 +243,11 @@ added later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":"0.104.0":PTMD_STD:{
+    Muldis_D:"http://muldis.com":"0.105.0":PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn
     }
 
-    Muldis_D:"http://muldis.com":"0.104.0":PTMD_STD:{
+    Muldis_D:"http://muldis.com":"0.105.0":PTMD_STD:{
         catalog_abstraction_level  => rtn_inv_alt_syn,
         standard_syntax_extensions => {date_time}
     }
@@ -328,7 +328,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":"0.104.0":PTMD_STD:{
+    Muldis_D:"http://muldis.com":"0.105.0":PTMD_STD:{
         catalog_abstraction_level => the_floor
     }
     Relation:{
@@ -381,7 +381,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":"0.104.0":PTMD_STD:{
+    Muldis_D:"http://muldis.com":"0.105.0":PTMD_STD:{
         catalog_abstraction_level => code_as_data
     }
     Relation:{
@@ -389,7 +389,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":"0.104.0":PTMD_STD:{
+    Muldis_D:"http://muldis.com":"0.105.0":PTMD_STD:{
        catalog_abstraction_level => code_as_data
     }
     depot-catalog Database:Depot:{
@@ -469,7 +469,7 @@ described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":"0.104.0":PTMD_STD:{
+    Muldis_D:"http://muldis.com":"0.105.0":PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv
     }
     depot-catalog {
@@ -527,7 +527,7 @@ EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":"0.104.0":PTMD_STD:{
+    Muldis_D:"http://muldis.com":"0.105.0":PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn
     }
     depot-catalog {
@@ -1327,8 +1327,12 @@ so long as the remaining unqualified chain is distinct among all standard
 system-defined (C<sys.std>-prefix) DBMS entities (but that as an exception,
 a non-distinct abbreviation is allowed iff exactly 1 of the candidate
 entities is in the language core, C<sys.std.Core>-prefix, in which case
-that 1 is unambiguously the entity that is resolved to).  This feature has
-no effect on the namespace prefixes like C<type> or C<tuple_from> or
+that 1 is unambiguously the entity that is resolved to).  For any
+system-defined entities whose names have trailing empty-string chain
+elements, those elements are ignored when determining a match for a
+C<PNSQNameChain_payload>, similarly to how specifying those elements is not
+required in a fully-qualified C<PNSQNameChain> to resolve it.  This feature
+has no effect on the namespace prefixes like C<type> or C<tuple_from> or
 C<array_of>; one still writes those as normal prepended to the otherwise
 shortened chains.  When a C<PNSQNameChain_payload>, whose context indicates
 it is a type or routine invocation, is encountered by the parser, and its
@@ -1336,7 +1340,8 @@ existing first chain element isn't one of the other 6 top-level namespaces,
 then the parser will assume it is an unqualified chain in the C<sys>
 namespace and lookup the best / only match from the known C<sys.std> DBMS
 entities, to resolve to.  So for example, one can just write C<Int> rather
-than C<sys.std.Core.Type.Int>, C<is_identical> rather than
+than C<sys.std.Core.Type.Int>, C<Array> rather than
+C<sys.std.Core.Type.Array."">, C<is_identical> rather than
 C<sys.std.Core.Universal.is_identical>, C<Tuple.attr> rather than
 C<sys.std.Core.Tuple.attr>, C<UTCInstant.fetch_curr_datetime> rather than
 C<sys.std.DateTime.UTCInstant.fetch_curr_datetime>,
@@ -1376,7 +1381,7 @@ The fourth special case involves any context where a type is being
 referenced using the C<type> namespace prefix feature described in
 L<Muldis::D::Basics/Referencing Data Types>.  In such a context, when the
 namespace prefix contains either of the optional chain elements
-C<[|dh_][tuple|relation]_from> or
+C<[|dh_]tuple_from> or
 C<[|dh_][set|maybe|single|array|bag|interval]_of>, programmers may omit the
 single prefix-leading C<type> chain element.  So for example, one can just
 write C<array_of.Rat> rather than C<type.array_of.Rat>, or
@@ -2155,8 +2160,14 @@ Grammar:
 
     <Interval_payload> ::=
         '{' \s*
-            <min> \s* <interval_boundary_kind> \s* <max>
+            [<nu_interval> ** [\s* ',' \s*]]?
         \s* '}'
+
+    <nu_interval> ::=
+        <nu_interval_range> | <nu_interval_single>
+
+    <nu_interval_range> ::=
+        <min> \s* <interval_boundary_kind> \s* <max>
 
     <min> ::=
         <expr>
@@ -2167,16 +2178,30 @@ Grammar:
     <interval_boundary_kind> ::=
         '..' | '..^' | '^..' | '^..^'
 
+    <nu_interval_single> ::=
+        <expr>
+
 An C<Interval> node represents a literal or selector invocation for an
-interval value.  It is interpreted as a Muldis D
-C<sys.std.Core.Type.Interval> value whose attributes are defined by the
-C<Interval_payload>.  Each of C<min> and C<max> is an C<expr> node that
-defines the C<min> and C<max> attribute value, respectively, of the new
-interval.  Each of the 4 C<interval_boundary_kind> values C<..>, C<..^>,
-C<^..>, C<^..^> corresponds to one of the 4 possible combinations of
-C<excludes_min> and C<excludes_max> values that the new interval can have,
-which in order are: C<[false,false]>, C<[false,true]>, C<[true,false]>,
+interval-union value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.IntervalUnion> value whose elements are defined by the
+C<Interval_payload>.  Each C<nu_interval> of the C<Interval_payload>
+defines a 4-ary tuple of the new interval-union, which defines a
+(non-union) interval of the interval-union; each C<nu_interval> defines
+the 4 attributes of the tuple.
+
+The normal case of a C<nu_interval> is a C<nu_interval_range>:  Each of
+C<min> and C<max> is an C<expr> node that defines the C<min> and C<max>
+attribute value, respectively, of the new (non-union) interval.  Each of
+the 4 C<interval_boundary_kind> values C<..>, C<..^>, C<^..>, C<^..^>
+corresponds to one of the 4 possible combinations of C<excludes_min> and
+C<excludes_max> values that the new (non-union) interval can have, which in
+order are: C<[false,false]>, C<[false,true]>, C<[true,false]>,
 C<[true,true]>.
+
+A C<nu_interval_single> is a degenerate case of a C<nu_interval> that
+represents exactly 1 value; it is simply a shorthand for a
+C<nu_interval_range> whose C<min> and C<max> are identical and whose
+C<interval_boundary_kind> is C<..>.
 
 See also the definition of the catalog data type
 C<sys.std.Core.Type.Cat.IvlSelExprNodeSet>, a tuple of which is what
@@ -2185,13 +2210,19 @@ C<depot> node, as it describes some semantics.
 
 Examples:
 
-    Interval:{1..10}
+    Interval:{}  # zero elements #
+
+    Interval:{'abc'}  # 1 element #
+
+    Interval:{1..10}  # 10 elements #
 
     Interval:{2.7..^9.3}
 
     Interval:{'a'^..'z'}
 
     Interval:{ UTCInstant:[2002,12,6,,,] ^..^ UTCInstant:[2002,12,20,,,] }
+
+    Interval:{1..3,6,8..9}  # 6 elements #
 
 =head1 DEPOT SPECIFICATION
 
@@ -2290,8 +2321,9 @@ Grammar:
         | <updater>
         | <procedure>
         | <scalar_type>
-        | <nonscalar_type>
-        | <union_type>
+        | <tuple_type>
+        | <relation_type>
+        | <domain_type>
         | <subset_type>
 
 A C<material> node specifies a new material (routine or type) that lives in
@@ -2390,8 +2422,9 @@ Every material has 2-3 elements, illustrated by this grammar:
             | recipe
             | 'system-service'
         | 'scalar-type'
-        | 'nonscalar-type'
-        | 'union-type'
+        | 'tuple-type'
+        | 'relation-type'
+        | 'domain-type'
         | 'subset-type'
 
     <material_declared_name> ::=
@@ -2402,8 +2435,9 @@ Every material has 2-3 elements, illustrated by this grammar:
         | <updater_payload>
         | <procedure_payload>
         | <scalar_type_payload>
-        | <nonscalar_type_payload>
-        | <union_type_payload>
+        | <tuple_type_payload>
+        | <relation_type_payload>
+        | <domain_type_payload>
         | <subset_type_payload>
 
 So a C<x_material>|C<material> node has 2-3 elements in general:
@@ -2448,11 +2482,15 @@ I<TODO.>
 
 I<TODO.>
 
-=head2 Nonscalar Type Specification
+=head2 Tuple Type Specification
 
 I<TODO.>
 
-=head2 Union Type Specification
+=head2 Relation Type Specification
+
+I<TODO.>
+
+=head2 Domain Type Specification
 
 I<TODO.>
 
@@ -4034,7 +4072,7 @@ Darren Duncan (C<darren@DarrenDuncan.net>)
 
 This file is part of the formal specification of the Muldis D language.
 
-Muldis D is Copyright © 2002-2009, Muldis Data Systems, Inc.
+Muldis D is Copyright © 2002-2010, Muldis Data Systems, Inc.
 
 See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
 

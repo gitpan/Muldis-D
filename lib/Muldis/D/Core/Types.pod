@@ -9,7 +9,7 @@ Muldis D general purpose data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types version 0.104.0.
+This document is Muldis::D::Core::Types version 0.105.0.
 
 =head1 PREFACE
 
@@ -59,8 +59,14 @@ relationships:
         sys.std.Core.Type.Tuple
             sys.std.Core.Type.DHTuple
                 sys.std.Core.Type.Database
-                sys.std.Core.Type.Interval
-                    sys.std.Core.Type.DHInterval
+            sys.std.Core.Type.Set.T
+                sys.std.Core.Type.DHSet.T
+            sys.std.Core.Type.Array.T
+                sys.std.Core.Type.DHArray.T
+            sys.std.Core.Type.Bag.T
+                sys.std.Core.Type.DHBag.T
+            sys.std.Core.Type.Interval
+                sys.std.Core.Type.DHInterval
 
         sys.std.Core.Type.Relation
             sys.std.Core.Type.DHRelation
@@ -74,6 +80,8 @@ relationships:
                 sys.std.Core.Type.DHArray
             sys.std.Core.Type.Bag
                 sys.std.Core.Type.DHBag
+            sys.std.Core.Type.IntervalUnion
+                sys.std.Core.Type.DHIntervalUnion
 
         # The following are all reference types.
 
@@ -101,11 +109,13 @@ here is another view of those:
                         sys.std.Core.Type.DHSingle
                 sys.std.Core.Type.DHArray
                 sys.std.Core.Type.DHBag
+                sys.std.Core.Type.DHIntervalUnion
             sys.std.Core.Type.Set
                 sys.std.Core.Type.Maybe
                     sys.std.Core.Type.Single
             sys.std.Core.Type.Array
             sys.std.Core.Type.Bag
+            sys.std.Core.Type.IntervalUnion
 
 =head1 MAXIMAL AND MINIMAL DATA TYPES
 
@@ -436,12 +446,55 @@ is otherwise the same.  The 2 system-defined user-data variables named
 C<[fed|nlx].data> are all of "just" the C<Database> type, or are of
 its proper subtypes.
 
+=head2 sys.std.Core.Type.Set.T
+
+This is an enumeration data type.  C<Set.T> is a proper subtype of
+C<Tuple>, and it exists in order for the relation type
+C<Set> (and C<Maybe> and C<Single>) to be defined partly in terms of it.  A
+C<Set.T> has 1 attribute, C<value> (a C<Universal>).  Its default value a
+C<value> of C<Bool:false>.
+
+=head2 sys.std.Core.Type.DHSet.T
+
+This is an enumeration data type.  C<DHSet.T> is a proper subtype of
+C<DHTuple>, and it exists in order for the dh-relation type
+C<DHSet> (and C<DHMaybe>, C<DHSingle>) to be defined partly in terms of it.
+
+=head2 sys.std.Core.Type.Array.T
+
+This is an enumeration data type.  C<Array.T> is a proper subtype of
+C<Tuple>, and it exists in order for the relation type
+C<Array> to be defined partly in terms of it.  An C<Array.T>
+has 2 attributes, C<index> (a C<NNInt>) and C<value> (a C<Universal>).  Its
+default value has an C<index> of zero and a C<value> of C<Bool:false>.
+
+=head2 sys.std.Core.Type.DHArray.T
+
+This is an enumeration data type.  C<DHArray.T> is a proper subtype of
+C<DHTuple>, and it exists in order for the dh-relation type
+C<DHArray> to be defined partly in terms of it.
+
+=head2 sys.std.Core.Type.Bag.T
+
+This is an enumeration data type.  C<Bag.T> is a proper subtype of
+C<Tuple>, and it exists in order for the relation type
+C<Bag> to be defined partly in terms of it.  A C<Bag.T>
+has 2 attributes, C<value> (a C<Universal>) and C<count> (a C<PInt>).  Its
+default value has a C<value> of C<Bool:false> and a C<count> of 1.
+
+=head2 sys.std.Core.Type.DHBag.T
+
+This is an enumeration data type.  C<DHBag.T> is a proper subtype of
+C<DHTuple>, and it exists in order for the dh-relation type
+C<DHBag> to be defined partly in terms of it.
+
 =head2 sys.std.Core.Type.Interval
 
 This is an enumeration data type.  An C<Interval> is a C<Tuple>.  It
 defines a single I<bounded interval> or I<finite interval> in terms of 2
 I<endpoint> values plus an indicator of whether either, both, or none of
 the endpoint values are included in the interval.
+I<COMING SOON: Adding support for unbounded/infinite intervals.>
 
 An C<Interval> has these 4 attributes:
 
@@ -493,14 +546,15 @@ C<Bool:false>.
 The C<Interval> type has no support for I<unbounded>/I<infinite> or
 I<half-bounded> intervals that is orthogonal to data type.  However, if
 there are any types with their own special values to represent infinities,
-then those special values can be uded for endpoints of intervals over those
+then those special values can be used for endpoints of intervals over those
 types.  I<As of this writing, no system-defined types have values for
-infinities, so only user-defined types would leverage this.>
+infinities, so only user-defined types would leverage this.  This will
+change very soon, with system-defined generic infinity values coming.>
 
-The C<Interval> type only represents a continuous interval, but a
-discontinuous interval may be effectively represented by a set of
-C<Interval> values, either a C<relation_from.Interval> or a
-C<set_of.Interval>.
+See also the C<sys.std.Core.Type.IntervalUnion> type, which is the
+canonical means that Muldis D provides of representing the result of
+set-unioning 2 C<Interval> where the latter do not touch or overlap,
+and provides the single I<canonical> empty interval value.
 
 =head2 sys.std.Core.Type.DHInterval
 
@@ -654,6 +708,27 @@ default value has zero tuples.
 This is an enumeration data type.  C<DHBag> is the intersection type of
 C<Bag> and C<DHRelation>.  The cardinality of this type is infinite.
 
+=head2 sys.std.Core.Type.IntervalUnion
+
+This is an enumeration data type.  C<IntervalUnion> is a proper subtype of
+C<Relation> that is defined directly partly in terms of the tuple type
+C<Interval>, thereby sharing its I<heading>, but defines no further
+constraints of its own.  It defines a single I<interval-union>, which is
+conceptually either a set of 0..N intervals or a single larger interval
+that had 0..N sub-intervals sliced out.  An C<IntervalUnion> is the
+canonical means that Muldis D provides of representing the result of
+set-unioning 2 C<Interval> where the latter do not touch or overlap. 
+Moreover, a C<IntervalUnion> also empowers Muldis D to have a single
+I<canonical> empty interval value, which is the only C<IntervalUnion> with
+zero tuples; this value is also the default value of C<IntervalUnion>.  The
+cardinality of this type is infinite.
+
+=head2 sys.std.Core.Type.DHIntervalUnion
+
+This is an enumeration data type.  C<DHIntervalUnion> is the intersection
+type of C<IntervalUnion> and C<DHRelation>.  The cardinality of this type
+is infinite.
+
 =head1 GENERIC REFERENCE TYPES
 
 These are the core reference data types.
@@ -687,7 +762,7 @@ Darren Duncan (C<darren@DarrenDuncan.net>)
 
 This file is part of the formal specification of the Muldis D language.
 
-Muldis D is Copyright © 2002-2009, Muldis Data Systems, Inc.
+Muldis D is Copyright © 2002-2010, Muldis Data Systems, Inc.
 
 See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
 

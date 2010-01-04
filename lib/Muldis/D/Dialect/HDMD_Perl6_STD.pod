@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.104.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.105.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Hosted Data Muldis D> standard
 dialect named C<HDMD_Perl6_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.104.0',
+standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.105.0',
 'HDMD_Perl6_STD' ]>.
 
 The C<HDMD_Perl6_STD> dialect is defined to be hosted in Perl 6, and is
@@ -124,7 +124,7 @@ value C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a Perl C<Str> formatted as per
-C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.104.0>.
+C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.105.0>.
 
 =item C<ln_dialect>
 
@@ -153,11 +153,11 @@ C<date_time>.
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '0.104.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn'
     } ]
 
-    [ 'Muldis_D', 'http://muldis.com', '0.104.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level  => 'rtn_inv_alt_syn',
         standard_syntax_extensions => Set.new('date_time')
     } ]
@@ -191,7 +191,7 @@ intended to actually be used.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.104.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'the_floor'
         } ],
         :Relation( Set.new(
@@ -227,7 +227,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.104.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'code_as_data'
         } ],
         :Relation( Set.new(
@@ -237,7 +237,7 @@ Examples:
     ]
 
     [
-       [ 'Muldis_D', 'http://muldis.com', '0.104.0', 'HDMD_Perl6_STD', {
+       [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
           catalog_abstraction_level => 'code_as_data'
        } ],
        [ 'depot', :depot-catalog[ 'Database', 'Depot', {
@@ -256,7 +256,7 @@ Examples:
                       func_invo_exprs => :Relation( Set.new(
                          {
                             name => :Name(''),
-                            function => :PNSQNameChain('Integer.power'),
+                            function => :PNSQNameChain<Integer.power>,
                             args => [ 'Relation', 'NameExprMap', [
                                {name=>:Name<radix>, expr=>:Name<topic>},
                                {name=>:Name<exponent>, expr=>:Name<INT_3>}
@@ -282,7 +282,7 @@ described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.104.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'plain_rtn_inv'
         } ],
         [ 'depot', :depot-catalog[
@@ -306,7 +306,7 @@ EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.104.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'rtn_inv_alt_syn'
         } ],
         [ 'depot', :depot-catalog[
@@ -640,7 +640,7 @@ Examples:
 
     :PNSQNameChain('fed.data.the_db.stats.samples by order')
 
-    :PNSQNameChain('.attr')  # same as :PNSQNameChain('lex.topic.attr') #
+    :PNSQNameChain<.attr>  # same as :PNSQNameChain<lex.topic.attr> #
 
 =head2 Code Comment Literals
 
@@ -740,7 +740,7 @@ attrs> is interpreted specifically as attributes of the declared type's
 possrep which is specified by the I<possrep name>.  Each key+value pair of
 the I<possrep attrs> defines a named possrep attribute of the new scalar;
 the pair's key and value are, respectively, a Perl C<Str> that specifies
-the possrep attribute name, and a C<expr> node that specifies the possrep
+the possrep attribute name, and an C<expr> node that specifies the possrep
 attribute value.
 
 Examples:
@@ -784,7 +784,7 @@ C<sys.std.Core.Type.Tuple> value whose attributes are defined by the
 payload.  The payload must be a Perl C<Mapping|Hash>.  Each key+value pair
 of the payload defines a named attribute of the new tuple; the pair's key
 and value are, respectively, a Perl C<Str> that specifies the attribute
-name, and a C<expr> node that specifies the attribute value.
+name, and an C<expr> node that specifies the attribute value.
 
 Examples:
 
@@ -809,7 +809,7 @@ C<sys.std.Core.Type.Database> value whose attributes are defined by the
 payload.  The payload must be a Perl C<Mapping|Hash>.  Each key+value pair
 of the payload defines a named attribute of the new 'database'; the pair's
 key and value are, respectively, a Perl C<Str> that specifies the attribute
-name, and a C<expr> node that specifies the attribute value, which must be
+name, and an C<expr> node that specifies the attribute value, which must be
 represent a relation value.
 
 =head2 Relation Selectors
@@ -885,7 +885,7 @@ A C<Set> node represents a literal or selector invocation for a set
 value.  It is interpreted as a Muldis D C<sys.std.Core.Type.Set> value
 whose elements are defined by the payload.  The payload must be a Perl
 C<Set|KeySet>.  Each element of the payload defines a unary tuple of
-the new set; each element is a C<expr> node that defines the C<value>
+the new set; each element is an C<expr> node that defines the C<value>
 attribute of the tuple.
 
 Examples I<TODO: What is the actual syntax for the P6 Set type?>:
@@ -911,7 +911,7 @@ C<sys.std.Core.Type.Maybe> value.  If the node payload is missing or
 undefined, then the node is interpreted as the special value
 C<Maybe:nothing>, aka C<nothing>, which is the only C<Maybe> value with
 zero elements.  If the node payload is defined then the node is interpreted
-as a C<Single> whose element is defined by the payload.  The payload is a
+as a C<Single> whose element is defined by the payload.  The payload is an
 C<expr> node that defines the C<value> attribute of the single tuple
 of the new 'single'.
 
@@ -928,7 +928,7 @@ array value.  It is interpreted as a Muldis D
 C<sys.std.Core.Type.Array> value whose elements are defined by the
 payload.  The payload must be a Perl C<Seq|Array>.  Each element of the
 payload defines a binary tuple of the new sequence; the element value
-is a C<expr> node that defines the C<value> attribute of the tuple,
+is an C<expr> node that defines the C<value> attribute of the tuple,
 and the element index is used as the C<index> attribute of the tuple.
 
 Examples:
@@ -977,23 +977,49 @@ Examples I<TODO: What is the actual syntax for the P6 Bag type?>:
 =head2 Interval Selectors
 
 An C<Interval> node represents a literal or selector invocation for an
-interval value.  It is interpreted as a Muldis D
-C<sys.std.Core.Type.Interval> value whose attributes are defined by the
-payload.  The node payload must be a Perl C<Range>, which is mapped
+interval-union value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.IntervalUnion> value whose elements are defined by the
+payload.  The payload must be either a Perl C<Set|KeySet> or
+a Perl C<Range>; it is interpreted as follows:
+
+=over
+
+=item *
+
+Iff the payload is a Perl C<Set|KeySet>, then each payload element is
+designated a I<nu-interval>.  Each I<nu-interval> of the payload defines a
+4-ary tuple of the new interval-union, which defines a (non-union) interval
+of the interval-union; each I<nu-interval> defines the 4 attributes of the
+tuple.  Each I<nu-interval> must be a Perl C<Range>, which is mapped
 directly.  Each of the C<min> and C<max> attributes/method-return-values of
 the Range is an C<expr> node that defines the C<min> and C<max> attribute
-value, respectively, of the new interval.  Each of the C<excludes_min> and
-C<excludes_max> of the Range maps directly with the interval.
+value, respectively, of the new (non-union) interval.  Each of the
+C<excludes_min> and
+C<excludes_max> of the Range maps directly with the (non-union) interval.
 
-Examples:
+=item *
 
-    :Interval(1..10)
+Iff the payload is a Perl C<Range>, then the payload as a whole is
+designated a I<nu-interval>.  The single I<nu-interval> is interpreted as
+per one of those in the previous bullet point.
+
+=back
+
+Examples I<TODO: What is the actual syntax for the P6 Set type?>:
+
+    :Interval( Set.new() )  # zero elements #
+
+    'abc'..'abc'  # 1 element #
+
+    :Interval(1..10)  # 10 elements #
 
     2.7..^9.3
 
     'a'^..'z'
 
     :UTCInstant[2002,12,6] ^..^ :UTCInstant[2002,12,20]
+
+    :Interval( Set.new(1..3,6..6,8..9) )  # 6 elements #
 
 =head1 DEPOT SPECIFICATION
 
@@ -1049,9 +1075,10 @@ Examples:
 A C<material> node specifies a new material (routine or type) that lives in
 a depot or subdepot.
 
-There are 7 main varieties of C<material> node, each of which is a named
+There are 8 main varieties of C<material> node, each of which is a named
 node kind of its own:  C<function>, C<updater>, C<procedure>,
-C<scalar_type>, C<nonscalar_type>, C<union_type>, C<subset_type>.
+C<scalar_type>, C<tuple_type>, C<relation_type>, C<domain_type>,
+C<subset_type>.
 
 =head2 Material Specification Common Elements
 
@@ -1101,11 +1128,15 @@ I<TODO.>
 
 I<TODO.>
 
-=head2 Nonscalar Type Specification
+=head2 Tuple Type Specification
 
 I<TODO.>
 
-=head2 Union Type Specification
+=head2 Relation Type Specification
+
+I<TODO.>
+
+=head2 Domain Type Specification
 
 I<TODO.>
 
@@ -1646,7 +1677,7 @@ Darren Duncan (C<darren@DarrenDuncan.net>)
 
 This file is part of the formal specification of the Muldis D language.
 
-Muldis D is Copyright © 2002-2009, Muldis Data Systems, Inc.
+Muldis D is Copyright © 2002-2010, Muldis Data Systems, Inc.
 
 See the LICENSE AND COPYRIGHT of L<Muldis::D> for details.
 
