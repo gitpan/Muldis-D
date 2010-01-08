@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.105.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.106.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Hosted Data Muldis D> standard
 dialect named C<HDMD_Perl6_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.105.0',
+standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.106.0',
 'HDMD_Perl6_STD' ]>.
 
 The C<HDMD_Perl6_STD> dialect is defined to be hosted in Perl 6, and is
@@ -124,7 +124,7 @@ value C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a Perl C<Str> formatted as per
-C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.105.0>.
+C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.106.0>.
 
 =item C<ln_dialect>
 
@@ -153,11 +153,11 @@ C<date_time>.
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.106.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn'
     } ]
 
-    [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.106.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level  => 'rtn_inv_alt_syn',
         standard_syntax_extensions => Set.new('date_time')
     } ]
@@ -191,7 +191,7 @@ intended to actually be used.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.106.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'the_floor'
         } ],
         :Relation( Set.new(
@@ -227,7 +227,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.106.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'code_as_data'
         } ],
         :Relation( Set.new(
@@ -237,7 +237,7 @@ Examples:
     ]
 
     [
-       [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
+       [ 'Muldis_D', 'http://muldis.com', '0.106.0', 'HDMD_Perl6_STD', {
           catalog_abstraction_level => 'code_as_data'
        } ],
        [ 'depot', :depot-catalog[ 'Database', 'Depot', {
@@ -282,7 +282,7 @@ described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.106.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'plain_rtn_inv'
         } ],
         [ 'depot', :depot-catalog[
@@ -306,7 +306,7 @@ EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.105.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.106.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'rtn_inv_alt_syn'
         } ],
         [ 'depot', :depot-catalog[
@@ -353,12 +353,12 @@ add syntax for operators.
 A C<value> node is a Muldis D value literal, which is a common special case
 of a Muldis D value selector.
 
-There are 24 main varieties of C<value> node, each of which is a named node
+There are 25 main varieties of C<value> node, each of which is a named node
 kind of its own:  C<Bool>, C<Order>, C<RatRoundMeth>, C<Int>, C<Rat>,
 C<Blob>, C<Text>, C<Name>, C<NameChain>, C<PNSQNameChain>, C<Comment>,
 C<Instant>, C<Duration>,
 C<RatRoundRule>, C<String>, C<Scalar>, C<Tuple>, C<Database>,
-C<Relation>, C<Set>, C<Maybe>, C<Array>, C<Bag>, C<Interval>.
+C<Relation>, C<Set>, C<Maybe>, C<Array>, C<Bag>, C<[S|M]PInterval>.
 
 Fundamentally, the various Muldis D scalar and collection types are
 represented by their equivalent Perl native scalar and collection types.
@@ -384,13 +384,13 @@ only external meta-data of C<value_payload> generally necessary to
 interpret the latter; what grammars are valid for C<value_payload> depend
 just on C<value_kind>.
 
-Between the various kinds of C<value> node, these 42 values are allowed for
+Between the various kinds of C<value> node, these 44 values are allowed for
 C<value_kind>:  C<Bool>, C<Order>, C<RatRoundMeth>, C<[|NN|P]Int>,
 C<[|NN|P]Rat>, C<[|Octet]Blob>, C<Text>, C<Name>, C<NameChain>,
 C<PNSQNameChain>, C<Comment>, C<Instant>, C<Duration>,
 C<RatRoundRule>, C<[|B|O|UCP]String>, C<[|DH]Scalar>,
 C<[|DH]Tuple>, C<Database>, C<[|DH]Relation>, C<[|DH]Set>,
-C<[|DH][Maybe|Single]>, C<[|DH]Array>, C<[|DH]Bag>, C<[|DH]Interval>.
+C<[|DH][Maybe|Single]>, C<[|DH]Array>, C<[|DH]Bag>, C<[|DH][S|M]PInterval>.
 
 For just some data types, the C<value_kind> may be omitted; see below.
 
@@ -423,17 +423,17 @@ sake of brevity.  If any Perl value of one of the following types is
 encountered where a GCVL node is expected, then it is interpreted as a full
 C<value> node as follows:
 
-    Muldis D <- Perl 6
-    --------------------
-    Bool     <- Bool
-    Order    <- Order
-    Int      <- Int
-    Rat      <- FatRat|Rat|Num
-    Blob     <- Blob
-    Text     <- Str
-    Instant  <- Instant
-    Duration <- Duration
-    Interval <- Range
+    Muldis D   <- Perl 6
+    ----------------------------
+    Bool       <- Bool
+    Order      <- Order
+    Int        <- Int
+    Rat        <- FatRat|Rat|Num
+    Blob       <- Blob
+    Text       <- Str
+    Instant    <- Instant
+    Duration   <- Duration
+    SPInterval <- Range
 
 The above details are subject to revision regarding when a Perl object
 might claim to do multiple type interfaces.
@@ -456,7 +456,7 @@ Examples:
 
 =head2 Order-Determination Literals
 
-A C<Order> node represents an order-determination.  It is interpreted as a
+An C<Order> node represents an order-determination.  It is interpreted as a
 Muldis D C<sys.std.Core.Type.Cat.Order> value as follows:  The payload must
 be a Perl C<Order>, and so C<Order::Increase> and C<Order::Same> and
 C<Order::Decrease> are mapped directly.
@@ -591,7 +591,7 @@ as follows:
 
 =item *
 
-If the payload is an C<Seq|Array>, then
+If the payload is a C<Seq|Array>, then
 every element must be a valid payload for a C<Name> node (that
 is, any Perl character string).  Each element of the payload, in order,
 defines an element of the C<array> possrep's attribute of a C<NameChain>.
@@ -923,7 +923,7 @@ Examples:
 
 =head2 Array Selectors
 
-A C<Array> node represents a literal or selector invocation for a
+An C<Array> node represents a literal or selector invocation for a
 array value.  It is interpreted as a Muldis D
 C<sys.std.Core.Type.Array> value whose elements are defined by the
 payload.  The payload must be a Perl C<Seq|Array>.  Each element of the
@@ -976,42 +976,27 @@ Examples I<TODO: What is the actual syntax for the P6 Bag type?>:
 
 =head2 Interval Selectors
 
-An C<Interval> node represents a literal or selector invocation for an
-interval-union value.  It is interpreted as a Muldis D
-C<sys.std.Core.Type.IntervalUnion> value whose elements are defined by the
-payload.  The payload must be either a Perl C<Set|KeySet> or
-a Perl C<Range>; it is interpreted as follows:
-
-=over
-
-=item *
-
-Iff the payload is a Perl C<Set|KeySet>, then each payload element is
-designated a I<nu-interval>.  Each I<nu-interval> of the payload defines a
-4-ary tuple of the new interval-union, which defines a (non-union) interval
-of the interval-union; each I<nu-interval> defines the 4 attributes of the
-tuple.  Each I<nu-interval> must be a Perl C<Range>, which is mapped
+An C<SPInterval> node represents a literal or selector invocation for a
+single-piece interval value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.SPInterval> value whose attributes are defined by the
+payload.  The node payload must be a Perl C<Range>, which is mapped
 directly.  Each of the C<min> and C<max> attributes/method-return-values of
-the Range is an C<expr> node that defines the C<min> and C<max> attribute
-value, respectively, of the new (non-union) interval.  Each of the
-C<excludes_min> and
-C<excludes_max> of the Range maps directly with the (non-union) interval.
+the C<Range> is an C<expr> node that defines the C<min> and C<max>
+attribute value, respectively, of the new single-piece interval.  Each of
+the C<excludes_min> and C<excludes_max> of the C<Range> maps directly with
+the single-piece interval.
 
-=item *
-
-Iff the payload is a Perl C<Range>, then the payload as a whole is
-designated a I<nu-interval>.  The single I<nu-interval> is interpreted as
-per one of those in the previous bullet point.
-
-=back
+An C<MPInterval> node represents a literal or selector invocation for a
+multi-piece interval value.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.MPInterval> value whose elements are defined by the
+payload.  The payload must be a Perl C<Set|KeySet>.  Each element of the
+payload must be a valid payload for an C<SPInterval> node (that is, a Perl
+C<Range>).  Each element of the payload defines a 4-ary tuple, representing
+a single-piece interval, of the new multi-piece interval.
 
 Examples I<TODO: What is the actual syntax for the P6 Set type?>:
 
-    :Interval( Set.new() )  # zero elements #
-
-    'abc'..'abc'  # 1 element #
-
-    :Interval(1..10)  # 10 elements #
+    :SPInterval(1..10)
 
     2.7..^9.3
 
@@ -1019,7 +1004,11 @@ Examples I<TODO: What is the actual syntax for the P6 Set type?>:
 
     :UTCInstant[2002,12,6] ^..^ :UTCInstant[2002,12,20]
 
-    :Interval( Set.new(1..3,6..6,8..9) )  # 6 elements #
+    :MPInterval( Set.new() )  # zero elements #
+
+    :MPInterval( Set.new(1..10) )  # 10 elements #
+
+    :MPInterval( Set.new(1..3,6..6,8..9) )  # 6 elements #
 
 =head1 DEPOT SPECIFICATION
 
@@ -1187,11 +1176,11 @@ Examples:
 
 =head2 Generic Function Invocation Expressions
 
-An C<func_invo> node has 2-4 ordered elements:  The first element is the
+A C<func_invo> node has 2-4 ordered elements:  The first element is the
 Perl C<Str> value C<func-invo>.  The second element is a
 C<PNSQNameChain_payload>, which names the function to invoke.  The last 1-2
 elements provide arguments to the function invocation; either or both or
-none of a C<Array_payload> element and a C<Tuple_payload> element may be
+none of an C<Array_payload> element and a C<Tuple_payload> element may be
 given.  The C<Array_payload> 3rd/4th element is for any anonymous (and
 ordered if multiple exist) arguments, and the C<Tuple_payload> 3rd/4th
 element is for any named arguments; each C<Array_payload> element or
@@ -1267,7 +1256,7 @@ element is I<when_then>, a Perl C<Seq|Array> with 0..N elements, each of
 those being a 2-element Perl C<Seq|Array> or a Perl Pair, where each
 element is an C<expr> node; the first element / key is a I<when> comparand,
 and the second element / value is the associated I<then> result expression.
-The 4th/last element of an C<given_when_def_expr> node is I<default> result
+The 4th/last element of a C<given_when_def_expr> node is I<default> result
 expression, which is an C<expr> node.
 
 Examples:
@@ -1282,6 +1271,8 @@ Examples:
     ]
 
 =head2 Library Entity Reference Selector
+
+B<TODO: REWRITE THIS DOCUMENTATION SECTION!>
 
 A C<[func|upd|proc|type|ord_det_func]_ref> node has 2 ordered elements:
 The first element is the Perl C<Str> value
@@ -1468,8 +1459,8 @@ operator and the other 1-2 provide attribute names that customize the
 operation.
 
 Note that for the C<[]> op, the C<min_index>, C<interval_boundary_kind>,
-C<max_index> are collectively the 2nd main op arg which is an C<Interval>
-node payload that defines an C<interval_of.NNInt>.
+C<max_index> are collectively the 2nd main op arg which is an C<SPInterval>
+node payload that defines an C<sp_interval_of.NNInt>.
 
 Examples:
 

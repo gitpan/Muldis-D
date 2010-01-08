@@ -9,7 +9,7 @@ Muldis D generic operators for all data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Universal version 0.105.0.
+This document is Muldis::D::Core::Universal version 0.106.0.
 
 =head1 PREFACE
 
@@ -144,19 +144,13 @@ C<sys.std.Core.Scalar.order>.  Each C<func> parameter is optional and
 defaults to C<sys.std.Core.Scalar.order> if no explicit argument is given
 to it.
 
-These functions' C<Interval>-typed arguments' C<min> and C<max> attribute
-values must be of compatible declared types with the wrapped functions'
-C<topic> and C<other> parameters; otherwise these functions will fail|warn
-when the wrapped function would.  Likewise, any other argument values would
-be compared to an interval's endpoints must be compatible with them.
-
 =head2 sys.std.Core.Universal.is_before
 
 C<< function sys.std.Core.Universal.is_before (Bool <-- $topic : Universal,
 $other : Universal, $func? : OrdDetCFuncNC) >>
 
 This function results in C<Bool:true> iff the wrapped function would result
-in C<Order:increase> when given the same corresponding 2 arguments plus a
+in C<Order:increase> when given the same corresponding 2 arguments plus an
 C<is_reverse_order> argument of C<Bool:false>, and C<Bool:false> otherwise.
 Note that this operation is also known as I<less than> or C<< < >>.
 
@@ -168,7 +162,7 @@ $other : Universal, $func? : OrdDetCFuncNC) >>
 This function is an alias for C<sys.std.Core.Universal.is_before> except
 that it transposes the C<topic> and C<other> arguments.  This function
 results in C<Bool:true> iff the wrapped function would result in
-C<Order:decrease> when given the same corresponding 2 arguments plus a
+C<Order:decrease> when given the same corresponding 2 arguments plus an
 C<is_reverse_order> argument of C<Bool:false>, and C<Bool:false> otherwise.
 Note that this operation is also known as I<greater than> or C<< > >>.
 
