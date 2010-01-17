@@ -1,6 +1,67 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-01-16  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.107.0 is released on CPAN as
+    Muldis-D-0.107.0.tar.gz.
+
+    * This release features a change in the canonical way to represent the
+    kind of data types that would conventionally be called "enumerated
+    types" in the industry, where examples are the system-defined types
+    "Bool", "Order", "RatRoundMeth".  The old canonical way was for each
+    "enumerated type" to be a scalar structure type with a single main/only
+    possrep with a single "Name"-typed attribute whose allowed values are
+    restricted to a pre-defined set.  The new canonical way is for each
+    "enumerated type" to be declared as a scalar union type over a set of
+    singleton scalar types (each with a single possrep with zero
+    attributes), with one singleton type per pre-defined value.
+
+    * (Types.pod, Types_Catalog.pod, PTMD_STD.pod, HDMD_Perl5_STD.pod,
+    HDMD_Perl6_STD.pod, Basics.pod, Conventions.pod, Array.pod, Bag.pod,
+    Blob.pod, Bool.pod, Interval.pod, Relation.pod, Routines_Catalog.pod,
+    STDIO.pod, Scalar.pod, Set.pod, Text.pod, Tuple.pod, Universal.pod,
+    Counted.pod, DateTime.pod)  Renamed all of the "simple enumeration"
+    structure data type values, and the other named singleton values, so
+    that their words are capitalized rather than lowercase, and lack
+    underscore separators where they had them before.  Both the applicable
+    scalar attribute values, and the literal-keywords in all dialects, were
+    updated.  These 12 scalar values/keywords are the result of said
+    renaming: "Bool:[False|True]", "Order:[Increase|Same|Decrease]",
+    "RatRoundRule:[Half[Down|Up|Even]|To[Floor|Ceiling|Zero|Inf]".  These 4
+    nonscalar values/keywords are the result of said renaming: "Tuple:D0",
+    "Relation:D0C[0|1]", "Maybe:Nothing".  The relevant type definition
+    updates were in Types.pod (Bool) and Types_Catalog.pod (Order,
+    RatRoundRule).  The relevant literal-keyword updates were in all 3
+    STD.pod, and to a lesser extent in Types.pod and Basics.pod.  In a few
+    places there were capitalization changes to some routine names or
+    routine parameter names, concerning the 4 nonscalar values.  All other
+    files updated in this change item are mainly referential updates.
+
+    * (Types_Catalog.pod)  Updated the catalog type "DomainType" to add an
+    optional-use 8th attribute "order" which functions as per that
+    attribute of "ScalarType"; this is intended to support enum types that
+    are defined as a union of singletons to have a built-in values order.
+
+    * (Types.pod, Types_Catalog.pod, Basics.pod, PTMD_STD.pod)  In
+    Types.pod, refactored the 1 type "Bool" into 3 types which are itself
+    plus the 2 "Bool.True", "Bool.False" where the latter 2 are singleton
+    types and the former is defined as a union over them.  In
+    Types_Catalog.pod, likewise refactored the 2 types "Order" and
+    "RatRoundMeth" into 4 types and 8 types, respectively.  In Basics.pod,
+    in the "TYPE SYSTEM" main pod section, brought up to date any
+    references to whether the 3 refactored types are are considered
+    structure or enumerated types.  In PTMD_STD.pod, updated the
+    descriptions of the 3 node kinds "Bool", "Order", "RatRoundMeth" to
+    remain compatible with refactor about how payloads map to values.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Updated the "Interval
+    Selectors" pod sub-section to add special shorthand syntax for
+    singleton (single-value) interval-parts, so that the identical
+    endpoints can be specified once (eg, "{6}") rather than twice (eg,
+    {6..6}).  This feature was previously in release 0.105.0 for PTMD_STD
+    only, but removed in 0.106.0; now this feature's in all 3 STD dialects.
+
 2010-01-07  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.106.0 is released on CPAN as
