@@ -1,6 +1,150 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-03-01  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.110.0 is released on CPAN as
+    Muldis-D-0.110.0.tar.gz.
+
+    * (Set.pod)  Updated ord-det function "sys.std.Core.Set.Maybe.order" to
+    add an "is_reverse_order" parameter, which it was lacking, and also
+    renamed (and reordered) 3 other parameters:  "ord_func" ->
+    "S_ord_func", "reverse_order_of_singles" -> "S_is_reverse_order",
+    "treat_Nothing_as_max" -> "N_is_after_all_S".
+
+    * (Array.pod)  Added new ord-det function "sys.std.Core.Array.order",
+    which provides the canonical means to order 2 Array, or 2 String; it
+    forms the basis for ordering functions of Blob, Text, NameChain, etc.
+
+    * (Cast.pod)  Updated the type "PInt2_36" to change its default value
+    to 10 from 2, to correspond to base-10 being the default base for
+    numeric literals in the STD dialects when no explicit base is given;
+    also updated all 4 functions which have a param of that type to make
+    that param optional, as each one will default to 10 if no arg is given.
+
+    * (Types.pod, Types_Catalog.pod)  Muldis D now incorporates Unicode
+    5.2.0 rather than the 5.1.0 version.
+
+    * (Tuple.pod, Relation.pod, Set.pod, Routines_Catalog.pod,
+    PTMD_STD.pod, Changes, TODO)  Fixed all misspellings of 'analogous'.
+
+    * (Types.pod, Basics.pod, Types_Catalog.pod, Scalar.pod, PTMD_STD.pod,
+    HDMD_Perl[6|5]_STD.pod)  In a reversal of one aspect of release 0.61.0,
+    brought back the concept of scalar types that have zero possreps and
+    hence are primitive types; however, now only "Int" is a primitive
+    scalar type, and all other scalar types including "String" are still
+    not; also removed the cludge concept of a type being defined as a union
+    over an infinite number of singleton types, which "Int" had used but no
+    longer does; this all is just a refactor, and the semantics of "Int"
+    are unchanged.  In Types.pod, changed the definition of the "Int" type
+    to say it is now an infinite-cardinality primitive type with no
+    possreps rather than say it is an enumerated type over an infinite
+    number of singleton "Int.*" types, and also deleted said infinite
+    "Int.*" types.  In Basics.pod, updated a few paragraphs in the "TYPE
+    SYSTEM" main pod section or its subsections so they now say that "Int"
+    is the third primitive type (besides "Tuple" and "Relation"), and added
+    mentions that the special "Int" can have no possreps, and removed any
+    references to the "Int.*" types.  In Types_Catalog.pod and Scalar.pod,
+    updated a few description paragraphs likewise.  In all 3 STD.pod files,
+    updated the "Scalar" expression node kind to specify it can't any more
+    be used to select "Int" values, but just all other scalar values, and
+    updated the "the_floor" catalog abstraction level to also allow use of
+    "Int" as a "value" node in addition to the 3 "Scalar", "Tuple",
+    "Relation" of before; also updated any example Muldis D code that had
+    used a "Scalar" node to select an "Int" value to use an "Int" node
+    instead; this example code was all in the "the_floor" pod sub-section,
+    which was made an order of magnitude less verbose as a result.
+
+    * (PTMD_STD.pod, HDMD_Perl5_STD.pod)  Small amount of grammar
+    normalization where any non-alphanumeric grammar characters intended to
+    be matched literally are now written string-quoted rather than
+    backslashed; for example, [\^] was changed to ['^']; all of the changes
+    concerned the formats of integer or rational value literals.
+
+    * (PTMD_STD.pod)  Made the "if_else_expr" grammar node kind stricter
+    such that a minimum of 1 "if_expr"+"then_expr" element is needed rather
+    than zero being allowed.  But the corresponding system catalog values
+    and Perl-STD grammar nodes still allow zero elements.
+
+    * (PTMD_STD.pod)  The grammar now uses "<ws>" and "<ws>?" rather than
+    "\s+" and "\s*" to define whitespace rules of Muldis D code, and
+    moreover the meaning of "<ws>" is defined by Muldis D rather than using
+    Perl 6's definition, such that our "<ws>" has a stricter definition
+    that just includes the 5 ASCII characters SPACE and [\t\n\f\r].  This
+    means that, for now, Unicode linebreaks and other kinds of whitespace
+    aren't allowed literally outside of character string literals.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, D.pm)  Refactored the grammar
+    for the 2 fully-qualified Muldis D language name elements
+    "ln_base_authority", "ln_base_version_number" so that they are no
+    longer defined as having the same format as a "Name" payload, but
+    rather they are independently defined, so they can evolve separately.
+    Now these 2 "ln" parts (and hence all language-name parts) are more
+    strict in that they must be nonempty strings and they are expressly
+    limited to using non-control characters in the ASCII repertoire,
+    instead of being allowed any Unicode chars.  But in PTMD_STD, the
+    bareword format of the 2 parts now has fewer limitations than a
+    bareword "Name", in that it may have periods and it may start with
+    digits; therefore, updated all example code of Muldis D language names
+    so that the version-number portion is no longer delimited.
+
+    * (PTMD_STD.pod)  Made the nonquoted "Name" literals format more
+    restrictive so it only allows ASCII chars, and not anything else that
+    Unicode considers an alphanumeric.  Technically speaking, the actual
+    grammar is unchanged, but rather the associated documentation saying it
+    should be expanded to include Unicode alphanums was removed/replaced.
+
+    * (PTMD_STD.pod)  Updated the 2 pod sub-sections "Simple Non-symmetric
+    Dyadic Infix Operators" and "Order Comparison Operators", concerning
+    the existing alternate syntaxes for 24 functions that test set
+    membership or sub/superset relationships, so that plain ASCII infix
+    syntax alternatives are now provided, and not just infix syntax options
+    that use trans-ASCII Unicode characters.  All of the additional options
+    are alpha rather than symbolic, such as "imem" for "∈".  As a result of
+    this update, now one can use all features of the 3 STD dialects without
+    touching any non-ASCII Unicode characters, besides the Unicode support.
+    Also, for the 2 operators "I∈" and "I∉", added the additional aliases
+    "between" and "!between"|"not-between", respectively.
+
+    * (Tuple.pod, Relation.pod, Set.pod, Bag.pod, Interval.pod)  Updated
+    the also-known-as notes for 24 functions in correspondence to
+    above-mentioned changes.
+
+    * (PTMD_STD.pod)  Fixed 3 instances of a grammar typo.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Added new mandatory pragma
+    "op_char_repertoire" that determines whether or not the various routine
+    invocation alternate syntaxes (and a few special value literals) may be
+    composed of only ASCII characters or also other Unicode characters.
+    Code specifying "basic" for the new pragma can only use ASCII chars
+    outside delimited character strings and should work on minimal Muldis D
+    implementations and older text editors, while code specifying
+    "extended" can use all the defined canonical symbols for math or logic
+    or relational et al operations as recognized in the wider world, rather
+    than just approximations.  Updated the main pod section "LANGUAGE NAME"
+    and added the new main pod section "OPERATOR CHARACTER REPERTOIRE"
+    (located just following "CATALOG ABSTRACTION LEVELS").  Updated all
+    code examples with a "language name" to add uses of the new pragma.  In
+    PTMD_STD.pod, each of the 2 op char repertoires has its own definition
+    for the 9 grammar nodes "Bool_payload", "maybe_Nothing",
+    "comm_infix_reduce_op", "[|non]sym_dyadic_infix_op",
+    "monadic_prefix_op", "is_[before|after]_op", "interval_membership_op";
+    this is the semi-formal way in which the effects of each level on the
+    grammar are specified.  In the various pod sub-sections of PTMD_STD.pod
+    that declare said 9 (now refactored / split in 2) grammar nodes,
+    reorganized the various doc tables (saying what keywords are aliases or
+    what functions they invoke) so that ASCII versions are now consistently
+    favored over other Unicode versions as the "main" versions, rather than
+    sometimes ASCII and sometimes Unicode; but, where 3 or more versions of
+    the same operator exist, a Unicode version is always in 2nd place and
+    favored over all but the single main ASCII version; all code examples
+    in these sub-sections were left unchanged, some using Unicode.
+
+    * Update TODO file with draft outline on some grammar/etc changes that
+    would add support for different charsets in delimited char strings,
+    especially Unicode compatibility vs canonical, which when used for
+    identifiers could help avoid some security problems.
+
 2010-01-26  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.109.0 is released on CPAN as
@@ -2087,7 +2231,7 @@
     its "package" attribute, so it is now structurally identical to the
     "SubdepotSet" type, and now just declares the existence of packages not
     their contents.  The new "MaterialSet" type has 6 attributes where the
-    old analagous types each had 4; 3 of these are identical between each
+    old analogous types each had 4; 3 of these are identical between each
     of the 3 old/new types, ["name", "comment", "material"]; 1 of these,
     "is_public" is in both the new and Pkg, and is changed from a "Bool" to
     a "maybe_of.Bool"; 1 of these is the "parent" in Dep and is renamed to
@@ -4164,7 +4308,7 @@
     there were no changes to the 8 there-declared procedures themselves.
 
     * (Basics.pod, Types_Catalog.pod, Routines_Catalog.pod)  Added new
-    language concept of "topic namespaces", which is analagous to the
+    language concept of "topic namespaces", which is analogous to the
     frequently used SQL DBMS (or general purpose language) concept of a
     "current database|schema" (or current class etc).  In Basics.pod, added
     new primary namespace "tpc" ("topic"), and added new pod sub-section
@@ -4346,7 +4490,7 @@
     wanted to designate a type.
 
     * (QRelation.pod)  Added new updater "sys.std.QRelation.assign_empty"
-    which is analagous to a SQL "TRUNCATE" statement.
+    which is analogous to a SQL "TRUNCATE" statement.
 
     * (Types.pod, Basics.pod, Routines.pod, Types_Catalog.pod,
     PTMD_Tiny.pod, HDMD_Perl(5|6)_Tiny.pod, Ordered.pod, QSet.pod,
@@ -4985,7 +5129,7 @@
 
     * (Set.pod)  Added new order-determination function
     "sys.std.Set.Maybe.order" which provides a short-hand to defining
-    semantics analagous to SQL's "NULLS FIRST|LAST".
+    semantics analogous to SQL's "NULLS FIRST|LAST".
 
     * (Integer.pod, Rational.pod)  Added 2 dyadic functions
     "sys.std.(Integer|Rational).abs_difference", each of which results in
@@ -7389,7 +7533,7 @@
 
     * (Core.pod)  Added 2 new Tuple functions 'attr_from_Tuple' and
     'Tuple_from_attr', which work with degree-one tuples; they are
-    analagous to the 2 "(T|R) from (R|T)" Relation functions that work with
+    analogous to the 2 "(T|R) from (R|T)" Relation functions that work with
     cardinality-one relations.  Also added 2 new Tuple functions 'attr' and
     'update_attr', which read or write an attribute in an arbitrary tuple.
 

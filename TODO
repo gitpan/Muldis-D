@@ -342,7 +342,7 @@ for some info on those.  Also add analogies to Perl 5's List::MoreUtils
 operators any(), all(), notall(), none(), true(), false(); some of those
 may be the same as EXISTS/FORALL.  Also add an EXACTLY operator like the
 Tutorial D language has, and a one() op that is between any() and none().
-Maybe some pure boolean ops can be added analagous to the above also; eg
+Maybe some pure boolean ops can be added analogous to the above also; eg
 any() an alias for or() and all() an alias for and().
 is_(any|all|one|none|notall|etc)_of_(restr|semijoin|semidiff|etc)
 $source is any|etc matching|where|etc $filter|etc
@@ -358,6 +358,21 @@ and rational numerics, such as for character strings or binary strings.
 union, that takes a list of attributes and unions the projections of those
 attributes from every input relation; so this means, as with join(), that
 the input relations don't need to have the same headings.
+
+* Update the definition of the "Instant" type to account for updates to the
+Perl 6 spec on 2010.02.23 (r29809), where "Instant" was made opaque and is
+no longer specifically a count of seconds from the TAI epoch but rather
+there can be multiple epochs where an epoch is simply an Instant value, and
+an Instant's internals are implementation defined.  Since Muldis D has no
+opaque types save Int, its analogy could perhaps have multiple possreps,
+one per each epoch of common interest, which counts seconds from that?  See
+also the Temporal-concerning perl6-language thread immed preceding r29809.
+It seems that, like with Text and the thing about NFD vs NFKD or Unicode vs
+non-Han-unifying alternatives, there isn't really any one representation
+option for Instants that is overwhelming more correct or normal than others
+to be used as a default or internal representation everywhere.
+Perhaps also consider demoting Instant/Duration from core, though what to
+do about timestamps used in a system catalog is an ongoing question.
 
 ----------
 
@@ -418,19 +433,67 @@ an explicit type declaration still.  Note, if same inline-declared host
 param used more than once, you just need "(param $foo : Bar)" form once and
 other uses can just say $foo as per usual; in fact, it must be this way.
 
-* Consider in PTMD_STD using a "<ws>" or other-named token similar to the
-Perl 6 concept of something that is treated as insignificant whitespace as
+* Consider in PTMD_STD using a token similar to the Perl 6 "<ws>" concept
+of something that is treated as insignificant whitespace as
 far as interpreting the code is concerned, but that may contain #-delimited
 comments.  The idea of this is to make it easier to sprinkle comments
 almost anywhere without making the grammar a lot more verbose for it.  It
 is expected that any use of such comments beside "<value>" nodes would only
 be allowed under a "<depot>", and under plain "<value>" would be rejected.
-Mind that such a "<ws>" would not be used everywhere in place of \s+/\s*,
-but only in the specific places representing a node that would turn into
-a system catalog tuple with a "comment".
+Mind that such a token would not be used everywhere in place of a current
+PTMD_STD "<ws>" or "<ws>?" (means \s+ or \s*), but only in specific places
+repr a node that would turn into a system catalog tuple with a "comment".
 Essentially it comes in 2 flavors whose definitions are
-"<_ms_oc> ::= \s+ [<non_value_comment> \s+]?" and
-"<_os_oc> ::= \s* | \s+ <non_value_comment> \s+" or such.
+"<_ms_oc> ::= <ws> [<non_value_comment> <ws>]?" and
+"<_os_oc> ::= <ws>? | <ws> <non_value_comment> <ws>" or such.
+
+* Consider in all STD adding a new pragma that concerns whether data in
+delimited character string literals is ASCII or Unicode etc.
+Example PTMD_STD grammar additions:
+            <ws>? ',' <ws>? str_char_repertoire <ws>? '=>' <ws>? <str_cr>
+    <str_cr> ::=
+        '{' <ws>?
+            [<str_cr_describes> <ws>? '=>' <ws>? <str_char_reper>]
+                ** [<ws>? ',' <ws>?]
+        <ws>? '}'
+    <str_cr_describes> ::=
+        all | text | name | cmnt
+    <str_char_reper> ::=
+          ASCII
+        | Unicode_5.2.0_canon
+        | Unicode_5.2.0_compat
+Example PTMD_STD code additions:
+    str_char_repertoire => { text => Unicode_5.2.0_canon,
+        name => Unicode_5.2.0_compat, cmnt => Unicode_5.2.0_compat },
+    str_char_repertoire => { all => ASCII },
+Of particular interest is the Unicode canonical vs compatibility, that is
+NFC|D vs NFKC|D; it is generally recommended such as by the Unicode
+consortium to use canonical for general data but to use compatibility for
+things like identifiers or to avoid some kinds of security problems; see
+http://www.unicode.org/faq/normalization.html.  Note that compatibility is
+a smaller repertoire than canonical, so converting from the latter to the
+former will lose information.  The text|name|cmnt affect how delimited char
+strs that are Text|Name|Comment are interpreted, and the effects are
+orthogonal to whether characters are specified literally or in escaped
+(eg "\c<...>" form); canonical will preserve exactly what is stated (but
+for normalization to NFD) and compatibility will take what is stated and
+fold it so semantically same characters become the same codepoints (like as
+normalizing to NFKD).  The suggested usage is compatibility for Name to
+help avoid security or other problems, and canonical for Text; as for
+Comment, I currently don't know which is better.  If ASCII is chosen, the
+semantics are different; with both Unicode any input is accepted but folded
+if needed; for ASCII, it is more likely an exception would be raised if
+there are any codepoints outside the 0..127 range in character strings.
+The 'all' is a shorthand for giving the same value to all 3 text|name|cmnt
+and is more likely to occur with ASCII but it might happen otherwise.
+An additional reason to raise this feature is to setup support for other
+char sets in future, such as Mojikyo, TRON, GB18030, etc which go beyond
+Unicode eg no Han-unification (see http://www.jbrowse.com/text/unij.html +
+http://www.ruby-forum.com/topic/165927) but type system also needs update.
+
+* Update HDMD_Perl6_STD.pod considering names of Perl collection types,
+such that "Enum" is the immutable "Pair" and "EnumMap" was renamed from
+"Mapping", and "FatRat" is now the "Rat" of unlimited size, etc.
 
 * Consider using postcircumfix syntax for extracting single relation
 attrs into Set or Bag etc, meaning wrap_attr; eg "$r.@S{a}", "$r.@B{a}".
@@ -457,7 +520,7 @@ resolve into multiple single-attr accessors when app in system catalog.
 
 * Restore the concept of public-vs-private entities directly in sub|depots.
 
-* Restore the concept of "topic namespaces" (analagous to SQL DBMS concept
+* Restore the concept of "topic namespaces" (analogous to SQL DBMS concept
 of "current database|schema" etc) in some form if not redundant.
 
 * Update the system catalog to deal with database users and privileges etc.
@@ -493,7 +556,7 @@ or routines built-in to the peer/host language that we can assume are as
 static as sys.std, could go under sys.imp or something.  This also doesn't
 go under fed etc since fed is reserved for data under Muldis D control and
 only ever contains pure s/t/r types.  Presumably this namespace will be
-subdivided by language analagously to sys.imp or whatever syntax Perl 6
+subdivided by language analogously to sys.imp or whatever syntax Perl 6
 provides for calling out into foreign languages co-hosted on Parrot.  Since
 all foreign values are treated as black boxes by Muldis D, it is assumed
 that the Muldis D implementation's bindings to the peer/host language will
@@ -555,6 +618,11 @@ to combine into one extension.
 * Add functions for splitting strings on delimiters or catenating them with
 such to above extensions or to Text.pod as appropriate.
 
+* Update or supplement the order-determination function for Text so that it
+compares whole graphemes (1 grapheme = sequence starting with a base
+codepoint plus N combining codepoints, or something) as single string
+elements, rather than say comparing a base char against a combining char.
+
 * Make further updates to DateTime.pod to improve correctness or
 normalization, particularly with durations, maybe add some UTCDuration
 subtypes.  Also expand the selection of routines to allow more control over
@@ -581,7 +649,7 @@ complete definitions of all system-defined types, and they declare all the
 system catalog dbvars/dbcons.  In other words these files contain
 everything that is in the sys.cat dbcon; anything that users can introspect
 from sys.cat can also be read from these files in the form of PTMD_STD
-code, more or less.  The function of these files is analagous to the Perl 6
+code, more or less.  The function of these files is analogous to the Perl 6
 Setting files described in the Perl 6 Synopsis 32, except that the Muldis D
 analogy explicitly does not define the bodies of any built-in routines.  An
 idea is that Muldis D implementations could take these files as is and

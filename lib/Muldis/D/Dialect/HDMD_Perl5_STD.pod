@@ -9,7 +9,7 @@ How to format Perl 5 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.109.0.
+This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.110.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Hosted Data Muldis D> standard
 dialect named C<HDMD_Perl5_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.109.0',
+standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.110.0',
 'HDMD_Perl5_STD' ]>.
 
 The C<HDMD_Perl5_STD> dialect is defined to be hosted in Perl 5, and is
@@ -118,13 +118,14 @@ string C<Muldis_D>.
 =item C<ln_base_authority>
 
 This is the base authority; it is a character string formatted as per a
-specific-context C<Name> value literal; it is typically the Perl character
-string C<http://muldis.com>.
+specific-context C<Name> value literal, except that must be nonempty and it
+is expressly limited to using non-control characters in the ASCII
+repertoire; it is typically the Perl character string C<http://muldis.com>.
 
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.109.0>.
+C<ln_base_authority>; it is typically a character string like C<0.110.0>.
 
 =item C<ln_dialect>
 
@@ -134,15 +135,20 @@ C<HDMD_Perl5_STD>.
 =item C<ln_extensions>
 
 This is a set of chosen pragma/parser-config options, which is formatted
-similarly to a C<Tuple> SCVL.  The only mandatory pragma is
+similarly to a C<Tuple> SCVL.  The only 2 mandatory pragmas are
 C<catalog_abstraction_level> (see the L</CATALOG ABSTRACTION LEVELS> pod
-section).  The only optional pragma is C<standard_syntax_extensions> (see
-the L</STANDARD SYNTAX EXTENSIONS> pod section).  Other pragmas may be
-added later, which would likely be optional.
+section) and C<op_char_repertoire> (see L</OPERATOR CHARACTER REPERTOIRE>).
+The only optional pragma is C<standard_syntax_extensions> (see the
+L</STANDARD SYNTAX EXTENSIONS> pod section).  Other pragmas may be added
+later, which would likely be optional.
 
 The value associated with the C<ln_extensions> attribute named
 C<catalog_abstraction_level> must be one of these 4 Perl character strings:
 C<the_floor>, C<code_as_data>, C<plain_rtn_inv>, C<rtn_inv_alt_syn>.
+
+The value associated with the C<ln_extensions> attribute named
+C<op_char_repertoire> must be one of these 2 Perl character strings:
+C<basic>, C<extended>.
 
 The value associated with the C<ln_extensions> attribute named
 C<standard_syntax_extensions> must be formatted similarly to a C<Set> SCVL;
@@ -153,12 +159,14 @@ C<date_time>.
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '0.109.0', 'HDMD_Perl5_STD', {
-        catalog_abstraction_level => 'rtn_inv_alt_syn'
+    [ 'Muldis_D', 'http://muldis.com', '0.110.0', 'HDMD_Perl5_STD', {
+        catalog_abstraction_level => 'rtn_inv_alt_syn',
+        op_char_repertoire => 'extended'
     } ]
 
-    [ 'Muldis_D', 'http://muldis.com', '0.109.0', 'HDMD_Perl5_STD', {
-        catalog_abstraction_level  => 'rtn_inv_alt_syn',
+    [ 'Muldis_D', 'http://muldis.com', '0.110.0', 'HDMD_Perl5_STD', {
+        catalog_abstraction_level => 'rtn_inv_alt_syn',
+        op_char_repertoire => 'extended',
         standard_syntax_extensions => ['date_time']
     } ]
 
@@ -191,35 +199,26 @@ intended to actually be used.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.109.0', 'HDMD_Perl5_STD', {
-            catalog_abstraction_level => 'the_floor'
+        [ 'Muldis_D', 'http://muldis.com', '0.110.0', 'HDMD_Perl5_STD', {
+            catalog_abstraction_level => 'the_floor',
+            op_char_repertoire => 'basic'
         } ],
         [ 'Relation', [
             {
                 food => [ 'Scalar', 'Text', [ nfd_codes => {
-                    '' => [ 'Relation', [ [ 'index', 'value' ] => [
-                        [ ['Scalar','Int.0',{}], ['Scalar','Int.67',{}]  ],
-                        [ ['Scalar','Int.1',{}], ['Scalar','Int.97',{}]  ],
-                        [ ['Scalar','Int.2',{}], ['Scalar','Int.114',{}] ],
-                        [ ['Scalar','Int.3',{}], ['Scalar','Int.114',{}] ],
-                        [ ['Scalar','Int.4',{}], ['Scalar','Int.111',{}] ],
-                        [ ['Scalar','Int.5',{}], ['Scalar','Int.116',{}] ],
-                        [ ['Scalar','Int.6',{}], ['Scalar','Int.115',{}] ]
+                    '' => [ 'Relation', [ ['index','value'] => [
+                      [0,67],[1,97],[2,114],[3,114],[4,111],[5,116],[6,115]
                     ] ] ]
                 } ] ],
-                qty => ['Scalar','Int.100',{}]
+                qty => 100
             },
             {
                 food => [ 'Scalar', 'Text', [ nfd_codes => {
-                    '' => [ 'Relation', [ [ 'index', 'value' ] => [
-                        [ ['Scalar','Int.0',{}], ['Scalar','Int.75',{}]  ],
-                        [ ['Scalar','Int.1',{}], ['Scalar','Int.105',{}] ],
-                        [ ['Scalar','Int.2',{}], ['Scalar','Int.119',{}] ],
-                        [ ['Scalar','Int.3',{}], ['Scalar','Int.105',{}] ],
-                        [ ['Scalar','Int.4',{}], ['Scalar','Int.115',{}] ],
+                    '' => [ 'Relation', [ ['index','value'] => [
+                        [0,75],[1,105],[2,119],[3,105],[4,115]
                     ] ] ]
                 } ] ],
-                qty => ['Scalar','Int.30',{}]
+                qty => 30
             }
         ] ]
     ]
@@ -236,8 +235,9 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.109.0', 'HDMD_Perl5_STD', {
-            catalog_abstraction_level => 'code_as_data'
+        [ 'Muldis_D', 'http://muldis.com', '0.110.0', 'HDMD_Perl5_STD', {
+            catalog_abstraction_level => 'code_as_data',
+            op_char_repertoire => 'basic'
         } ],
         [ 'Relation', [
             { food => 'Carrots', qty => 100 },
@@ -246,8 +246,9 @@ Examples:
     ]
 
     [
-       [ 'Muldis_D', 'http://muldis.com', '0.109.0', 'HDMD_Perl5_STD', {
-          catalog_abstraction_level => 'code_as_data'
+       [ 'Muldis_D', 'http://muldis.com', '0.110.0', 'HDMD_Perl5_STD', {
+          catalog_abstraction_level => 'code_as_data',
+          op_char_repertoire => 'basic'
        } ],
        [ 'depot', { 'depot-catalog' => [ 'Database', 'Depot', {
           functions => [ 'Relation', [
@@ -294,8 +295,9 @@ described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.109.0', 'HDMD_Perl5_STD', {
-            catalog_abstraction_level => 'plain_rtn_inv'
+        [ 'Muldis_D', 'http://muldis.com', '0.110.0', 'HDMD_Perl5_STD', {
+            catalog_abstraction_level => 'plain_rtn_inv',
+            op_char_repertoire => 'basic'
         } ],
         [ 'depot', { 'depot-catalog' => [
             [ 'function', 'cube', [ 'Int', { topic => 'Int' }, [
@@ -318,8 +320,9 @@ EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.109.0', 'HDMD_Perl5_STD', {
-            catalog_abstraction_level => 'rtn_inv_alt_syn'
+        [ 'Muldis_D', 'http://muldis.com', '0.110.0', 'HDMD_Perl5_STD', {
+            catalog_abstraction_level => 'rtn_inv_alt_syn',
+            op_char_repertoire => 'basic'
         } ],
         [ 'depot', { 'depot-catalog' => [
             [ 'function', 'cube', [ 'Int', { topic => 'Int' }, [
@@ -327,6 +330,41 @@ Examples:
             ] ] ]
         ] } ]
     ]
+
+=head1 OPERATOR CHARACTER REPERTOIRE
+
+The C<op_char_repertoire> pragma determines primarily whether or not the
+various routine invocation alternate syntaxes, herein called I<operators>,
+may be composed of only ASCII characters or also other Unicode characters,
+and this pragma determines secondarily whether or not a few special value
+literals (effectively nullary operators) composed of non-ASCII Unicode
+characters may exist.
+
+There are currently 2 specified operator character repertoires: C<basic>,
+C<extended>.  The latter is a proper superset of the former.
+
+Specifying the C<op_char_repertoire> pragma in a C<language_name> node is
+mandatory, since there is no obviously best setting to use implicitly when
+one isn't specified.
+
+=head2 basic
+
+The C<basic> operator character repertoire is the smallest one, and it only
+supports writing the proper subset of defined operator invocations and
+special value literals that are composed of just 7-bit ASCII characters.
+This repertoire can be recommended for general use, especially since code
+written to it should be the most universally portable as-is (with respect
+to operator character repertoires), including full support even by minimal
+Muldis D implementations and older text editors.
+
+=head2 extended
+
+The C<extended> operator character repertoire is the largest one, and it
+supports the entire set of defined operator invocations and special value
+literals, many of which are composed of Unicode characters outside the
+7-bit ASCII repertoire.  This is the most recommended repertoire for
+general use, assuming that all the Muldis D implementations and source code
+text editors you want to use support it.
 
 =head1 STANDARD SYNTAX EXTENSIONS
 
@@ -350,8 +388,9 @@ standard syntax extensions will have no effect when the catalog abstraction
 level is C<the_floor>, and some of their features may only take effect when
 the catalog abstraction level is C<rtn_inv_alt_syn>, as is appropriate.
 
-Specifying the C<standard_syntax_extensions> pragma is optional, and when
-omitted it defaults to the empty set, meaning no extensions may be used.
+Specifying the C<standard_syntax_extensions> pragma in a C<language_name>
+node is optional, and when omitted it defaults to the empty set, meaning no
+extensions may be used.
 
 =head2 date_time
 
@@ -532,8 +571,8 @@ Muldis D C<sys.std.Core.Type.Int> value as follows:
 If the payload is a Perl scalar, then it must be just a canonical integer
 value according to Perl, and it is mapped directly; since native Perl
 integers are limited precision, larger integers can be represented by a
-Perl character string of the format C<0> or C<< \-?<[1..9]>['_'?<[0..9]>+]*
->> that is interpreted as base 10.
+Perl character string of the format C<0> or C<<
+'-'?<[1..9]>['_'?<[0..9]>+]* >> that is interpreted as base 10.
 
 =item *
 
@@ -546,7 +585,7 @@ If the payload is a Perl hash ref, then it must have 1 element, whose key
 and value are designated, in order, I<max-col-val> and I<main payload>; the
 max-col-val must be a Perl string composed of a single C<[ 1..9 A..Z ]>
 character, and the main payload must be a Perl character string of the
-format C<0> or C<< \-?<[ 1..9 A..Z ]>['_'?<[ 0..9 A..Z ]>+]* >>.  The
+format C<0> or C<< '-'?<[ 1..9 A..Z ]>['_'?<[ 0..9 A..Z ]>+]* >>.  The
 main payload is interpreted as a base-I<N> integer where I<N> might be
 between 2 and 36, and the given max-col-val says which possible value of
 I<N> to use.  Assuming all column values are between zero and
@@ -588,8 +627,9 @@ If the payload is a Perl scalar, then it must be just a canonical numeric
 value according to Perl, and it is mapped directly; since native Perl
 numerics are limited precision or are inexact (IEEE float), larger numerics
 can be represented by a Perl character string of the format C<<
-0\.['_'?<[0..9]>+]+ >> or C<< \-?<[1..9]>['_'?<[0..9]>+]*\.['_'?<[0..9]>+]+
->> that is interpreted as base 10.
+0'.'['_'?<[0..9]>+]+ >> or C<<
+'-'?<[1..9]>['_'?<[0..9]>+]*'.'['_'?<[0..9]>+]+ >> that is interpreted as
+base 10.
 
 =item *
 
@@ -612,8 +652,8 @@ If the payload is a Perl hash ref, then it must have 1 element, whose key
 and value are designated, in order, I<max-col-val> and I<main payload>; the
 max-col-val must be a Perl string composed of a single C<[ 1..9 A..Z ]>
 character.  If the main payload is a Perl scalar, then the main payload
-must be a Perl character string of the format C<< 0\.['_'?<[ 0..9 A..Z
-]>+]+ >> or C<< \-?<[ 1..9 A..Z ]>['_'?<[ 0..9 A..Z ]>+]*\.['_'?<[ 0..9
+must be a Perl character string of the format C<< 0'.'['_'?<[ 0..9 A..Z
+]>+]+ >> or C<< '-'?<[ 1..9 A..Z ]>['_'?<[ 0..9 A..Z ]>+]*'.'['_'?<[ 0..9
 A..Z ]>+]+ >>.  The main payload is interpreted as a base-I<N> rational
 where I<N> might be between 2 and 36, and the given max-col-val says which
 possible value of I<N> to use.  Assuming all column values are between zero
@@ -858,7 +898,7 @@ options exist are only valid within a C<depot> node.
 =head2 Scalar Selectors
 
 A C<Scalar> node represents a literal or selector invocation for a
-scalar subtype value.  It is interpreted as a Muldis D
+not-C<Int> scalar subtype value.  It is interpreted as a Muldis D
 C<sys.std.Core.Type.Scalar> subtype value whose declared type is specified
 by the  node's (mandatory for C<Scalar>) C<type_name> element and whose
 attributes are defined by the payload.  If the payload is a Perl array ref,
@@ -900,8 +940,6 @@ Examples:
     [ 'Scalar', 'fed.lib.the_db.WeekDay', [ number => {
         '' => 5,
     } ] ]
-
-    [ 'Scalar', 'Int.42', {} ]
 
     [ 'Scalar', 'Text', [ nfd_codes => {
         '' => [ 'Array', [80,101,114,109] ]

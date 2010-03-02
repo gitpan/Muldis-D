@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Muldis::D;
-our $VERSION = '0.109000';
+our $VERSION = '0.110000';
 $VERSION = eval $VERSION;
 # Note that Perl code only exists at all in this file in order to help
 # the CPAN indexer handle the distribution properly.
@@ -20,7 +20,7 @@ Formal spec of Muldis D relational DBMS lang
 
 =head1 VERSION
 
-This document is Muldis::D version 0.109.0.
+This document is Muldis::D version 0.110.0.
 
 =head1 PREFACE
 
@@ -45,10 +45,9 @@ at them.
 
 The fully-qualified name of this multi-part document and the language
 specification it contains (as a single composition) is
-C<Muldis_D:"http://muldis.com":"0.109.0">.  It is the official/original
-(not
+C<Muldis_D:"http://muldis.com":0.110.0>.  It is the official/original (not
 embraced and extended) Muldis D language specification by the authority
-Darren Duncan (C<http://muldis.com>), version C<0.109.0> (this number
+Darren Duncan (C<http://muldis.com>), version C<0.110.0> (this number
 matches the VERSION pod in this file).  This multi-part document is named
 and organized with the expectation that many dialects, extensions, and core
 versions of it will exist over time, some of those under the original
@@ -131,6 +130,17 @@ allowed elements; in that case, this language name implicitly refers to the
 entire language sub-tree having the specified elements in common; an
 example of this is the 3-element name mentioned in this file's DESCRIPTION
 section.  Even in code, sometimes certain child-most elements are optional.
+
+While not mandatory for Muldis D variants in general, it is strongly
+recommended that all elements of a Muldis D language name would, when
+expressed in terms of character strings, be expressly limited to comprising
+just non-control characters in the ASCII repertoire, and not include any
+other characters such as Unicode has.  The primary reason for this is to
+make it as simple as possible to interpret a language name on all
+architectures, especially so that any explicit hints in the name on how to
+interpret the rest of the Muldis D code, including hints as to what
+character repertoire it is written in, can be understood without ambiguity.
+For all official Muldis D variants, ASCII-only names is actually mandatory.
 
 =head2 Foundation
 
