@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.110.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.111.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.110.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.111.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -190,11 +190,9 @@ Grammar:
         <[ a..z A..Z 0..9 _ - \. ]>+
 
     <quoted_ln_elem_str> ::=
-        [
-            <["]>
-                [<[\ ..~]-[\\"]> | '\b'|'\a'|'\q'|'\g'|'\h'|'\s']+
-            <["]>
-        ] ** [<ws>? '~']
+        '"'
+            [<[\ ..~]-[\\"]> | '\b'|'\a'|'\q'|'\g'|'\h'|'\s' | <unspace>]+
+        '"'
 
     <ln_extensions> ::=
         '{' <ws>?
@@ -244,7 +242,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.110.0>.
+C<ln_base_authority>; it is typically a character string like C<0.111.0>.
 
 =item C<ln_dialect>
 
@@ -265,12 +263,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.110.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.110.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {date_time}
@@ -353,7 +351,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.110.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -411,7 +409,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.110.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -420,7 +418,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.110.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -501,7 +499,7 @@ described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.110.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -560,7 +558,7 @@ EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.110.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -765,8 +763,6 @@ Grammar:
         | <NameChain>
         | <PNSQNameChain>
         | <Comment>
-        | <Instant>
-        | <Duration>
         | <RatRoundRule>
 
     <coll_value_selector> ::=
@@ -860,8 +856,6 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | NameChain
         | PNSQNameChain
         | Comment
-        | Instant
-        | Duration
         | RatRoundRule
         | DH? Scalar
         | DH? Tuple
@@ -889,8 +883,6 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | <NameChain_payload>
         | <PNSQNameChain_payload>
         | <Comment_payload>
-        | <Instant_payload>
-        | <Duration_payload>
         | <RatRoundRule_payload>
         | <Scalar_payload>
         | <Tuple_payload>
@@ -988,6 +980,13 @@ is a bareword character string formatted as per a C<Name> SCVL, and it maps
 directly to the matching unqualified declared name of one of the C<Bool.*>
 singleton types that the C<Bool> type is defined as a union over.
 
+Some of the keywords are aliases for each other:
+
+    keyword   | aliases
+    ----------+--------
+    False     | ⊥
+    True      | ⊤
+
 Examples:
 
     Bool:True
@@ -1083,7 +1082,7 @@ Grammar:
         <[ 1..9 A..Z ]>
 
     <pint_tail> ::=
-        [[_?<[ 0..9 A..Z ]>+]+] ** [<ws>? '~' <ws>?]
+        [[_?<[ 0..9 A..Z ]>+]+] ** <unspace>
 
     <d_int_body> ::=
         0 | '-'?<d_pint_body>
@@ -1098,7 +1097,7 @@ Grammar:
         <[ 1..9 ]>
 
     <d_pint_tail> ::=
-        [[_?<[ 0..9 ]>+]+] ** [<ws>? '~' <ws>?]
+        [[_?<[ 0..9 ]>+]+] ** <unspace>
 
 An C<Int> node represents an integer numeric value.  It is interpreted as a
 Muldis D C<sys.std.Core.Type.Int> value as follows:
@@ -1119,12 +1118,13 @@ digits and uppercased (but not lowercased) letters, where each digit
 number in [10..35].  A I<body> may optionally contain underscore characters
 (C<_>), which exist just to help with visual formatting, such as for
 C<10_000_000>, and these are ignored/stripped by the parser.  A I<body> may
-optionally be split into 1..N segments where each segment is separated by a
-tilde token (C<~>); this segmenting ability is provided to support code
-that contains very long numeric literals while still being well formatted
-(no extra long lines); the tilde tokens are also ignored/stripped by the
-parser, and the I<body> is interpreted as if all its alphanumeric
-characters were contiguous.
+optionally be split into 1..N segments where each pair of consecutive
+segments is separated by an I<unspace> token, which is a run of whitespace
+delimited by backslashes (C<\>); this segmenting ability is provided to
+support code that contains very long numeric literals while still being
+well formatted (no extra long lines); the I<unspace> tokens are also
+ignored/stripped by the parser, and the I<body> is interpreted as if all
+its alphanumeric characters were contiguous.
 
 If the C<value_kind> of a C<value> node is C<NNInt> or C<PInt> rather than
 C<Int>, then the C<value> node is interpreted simply as an C<Int> node
@@ -1246,11 +1246,9 @@ Grammar:
         <[137F]>
 
     <blob_body> ::=
-        [
-            <[']>
-                <[ 0..9 A..F ]>*
-            <[']>
-        ] ** [<ws>? '~' <ws>?]
+        '\''
+            [<[ 0..9 A..F ]> | <unspace>]*
+        '\''
 
 A C<Blob> node represents a general purpose bit string.  It is interpreted
 as a Muldis D C<sys.std.Core.Type.Blob> value as follows:  Fundamentally
@@ -1288,11 +1286,9 @@ Grammar:
         <Text_payload>
 
     <Text_payload> ::=
-        [
-            <[']>
-                [<-[\\\'\t\n\f\r]> | <escaped_char>]*
-            <[']>
-        ] ** [<ws>? '~' <ws>?]
+        '\''
+            [<-[\\\'\t\n\f\r]> | <escaped_char> | <unspace>]*
+        '\''
 
     <escaped_char> ::=
           '\b' | '\a' | '\q' | '\g' | '\h'
@@ -1304,8 +1300,11 @@ Grammar:
             | <[ 1..9 A..Z ]> ';' [0 | <[ 1..9 A..Z ]> <[ 0..9 A..Z ]>*]
           ] '>'
 
+    <unspace> ::=
+        '\\' <ws> '\\'
+
     <ws> ::=
-        [' ' | <[\t\n\f\r]>]+
+        <[\ \t\n\f\r]>+
 
 A C<Text> node represents a general purpose character string.  It is
 interpreted as a Muldis D C<sys.std.Core.Type.Text> value as follows:
@@ -1314,12 +1313,12 @@ The C<Text_payload> is interpreted generally as is usual for a programming
 language with such a delimited character string literal.
 
 A C<Text_payload> may optionally be split into 1..N segments where each
-segment is delimited by apostrophes/single-quotes (C<'>) and separated by a
-tilde token (C<~>); this segmenting ability is provided to support code
-that contains long string literals while still being well formatted (no
-extra long lines); the tilde tokens and adjoining string delimiters are
+pair of consecutive segments is separated by an I<unspace> token, which is
+a run of whitespace delimited by backslashes (C<\>); this segmenting
+ability is provided to support code that contains long value literals while
+still being well formatted (no extra long lines); the I<unspace> tokens are
 ignored/stripped by the parser, and the C<Text_payload> is interpreted as
-if it just consisted of a single delimited string.
+if it just consisted of the rest of the delimited string contiguously.
 
 All Muldis D delimited character string literals (generally the 3 C<Text>,
 C<Name>, C<Comment>) may contain some characters denoted with escape
@@ -1368,7 +1367,7 @@ There is currently just one complex escape sequence, of the format C<<
 abstract codepoint name or number.  If the C<...> consists of just
 uppercased (not lowercased) letters and the space character, then the
 C<...> is interpreted as a Unicode character name.  If the C<...> looks
-like an C<Int_payload>, sans that underscores and tilde segmentation aren't
+like an C<Int_payload>, sans that underscores and unspace aren't
 allowed here, then the C<...> is interpreted as a Unicode abstract
 codepoint number.  One reason for this feature is to empower more elegant
 passing of Unicode-savvy PTMD_STD source code through a communications
@@ -1402,11 +1401,9 @@ Grammar:
         <[ a..z A..Z _ ]><[ a..z A..Z 0..9 _ - ]>*
 
     <quoted_name_str> ::=
-        [
-            <["]>
-                [<-[\\\"\t\n\f\r]> | <escaped_char>]*
-            <["]>
-        ] ** [<ws>? '~' <ws>?]
+        '"'
+            [<-[\\\"\t\n\f\r]> | <escaped_char> | <unspace>]*
+        '"'
 
     <NameChain> ::=
         NameChain ':' <ws>?
@@ -1440,7 +1437,7 @@ node, and any similarities won't be repeated here.  Unlike a
 C<Text_payload> literal which must always be delimited, a C<Name_payload>
 has 2 variants, one delimited (C<quoted_name_str>) and one not
 (C<nonquoted_name_str>).  The delimited C<Name_payload> form differs from
-C<Text_payload> only in that each string segment is delimited by
+C<Text_payload> only in that the string is delimited by
 double-quotes rather than apostrophes/single-quotes.
 
 A C<nonquoted_name_str> is composed of a single alphabetic or underscore
@@ -1591,17 +1588,15 @@ Grammar:
         <Comment_payload>
 
     <Comment_payload> ::=
-        [
-            <[`]>
-                [<-[\\\`\t\n\f\r]> | <escaped_char>]*
-            <[`]>
-        ] ** [<ws>? '~' <ws>?]
+        '`'
+            [<-[\\\`\t\n\f\r]> | <escaped_char> | <unspace>]*
+        '`'
 
     <non_value_comment> ::=
         [
             '#' ** 2..*
           | '#' ' '*
-                [<-[\\\#\t\n\f\r]> | <escaped_char>]*
+                [<-[\\\#\t\n\f\r]> | <escaped_char> | <unspace>]*
             ' '* '#'
         ] ** <ws>
 
@@ -1612,7 +1607,7 @@ follows:
 
 Fundamentally a C<Comment> node is formatted and interpreted like a C<Text>
 node, and any similarities won't be repeated here.  The C<Comment_payload>
-differs from C<Text_payload> only in that each string segment is delimited
+differs from C<Text_payload> only in that the string is delimited
 by backticks/grave-accents (C<`>) rather than apostrophes/single-quotes.
 
 A C<non_value_comment> node is I<also> interpreted as a Muldis D
@@ -1664,55 +1659,6 @@ Examples (the first 2 are as values, the third is not as a value):
     `So does this.`
 
     # And also this. #
-
-=head2 TAI Temporal Literals
-
-Grammar:
-
-    <Instant> ::=
-        Instant ':' <ws>?
-        [<type_name> ':' <ws>?]?
-        <Instant_payload>
-
-    <Instant_payload> ::=
-        <Rat_payload>
-
-    <Duration> ::=
-        Duration ':' <ws>?
-        [<type_name> ':' <ws>?]?
-        <Duration_payload>
-
-    <Duration_payload> ::=
-        <Rat_payload>
-
-An C<Instant> node represents a single point in time which is specified in
-terms of atomic seconds; it is a rational numeric type, that is disjoint
-from both C<Rat> and C<Duration>.  This node is interpreted as a Muldis D
-C<sys.std.Core.Type.Instant> value as follows:  An C<Instant_payload> is
-formatted and interpreted in the same way as a C<Rat_payload>.
-
-A C<Duration> node represents a single amount of time (the difference
-between two instants) which is specified in terms of atomic seconds; it
-is a rational numeric type, that is disjoint from both C<Rat> and
-C<Instant>.  This node is interpreted as a Muldis D
-C<sys.std.Core.Type.Duration> value as follows:  A C<Duration_payload> is
-formatted and interpreted in the same way as a C<Rat_payload>.
-
-Examples:
-
-    Instant:1235556432.0
-
-    Instant:854309115.0
-
-    Duration:3600.0
-
-    Duration:-50.0
-
-    Duration:3.14159
-
-    Duration:1;1011101101*10^-11011
-
-    Duration:1/43
 
 =head2 Rational Rounding Rule Literals
 
@@ -2942,7 +2888,7 @@ Examples:
 
     if $foo > 5 then $bar else $baz
 
-    if $ary is empty then $empty_result else $ary.[0]
+    if $ary is-empty then $empty_result else $ary.[0]
 
     if $x = ∅ or $y = ∅ then ∅
         else s ((v $x) I+ ((v $y) I^ 3)
@@ -3509,8 +3455,8 @@ This table indicates which function is invoked by each keyword:
     I|| -> Core.Integer.abs( $expr )
     N|| -> Core.Rational.abs( $expr )
     R#  -> Core.Relation.cardinality( $expr )
-    t   -> Core.Relation.Tuple_from_Relation( $expr )
-    r   -> Core.Relation.Relation_from_Tuple( $expr )
+    t   -> Core.Cast.Tuple_from_Relation( $expr )
+    r   -> Core.Cast.Relation_from_Tuple( $expr )
     s   -> Core.Set.Maybe.single( value => $expr )
     v   -> Core.Set.Maybe.attr( $expr )
 
@@ -4053,18 +3999,24 @@ Grammar:
 
     <value__sse_date_time> ::=
           ...
+        | <TAIInstant>
+        | <TAIDuration>
         | <UTCInstant>
         | <FloatInstant>
         | <UTCDuration>
 
     <value_kind__sse_date_time> ::=
           ...
+        | TAIInstant
+        | TAIDuration
         | UTC [Instant | DateTime | Date | Time]
         | Float [Instant | DateTime | Date | Time]
         | UTCDuration
 
     <value_payload__sse_date_time> ::=
           ...
+        | <TAIInstant_payload>
+        | <TAIDuration_payload>
         | <UTCInstant_payload>
         | <FloatInstant_payload>
         | <UTCDuration_payload>
@@ -4072,6 +4024,22 @@ Grammar:
 =head2 Date and Time Literals
 
 Grammar:
+
+    <TAIInstant> ::=
+        TAIInstant ':' <ws>?
+        [<type_name> ':' <ws>?]?
+        <TAIInstant_payload>
+
+    <TAIInstant_payload> ::=
+        <Rat_payload>
+
+    <TAIDuration> ::=
+        TAIDuration ':' <ws>?
+        [<type_name> ':' <ws>?]?
+        <TAIDuration_payload>
+
+    <TAIDuration_payload> ::=
+        <Rat_payload>
 
     <UTCInstant> ::=
         UTC [Instant | DateTime | Date | Time] ':' <ws>?
@@ -4109,6 +4077,21 @@ Grammar:
             [<d_int_body>? [<ws>? ',' <ws>?]] ** 5
             <ws>? ',' <ws>? <d_rat_body>?
         <ws>? ']'
+
+A C<TAIInstant> node represents a single point in time which is specified
+in terms of atomic seconds; it is a rational numeric type, that is disjoint
+from both C<Rat> and C<TAIDuration>.  This node is interpreted as a Muldis
+D C<sys.std.DateTime.Type.TAIInstant> value as follows:  A
+C<TAIInstant_payload> is formatted and interpreted in the same way as a
+C<Rat_payload>.
+
+A C<TAIDuration> node represents a single amount of time (the difference
+between two instants) which is specified in terms of atomic seconds; it is
+a rational numeric type, that is disjoint from both C<Rat> and
+C<TAIInstant>.  This node is interpreted as a Muldis D
+C<sys.std.DateTime.Type.TAIDuration> value as follows:  A
+C<TAIDuration_payload> is formatted and interpreted in the same way as a
+C<Rat_payload>.
 
 A C<UTCInstant> node represents an "instant"/"datetime" value that is
 affiliated with the UTC time-zone.  This node is interpreted as a Muldis D
@@ -4177,6 +4160,20 @@ every kind of C<value__sse_date_time> node distills to when it is beneath
 the context of a C<depot> node, as it describes some semantics.
 
 Examples:
+
+    TAIInstant:1235556432.0
+
+    TAIInstant:854309115.0
+
+    TAIDuration:3600.0
+
+    TAIDuration:-50.0
+
+    TAIDuration:3.14159
+
+    TAIDuration:1;1011101101*10^-11011
+
+    TAIDuration:1/43
 
     UTCInstant:[1964,10,16,16,12,47.5] # a UTCDateTime #
 
