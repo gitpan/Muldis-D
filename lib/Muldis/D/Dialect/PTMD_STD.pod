@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.111.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.112.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.111.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.112.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -217,7 +217,7 @@ Grammar:
         <ws>? '}'
 
     <std_syn_ext_list_item> ::=
-        date_time
+        temporal
 
 As per the VERSIONING pod section of L<Muldis::D>, code written in Muldis D
 must start by declaring the fully-qualified Muldis D language name it is
@@ -242,7 +242,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.111.0>.
+C<ln_base_authority>; it is typically a character string like C<0.112.0>.
 
 =item C<ln_dialect>
 
@@ -263,15 +263,15 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
-        standard_syntax_extensions => {date_time}
+        standard_syntax_extensions => {temporal}
     }
 
 =head1 CATALOG ABSTRACTION LEVELS
@@ -351,7 +351,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -409,7 +409,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -418,7 +418,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -499,7 +499,7 @@ described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -558,7 +558,7 @@ EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.111.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -694,7 +694,7 @@ following grammar definitions are in effect:
 The C<standard_syntax_extensions> pragma declares which optional portions
 of the Muldis D grammar a programmer may employ with their Muldis D code.
 
-There is currently 1 specified standard syntax extension: C<date_time>.
+There is currently 1 specified standard syntax extension: C<temporal>.
 These are all mutually independent and any or all may be used at once.
 
 While each I<standard syntax extension> is closely related to a I<Muldis D
@@ -715,27 +715,27 @@ Specifying the C<standard_syntax_extensions> pragma in a C<language_name>
 node is optional, and when omitted it defaults to the empty set, meaning no
 extensions may be used.
 
-=head2 date_time
+=head2 temporal
 
-The C<date_time> standard syntax extension is closely related to the
-L<Muldis::D::Ext::DateTime> language extension, and it constitutes special
+The C<temporal> standard syntax extension is closely related to the
+L<Muldis::D::Ext::Temporal> language extension, and it constitutes special
 syntax for its data types; in the future it may improve the type syntax or
 add syntax for operators.
 
-When the C<standard_syntax_extensions> pragma includes C<date_time> in its
+When the C<standard_syntax_extensions> pragma includes C<temporal> in its
 list, then the following grammar extensions are in effect:
 
     <value__code_as_data> ::=
           ...
-        | <value__sse_date_time>
+        | <value__sse_temporal>
 
     <value_kind> ::=
           ...
-        | <value_kind__sse_date_time>
+        | <value_kind__sse_temporal>
 
     <value_payload> ::=
           ...
-        | <value_payload__sse_date_time>
+        | <value_payload__sse_temporal>
 
 =head1 VALUE LITERALS AND SELECTORS
 
@@ -1511,7 +1511,7 @@ than C<sys.std.Core.Type.Int>, C<Array> rather than
 C<sys.std.Core.Type.Array."">, C<is_identical> rather than
 C<sys.std.Core.Universal.is_identical>, C<Tuple.attr> rather than
 C<sys.std.Core.Tuple.attr>, C<UTCInstant.fetch_curr_datetime> rather than
-C<sys.std.DateTime.UTCInstant.fetch_curr_datetime>,
+C<sys.std.Temporal.UTCInstant.fetch_curr_datetime>,
 C<array_of.Rat> rather than C<array_of.sys.std.Core.Type.Rat>, and so on.
 In fact, the Muldis D spec itself uses such abbreviations frequently.
 
@@ -1759,7 +1759,7 @@ Examples:
         exponent => 37
     }
 
-    Scalar:sys.std.DateTime.Type.UTCDateTime:datetime;{
+    Scalar:sys.std.Temporal.Type.UTCDateTime:datetime;{
         year   => 2003,
         month  => 10,
         day    => 26,
@@ -2423,6 +2423,7 @@ Grammar:
         | <relation_type>
         | <domain_type>
         | <subset_type>
+        | <mixin_type>
 
 A C<material> node specifies a new material (routine or type) that lives in
 a depot or subdepot.
@@ -2525,6 +2526,7 @@ Every material has 2-3 elements, illustrated by this grammar:
         | 'relation-type'
         | 'domain-type'
         | 'subset-type'
+        | 'mixin-type'
 
     <material_declared_name> ::=
         <Name_payload>
@@ -2538,6 +2540,7 @@ Every material has 2-3 elements, illustrated by this grammar:
         | <relation_type_payload>
         | <domain_type_payload>
         | <subset_type_payload>
+        | <mixin_type_payload>
 
 So a C<x_material>|C<material> node has 2-3 elements in general:
 
@@ -2594,6 +2597,10 @@ I<TODO.>
 I<TODO.>
 
 =head2 Subset Type Specification
+
+I<TODO.>
+
+=head2 Mixin Type Specification
 
 I<TODO.>
 
@@ -3269,9 +3276,9 @@ Grammar:
         | 'I-' | 'I/' | '%' | mod | 'I^'
         | 'N-' | 'N/'
         | Bx | Tx | Ax
-        | imem | '!imem' | 'not-imem' | hmem | '!hmem' | 'not-hmem'
-        | Simem | 'S!imem' | 'Snot-imem' | Shmem | 'S!hmem' | 'Snot-hmem'
-        | Bimem | 'B!imem' | 'Bnot-imem' | Bhmem | 'B!hmem' | 'Bnot-hmem'
+        | in-r | '!in-r' | 'not-in-r' | has-t | '!has-t' | 'not-has-t'
+        | Sin | 'S!in' | 'Snot-in' | Shas | 'S!has' | 'Snot-has'
+        | Bin | 'B!in' | 'Bnot-in' | Bhas | 'B!has' | 'Bnot-has'
         | sub | '!sub' | 'not-sub' | super | '!super' | 'not-super'
         | psub | '!psub' | 'not-psub' | psuper | '!psuper' | 'not-psuper'
         | minus | except | 'R-'
@@ -3283,7 +3290,7 @@ Grammar:
     <nonsym_dyadic_infix_op__op_cr_extended> ::=
           <nonsym_dyadic_infix_op__op_cr_basic>
         | '→' | '↛' | '←' | '↚'
-        | '∈' | '∉' | '∋' | '∌'
+        | '∈r' | '∉r' | '∋t' | '∌t'
         | 'S∈' | 'S∉' | 'S∋' | 'S∌'
         | 'B∈' | 'B∉' | 'B∋' | 'B∌'
         | '⊆' | '⊈' | '⊇' | '⊉'
@@ -3310,18 +3317,18 @@ Some of the keywords are aliases for each other:
     if        | ←
     nif       | ↚
     %         | mod
-    imem      | ∈
-    !imem     | ∉ not-imem
-    hmem      | ∋
-    !hmem     | ∌ not-hmem
-    Simem     | S∈
-    S!imem    | S∉ Snot-imem
-    Shmem     | S∋
-    S!hmem    | S∌ Snot-hmem
-    Bimem     | B∈
-    B!imem    | B∉ Bnot-imem
-    Bhmem     | B∋
-    B!hmem    | B∌ Bnot-hmem
+    in-r      | ∈r
+    !in-r     | ∉r not-in-r
+    has-t     | ∋t
+    !has-t    | ∌t not-has-t
+    Sin       | S∈
+    S!in      | S∉ Snot-in
+    Shas      | S∋
+    S!has     | S∌ Snot-has
+    Bin       | B∈
+    B!in      | B∉ Bnot-in
+    Bhas      | B∋
+    B!has     | B∌ Bnot-has
     sub       | ⊆
     !sub      | ⊈ not-sub
     super     | ⊇
@@ -3356,18 +3363,18 @@ This table indicates which function is invoked by each keyword:
     Tx   -> Core.Text.replication( $lhs, count => $rhs )
     Ax   -> Core.Array.replication( $lhs, count => $rhs )
 
-    imem   -> Core.Tuple.is_member( t => $lhs, r => $rhs )
-    !imem  -> Core.Tuple.is_not_member( t => $lhs, r => $rhs )
-    hmem   -> Core.Relation.has_member( r => $lhs, t => $rhs )
-    !hmem  -> Core.Relation.has_not_member( r => $lhs, t => $rhs )
-    Simem  -> Core.Set.value_is_member( value => $lhs, set => $rhs )
-    S!imem -> Core.Set.value_is_not_member( value => $lhs, set => $rhs )
-    Shmem  -> Core.Set.has_member( set => $lhs, value => $rhs )
-    S!hmem -> Core.Set.has_not_member( set => $lhs, value => $rhs )
-    Bimem  -> Core.Bag.value_is_member( value => $lhs, bag => $rhs )
-    B!imem -> Core.Bag.value_is_not_member( value => $lhs, bag => $rhs )
-    Bhmem  -> Core.Bag.has_member( bag => $lhs, value => $rhs )
-    B!hmem -> Core.Bag.has_not_member( bag => $lhs, value => $rhs )
+    in-r   -> Core.Tuple.is_member( t => $lhs, r => $rhs )
+    !in-r  -> Core.Tuple.is_not_member( t => $lhs, r => $rhs )
+    has-t  -> Core.Relation.has_member( r => $lhs, t => $rhs )
+    !has-t -> Core.Relation.has_not_member( r => $lhs, t => $rhs )
+    Sin    -> Core.Set.value_is_member( value => $lhs, set => $rhs )
+    S!in   -> Core.Set.value_is_not_member( value => $lhs, set => $rhs )
+    Shas   -> Core.Set.has_member( set => $lhs, value => $rhs )
+    S!has  -> Core.Set.has_not_member( set => $lhs, value => $rhs )
+    Bin    -> Core.Bag.value_is_member( value => $lhs, bag => $rhs )
+    B!in   -> Core.Bag.value_is_not_member( value => $lhs, bag => $rhs )
+    Bhas   -> Core.Bag.has_member( bag => $lhs, value => $rhs )
+    B!has  -> Core.Bag.has_not_member( bag => $lhs, value => $rhs )
 
     sub     -> Core.Relation.is_subset( $lhs, $rhs )
     !sub    -> Core.Relation.is_not_subset( $lhs, $rhs )
@@ -3877,7 +3884,7 @@ Grammar:
         | '≥'
 
     <interval_membership_op__op_cr_basic> ::=
-          Iimem | 'I!imem' | 'Inot-imem' | Ihmem | 'I!hmem' | 'Inot-hmem'
+          Iin | 'I!in' | 'Inot-in' | Ihas | 'I!has' | 'Inot-has'
         | between | '!between' | 'not-between'
 
     <interval_membership_op__op_cr_extended> ::=
@@ -3912,10 +3919,10 @@ Some of the keywords are aliases for each other:
     --------+--------
     <=      | ≤
     >=      | ≥
-    Iimem   | I∈ | between
-    I!imem  | I∉ | Inot-imem | !between | not-between
-    Ihmem   | I∋
-    I!hmem  | I∌ | Inot-hmem
+    Iin     | I∈ | between
+    I!in    | I∉ | Inot-in | !between | not-between
+    Ihas    | I∋
+    I!has   | I∌ | Inot-has
     <=<=    | ≤≤
     <=<     | ≤<
     <<=     | <≤
@@ -3934,12 +3941,12 @@ This table indicates which function is invoked by each keyword:
     >      -> Core.Universal.is_after( $lhs, $rhs )
     <=     -> Core.Universal.is_before_or_same( $lhs, $rhs )
     >=     -> Core.Universal.is_after_or_same( $lhs, $rhs )
-    Iimem  -> Core.Interval.value_is_member( value => $lhs,
+    Iin    -> Core.Interval.value_is_member( value => $lhs,
                 interval => $rhs )
-    I!imem -> Core.Interval.value_is_not_member( value => $lhs,
+    I!in   -> Core.Interval.value_is_not_member( value => $lhs,
                 interval => $rhs )
-    Ihmem  -> Core.Interval.has_member( interval => $lhs, value => $rhs )
-    I!hmem -> Core.Interval.has_not_member( interval => $lhs,
+    Ihas   -> Core.Interval.has_member( interval => $lhs, value => $rhs )
+    I!has  -> Core.Interval.has_not_member( interval => $lhs,
                 value => $rhs )
 
     <=<=  -> Core.Interval.value_is_member( value => $expr,
@@ -3988,16 +3995,16 @@ Examples (for now sans any use of extra op args, which are atypical):
 
     not $min < $foo < $max
 
-=head1 DATE-TIME EXTENSION OPAQUE VALUE LITERALS
+=head1 TEMPORAL EXTENSION OPAQUE VALUE LITERALS
 
-The C<date_time> standard syntax extension is closely related to the
-L<Muldis::D::Ext::DateTime> language extension, and it constitutes special
+The C<temporal> standard syntax extension is closely related to the
+L<Muldis::D::Ext::Temporal> language extension, and it constitutes special
 syntax for its data types; in the future it may improve the type syntax or
 add syntax for operators.
 
 Grammar:
 
-    <value__sse_date_time> ::=
+    <value__sse_temporal> ::=
           ...
         | <TAIInstant>
         | <TAIDuration>
@@ -4005,7 +4012,7 @@ Grammar:
         | <FloatInstant>
         | <UTCDuration>
 
-    <value_kind__sse_date_time> ::=
+    <value_kind__sse_temporal> ::=
           ...
         | TAIInstant
         | TAIDuration
@@ -4013,7 +4020,7 @@ Grammar:
         | Float [Instant | DateTime | Date | Time]
         | UTCDuration
 
-    <value_payload__sse_date_time> ::=
+    <value_payload__sse_temporal> ::=
           ...
         | <TAIInstant_payload>
         | <TAIDuration_payload>
@@ -4081,7 +4088,7 @@ Grammar:
 A C<TAIInstant> node represents a single point in time which is specified
 in terms of atomic seconds; it is a rational numeric type, that is disjoint
 from both C<Rat> and C<TAIDuration>.  This node is interpreted as a Muldis
-D C<sys.std.DateTime.Type.TAIInstant> value as follows:  A
+D C<sys.std.Temporal.Type.TAIInstant> value as follows:  A
 C<TAIInstant_payload> is formatted and interpreted in the same way as a
 C<Rat_payload>.
 
@@ -4089,13 +4096,13 @@ A C<TAIDuration> node represents a single amount of time (the difference
 between two instants) which is specified in terms of atomic seconds; it is
 a rational numeric type, that is disjoint from both C<Rat> and
 C<TAIInstant>.  This node is interpreted as a Muldis D
-C<sys.std.DateTime.Type.TAIDuration> value as follows:  A
+C<sys.std.Temporal.Type.TAIDuration> value as follows:  A
 C<TAIDuration_payload> is formatted and interpreted in the same way as a
 C<Rat_payload>.
 
 A C<UTCInstant> node represents an "instant"/"datetime" value that is
 affiliated with the UTC time-zone.  This node is interpreted as a Muldis D
-C<sys.std.DateTime.Type.UTCInstant> value whose C<instant> possrep
+C<sys.std.Temporal.Type.UTCInstant> value whose C<instant> possrep
 attribute values are defined as follows:
 
 A C<UTCInstant_payload> consists mainly of a bracket-delimited sequence of
@@ -4128,13 +4135,13 @@ restricted.
 
 A C<FloatInstant> node represents an "instant"/"datetime" value that is
 "floating" / not affiliated with any time-zone.  This node is interpreted
-as a Muldis D C<sys.std.DateTime.Type.FloatInstant> value in an identical
+as a Muldis D C<sys.std.Temporal.Type.FloatInstant> value in an identical
 fashion to how a C<UTCInstant> node is interpreted, whose format it
 completely shares.  Likewise regarding C<Float[DateTime|Date|Time]>.
 
 A C<UTCDuration> node represents a duration value, an amount of time, which
 is not fixed to any instant in time.  This node is interpreted as a Muldis
-D C<sys.std.DateTime.Type.UTCDuration> value whose C<duration> possrep
+D C<sys.std.Temporal.Type.UTCDuration> value whose C<duration> possrep
 attribute values are defined as follows:
 
 A C<UTCDuration_payload> consists mainly of a bracket-delimited sequence of
@@ -4156,7 +4163,7 @@ C<UTCDuration> has no system-defined subtypes, but that may change later.>
 
 See also the definition of the catalog data type
 C<sys.std.Core.Type.Cat.OVLScaValExprNodeSet>, a tuple of which is what
-every kind of C<value__sse_date_time> node distills to when it is beneath
+every kind of C<value__sse_temporal> node distills to when it is beneath
 the context of a C<depot> node, as it describes some semantics.
 
 Examples:

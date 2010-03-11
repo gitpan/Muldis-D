@@ -1,6 +1,126 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-03-10  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.112.0 is released on CPAN as
+    Muldis-D-0.112.0.tar.gz.
+
+    * This release features a rough cut of a new major feature of the
+    Muldis D type system, called "mixin types", which is analogous to the
+    "roles" of Perl 6, or to the "mixins" or "interfaces" of some other
+    general purpose languages.  The new feature now does, or will in a
+    near-subsequent release, support multiple kinds of important
+    functionality that were either previously missing from Muldis D or were
+    implemented in a less elegant manner.  The first new functionality is
+    that a union type can now be declared in the reverse manner to how it
+    was previously doable using a "domain type"; a domain type definition
+    explicitly lists all the other types it ranges over, so it is "closed";
+    in contrast, a "mixin type" is a union type that ranges over other
+    types that specify themselves to be part of that union, which the other
+    types do by "composing" the mixin type, so a mixin type is "open".  Any
+    user-defined type can add itself to the domain of even a system-defined
+    mixin-type (such as "Numeric"), whereas no type can add itself to the
+    domain of a system-defined domain-type (such as "Bool").  The second
+    new functionality is that functions can now be declared virtual and be
+    associated with a mixin, and other functions which are associated with
+    other types composing that mixin can be declared to implement that
+    virtual function; this means that Muldis D now supports "operator
+    overloading" to a limited extent, that limit being that you can only
+    overload operators that are explicitly defined to be overloadable; in
+    any event, a direct invocation of a virtual function will automatically
+    dispatch to one of its implementing functions based on the data types
+    of the primary function arguments.  In a subsequent release, mixins
+    will support code reuse by way of letting you define type attributes in
+    a mixin and then all composing types will have those attributes without
+    having to separately define them; this then means Muldis D will support
+    an approximation of "specialization by extension".  Having "mixin
+    types" also means that some other tangential design changes can be made
+    to Muldis D more easily, in subsequent releases.  Note that a refactor
+    of the system type hierarchy to exploit mixins has been postponed to
+    the next release, so this current release merely adds support for
+    mixins without actually using them.
+
+    * (Basics.pod)  Updated 3 parts of the "TYPE SYSTEM" main pod section,
+    listed here in order of occurrance in the file: 1. Updated the
+    paragraph that talked about "specialization by extension" so instead of
+    saying that the latter is unsupported (just "specialization by
+    constraint"), it now says that "extension" will be supported to some
+    approximation in the near future. 2. Updated the paragraph introducing
+    the MST (most specific type) concept to chop out the unnecessary second
+    half, and updating the remainder to say that Muldis D enforces MSTs
+    only in the contexts where it is necessary, if any. 3. Added a whole
+    new large paragraph that introduces and distinguishes the 2 main
+    methods of defining a type in terms of a type union, "domain types" and
+    "mixin types"; users can extend the latter but not the former.
+
+    * (Types_Catalog.pod, Routines_Catalog.pod, PTMD_STD.pod,
+    HDMD_Perl[6|5]_STD.pod)  Added the new type generator called "mixin
+    type" which defines new data types whose values are a union of those
+    from the one or more other types that specify themselves to be part of
+    that union.  In Types_Catalog.pod, added the catalog type "MixinType"
+    (with the initial 2 attributes "comment", "default"), and added the 2
+    catalog types "[|Sys]MixinTypeSet", and updated each of the 2 catalog
+    types "System", "Depot" to add a "mixin_types" attribute.  In
+    Routines_Catalog.pod, added the 2 recipes "[create|drop]_mixin_type".
+    In all 3 STD.pod, added "Mixin Type Specification" pod sub-sect under
+    "MATERIAL SPECIFICATION" and added the "mixin_type" material node kind.
+
+    * (Types_Catalog.pod)  Updated all 6 catalog types
+    "[Scalar|Tuple|Relation|Domain|Subset|Mixin]Type" to add a
+    "composed_mixins" attribute, which is simply a set of type names.
+
+    * (Basics.pod)  In the "ROUTINES" main pod section, added the new pod
+    sub-section "Overloading With Virtual Routines" which introduces /
+    explains how Muldis D supports operator overloading and how users
+    define overloads through "virtual" and "implementing" routines, and
+    that every kind of routine (func, updater, proc) is overloadable.
+
+    * (Types_Catalog.pod)  Updated all 3 catalog types "Function",
+    "Updater", "Procedure" to add the 2 attributes "dispatch_params" and
+    "implements", where the former is used to declare that a routine is
+    virtual / can be overloaded and the latter is used to declare that a
+    routine implements another one; "dispatch_params" is simply a set of
+    parameter names, and "implements" is a routine name.  Also added the 2
+    new data types "RP[Updater|Procedure]NC" that are like "RPFunctionNC".
+
+    * Renamed DateTime.pod to Temporal.pod; the entities it declares have
+    all been renamed to "sys.std.Temporal.\w+" from "sys.std.DateTime.\w+".
+    Any references to these in other files [D.pm, Core.pod, the README
+    file, PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod] were updated accordingly.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Corresponding to the previous
+    change item, renamed the "date_time" standard syntax extension to
+    "temporal", and renamed the "DATE-TIME EXTENSION OPAQUE VALUE LITERALS"
+    main pod section to replace "DATE-TIME" with "TEMPORAL".
+
+    * (PTMD_STD.pod)  Updated the 2 pod sub-sections "Simple Non-symmetric
+    Dyadic Infix Operators" and "Order Comparison Operators", to rename the
+    plain ASCII alternate syntaxes for 16 membership-testing functions
+    so that they read better.  The spellings were changed from
+    "[|S|B|I][|!|not-][i|h]mem" to "[|S|B|I][|!|not-][in|has]", rspectivly.
+
+    * (PTMD_STD.pod)  Updated the pod sub-section "Simple Non-symmetric
+    Dyadic Infix Operators" to rename the alternate syntaxes for 4
+    functions that test membership of a generic tuple in a generic
+    relation.  The spellings were changed from
+    "[[|!|not-][in|has]|∈|∉|∋|∌]" to "[[|!|not-][in-r|has-t]|∈r|∉r|∋t|∌t]",
+    respectively.  This change was made to lay groundwork for the next
+    release where the Set|Bag|Interval-specific versions of these operators
+    would be combined using operator overloading, and the huffmanization
+    was re-considered to let those have the shorter/unqualified versions of
+    "is","has" etc and so the versions for generic tuples and relations,
+    which can't be combined into the same overloads due to type overlaps,
+    would get slightly longer names ending in "r" or "t" as appropriate.
+
+    * (Tuple.pod, Relation.pod, Set.pod, Bag.pod, Interval.pod)  Updated
+    the also-known-as notes for the 16 membership-testing functions in
+    correspondence to above-mentioned changes.
+
+    * Update the TODO file to rewrite / greatly chop the portion about
+    mixins/roles, now that we have a clearer picture of what exactly to be
+    doing, and list the top TODO item priorities in order.
+
 2010-03-05  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.111.0 is released on CPAN as
