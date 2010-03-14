@@ -9,7 +9,7 @@ Muldis D rational numeric operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Rational version 0.112.0.
+This document is Muldis::D::Core::Rational version 0.113.0.
 
 =head1 PREFACE
 
@@ -74,7 +74,7 @@ These functions implement commonly used rational numeric operations.
 C<< function sys.std.Core.Rational.abs (NNRat <-- $topic : Rat) >>
 
 This function results in the absolute value of its argument.  Note that
-this operation is also known as C<N||>.
+this operation is also known as I<modulus> or C<N||>.
 
 =head2 sys.std.Core.Rational.sum
 

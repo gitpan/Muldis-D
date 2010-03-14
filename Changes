@@ -1,6 +1,113 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-03-13  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.113.0 is released on CPAN as
+    Muldis-D-0.113.0.tar.gz.
+
+    * (Basics.pod, Types_Catalog.pod)  Other minor fixes.
+
+    * (Basics.pod, Types_Catalog.pod)  Expanded the routine overloading
+    feature so that multiple virtual routines may be directly implemented
+    by the same other routine, should this be useful.  In Basics.pod,
+    updated the "Overloading With Virtual Routines" pod sub-section.  In
+    Types_Catalog.pod, updated the "implements" attribute of the 3 catalog
+    types "Function", "Updater", "Procedure" so it is a Set, not a Maybe.
+
+    * (Basics.pod, Integer.pod, Rational.pod)  Made a few small terminology
+    fixes; "modulo" is a name for the "remainder"|"%"|"mod" operation, and
+    "modulus" is a name for the result of that operation; "modulus" is also
+    an alternate name for the "abs"/"absolute value" operation; update or
+    add notes about this where appropriate; in general, just don't use the
+    word "modulus" at all to save on ambiguity.
+
+    * Renamed Bool.pod to Boolean.pod; the entities it declares have
+    all been renamed to "sys.std.Boolean.\w+" from "sys.std.Bool.\w+".
+    Any references to these in other files [Core.pod, the README
+    file, PTMD_STD.pod] were updated accordingly.
+
+    * In a reversal of one aspect of release 0.101.0, split up
+    Universal.pod into itself and new file Ordered.pod; moved the 10
+    ordered-sensitive functions of Universal.pod into Ordered.pod, renaming
+    each one from the "Universal." name-space to the "Ordered." name-space.
+    Any references to these in other files [Core.pod, the README file,
+    PTMD_STD.pod] were updated accordingly.
+
+    * (Types_Catalog.pod, Cast.pod, PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)
+    In Types_Catalog.pod, renamed the catalog type "RatRoundMeth" to
+    "RoundMeth", and its 7 singleton subtypes likewise.  Any references to
+    these, in the other 4 files, were updated accordingly.  In all 3
+    STD.pod, renamed the "Rational Rounding Method Literals" pod
+    sub-section to remove "Rational", and renamed the "RatRoundMeth" node
+    kind to "RoundMeth".
+
+    * (Types_Catalog.pod, PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  In
+    Types_Catalog.pod, refactored the catalog type "RoundMeth" and its
+    singleton subtypes as follows:  Renamed the 2 singletons "ToFloor",
+    "ToCeiling" to "Down", "Up" respectively.  Added 2 new singletons
+    "HalfToZero", "HalfToInf".  And so "RoundMeth" now has 9 values, which
+    were also reordered, where 8 form a 2x4 table crossing
+    [always-to,half-to] with [down,up,zero,nearest-infinity], and
+    "half-even" being (while important) somewhat the odd one out.  Any
+    references to these, in the 3 STD.pod files, were updated accordingly.
+
+    * (Types_Catalog.pod)  Updated the catalog type "RoundMeth" to change
+    its default value from "HalfUp" to "HalfEven", since in general that
+    should be the rounding method most likely to minimize the rounding
+    error from a sequence of operations that each round, which is
+    especially useful in contexts where a rounding method is implicit.
+    Similarly updated the default value of the "RatRoundRule" type.
+
+    * (Integer.pod)  Updated the 6 functions
+    "[|maybe_][quotient|remainder|quot_and_rem]" to add a mandatory third
+    parameter "round_meth", so that the functions' result rounding
+    semantics, when "divisor" doesn't go into "dividend" evenly, can be
+    customized by the user, and also make the invoking code more
+    self-documenting.  The reason that "round_meth" is mandatory is that
+    there are no commonly accepted semantics, either in programming
+    languages or otherwise, for a normal rounding method to use implicitly,
+    and so there would be a variety of implicit user expectations, and so
+    spelling out the method explicitly should prevent any bugs due to false
+    assumptions.  Use "Down" to get the currently-defined semantics of
+    Perl 6's Int-specific ops ("div", "mod"), or Knuth (according to WP);
+    use "ToZero" to get the semantics of some other languages.  Previously
+    the exact semantics of these functions was not defined and was left
+    implicit.  Furthermore, updated the description of "quotient" to
+    specify that it preserves the identity "$x % $y = $x - $y * ($x / $y)";
+    your choice of "round_meth" has an even more pronounced effect here.
+
+    * (Integer.pod)  Added Int-specific analogies of some Rat-specific
+    operators that didn't exist before, where there was no particularly
+    strong reason for Int to lack ops that Rat has.  Added the 3
+    "sys.std.Core.Integer.\w+" operators "[|maybe_]mean", "mean_of_median";
+    their semantics follow "quotient", meaning floor rounding.  They all
+    have been given "round_meth" params also, follow "quotient" semantics.
+
+    * (PTMD_STD.pod)  Loosened the definition of "unspace" a bit so that
+    the whitespace between its pair of backslashes is now optional, so one
+    may now use them for visual code alignment more effectively if wanted.
+
+    * (PTMD_STD.pod)  Made the grammar stricter with regards to several
+    situations where optional whitespace used to be allowed; in those
+    situations, whitespace is now prohibited except in the form of an
+    "unspace": 1. In a "language_name" token preceeding a ":" element
+    separator. 2. In a generic-context value literal / value node following
+    a ":" element separator. 3. In any value literal payload following a
+    ";" pair-payload element separator. 4. In a rational number body around
+    the [/,*,^] element separators. 5. In a name-chain around the "."
+    chain-element separators. 6. In an "accessor" node around the "."
+    element separator. 7. In all of the "Simple Postcircumfix Operators"
+    between the base expression and its postfix portion.
+
+    * (PTMD_STD.pod)  Made the grammar looser with regards to several
+    situations where no whitespace used to be allowed, such that "unspace"
+    is now also allowed there: 1. In a rational number body preceeding a
+    "." radix point. 2. In a "func_invo" between the routine name and its
+    argument list.
+
+    * More TODO file additions or changes.
+
 2010-03-10  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.112.0 is released on CPAN as

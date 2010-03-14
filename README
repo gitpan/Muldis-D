@@ -24,7 +24,7 @@ this distribution, I recommend doing so in this order:
          b.       lib/Muldis/D/Core/Types_Catalog.pod
          c.       lib/Muldis/D/Core/Universal.pod
          d.       lib/Muldis/D/Core/Scalar.pod
-         e.       lib/Muldis/D/Core/Bool.pod
+         e.       lib/Muldis/D/Core/Boolean.pod
          f.       lib/Muldis/D/Core/Integer.pod
          g. (opt) lib/Muldis/D/Core/Blob.pod
          h.       lib/Muldis/D/Core/Text.pod
@@ -38,6 +38,7 @@ this distribution, I recommend doing so in this order:
          p. (opt) lib/Muldis/D/Core/Interval.pod
          q. (opt) lib/Muldis/D/Core/STDIO.pod
          r.       lib/Muldis/D/Core/Routines_Catalog.pod
+         s.       lib/Muldis/D/Core/Ordered.pod
      6.
          a.       lib/Muldis/D/Dialect/PTMD_STD.pod
          b.       lib/Muldis/D/Dialect/HDMD_Perl6_STD.pod

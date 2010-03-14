@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.112.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.113.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.112.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.113.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -129,9 +129,12 @@ than the Perl 6 way like C<token footok { ... }> or C<rule footok { ... }>.
 3. All non-quoted whitespace is not significant and just is formatting the
 grammar itself; rather, whitespace rules in the grammar are spelled out
 explicitly such as with C<< <ws>? >> (optional whitespace) and C<< <ws> >>
-(mandatory whitespace).  4. The meaning of C<< <ws> >> is explicitly
-defined in this file's grammar and does not match the C<< <ws> >> that is
-defined by Perl 6; this file's version is simpler for one thing.
+(mandatory whitespace) and C<< <unspace> >> (nothing at all may go here
+except a pair of backslashes (C<\>) surrounding an optional run of
+whitespace, which would be stripped).  4. The meanings
+of C<< <ws> >> and C<< <unspace> >> are explicitly defined in this file's
+grammar and do not match the C<< <ws> >> and C<< <unspace> >> that are
+defined by Perl 6; this file's versions are simpler for one thing.
 
 The root grammar token for the entire dialect is C<Muldis_D>.
 
@@ -166,10 +169,10 @@ Grammar:
 
     <language_name> ::=
         <ln_base_name>
-        <ws>? ':' <ln_base_authority>
-        <ws>? ':' <ln_base_version_number>
-        <ws>? ':' <ln_dialect>
-        <ws>? ':' <ln_extensions>
+        <unspace> ':' <ln_base_authority>
+        <unspace> ':' <ln_base_version_number>
+        <unspace> ':' <ln_dialect>
+        <unspace> ':' <ln_extensions>
 
     <ln_base_name> ::=
         Muldis_D
@@ -242,7 +245,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.112.0>.
+C<ln_base_authority>; it is typically a character string like C<0.113.0>.
 
 =item C<ln_dialect>
 
@@ -263,12 +266,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.113.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.113.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {temporal}
@@ -351,7 +354,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.113.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -409,7 +412,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.113.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -418,7 +421,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.113.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -499,7 +502,7 @@ described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.113.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -558,7 +561,7 @@ EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.112.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.113.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -754,7 +757,7 @@ Grammar:
     <opaque_value_literal> ::=
           <Bool>
         | <Order>
-        | <RatRoundMeth>
+        | <RoundMeth>
         | <Int>
         | <Rat>
         | <Blob>
@@ -839,15 +842,15 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
 
     <x_value> ::=
         [
-            <value_kind> ':' <ws>?
-            [<type_name> ':' <ws>?]?
+            <value_kind> ':' <unspace>
+            [<type_name> ':' <unspace>]?
         ]?
         <value_payload>
 
     <value_kind> ::=
           Bool
         | Order
-        | RatRoundMeth
+        | RoundMeth
         | Int | NNInt | PInt
         | Rat | NNRat | PRat
         | Blob | OctetBlob
@@ -874,7 +877,7 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
     <value_payload> ::=
           <Bool_payload>
         | <Order_payload>
-        | <RatRoundMeth_payload>
+        | <RoundMeth_payload>
         | <Int_payload>
         | <Rat_payload>
         | <Blob_payload>
@@ -908,7 +911,7 @@ interpret the latter; what grammars are valid for C<value_payload> depend
 just on C<value_kind>.
 
 For all values of just the 8 data types [C<Bool>, C<Order>,
-C<RatRoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>, C<Comment>], the
+C<RoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>, C<Comment>], the
 C<value_kind> portion of a GCVL may be omitted for brevity, but the code
 parser should still be able to infer it easily by examining the first few
 characters of the C<value_payload>, which for each of said 8 data types has
@@ -964,7 +967,7 @@ the context of a C<depot> node, as it describes some semantics.
 Grammar:
 
     <Bool> ::=
-        [Bool ':' <ws>?]?
+        [Bool ':' <unspace>]?
         <Bool_payload>
 
     <Bool_payload__op_cr_basic> ::=
@@ -1002,7 +1005,7 @@ Examples:
 Grammar:
 
     <Order> ::=
-        [Order ':' <ws>?]?
+        [Order ':' <unspace>]?
         <Order_payload>
 
     <Order_payload> ::=
@@ -1021,33 +1024,32 @@ Examples:
 
     Decrease
 
-=head2 Rational Rounding Method Literals
+=head2 Rounding Method Literals
 
 Grammar:
 
-    <RatRoundMeth> ::=
+    <RoundMeth> ::=
         [
-            RatRoundMeth ':' <ws>?
-            [<type_name> ':' <ws>?]?
+            RoundMeth ':' <unspace>
+            [<type_name> ':' <unspace>]?
         ]?
-        <RatRoundMeth_payload>
+        <RoundMeth_payload>
 
-    <RatRoundMeth_payload> ::=
-          HalfDown | HalfUp
+    <RoundMeth_payload> ::=
+          Down | Up | ToZero | ToInf
+        | HalfDown | HalfUp | HalfToZero | HalfToInf
         | HalfEven
-        | ToFloor | ToCeiling
-        | ToZero | ToInf
 
-A C<RatRoundMeth> node represents a rational rounding method.  It is
-interpreted as a Muldis D C<sys.std.Core.Type.Cat.RatRoundMeth> value as
-follows:  The C<RatRoundMeth_payload> is a bareword character string
+A C<RoundMeth> node represents a rounding method.  It is
+interpreted as a Muldis D C<sys.std.Core.Type.Cat.RoundMeth> value as
+follows:  The C<RoundMeth_payload> is a bareword character string
 formatted as per a C<Name> SCVL, and it maps directly to the matching
-unqualified declared name of one of the C<RatRoundMeth.*>
-singleton types that the C<RatRoundMeth> type is defined as a union over.
+unqualified declared name of one of the C<RoundMeth.*>
+singleton types that the C<RoundMeth> type is defined as a union over.
 
 Examples:
 
-    RatRoundMeth:HalfUp
+    RoundMeth:HalfUp
 
     ToZero
 
@@ -1057,13 +1059,13 @@ Grammar:
 
     <Int> ::=
         [
-            [Int | NNInt | PInt] ':' <ws>?
-            [<type_name> ':' <ws>?]?
+            [Int | NNInt | PInt] ':' <unspace>
+            [<type_name> ':' <unspace>]?
         ]?
         <Int_payload>
 
     <Int_payload> ::=
-          <num_max_col_val> ';' <ws>? <int_body>
+          <num_max_col_val> ';' <unspace> <int_body>
         | <d_int_body>
 
     <num_max_col_val> ::=
@@ -1119,8 +1121,9 @@ number in [10..35].  A I<body> may optionally contain underscore characters
 (C<_>), which exist just to help with visual formatting, such as for
 C<10_000_000>, and these are ignored/stripped by the parser.  A I<body> may
 optionally be split into 1..N segments where each pair of consecutive
-segments is separated by an I<unspace> token, which is a run of whitespace
-delimited by backslashes (C<\>); this segmenting ability is provided to
+segments is separated by an I<unspace> token, which is a
+pair of backslashes (C<\>) surrounding
+an optional run of whitespace; this segmenting ability is provided to
 support code that contains very long numeric literals while still being
 well formatted (no extra long lines); the I<unspace> tokens are also
 ignored/stripped by the parser, and the I<body> is interpreted as if all
@@ -1157,25 +1160,25 @@ Grammar:
 
     <Rat> ::=
         [
-            [Rat | NNRat | PRat] ':' <ws>?
-            [<type_name> ':' <ws>?]?
+            [Rat | NNRat | PRat] ':' <unspace>
+            [<type_name> ':' <unspace>]?
         ]?
         <Rat_payload>
 
     <Rat_payload> ::=
-          <num_max_col_val> ';' <ws>? <rat_body>
+          <num_max_col_val> ';' <unspace> <rat_body>
         | <d_rat_body>
 
     <rat_body> ::=
-          <int_body>'.'<pint_tail>
-        | <int_body> <ws>? '/' <ws>? <pint_body>
-        | <int_body> <ws>? '*' <ws>? <pint_body> <ws>? '^' <ws>? <int_body>
+          <int_body> <unspace> '.' <pint_tail>
+        | <int_body> <unspace> '/' <pint_body>
+        | <int_body> <unspace> '*' <pint_body> <unspace> '^' <int_body>
 
     <d_rat_body> ::=
-          <d_int_body>'.'<d_pint_tail>
-        | <d_int_body> <ws>? '/' <ws>? <d_pint_body>
-        | <d_int_body> <ws>? '*' <ws>? <d_pint_body>
-            <ws>? '^' <ws>? <d_int_body>
+          <d_int_body> <unspace> '.' <d_pint_tail>
+        | <d_int_body> <unspace> '/' <d_pint_body>
+        | <d_int_body> <unspace> '*' <d_pint_body>
+            <unspace> '^' <d_int_body>
 
 A C<Rat> node represents a rational numeric value.  It is interpreted as a
 Muldis D C<sys.std.Core.Type.Rat> value as follows:
@@ -1234,13 +1237,13 @@ Grammar:
 
     <Blob> ::=
         [
-            [Blob | OctetBlob] ':' <ws>?
-            [<type_name> ':' <ws>?]?
+            [Blob | OctetBlob] ':' <unspace>
+            [<type_name> ':' <unspace>]?
         ]?
         <Blob_payload>
 
     <Blob_payload> ::=
-        <blob_max_col_val> ';' <ws>? <blob_body>
+        <blob_max_col_val> ';' <unspace> <blob_body>
 
     <blob_max_col_val> ::=
         <[137F]>
@@ -1280,8 +1283,8 @@ Grammar:
 
     <Text> ::=
         [
-            Text ':' <ws>?
-            [<type_name> ':' <ws>?]?
+            Text ':' <unspace>
+            [<type_name> ':' <unspace>]?
         ]?
         <Text_payload>
 
@@ -1314,7 +1317,8 @@ language with such a delimited character string literal.
 
 A C<Text_payload> may optionally be split into 1..N segments where each
 pair of consecutive segments is separated by an I<unspace> token, which is
-a run of whitespace delimited by backslashes (C<\>); this segmenting
+a pair of backslashes (C<\>) surrounding an optional run of whitespace;
+this segmenting
 ability is provided to support code that contains long value literals while
 still being well formatted (no extra long lines); the I<unspace> tokens are
 ignored/stripped by the parser, and the C<Text_payload> is interpreted as
@@ -1390,8 +1394,8 @@ Examples:
 Grammar:
 
     <Name> ::=
-        Name ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        Name ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <Name_payload>
 
     <Name_payload> ::=
@@ -1406,26 +1410,26 @@ Grammar:
         '"'
 
     <NameChain> ::=
-        NameChain ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        NameChain ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <NameChain_payload>
 
     <NameChain_payload> ::=
         <nc_nonempty> | <nc_empty>
 
     <nc_nonempty> ::=
-        <Name_payload> ** [<ws>? '.' <ws>?]
+        <Name_payload> ** [<unspace> '.']
 
     <nc_empty> ::=
         '[]'
 
     <PNSQNameChain> ::=
-        PNSQNameChain ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        PNSQNameChain ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <PNSQNameChain_payload>
 
     <PNSQNameChain_payload> ::=
-        ['.' <ws>?]? <nc_nonempty>
+        '.'? <nc_nonempty>
 
 A C<Name> node represents a canonical short name for any kind of DBMS
 entity when declaring it; it is a character string type, that is disjoint
@@ -1582,8 +1586,8 @@ Grammar:
 
     <Comment> ::=
         [
-            Comment ':' <ws>?
-            [<type_name> ':' <ws>?]?
+            Comment ':' <unspace>
+            [<type_name> ':' <unspace>]?
         ]?
         <Comment_payload>
 
@@ -1665,8 +1669,8 @@ Examples (the first 2 are as values, the third is not as a value):
 Grammar:
 
     <RatRoundRule> ::=
-        RatRoundRule ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        RatRoundRule ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <RatRoundRule_payload>
 
     <RatRoundRule_payload> ::=
@@ -1681,7 +1685,7 @@ Grammar:
         <Int_payload>
 
     <round_meth> ::=
-        <RatRoundMeth_payload>
+        <RoundMeth_payload>
 
 A C<RatRoundRule> node represents a rational rounding rule.  It is
 interpreted as a Muldis D C<sys.std.Core.Type.Cat.RatRoundRule> value whose
@@ -1689,9 +1693,9 @@ attributes are defined by the C<RatRoundRule_payload>.  A
 C<RatRoundRule_payload> consists mainly of a bracket-delimited sequence of
 3 comma-separated elements, which correspond in order to the 3 attributes:
 C<radix> (a C<PInt2_N>), C<min_exp> (an C<Int>), and C<round_meth> (a
-C<RatRoundMeth>).  Each of C<radix> and C<min_exp> must qualify as a valid
+C<RoundMeth>).  Each of C<radix> and C<min_exp> must qualify as a valid
 C<Int_payload>, and C<round_meth> must qualify as a valid
-C<RatRoundMeth_payload>.
+C<RoundMeth_payload>.
 
 Examples:
 
@@ -1713,12 +1717,12 @@ options exist are only valid within a C<depot> node.
 Grammar:
 
     <Scalar> ::=
-        DH? Scalar ':' <ws>?
-        <type_name> ':' <ws>?
+        DH? Scalar ':' <unspace>
+        <type_name> ':' <unspace>
         <Scalar_payload>
 
     <Scalar_payload> ::=
-          <possrep_name> ';' <ws>? <possrep_attrs>
+          <possrep_name> ';' <unspace> <possrep_attrs>
         | <possrep_attrs>
 
     <possrep_name> ::=
@@ -1783,8 +1787,8 @@ Examples:
 Grammar:
 
     <Tuple> ::=
-        DH? Tuple ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        DH? Tuple ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <Tuple_payload>
 
     <Tuple_payload> ::=
@@ -1871,8 +1875,8 @@ Examples:
 Grammar:
 
     <Database> ::=
-        Database ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        Database ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <Database_payload>
 
     <Database_payload> ::=
@@ -1897,8 +1901,8 @@ a C<Database> node distills to same as when C<Tuple> does.
 Grammar:
 
     <Relation> ::=
-        DH? Relation ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        DH? Relation ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <Relation_payload>
 
     <Relation_payload> ::=
@@ -1921,7 +1925,7 @@ Grammar:
         '[' <ws>?
             [<attr_name> ** [<ws>? ',' <ws>?]]?
         <ws>? ']'
-        ';' <ws>?
+        ';' <unspace>
         '{' <ws>?
             [<ordered_tuple_attrs> ** [<ws>? ',' <ws>?]]?
         <ws>? '}'
@@ -2011,8 +2015,8 @@ Examples:
 Grammar:
 
     <Set> ::=
-        DH? Set ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        DH? Set ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <Set_payload>
 
     <Set_payload> ::=
@@ -2053,8 +2057,8 @@ Examples:
 Grammar:
 
     <Maybe> ::=
-        DH? [Maybe | Single] ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        DH? [Maybe | Single] ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <Maybe_payload>
 
     <Maybe_payload> ::=
@@ -2111,8 +2115,8 @@ Examples:
 Grammar:
 
     <Array> ::=
-        DH? Array ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        DH? Array ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <Array_payload>
 
     <Array_payload> ::=
@@ -2156,8 +2160,8 @@ Examples:
 Grammar:
 
     <Bag> ::=
-        DH? Bag ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        DH? Bag ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <Bag_payload>
 
     <Bag_payload> ::=
@@ -2170,7 +2174,7 @@ Grammar:
         <ws>? '}'
 
     <count> ::=
-          <num_max_col_val> ';' <ws>? <pint_body>
+          <num_max_col_val> ';' <unspace> <pint_body>
         | <d_pint_body>
 
     <bag_payload_repeated_values> ::=
@@ -2235,8 +2239,8 @@ Examples:
 Grammar:
 
     <SPInterval> ::=
-        DH? SPInterval ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        DH? SPInterval ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <SPInterval_payload>
 
     <SPInterval_payload> ::=
@@ -2263,8 +2267,8 @@ Grammar:
         <expr>
 
     <MPInterval> ::=
-        DH? MPInterval ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        DH? MPInterval ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <MPInterval_payload>
 
     <MPInterval_payload> ::=
@@ -2713,7 +2717,7 @@ Grammar:
         <data_sigil> <PNSQNameChain_payload>
 
     <acc_via_anon> ::=
-        <expr> <ws>? '.' <ws>? <nc_nonempty>
+        <expr> <unspace> '.' <nc_nonempty>
 
 An C<accessor> node represents an accessor or alias for an attribute of
 another, tuple-valued expression node.  It is interpreted as a tuple of a
@@ -2739,7 +2743,7 @@ Examples:
 Grammar:
 
     <func_invo> ::=
-        <routine_name> <func_arg_list>
+        <routine_name> <unspace> <func_arg_list>
 
     <routine_name> ::=
         <PNSQNameChain_payload>
@@ -3106,10 +3110,10 @@ Some of the keywords are aliases for each other:
 
 This table indicates which function is invoked by each keyword:
 
-    and  -> Core.Bool.and( Set:{ $expr[0], ..., $expr[n] } )
-    or   -> Core.Bool.or( Set:{ $expr[0], ..., $expr[n] } )
-    xnor -> Core.Bool.xnor( Bag:{ $expr[0], ..., $expr[n] } )
-    xor  -> Core.Bool.xor( Bag:{ $expr[0], ..., $expr[n] } )
+    and  -> Core.Boolean.and( Set:{ $expr[0], ..., $expr[n] } )
+    or   -> Core.Boolean.or( Set:{ $expr[0], ..., $expr[n] } )
+    xnor -> Core.Boolean.xnor( Bag:{ $expr[0], ..., $expr[n] } )
+    xor  -> Core.Boolean.xor( Bag:{ $expr[0], ..., $expr[n] } )
     I+   -> Core.Integer.sum( Bag:{ $expr[0], ..., $expr[n] } )
     I*   -> Core.Integer.product( Bag:{ $expr[0], ..., $expr[n] } )
     N+   -> Core.Rational.sum( Bag:{ $expr[0], ..., $expr[n] } )
@@ -3240,8 +3244,8 @@ This table indicates which function is invoked by each keyword:
 
     =    -> Core.Universal.is_identical( $expr[0], $expr[1] )
     !=   -> Core.Universal.is_not_identical( $expr[0], $expr[1] )
-    nand -> Core.Bool.nand( $expr[0], $expr[1] )
-    nor  -> Core.Bool.nor( $expr[0], $expr[1] )
+    nand -> Core.Boolean.nand( $expr[0], $expr[1] )
+    nor  -> Core.Boolean.nor( $expr[0], $expr[1] )
     I|-| -> Core.Integer.abs_diff( $expr[0], $expr[1] )
     N|-| -> Core.Rational.abs_diff( $expr[0], $expr[1] )
 
@@ -3349,10 +3353,10 @@ This table indicates which function is invoked by each keyword:
     !isa -> Core.Universal.is_not_value_of_type( $lhs, type => $rhs )
     as   -> Core.Universal.treated( $lhs, as => $rhs )
     asserting -> Core.Universal.assertion( $lhs, is_true => $rhs )
-    imp  -> Core.Bool.imp( $lhs, $rhs )
-    nimp -> Core.Bool.nimp( $lhs, $rhs )
-    if   -> Core.Bool.if( $lhs, $rhs )
-    nif  -> Core.Bool.nif( $lhs, $rhs )
+    imp  -> Core.Boolean.imp( $lhs, $rhs )
+    nimp -> Core.Boolean.nimp( $lhs, $rhs )
+    if   -> Core.Boolean.if( $lhs, $rhs )
+    nif  -> Core.Boolean.nif( $lhs, $rhs )
     I-   -> Core.Integer.diff( minuend => $lhs, subtrahend => $rhs )
     I/   -> Core.Integer.quotient( dividend => $lhs, divisor => $rhs )
     %    -> Core.Integer.remainder( dividend => $lhs, divisor => $rhs )
@@ -3458,7 +3462,7 @@ Some of the keywords are aliases for each other:
 This table indicates which function is invoked by each keyword:
 
     d   -> Core.Universal.default( of => $expr )
-    not -> Core.Bool.not( $expr )
+    not -> Core.Boolean.not( $expr )
     I|| -> Core.Integer.abs( $expr )
     N|| -> Core.Rational.abs( $expr )
     R#  -> Core.Relation.cardinality( $expr )
@@ -3529,20 +3533,20 @@ Grammar:
         <pcf_s_acc_op_invo> | <pcf_t_acc_op_invo>
 
     <pcf_s_acc_op_invo> ::=
-        <expr> <ws>? '.${' [<ws>? <possrep_name> ';']? <ws>?
+        <expr> <unspace> '.${' [<ws>? <possrep_name> ';']? <ws>?
             <attr_name>
         <ws>? '}'
 
     <pcf_t_acc_op_invo> ::=
-        <expr> <ws>? '.%{' <ws>? <attr_name> <ws>? '}'
+        <expr> <unspace> '.%{' <ws>? <attr_name> <ws>? '}'
 
     <s_pcf_op_invo> ::=
-        <expr> <ws>? '${' [<ws>? <possrep_name> ';']? <ws>?
+        <expr> <unspace> '${' [<ws>? <possrep_name> ';']? <ws>?
             [<pcf_projection> | <pcf_cmpl_proj>]
         <ws>? '}'
 
     <t_pcf_op_invo> ::=
-        <expr> <ws>? '%{' <ws>?
+        <expr> <unspace> '%{' <ws>?
             [
                   <pcf_rename>
                 | <pcf_projection> | <pcf_cmpl_proj>
@@ -3552,7 +3556,7 @@ Grammar:
         <ws>? '}'
 
     <r_pcf_op_invo> ::=
-        <expr> <ws>? '@{' <ws>?
+        <expr> <unspace> '@{' <ws>?
             [
                   <pcf_rename>
                 | <pcf_projection> | <pcf_cmpl_proj>
@@ -3622,14 +3626,14 @@ Grammar:
         <pcf_ary_acc_op_invo> | <pcf_ary_slice_op_invo>
 
     <pcf_ary_value_op_invo> ::=
-        <expr> <ws>? '.[' <ws>? <index> <ws>? ']'
+        <expr> <unspace> '.[' <ws>? <index> <ws>? ']'
 
     <index> ::=
-          <num_max_col_val> ';' <ws>? <nnint_body>
+          <num_max_col_val> ';' <unspace> <nnint_body>
         | <d_nnint_body>
 
     <pcf_ary_slice_op_invo> ::=
-        <expr> <ws>? '[' <ws>?
+        <expr> <unspace> '[' <ws>?
             <min_index> <ws>? <interval_boundary_kind> <ws>? <max_index>
         <ws>? ']'
 
@@ -3833,9 +3837,9 @@ Examples:
 
     309.1 log 5.4 round RatRoundRule:[10,-4,HalfUp]
 
-    e^ 6.3 round RatRoundRule:[10,-6,ToCeiling]
+    e^ 6.3 round RatRoundRule:[10,-6,Up]
 
-    17.0 log-e round RatRoundRule:[3,-5,ToFloor]
+    17.0 log-e round RatRoundRule:[3,-5,Down]
 
 =head2 Order Comparison Operators
 
@@ -3934,13 +3938,13 @@ This table indicates which function is invoked by each keyword:
 
     <=> -> Core.Scalar.order( $lhs, $rhs )
 
-    min -> Core.Universal.min( Set:{ $expr[0], ..., $expr[n] } )
-    max -> Core.Universal.max( Set:{ $expr[0], ..., $expr[n] } )
+    min -> Core.Ordered.min( Set:{ $expr[0], ..., $expr[n] } )
+    max -> Core.Ordered.max( Set:{ $expr[0], ..., $expr[n] } )
 
-    <      -> Core.Universal.is_before( $lhs, $rhs )
-    >      -> Core.Universal.is_after( $lhs, $rhs )
-    <=     -> Core.Universal.is_before_or_same( $lhs, $rhs )
-    >=     -> Core.Universal.is_after_or_same( $lhs, $rhs )
+    <      -> Core.Ordered.is_before( $lhs, $rhs )
+    >      -> Core.Ordered.is_after( $lhs, $rhs )
+    <=     -> Core.Ordered.is_before_or_same( $lhs, $rhs )
+    >=     -> Core.Ordered.is_after_or_same( $lhs, $rhs )
     Iin    -> Core.Interval.value_is_member( value => $lhs,
                 interval => $rhs )
     I!in   -> Core.Interval.value_is_not_member( value => $lhs,
@@ -4033,44 +4037,44 @@ Grammar:
 Grammar:
 
     <TAIInstant> ::=
-        TAIInstant ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        TAIInstant ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <TAIInstant_payload>
 
     <TAIInstant_payload> ::=
         <Rat_payload>
 
     <TAIDuration> ::=
-        TAIDuration ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        TAIDuration ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <TAIDuration_payload>
 
     <TAIDuration_payload> ::=
         <Rat_payload>
 
     <UTCInstant> ::=
-        UTC [Instant | DateTime | Date | Time] ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        UTC [Instant | DateTime | Date | Time] ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <UTCInstant_payload>
 
     <UTCInstant_payload> ::=
         <UTCDuration_payload>
 
     <FloatInstant> ::=
-        Float [Instant | DateTime | Date | Time] ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        Float [Instant | DateTime | Date | Time] ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <FloatInstant_payload>
 
     <FloatInstant_payload> ::=
         <UTCDuration_payload>
 
     <UTCDuration> ::=
-        UTCDuration ':' <ws>?
-        [<type_name> ':' <ws>?]?
+        UTCDuration ':' <unspace>
+        [<type_name> ':' <unspace>]?
         <UTCDuration_payload>
 
     <UTCDuration_payload> ::=
-          <num_max_col_val> ';' <ws>? <utc_duration_body>
+          <num_max_col_val> ';' <unspace> <utc_duration_body>
         | <d_utc_duration_body>
 
     <utc_duration_body> ::=

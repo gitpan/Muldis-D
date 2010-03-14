@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.112.0.
+This document is Muldis::D::Core::Types_Catalog version 0.113.0.
 
 =head1 PREFACE
 
@@ -67,6 +67,8 @@ more or less:
                                     sys.std.Core.Type.Cat.APTypeNC
                                 sys.std.Core.Type.Cat.RelPathMaterialNC
                                     sys.std.Core.Type.Cat.RPFunctionNC
+                                    sys.std.Core.Type.Cat.RPUpdaterNC
+                                    sys.std.Core.Type.Cat.RPProcedureNC
                                     sys.std.Core.Type.Cat.RPTypeNC
                             sys.std.Core.Type.Cat.DataNC
                                 sys.std.Core.Type.Cat.LexDataNC
@@ -76,8 +78,8 @@ more or less:
 
                     # The following are all regular non-ord scalar types.
 
-                    sys.std.Core.Type.Cat.RatRoundMeth
-                        sys.std.Core.Type.Cat.RatRoundMeth.*
+                    sys.std.Core.Type.Cat.RoundMeth
+                        sys.std.Core.Type.Cat.RoundMeth.*
                     sys.std.Core.Type.Cat.RatRoundRule
 
         sys.std.Core.Type.Tuple
@@ -218,7 +220,7 @@ defined as a union type over all system-defined C<DHScalar> types, and just
 those types, for whose values all of the Muldis D standard dialects provide
 "opaque value literal" syntax for:  C<Bool>, C<Int>, C<Blob>, C<Text>,
 C<Rat>, C<Name>, C<NameChain>, C<Comment>, C<Order>,
-C<RatRoundMeth>, C<RatRoundRule>, C<TAIInstant>, C<TAIDuration>,
+C<RoundMeth>, C<RatRoundRule>, C<TAIInstant>, C<TAIDuration>,
 C<UTCInstant>, C<FloatInstant>, C<UTCDuration>.  The C<OVLScalar> type is
 mainly intended to be used as the declared type of some attributes of some
 other system-defined catalog types, as a compact or hard-coded way to
@@ -437,40 +439,45 @@ name is the empty string and which has zero attributes.  The cardinality of
 this type is 1, and its only value is its default and minimum and maximum
 value.
 
-=head2 sys.std.Core.Type.Cat.RatRoundMeth
+=head2 sys.std.Core.Type.Cat.RoundMeth
 
-This is an enumeration data type.  The C<RatRoundMeth> (rounding method)
-type is explicitly defined as a union type over just these 7 singleton
-types having C<sys.std.Core.Type.Cat.RatRoundMeth.*>-format names:
-C<HalfDown>, C<HalfUp>, C<HalfEven>, C<ToFloor>,
-C<ToCeiling>, C<ToZero>, C<ToInf>.  When a value
+This is an enumeration data type.  The C<RoundMeth> (rounding method)
+type is explicitly defined as a union type over just these 9 singleton
+types having C<sys.std.Core.Type.Cat.RoundMeth.*>-format names:
+C<Down>, C<Up>, C<ToZero>, C<ToInf>, C<HalfDown>, C<HalfUp>, C<HalfToZero>,
+C<HalfToInf>, C<HalfEven>.  When a value
 of some ordered type needs to be mapped into a proper subtype that doesn't
 contain that value, such as when mapping an arbitrary number to one with
 less precision, some rounding method is applied to determine which value of
 the subtype is to be mapped to while most accurately reflecting the
-original value.  The C<RatRoundMeth> type enumerates the rounding methods
-that Muldis D operators can typically apply.  With C<HalfDown>,
-C<HalfUp>, and C<HalfEven> (aka I<unbiased rounding>, I<convergent
+original value.  The C<RoundMeth> type enumerates the rounding methods
+that Muldis D operators can typically apply.  With C<Down> (aka I<floor>),
+C<Up> (aka I<ceiling>), C<ToZero> (aka I<truncate>), and C<ToInf>, the
+original value will always be mapped to the single adjacent value that is
+lower than it, or higher than it, or towards "zero" from it, or towards the
+nearer infinity from it, respectively.  With C<HalfDown>,
+C<HalfUp>, C<HalfToZero>, C<HalfToInf>,
+and C<HalfEven> (aka I<unbiased rounding>, I<convergent
 rounding>, I<statistician's rounding>, or I<bankers' rounding>), the
 original value will be mapped to the single target value that it is closest
 to, if there is one; otherwise, if it is exactly half-way between 2
 adjacent target values, then C<HalfDown> will round towards negative
-infinity, C<HalfUp> will round towards positive infinity, and C<HalfEven>
-will round towards the nearest "even" target.  With C<ToFloor>,
-C<ToCeiling>, C<ToZero> (aka I<truncate>), C<ToInf>, the original value
-will always be mapped to the single adjacent value that is lower than it,
-or higher than it, or towards "zero" from it, or towards the nearer
-infinity from it, respectively.  The default value of C<RatRoundMeth> is
-C<HalfUp>, since that is the most commonly used method of rounding.  The
-C<RatRoundMeth> type does I<not> have a default ordering algorithm.
+infinity, C<HalfUp> will round towards positive infinity,
+C<HalfToZero> will round towards "zero", C<HalfToInf> will round towards
+the nearer infinity, and C<HalfEven> will round towards the nearest "even"
+target.  The default value of C<RoundMeth> is C<HalfEven>, since in general
+that should be the most likely to minimize the rounding error from a
+sequence of operations that each round, which is especially useful in
+contexts where a rounding method is implicit.  The
+C<RoundMeth> type does I<not> have a default ordering algorithm.
 
-=head2 sys.std.Core.Type.Cat.RatRoundMeth.*
+=head2 sys.std.Core.Type.Cat.RoundMeth.*
 
-There are exactly 7 types having
-C<sys.std.Core.Type.Cat.RatRoundMeth.*>-format names and each one is a
+There are exactly 9 types having
+C<sys.std.Core.Type.Cat.RoundMeth.*>-format names and each one is a
 structure data type; for the rest of this description, the type name
-C<RatRoundMeth.Value> will be used as a proxy for each and every one of
-them.  A C<RatRoundMeth.Value> has 1 system-defined possrep whose name is
+C<RoundMeth.Value> will be used as a proxy for each and every one of
+them.  A C<RoundMeth.Value> has 1 system-defined possrep whose name is
 the empty string and which has zero attributes.  The cardinality of this
 type is 1, and its only value is its default and minimum and maximum value.
 
@@ -485,13 +492,13 @@ approximating rational number.  It is also used to define a generic
 rounding operation on a rational number that derives a typically less
 precise rational.  A C<RatRoundRule> has 1 system-defined possrep whose
 name is the empty string, which has these 3 attributes: C<radix> (a
-C<PInt2_N>), C<min_exp> (an C<Int>), and C<round_meth> (a C<RatRoundMeth>).
+C<PInt2_N>), C<min_exp> (an C<Int>), and C<round_meth> (a C<RoundMeth>).
 The rational resulting from the operation is as close as possible to the
 conceptual result but that it is an exact multiple of the rational value
 resulting from C<radix> taken to the power of C<min_exp>; if rounding is
 needed, then C<round_meth> dictates the rounding method.  The default value
 of C<RatRoundRule> specifies a coersion to a whole number using the
-C<HalfUp> rounding method (its radix is 2 and its min exp is 0).  The
+C<HalfEven> rounding method (its radix is 2 and its min exp is 0).  The
 C<RatRoundRule> type does I<not> have a default ordering algorithm.
 
 =head1 SIMPLE GENERIC STRING TYPES
@@ -1265,14 +1272,14 @@ determine which other function, that explicitly implements this virtual
 one, is automatically dispatched to.  Each element of C<dispatch_params>
 must match a parameter name in C<params>.
 
-=item C<implements> - C<maybe_of.RPFunctionNC>
+=item C<implements> - C<set_of.RPFunctionNC>
 
 Iff C<implements> is nonempty then this function is explicitly declaring
-that it implements the other, virtual function whose name is given in its
-sole element; otherwise, empty means not implementing a virtual.  An
-implementing function must the same parameter list as its virtual, save
-that the implementer's parameters' or result's declared types must be
-subtypes of the corresponding ones of the virtual.
+that it implements the other (typically just one), virtual functions named
+by its elements; otherwise, empty means not implementing any virtuals.  An
+implementing function must have the same parameter list as its virtuals,
+save that the implementer's parameters' and result's declared types must be
+subtypes of the corresponding ones of the virtuals.
 
 =item C<expr> - C<ExprNodeSet>
 
@@ -2085,14 +2092,14 @@ determine which other updater, that explicitly implements this virtual
 one, is automatically dispatched to.  Each element of C<dispatch_params>
 must match a parameter name in C<upd_params> or C<ro_params>.
 
-=item C<implements> - C<maybe_of.RPUpdaterNC>
+=item C<implements> - C<set_of.RPUpdaterNC>
 
 Iff C<implements> is nonempty then this updater is explicitly declaring
-that it implements the other, virtual updater whose name is given in its
-sole element; otherwise, empty means not implementing a virtual.  An
-implementing updater must the same parameter list as its virtual, save
-that the implementer's parameters' or result's declared types must be
-subtypes of the corresponding ones of the virtual.
+that it implements the other (typically just one), virtual updaters named
+by its elements; otherwise, empty means not implementing any virtuals.  An
+implementing updater must have the same parameter list as its virtuals,
+save that the implementer's parameters' declared types must be
+subtypes of the corresponding ones of the virtuals.
 
 =item C<exprs> - C<ExprNodeSet>
 
@@ -2224,14 +2231,14 @@ determine which other procedure, that explicitly implements this virtual
 one, is automatically dispatched to.  Each element of C<dispatch_params>
 must match a parameter name in C<upd_params> or C<ro_params>.
 
-=item C<implements> - C<maybe_of.RPProcedureNC>
+=item C<implements> - C<set_of.RPProcedureNC>
 
 Iff C<implements> is nonempty then this procedure is explicitly declaring
-that it implements the other, virtual procedure whose name is given in its
-sole element; otherwise, empty means not implementing a virtual.  An
-implementing procedure must the same parameter list as its virtual, save
-that the implementer's parameters' or result's declared types must be
-subtypes of the corresponding ones of the virtual.
+that it implements the other (typically just one), virtual procedures named
+by its elements; otherwise, empty means not implementing any virtuals.  An
+implementing procedure must have the same parameter list as its virtuals,
+save that the implementer's parameters' declared types must be
+subtypes of the corresponding ones of the virtuals.
 
 =item C<is_recipe> - C<Bool>
 

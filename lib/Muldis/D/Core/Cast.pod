@@ -9,7 +9,7 @@ Muldis D explicit type-casting operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Cast version 0.112.0.
+This document is Muldis::D::Core::Cast version 0.113.0.
 
 =head1 PREFACE
 
@@ -111,7 +111,7 @@ C<Int> values.
 =head2 sys.std.Core.Cast.Int_from_Rat
 
 C<< function sys.std.Core.Cast.Int_from_Rat (Int <-- $rat : Rat,
-$round_meth : RatRoundMeth) >>
+$round_meth : RoundMeth) >>
 
 This selector function results in the C<Int> value that is conceptually
 equal to or otherwise nearest to its C<rat> argument, where the nearest is

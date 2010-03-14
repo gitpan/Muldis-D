@@ -9,7 +9,7 @@ Muldis D integer numeric operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Integer version 0.112.0.
+This document is Muldis::D::Core::Integer version 0.113.0.
 
 =head1 PREFACE
 
@@ -50,7 +50,7 @@ this operation is also known as C<-->.
 C<< function sys.std.Core.Integer.abs (NNInt <-- $topic : Int) >>
 
 This function results in the absolute value of its argument.  Note that
-this operation is also known as C<I||>.
+this operation is also known as I<modulus> or C<I||>.
 
 =head2 sys.std.Core.Integer.sum
 
@@ -96,27 +96,37 @@ as I<multiply> or I<times> or C<I*>.
 =head2 sys.std.Core.Integer.quotient
 
 C<< function sys.std.Core.Integer.quotient (Int <-- $dividend : Int,
-$divisor : Int) >>
+$divisor : Int, $round_meth : RoundMeth) >>
 
 This function results in the quotient when its C<dividend> argument is
-divided by its C<divisor> argument using integer division.  This function
+divided by its C<divisor> argument using integer division.  The semantics
+of this function are equivalent to rounding the result of a real number
+division to the same or nearest integer, where the nearest is determined by
+the rounding method specified by the C<round_meth> argument.  This function
 will fail if C<divisor> is zero.  Note that this operation is also known as
 I<divide> or C<I/>.
 
 =head2 sys.std.Core.Integer.remainder
 
 C<< function sys.std.Core.Integer.remainder (NNInt <-- $dividend : Int,
-$divisor : Int) >>
+$divisor : Int, $round_meth : RoundMeth) >>
 
 This function results in the remainder when its C<dividend> argument is
-divided by its C<divisor> argument using integer division.  This function
+divided by its C<divisor> argument using integer division.  The semantics
+of this function preserve the identity C<$x % $y = $x - $y * ($x / $y)>
+(read C<$x> as C<dividend> and C<$y> as C<divisor>) where the division C</>
+has the same semantics as C<sys.std.Core.Integer.quotient> (rounding the
+result of a real number division as per C<round_meth>); the sign of this
+function's result always matches the sign of the dividend or the divisor if
+C<round_meth> is C<ToZero> (aka I<truncate>) or C<Down> (aka I<floor>),
+respectively.  This function
 will fail if C<divisor> is zero.  Note that this operation is also known as
-I<modulus> or C<%>.
+I<modulo> or C<%>.
 
 =head2 sys.std.Core.Integer.quot_and_rem
 
 C<< function sys.std.Core.Integer.quot_and_rem (Tuple <--
-$dividend : Int, $divisor : Int) >>
+$dividend : Int, $divisor : Int, $round_meth : RoundMeth) >>
 
 This function results in a binary tuple whose attribute names are
 C<quotient> (an C<Int>) and C<remainder> (a C<NNInt>) and whose respective
@@ -127,7 +137,7 @@ arguments.  This function will fail if C<divisor> is zero.
 =head2 sys.std.Core.Integer.maybe_quotient
 
 C<< function sys.std.Core.Integer.maybe_quotient (maybe_of.Int <--
-$dividend : Int, $divisor : Int) >>
+$dividend : Int, $divisor : Int, $round_meth : RoundMeth) >>
 
 This function is exactly the same as C<sys.std.Core.Integer.quotient>
 except that it results in a C<Maybe> of what is otherwise the result, and
@@ -136,7 +146,7 @@ that result has zero elements if C<divisor> is zero.
 =head2 sys.std.Core.Integer.maybe_remainder
 
 C<< function sys.std.Core.Integer.maybe_remainder (maybe_of.NNInt <--
-$dividend : Int, $divisor : Int) >>
+$dividend : Int, $divisor : Int, $round_meth : RoundMeth) >>
 
 This function is exactly the same as C<sys.std.Core.Integer.remainder>
 except that it results in a C<Maybe> of what is otherwise the result, and
@@ -145,7 +155,7 @@ that result has zero elements if C<divisor> is zero.
 =head2 sys.std.Core.Integer.maybe_quot_and_rem
 
 C<< function sys.std.Core.Integer.maybe_quot_and_rem (Relation <--
-$dividend : Int, $divisor : Int) >>
+$dividend : Int, $divisor : Int, $round_meth : RoundMeth) >>
 
 This function results in a binary relation whose attribute names are
 C<quotient> (an C<Int>) and C<remainder> (a C<NNInt>).  If C<divisor> is
@@ -162,6 +172,28 @@ This function results in the difference between the lowest and highest
 element values of its argument.  If C<topic> has zero values, then C<range>
 results in the integer zero.
 
+=head2 sys.std.Core.Integer.mean
+
+C<< function sys.std.Core.Integer.mean (Int <-- $topic : bag_of.Int,
+$round_meth : RoundMeth) >>
+
+This function results in the mean or arithmetic average of the N element
+values of its argument.  It is equivalent to first taking the sum of the
+input values, and dividing that sum by the count of the input values, where
+the semantics of the division are the same as those of
+C<sys.std.Core.Integer.quotient> (rounding the result of a real number
+division as per C<round_meth>).  If
+C<topic> has zero values, then this function will fail.
+
+=head2 sys.std.Core.Integer.maybe_mean
+
+C<< function sys.std.Core.Integer.maybe_mean (maybe_of.Int <--
+$topic : bag_of.Int, $round_meth : RoundMeth) >>
+
+This function is exactly the same as C<sys.std.Core.Integer.mean> except
+that it results in a C<Maybe> of what is otherwise the result, and that
+result has zero elements if C<topic> has zero values.
+
 =head2 sys.std.Core.Integer.median
 
 C<< function sys.std.Core.Integer.median (set_of.Int <--
@@ -174,6 +206,15 @@ single middle value, if the count of input values is odd, or taking the 2
 middle values, if the count of input values is even (but if the 2 middle
 values are the same value, the output has one element).  If C<topic> has
 zero values, then the result set is empty.
+
+=head2 sys.std.Core.Integer.mean_of_median
+
+C<< function sys.std.Core.Integer.mean_of_median (Int <--
+$topic : bag_of.Int, $round_meth : RoundMeth) >>
+
+This function is a wrapper over C<sys.std.Core.Integer.median> that will
+result in the mean of its result elements; it will fail if there are zero
+elements.
 
 =head2 sys.std.Core.Integer.mode
 

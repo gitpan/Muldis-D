@@ -40,37 +40,64 @@ implementations over multiple SQL DBMSs.
 
 ----------
 
+* Maybe rename Integer.pod to Integral.pod,
+Text.pod to Textual.pod, Blob.pod to Blobby.pod, etc.
+Or standardize in some other way between mixins and types named after.
+
+* Use terminology like "ordered" versus "ordinal" to distinguish types like
+Rat,Text from Int; "ordinal" naturally supports prec,succ (prev,next)
+operators while "ordered" does not.  All "ordinal" are "ordered" but not
+the reverse.  Making a finite subtype of an infinite ordered type might
+also have the effect of making it ordinal, in some cases.  Add concept of
+"step size" or "quantum" or such to talk about ordinal, which is the basis
+for figuring out all the other ordinal stuff.
+
 * FIRST PRIORITY ...
 Refactor the system type hierarchy to exploit mixins and operator
 overloading / virtual routines ...
 Create the following mixins and group types and ops under them:
     - Ordered :
-        - tps: Ordinal, Stringy, Rat, NameChain, etc
+        - tps: Ordinal, Rational, Stringy, Temporal, NameChain,
+            Instant, Duration, etc
         - ops: order/<=>
     - Ordinal :
-        - tps: Bool, Int, Order
+        - tps: Boolean, Integer, Order
         - ops: succ/++, pred/--, last, first
+    - Boolean :
+        - tps: Bool ... and maybe Blobby/Blob (treat logi ops as bitwise)?
+        - ops: not/!, and, or, etc
+    - Diffable :
+        - tps: Numeric, Instant
+        - ops: diff/-, abs_diff/|-| (for Instant, both result in Duration)
     - Numeric :
-        - tps: Int, Rat, ... in the future, Complex etc
-        - ops: abs/||, sum/+, diff/-, product/*, quotient/'/',
-            abs_diff/|-|, range, median, mode
+        - tps: Integer, Rational, Duration, ... in the future, Complex etc
+        - ops: abs/||, sum/+, range, mean, median, mode,
+            product/*, quotient/'/' (for Duration, last 2 hv Rat 2nd param)
+    - Integer :
+        - tps: Int
+        - ops: remainder/mod/%, power/I^, factorial/I!, fetch_random
+    - Rational :
+        - tps: Rat
+        - ops: power/N^, log, natural_[power|log], fetch_random
     - Stringy :
-        - tps: Blob, Text, String
+        - tps: Blob, Text, String, NameChain ... maybe Array in general?
         - ops: catenation/~, replication/x
+    - Blobby :
+        - tps: Blob
+        - ops: other Blob ops
+    - Textual :
+        - tps: Text, Name, Comment
+        - ops: other Text ops
     - Collective :
         - tps: Set, Array, Bag, SPInterval, MPInterval
         - ops: in/∈, has/∋
+    - Instant :
+        - tps: TAIInstant, UTCInstant, FloatInstant
+        - ops: later, earlier (both have second param of Duration)
+    - Duration :
+        - tps: TAIDuration, UTCDuration
+        - ops: (none added)
 Then the types that compose those mixins retain ops like these:
-    - Bool :
-        - ops: not/!, and, or, etc
-    - Int :
-        - ops: remainder/mod/%, power/I^, factorial/I!, fetch_random
-    - Rat :
-        - ops: mean, power/N^, log, natural_[power|log], fetch_random
-    - Blob :
-        - ops: other Blob ops
-    - Text :
-        - ops: other Text ops
 And these types have these similar ops:
     - Tuple :
         - ops: in-r/∈r
@@ -165,8 +192,6 @@ constraint writers want to know anyway.
 
 * Add new "material" kinds that def stimulus-response rules
 / triggered routines.
-
-* Add sequence generator updaters|procedures in Integer.pod.
 
 * Add new "material" kinds that define descriptions of resource locks that
 one wants to get, starting with basic whole dbvar, relvar locks (address as
@@ -310,6 +335,10 @@ routine is needed here such as a catenate function plus normal I/O output.
 
 ----------
 
+* Add a round-rule param to rat division, I suppose, since in general we'll
+need it if we want to maintain a rational radix through every op (+,-,*
+will already do so when all their args are in the desired radix).
+
 * Add explicit support for +/- underflow, +/- overflow, NaNs, etc.
 I'm inclined to think +/- zero is unnecessary when we have underflow and
 can be confusing anyway (just a single normal number zero is better).
@@ -326,7 +355,7 @@ the current simpler versions that don't, such as "IntNS" (int no specials),
 "RatNS", etc.  Either way, it is useful to support the full range of values
 that a Perl 6 numeric can support, or that an IEEE float can support,
 without users necessarily having to define it themselves.
-IDEA:  Make all the normal math/etc ops work with the extended versions
+IDEA:  Maybe make all normal math/etc ops work with the extended versions
 (those with NaNs, infinities, etc) and in situations where users don't want
 those special values they just use a declared type excluding them, and then
 the normal type constraints will take care of throwing exceptions when one
@@ -334,14 +363,6 @@ divides by zero for example.
 And so we then can also rid ourselves of having to use Maybe (as it stands
 now based on Set) in as many situations as we do now, where functions come
 in pairs where one chooses between a Maybe or a possible exception.
-
-* Use terminology like "ordered" versus "ordinal" to distinguish types like
-Rat,Text from Int; "ordinal" naturally supports prec,succ (prev,next)
-operators while "ordered" does not.  All "ordinal" are "ordered" but not
-the reverse.  Making a finite subtype of an infinite ordered type might
-also have the effect of making it ordinal, in some cases.  Add concept of
-"step size" or "quantum" or such to talk about ordinal, which is the basis
-for figuring out all the other ordinal stuff.
 
 * Flesh out Interval.pod to add a complement of functions for comparing
 multiple intervals in different ways, such as is-subset, is-overlap,
@@ -370,6 +391,8 @@ ADD RELATIONAL OPERATORS THAT COMBINE BOOL OPS ADDED IN 0.80.0 WITH
 RELATIONAL MAP/RESTRICTION/ETC AND ... The new functions are modelled after
 some in Perl 5's List::MoreUtils module.
 
+* Consider adding sequence generator updaters|procedures in Integer.pod.
+
 * Consider adding random value generators for data types other than integer
 and rational numerics, such as for character strings or binary strings.
 
@@ -394,14 +417,8 @@ to be used as a default or internal representation everywhere.
 
 ----------
 
-* Consider updating the mnemonic in the STD dialects in regard to
-boolean-valued expressions (or attributes) that are asking a yes/no
-question, especially those that come in pairs, such that the is-foo version
-is spelled with a leading "?" (meaning "so foo") and the is-not-foo version
-is spelled with a leading "!" (meaning "not foo"); the idea is that often
-times if you see an operator with a leading "?" or "!" then you know the
-result is a boolean.  As examples, see the ASCII versions of the
-set-membership or super/subset ops.
+* Update the STD dialects concerning that integer division and modulo now
+have a mandatory third parameter, not yet shown, the rounding-method.
 
 * IN PROGRESS ...
 Update the STD dialects with special syntax for declaring whole depots
@@ -420,19 +437,20 @@ function, updater, procedure, type, param, ro_param, upd_param, expr, stmt,
 subtype, key, possrep, etc; they apply to both 'outer' and 'inner'
 types/routines; also keywords for declaring whole packages or something.
 
-* Update the STD dialects to support inline definition of basic inner
+* IN PROGRESS ...
+Update the STD dialects to support inline definition of basic
 routines (and types?) right in the expressions/etc where they are used,
 such as filter functions in restriction() invocations, so many common cases
 look much more like their SQL or Perl counterparts, or for that matter, a
 functional language's anonymous higher order functions.  This syntax would
-be sugar over an explicit inner definition plus a FooRef value selection,
+be sugar over an explicit material definition plus a FooRef val selection,
 which means the inner def effectively is an expression node, and users can
 choose to name or not name the FooRef selecting node as normal with value
-expressions.  It is expected that the inners could be declared anonymously
+expressions.  It is expected that the materials could be decl anonymously
 and names for them (the inn.foo, not the FooRef's lex.foo) would be
 generated as per inline expression nodes etc.  Presumably also add some new
 keyword for a routine to invoke itself without using a name like normal;
-this would be sugar for normal functional call syntax, using gen inn name.
+this would be sugar for normal functional call syntax, using gen name.
 
 * Further to the previous item, add some special syntax, similar to how one
 references a parameter to get its argument's value, which can see into the
@@ -549,6 +567,17 @@ braces/brackets; for example: "[$x, $y] ::= [3, 4]",
 "[$a, $b] ::= $t.%{a,b}", "[$c, $d] ::= $ary.[3,5]".  This syntax would
 resolve into multiple single-attr accessors when app in system catalog.
 
+* In PTMD_STD, consider loosening the grammar regarding some of the normal
+prefix or postfix or infix operators so that rather than mandating
+whitespace be present between the operators and their arguments, the
+whitespace is optional where it wouldn't cause a problem.  On the other
+hand, is "! $foo" really such a problem?  People might often write "not
+$foo" there anyway as that is a preferred form for boolean ops.  In
+particular, while someone may want to write say "$foo++" or "$foo--", the
+latter is problematic since "-" are allowed in bareword identifiers and
+that could mis-parse, and someone would probably prefer to then write
+[$foo --] rather than [$"foo"--] anyway.
+
 ----------
 
 * Restore the concept of public-vs-private entities directly in sub|depots.
@@ -655,6 +684,23 @@ such to above extensions or to Text.pod as appropriate.
 compares whole graphemes (1 grapheme = sequence starting with a base
 codepoint plus N combining codepoints, or something) as single string
 elements, rather than say comparing a base char against a combining char.
+
+* Add new "Complex" extension which provides the numeric "complex" data
+types (each expressed as a pair of real numbers with at least 2 possreps
+like cartesian vs polar) and operators.  Note that the SQL standard does
+not have such data types but both many general languages as well some
+hardware CPUs natively support them.  Probably make "Complex" a mixin type
+and have the likes of "RatComplex" and "IntComplex" composing it.  Note
+that a complex number over just integers is also called a Gaussian integer.
+A question to ask is whether a distinct "imaginary" type is useful; some
+may say it is and Digital Mars' "D" has it, but I don't know if others do.
+In any event, complex numerics should most likely not be part of the core,
+even though their candidacy could be considered borderline; for one thing,
+I would expect that most actual uses of them would work with inexact math.
+
+* Add other mathematical extensions, such as ones that add trigonometric
+functions et al, or ones that deal with hyperreal/hypercomplex/etc types,
+or ones with variants of the core numeric types that propagate NaNs etc.
 
 * Make further updates to Temporal.pod to improve correctness or
 normalization, particularly with durations, maybe add some *Duration
