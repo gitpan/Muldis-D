@@ -9,7 +9,7 @@ Muldis D explicit type-casting operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Cast version 0.113.0.
+This document is Muldis::D::Core::Cast version 0.114.0.
 
 =head1 PREFACE
 
@@ -33,20 +33,16 @@ Following are all the data types described in this document, arranged in a
 type graph according to their proper sub|supertype relationships:
 
     sys.std.Core.Type.Universal
-
-        sys.std.Core.Type.Empty
-
         sys.std.Core.Type.Scalar
             sys.std.Core.Type.DHScalar
-                sys.std.Core.Type.Cat.OVLScalar
-                    sys.std.Core.Type.Int
-                        sys.std.Core.Type.NNInt
-                            sys.std.Core.Type.PInt
+                sys.std.Core.Type.Int
+                    sys.std.Core.Type.NNInt
+                        sys.std.Core.Type.PInt
 
-                                # These are all finite integer types.
+                            # These are all finite integer types.
 
-                                sys.std.Core.Type.Cast.PInt1_4
-                                sys.std.Core.Type.Cast.PInt2_36
+                            sys.std.Core.Type.Cast.PInt1_4
+                            sys.std.Core.Type.Cast.PInt2_36
 
 I<This documentation is pending.>
 
@@ -54,13 +50,13 @@ I<This documentation is pending.>
 
 =head2 sys.std.Core.Type.Cast.PInt1_4
 
-This is an enumeration data type.  C<PInt1_4> is a proper subtype of
+C<PInt1_4> is a proper subtype of
 C<PInt> where all member values are between 1 and 4.  Its maximum value is
 4.  The cardinality of this type is 4.
 
 =head2 sys.std.Core.Type.Cast.PInt2_36
 
-This is an enumeration data type.  C<PInt2_36> is a proper subtype of
+C<PInt2_36> is a proper subtype of
 C<PInt> where all member values are between 2 and 36.  (The significance of
 the number 36 is 10 digits plus 26 letters.)  Its default value is 10 (to
 correspond to base-10 being the default base for numeric literals in the

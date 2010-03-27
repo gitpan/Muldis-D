@@ -45,7 +45,7 @@ Text.pod to Textual.pod, Blob.pod to Blobby.pod, etc.
 Or standardize in some other way between mixins and types named after.
 
 * Use terminology like "ordered" versus "ordinal" to distinguish types like
-Rat,Text from Int; "ordinal" naturally supports prec,succ (prev,next)
+Rat,Text from Int; "ordinal" naturally supports pred,succ (prev,next)
 operators while "ordered" does not.  All "ordinal" are "ordered" but not
 the reverse.  Making a finite subtype of an infinite ordered type might
 also have the effect of making it ordinal, in some cases.  Add concept of
@@ -63,6 +63,9 @@ Create the following mixins and group types and ops under them:
     - Ordinal :
         - tps: Boolean, Integer, Order
         - ops: succ/++, pred/--, last, first
+
+* AT SOME POINT ...
+Create the following mixins and group types and ops under them:
     - Boolean :
         - tps: Bool ... and maybe Blobby/Blob (treat logi ops as bitwise)?
         - ops: not/!, and, or, etc
@@ -97,7 +100,6 @@ Create the following mixins and group types and ops under them:
     - Duration :
         - tps: TAIDuration, UTCDuration
         - ops: (none added)
-Then the types that compose those mixins retain ops like these:
 And these types have these similar ops:
     - Tuple :
         - ops: in-r/∈r
@@ -105,34 +107,25 @@ And these types have these similar ops:
         - ops: has-t/∋t
 
 * SECOND PRIORITY ...
-Refactor the scalar type hierarchy at a fundamental level, so that the
-Muldis D type system ends up with exactly 4 native root types, which are
-Int, NPScalar (non-primitive scalar), Tuple, Relation.  So the concept of
-"structure" type will be eliminated, so all scalar root types besides Int
-will become enumeration types whose common root type is NPScalar.  The
-fundamental reason to make this change is so that Muldis D can then support
-doing data definition plus data manipulation as a single atomic operation,
-because there will now be an effective way to represent and interpret all
-Muldis D values, scalar and nonscalar alike, in the complete absence of any
-user-defined types, so the chicken-and-egg problem behind not being allowed
-to do DD and DM together would then be gone.  As you might guess, there is
-a single selector for all NPScalar values.  An NPScalar is a collection
-type that looks like a Tuple except for having 2 extra components, which
-are a declaration of type name and possrep name for the value where those
-names are partially context-independent; the initial Tuple-like component
-would have the possrep attribute values.  In the absence of any actual
-user-defined type definitions, two NPScalar are considered identical if
-they have the same type name and possrep name and attribute names and
-values, and they have no native concept of possrep mapping so one can't
-compare 2 different possreps for the same type.  But when user-defined
-types are in scope that "claim" the values in question, they can provide
-possrep mapping, as well as canonicalization (such as making Rat n+d
-coprime), so effectively acting as restrictions, and overriding what
-equality tests on those values result in.  Some details still to figureout.
+Make various updates with respect to adding data types that package
+constraint-defining metadata and payload values that are constrained by
+said metadata.  Make it so that a depot is simply a value of that type,
+which is a database-tuple with 'cat' and 'data' attributes.  Replace or
+supplement the "recipe" / data-definition routines with functions and/or
+updaters (especially functions) that take such data types so that for
+example an ALTER-TABLE-alike is now a function that takes care of the
+schema alterations and corresponding data alterations as one atomic step.
+Further to this, /maybe/ consider merging 'cat' and 'data' in some limited
+way so that at any given level of drilling each namespace's or relvar's
+'cat' is together with its 'data', though more likely this would be
+accomplished with just virtual variables.
 
 * THIRD PRIORITY ...
 Heavily update the transaction specs so that Muldis D DBMSs are
 fundamentally multi-versioned.  See subsequent long TODO item for details.
+Each "version" of a depot conceptually is just a value of that
+database-tuple with 'cat' and 'data' attributes, described in prior item.
+Similarly, a mount-federation conceivably is a single such db-tup val also.
 
 * FOURTH PRIORITY ...
 Update the mixins feature to add support for mixins that define attributes
@@ -190,8 +183,20 @@ transition constraints.  The initial version would simply take a
 alternative where arguments show the delta since often that is what
 constraint writers want to know anyway.
 
-* Add new "material" kinds that def stimulus-response rules
-/ triggered routines.
+* Add new "material" kinds that def stimulus-response rules / triggered
+routines.  The material kind has 2 main attributes, where the "stimulus"
+defines what to look out for and "response" defines what to do when the
+former is sighted.  Some possible keywords for the first are "stimulus",
+"cause", "when"; for the latter, "response", "effect", "invoke".
+
+* Document that a Muldis D DBMS should have command-line parameters
+regarding the initial "main program" depot it is mounting that correspond
+to each of the "MountControlSet" attributes; at the very least, the boolean
+parameters "allow_auto_run" and "we_may_update" must be provided, in
+addition to any params for, say, picking filename/etc of the initial depot;
+for security purposes, the booleans are false when not given, meaning users
+have to *always* say --allow_auto_run in order to run a pure MD program, so
+it is quite clear up front what they are risking.
 
 * Add new "material" kinds that define descriptions of resource locks that
 one wants to get, starting with basic whole dbvar, relvar locks (address as
@@ -591,7 +596,7 @@ of "current database|schema" etc) in some form if not redundant.
 
 * IN PROGRESS ...
 A Muldis D host|peer language can probably hold lexical-to-them variables
-whose Muldis D value object is Reference typed, and so they could
+whose Muldis D value object is External typed, and so they could
 effectively pass around an anonymous closure of
 their own language.  Such a value object would be a black box to the host
 and can't be dumped to Muldis D source code.
@@ -631,17 +636,10 @@ identity is overloaded by the foreign, like how Perl 6's .WHICH works.
 The foreign-access namespace may have a simple catalog variable
 representing what types and routines it is exposing, but to Muldis D this
 would be we_may_update=false.
-TODO:  Figure out how to declare a Muldis D non-dh type whose attributes
-are declared of some foreign type ... or maybe we can't and all such
-attributes would simply be declared Universal all the time, might be enuf.
 
 * IN PROGRESS ...
-First round to above:  Add system-defined subtype of Reference called
-sys.std.Core.Type.Foreign, the
-new one being a root type, and then we simply say that all values passed in
-from a host or peer language are of that root type, period; this new one is
-declared in Types.pod probably maybe I guess.  Then update Perl5_STD and
-Perl6_STD to add a new selector node kind 'Foreign' which takes any Perl
+About External type ... update Perl5_STD and
+Perl6_STD to add a new selector node kind 'External' which takes any Perl
 value or object as its payload; this is treated completely as a black box
 in general within the Muldis D implementation.  For matters of identity
 within the Muldis D envirnment, it works as follows:  Under Perl 6, the
@@ -651,8 +649,8 @@ used, and this applies to all objects also (since all refs are mutable,
 this seems to be the safest bet); otherwise ('ref $obj' is false) then the
 value's result in a string context, "$obj", is used as the identity; the
 mem addr and stringification would both be prefixed with some constant to
-distinguish the 2 that might stringify the same.  By default, a
-ForeignValue supports no operators but is/not_identical.
+distinguish the 2 that might stringify the same.  By default, an
+External supports no operators but is/not_identical.
 
 ----------
 

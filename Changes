@@ -1,6 +1,233 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-03-27  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.114.0 is released on CPAN as
+    Muldis-D-0.114.0.tar.gz.
+
+    * This release features a rough cut of a refactor of the entire Muldis
+    D type hierarchy at a fundamental level; this introduces the new
+    concept of the "low-level type system" over which the previously
+    existing, and still maintained mostly intact, type system is now an
+    abstraction.  In the new low-level type system, there are exactly 2
+    "declaration" types, the system-defined "Int" and "List", which are now
+    the only types that introduce values into the type system; now, *all*
+    other types, including all user-defined types, are just "enumeration"
+    types, which reuse values from said 2 types, and are defined just in
+    terms of either a subset or a union of other types.  The "Int" type is
+    exactly the same as in the previous release, consisting of just atomic
+    integer values, and is the sole Muldis D atomic type.  The "List"
+    type is the sole Muldis D nonatomic type, each value being a dense
+    sequence of 0..N elements where each element is an "Int" or a "List".
+    The fundamental reason for this design, where all values are introduced
+    into the type system by just system-defined types, is so that Muldis D
+    can support doing data definition plus data manipulation as a single
+    atomic operation.  This is because there is an effective way to
+    represent and interpret all Muldis D values in the complete absence of
+    any user-defined types, so there is no chicken-and-egg problem that
+    prevents DD+DM from being done together in the general case, where one
+    needs to have non-mutating definitions of user-defined types in order
+    to do manipulation of data having those types.
+
+    * (PTMD_STD.pod)  Fix fossil in docs about whitespace in char str lits.
+
+    * (Types_Catalog.pod)  Updated the "MountControlSet" catalog type to
+    add an 8th, boolean attribute "allow_auto_run", which is primarily
+    intended to provide a measure of security against viruses and other
+    malware that are using Muldis D databases as a vector, especially where
+    the malicious code is setup to run automatically as soon as its host
+    depot is mounted.  When you have a depot with a dubious history,
+    mounting it initially with a false "allow_auto_run" will allow you to
+    examine the depot for malware without giving the latter any opportunity
+    to run; moreover, you will be able to clean out a virus infection from
+    a depot that you otherwise wish to preserve; and then you can remount
+    the depot with a true "allow_auto_run" once you know it is clean, in
+    order for benign auto-running code to work.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, Interval.pod)  Eliminated all
+    of the triadic order comparison operator syntaxes, whose usage would
+    look like "1 <= $n < 10", because their support unnecessarily
+    complicated the grammar and also they were completely redundant with
+    interval membership-test operators, whose usage would look like "$n in
+    SPInterval:{1..10}".  In all 3 STD.pod, updated the pod sub-section
+    "Order Comparison Operators" to remove the "triadic_compare_op_invo"
+    grammar node plus all associated documentation and code examples; then
+    refactored the remaining grammar to merge the 10 nodes
+    "dyadic_compare_op", "is_[before|after]_op[|__op_cr_[basic|extended]]",
+    "interval_membership_op[|__op_cr_[basic|extended]]" into the 3 nodes
+    "dyadic_compare_op[|__op_cr_[basic|extended]]".  Also updated the main
+    pod section "NESTING PRECEDENCE RULES" to remove the one of the 8
+    precedence levels that was specific to the removed triadic operators
+    (so it wouldn't mis-parse as a pair of dyadic operators).  In
+    Interval.pod, updated the also-known-as notes for the 2
+    "value_is[|_not]_member" to excise mentions of such as "!≤≤".
+
+    * (Types.pod, README, Core.pod, Basics.pod, Types_Catalog.pod)
+    Reordered any lists of core data types or related materials so that the
+    "Rat" types now always precede the "Blob" and "Text" types rather than
+    follow them.  In Types.pod, moved the pod sub-sections that declare the
+    3 types "[|NN|P]Rat" so they are now just prior to "Blob", and updated
+    the "TYPE SUMMARY" section accordingly.  In the README file and
+    Core.pod, moved the reference to Rational.pod upwards to just prior to
+    Blob.pod.  In Basics.pod and Types_Catalog.pod, reordered a few lists
+    of type names in descriptive paragraphs.  No changes were needed in the
+    3 STD.pod as they already used the desired ordering for value literals.
+
+    * (Types.pod, Types_Catalog.pod, Rational.pod, Cast.pod, Temporal.pod)
+    In a reversal of one aspect of release 0.51.0, removed the annotations
+    on all of the Muldis D data type definitions, either individually or by
+    documentation section, that said which of the main 4 type categories
+    (primitive, structure, enumeration, reference) each type belonged to.
+    This was because these notes would be superfluous following a subseq
+    change item where *all* types but exactly 2 became enumeration types.
+
+    * (Basics.pod, Types.pod, Types_Catalog.pod)  Replaced the prior
+    concept of a "reference type" (as represented by the "Reference" type)
+    with the concept of an "external type", which for all practical
+    purposes was a no-op since the only system defined subtype of
+    "Reference" was "External".  In Types.pod, removed the declaration of
+    the type "Reference", promoted "External" into its place in the type
+    graph of "TYPE SUMMARY", and renamed the "GENERIC REFERENCE TYPES" main
+    pod section to "GENERIC EXTERNAL TYPES".  In Basics.pod, updated the
+    "TYPE SYSTEM" main pod section, and its "Type Identification"
+    sub-section, to rename the "reference type" concept to "external type",
+    and moved the paragraph describing this concept downwards from that
+    main section to that sub-section.  In Types_Catalog.pod, updated the
+    description of the "special_types" attribute of the "System" catalog
+    type to remove "Reference" from its list.
+
+    * (Types_Catalog.pod)  Added the 2 new scalar enumeration types
+    "sys.std.Core.Type.Cat.[|DH]ScalarWP" which serve as maximal types of
+    all scalar values which have any possreps, meaning all scalar values
+    except for those of "Int", which is atomic.  "ScalarWP" is the
+    difference type of subtracting "Int" from "Scalar", and "DHScalarWP" is
+    the intersection type of "ScalarWP" and "DHScalar".  These types were
+    added at the top of the "SIMPLE GENERIC SCALAR TYPES" main pod section.
+
+    * (Types.pod, Types_Catalog.pod, Rational.pod, Cast.pod, Temporal.pod,
+    Spatial.pod)  In Types.pod and Types_Catalog.pod, did some major
+    refactoring of the "TYPE SUMMARY" main pod section, featuring the
+    splitting of the main type graph into multiple graphs that are easier
+    to read, some showing different views of the same type relationships.
+    In Temporal.pod, did a smaller refactoring of its "TYPE SUMMARY".  In
+    all 6 files, updated their "TYPE SUMMARY" to do some basic cleanup,
+    including the addition of a few instances of "[|DH]ScalarWP", and
+    including the collective removal of most instances of the "Empty" or
+    "OVLScalar" type from the graph, those being superfluous; now, "Empty"
+    and "OVLScalar" only appear in graphs of the files that declare them.
+
+    * (Types_Catalog.pod, Basics.pod, Types.pod, Scalar.pod, Array.pod,
+    PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  In a reversal of one aspect of
+    release 0.61.0, and also of one aspect of release 0.109.0,
+    converted "String" into a primitive scalar type with no
+    possreps, which is a dense sequence of integers, rather than it being a
+    nonscalar subtype of "Array"; this all is just a
+    refactor, and the semantics of "String" are unchanged.  In
+    Types_Catalog.pod, changed the definition of the "String" type to say
+    it is now the aforementioned primitive scalar type, and updated the
+    "TYPE SUMMARY" section accordingly; also merged the main pod section
+    "SIMPLE GENERIC STRING TYPES" into "SIMPLE GENERIC SCALAR TYPES" with
+    the declarations of the 4 types "[|B|O|UCP]String" being moved up just
+    prior to "Name".  Also updated the description of the "special_types"
+    attribute of the "System" catalog type to add "String" to its list.  In
+    Basics.pod, updated a few paragraphs in the "TYPE SYSTEM" main pod
+    section and its subsections as appropriate for the new status of
+    "String".  In Types.pod, Scalar.pod, and Array.pod, updated a few
+    description paragraphs likewise.  In all 3 STD.pod files, updated the
+    "Scalar" node kind description and removed a code example from the
+    "Array" node kind, concerning "String"; also updated the code examples
+    for "the_floor" to temporarily use a stand-in "String:[...]" syntax,
+    since an "Array" can't be used anymore; however, the "String" value
+    literal node that release 0.109.0 removed has not also been restored,
+    which isn't a problem since a subseq change item adds an alternative.
+
+    * (Basics.pod, Types_Catalog.pod, Types.pod)  Added the 3 new catalog
+    types "sys.std.Core.Type.Cat.[List|[S|Nons]ructure", where "List"
+    contains every type system value that "Int" doesn't, "Structure"
+    contains every "List" value that is a scalar or nonscalar or external
+    value, and "Nonstructure" contains every "List" value that "Structure"
+    doesn't; these were declared in the new main pod section of
+    Types_Catalog.pod named "LOW-LEVEL STRUCTURE TYPES", added just prior
+    to "SIMPLE GENERIC SCALAR TYPES".  A "List" is a dense sequence of
+    elements where each element is either an "Int" or a "List".  Redefined
+    the "String" type to be a "List" proper subtype, so each of its integer
+    elements is now an actual "Int"; it still has no scalar possreps,
+    though.  Redefined the "Tuple" and "Relation" types to be "List" proper
+    subtypes, such that their attribute lists are now "List" values with
+    one element per attribute, and their headings or bodies are now
+    expressed as "List", and a relation body is now a list of lists, and
+    for nonscalars you can now choose "row-oriented" and "column-oriented"
+    formats which are logically equivalent.  Redefined "ScalarWP" to be a
+    "List" proper subtype whose explicit elements spell out the "type
+    name", "possrep name", and "possrep attributes" of a scalar value; the
+    first 2 are "String" and the last is a "Tuple".  Redefined the
+    "External" type to be a "List" proper subtype, and it is now just
+    conceptually opaque rather than actually, but its payload format is
+    still implementation-defined.  In both Types.pod and Types_Catalog.pod,
+    updated the "TYPE SUMMARY" sections to add the 3 new types and to
+    otherwise reflect the new state of affairs; also updated the
+    descriptions of these existing 12 types to reflect their additional
+    natures in light of the low-level type system: "Universal", "Empty",
+    "[|DH]Scalar", "Tuple", "Relation", "External", "ScalarWP",
+    "[|B|O|UCP]String".  In Types_Catalog.pod, updated the description of
+    the "special_types" attribute of the "System" catalog type to remove
+    the 5 types "Scalar", "String", "Tuple", "Relation", "External" from
+    its list, and add the 1 type "List" to its list, and leaving the 3
+    types "Universal", "Empty", "Int" unchanged.  In Basics.pod, several
+    major updates in the "TYPE SYSTEM" main pod section plus sub-sections.
+    Rewrote the main section paragraphs that introduced the 4 main type
+    categories "primitive", "structure", "reference", "enumeration" so to
+    replace them with the 2 main categories "declaration" and
+    "enumeration"; also added a paragraph giving rationale for the new
+    design.  Updated the "Type Identification" sub-section to add the
+    "nonstructure" 5th category to the alternate 4 main value categories
+    "scalar", "tuple", "relation", "external".  Updated the "Distinction of
+    Non-Homogeneous Types from Homogeneous Types" sub-section to add a
+    paragraph specifying that DH types exclude external and and
+    nonstructure valued attributes.  Added new pod sub-section "Low Level
+    Type System" in "TYPE SYSTEM" that introduces and details the new
+    "low-level type system" concept, where "Int" are the atoms, "List"
+    compose those, and all other main types are "List" with particular
+    formats.  A consequence of these changes is that now Muldis D has
+    values which are neither scalar nor nonscalar nor external, though
+    users should never really encounter these in practice as all the normal
+    system-defined routines are closed over scalars and nonscalars.
+
+    * (Types_Catalog.pod)  Added new catalog type "ListSelExprNodeSet"
+    which provides a means to select any "List" value at all in terms of a
+    sequence of elements whose values may all be determined at runtime. It
+    is completely redundant for selecting tuple and relation values and
+    scalar values with possreps, but it currently provides the only means
+    to directly select "List" values that are "String" or external or
+    nonstructure values, not that any normal users should be doing that.
+    Also updated the catalog type "ExprNodeSet" to add a 15th attribute
+    "list_sel_exprs" of the new catalog type.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Added new pod sub-section
+    named "Low Level List Selectors" to the end of the main pod section
+    "COLLECTION VALUE SELECTORS", which declares new literal/selector
+    syntax specific to generic "List" values; this syntax takes the form of
+    the new "List" value node kind, which looks exactly like the "Array"
+    value node kind save for the keyword.  The new sub-sections include
+    several code examples showing how to select scalar and nonscalar values
+    just in terms of "List".  Also updated the definition of the grammar
+    node "value__the_floor" so that it can only consist of "Int" and "List"
+    nodes, rather than "Int|Scalar|Tuple|Relation" nodes, since that is the
+    new minimal syntax for the catalog abstraction level "the_floor".  Also
+    obligatorily updated the code examples for "the_floor" to show how the
+    same 2x2 relation value is represented just in terms of "List" and
+    "Int"; the primary difference from all the prior iterations of this
+    code is that now all type and possrep and attribute names are *also*
+    expressed as strings of integers like the values, not as characters.
+
+    * Updated the TODO file concerning stimulus-response rules and DBMS
+    command-line parameters.  Also updated the TODO file concerning the
+    combination of related 'catalog' and 'data' into single values that are
+    binary tuples, where a value effectively defines its own constraints,
+    and that each "version" of a multi-versioned depot is one, and so using
+    those, just functions or updaters can do what 'recipe' were needed for.
+
 2010-03-13  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.113.0 is released on CPAN as
@@ -73,7 +300,7 @@
     Perl 6's Int-specific ops ("div", "mod"), or Knuth (according to WP);
     use "ToZero" to get the semantics of some other languages.  Previously
     the exact semantics of these functions was not defined and was left
-    implicit.  Furthermore, updated the description of "quotient" to
+    implicit.  Furthermore, updated the description of "remainder" to
     specify that it preserves the identity "$x % $y = $x - $y * ($x / $y)";
     your choice of "round_meth" has an even more pronounced effect here.
 
@@ -129,15 +356,19 @@
     user-defined type can add itself to the domain of even a system-defined
     mixin-type (such as "Numeric"), whereas no type can add itself to the
     domain of a system-defined domain-type (such as "Bool").  The second
-    new functionality is that functions can now be declared virtual and be
-    associated with a mixin, and other functions which are associated with
-    other types composing that mixin can be declared to implement that
+    new functionality is that routines can now be declared virtual and be
+    associated with a union type, and other functions which are associated
+    with other types that are subtypes of the union can be declared to
+    implement that
     virtual function; this means that Muldis D now supports "operator
     overloading" to a limited extent, that limit being that you can only
     overload operators that are explicitly defined to be overloadable; in
-    any event, a direct invocation of a virtual function will automatically
+    any event, a direct invocation of a virtual routine will automatically
     dispatch to one of its implementing functions based on the data types
-    of the primary function arguments.  In a subsequent release, mixins
+    of the "dispatch" routine arguments.  Strictly
+    speaking this feature doesn't require mixin types, but with most of the
+    likely use cases the union type would be a mixin type and the subtypes
+    its composers.  In a subsequent release, mixins
     will support code reuse by way of letting you define type attributes in
     a mixin and then all composing types will have those attributes without
     having to separately define them; this then means Muldis D will support
@@ -3452,7 +3683,7 @@
 
     * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Refactored the grammar by
     splitting the 2 pod sub-sections ["Infix N-adic Reduction Operators",
-    "Infix Homogenous Dyadic Operators"] into the 4 pod sub-sections
+    "Infix Homogeneous Dyadic Operators"] into the 4 pod sub-sections
     ["Simple [C|Non-c]ommutative N-adic Infix Reduction Operators", "Simple
     [C|Non-c]ommutative Dyadic Infix Operators"].  Correspondingly, in
     PTMD_STD, the 2 main node kinds "infix_[reduce|h_dyadic]_op_invo" were
@@ -3500,7 +3731,7 @@
 
     * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Added new main pod section
     "FUNCTION INVOCATION ALTERNATE SYNTAX EXPRESSIONS" with the initial 2
-    pod sub-sections ["Infix N-adic Reduction Operators", "Infix Homogenous
+    pod sub-sections ["Infix N-adic Reduction Operators","Infix Homogeneous
     Dyadic Operators"].  In PTMD_STD, these sections introduced these new 3
     main node kinds: "func_invo_alt_syntax", "infix_reduce_op_invo",
     "infix_h_dyadic_op_invo".  The additions provide an initial complement

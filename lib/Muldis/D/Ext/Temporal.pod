@@ -9,7 +9,7 @@ Muldis D extension for temporal data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Temporal version 0.113.0.
+This document is Muldis::D::Ext::Temporal version 0.114.0.
 
 =head1 PREFACE
 
@@ -100,12 +100,20 @@ Following are all the data types described in this document, arranged in a
 type graph according to their proper sub|supertype relationships:
 
     sys.std.Core.Type.Universal
-
-        sys.std.Core.Type.Empty
-
         sys.std.Core.Type.Scalar
             sys.std.Core.Type.DHScalar
-                sys.std.Core.Type.Cat.OVLScalar
+
+                sys.std.Core.Type.Int
+                    sys.std.Core.Type.NNInt
+                        sys.std.Core.Type.PInt
+                            sys.std.Temporal.Type.PInt[12|31]
+                        sys.std.Temporal.Type.NNInt[23|59]
+
+                sys.std.Core.Type.Cat.DHScalarWP
+
+                    sys.std.Core.Type.Rat
+                        sys.std.Core.Type.NNRat
+                            sys.std.Temporal.Type.NNRatLT62
 
                     # The following are all regular ordered scalar types.
 
@@ -124,27 +132,6 @@ type graph according to their proper sub|supertype relationships:
 
                     sys.std.Temporal.Type.UTCDuration
 
-                    sys.std.Core.Type.Int
-
-                        sys.std.Core.Type.NNInt
-
-                            sys.std.Core.Type.PInt
-
-                                # These are all finite positive int types.
-
-                                sys.std.Temporal.Type.PInt[12|31]
-
-                            # These are all finite non-negative int types.
-
-                            sys.std.Temporal.Type.NNInt[23|59]
-
-                    sys.std.Core.Type.Rat
-                        sys.std.Core.Type.NNRat
-
-                            # These're all infinite non-neg rational types.
-
-                            sys.std.Temporal.Type.NNRatLT62
-
 I<This documentation is pending.>
 
 =head1 DATA TYPES FOR TEMPORAL ARTIFACTS
@@ -153,7 +140,7 @@ These non-core data types are all ordered scalar types.
 
 =head2 sys.std.Temporal.Type.PInt[12|31]
 
-This is an enumeration data type.  C<PInt[12|31]> is a proper subtype of
+C<PInt[12|31]> is a proper subtype of
 C<PInt> where all member values are not greater than 12|31.  Its default
 and minimum value is 1; its maximum value is 12|31.  The significance is
 that in proleptic Gregorian dates, the [month|month-day] portion is a
@@ -161,7 +148,7 @@ positive integer not greater than 12|31.
 
 =head2 sys.std.Temporal.Type.NNInt[23|59]
 
-This is an enumeration data type.  C<NNInt[23|59]> is a proper subtype of
+C<NNInt[23|59]> is a proper subtype of
 C<NNInt> where all member values are not greater than 23|59.  Its default
 and minimum value is 0; its maximum value is 23|59.  The significance is
 that in the time portion of proleptic Gregorian dates, the [hour|minute]
@@ -169,7 +156,7 @@ portion is a non-negative integer not greater than 23|59.
 
 =head2 sys.std.Temporal.Type.NNRatLT62
 
-This is an enumeration data type.  C<NNRatLT62> is a proper subtype of
+C<NNRatLT62> is a proper subtype of
 C<NNRat> where all member values are less than 62.  Its default and minimum
 value is 0; its maximum value is conceptually infinitessimally less than 62
 and practically impossible.  The significance is that in the time portion
@@ -182,7 +169,7 @@ precision).
 
 =head2 sys.std.Temporal.Type.TAIInstant
 
-This is a structure data type.  A C<TAIInstant> is a single point in time
+A C<TAIInstant> is a single point in time
 which is specified with arbitrary precision in terms of atomic seconds
 with fractions.  That is, a C<TAIInstant> is defined as a point on the
 canonical continuous timeline of International Atomic Time (TAI; this is a
@@ -210,7 +197,7 @@ which is defined in terms of calendars.
 
 =head2 sys.std.Temporal.Type.TAIDuration
 
-This is a structure data type.  A C<TAIDuration> is a single amount of
+A C<TAIDuration> is a single amount of
 time, which is specified with arbitrary precision in terms of the same
 units as a C<TAIInstant> is structured with.  A C<TAIDuration> is not fixed
 to any point in time.  A C<TAIDuration> is the result type of taking the
@@ -228,7 +215,7 @@ type for alternatives.
 
 =head2 sys.std.Temporal.Type.UTCInstant
 
-This is a structure data type.  A C<UTCInstant> is a single point in time,
+A C<UTCInstant> is a single point in time,
 or a periodic multiplicity of points in time, which is specified with
 arbitrary precision using a set of unit quantities involving multiple
 units, where the units do not generally have a fixed conversion rate with
@@ -283,7 +270,7 @@ attribute, the C<Nothing> value will order before any C<Single> value.
 
 =head2 sys.std.Temporal.Type.UTCDateTime
 
-This is an enumeration data type.  A C<UTCDateTime> is a single specific
+A C<UTCDateTime> is a single specific
 time on a specific date, with precision to arbitrary fractions of a second.
 A C<UTCDateTime> is a proper subtype of C<UTCInstant> where all 6
 attributes of its C<instant> possrep have C<Single> / known values.  A
@@ -295,7 +282,7 @@ as for C<UTCInstant>.
 
 =head2 sys.std.Temporal.Type.UTCDate
 
-This is an enumeration data type.  A C<UTCDate> is a single specific
+A C<UTCDate> is a single specific
 terrestrial day, at no particular time of day.  A C<UTCDate> is a proper
 subtype of C<UTCInstant> where the 3 attributes of its C<instant> possrep
 named [C<year>, C<month>, C<day>] have C<Single> / known values, and the
@@ -311,7 +298,7 @@ C<year>).
 
 =head2 sys.std.Temporal.Type.UTCTime
 
-This is an enumeration data type.  A C<UTCTime> is a single specific time
+A C<UTCTime> is a single specific time
 that isn't on any day in particular (or alternately that is repeating on
 multiple days), with a precision to arbitrary fractions of a second; its
 allowed range is between zero seconds (inclusive) and 1 terrestrial day
@@ -332,7 +319,7 @@ C<second>).
 
 =head2 sys.std.Temporal.Type.FloatInstant
 
-This is a structure data type.  A C<FloatInstant> is exactly the same as
+A C<FloatInstant> is exactly the same as
 C<UTCInstant>, but that it is not defined against any specific time-zone,
 but rather is floating; you use it when you I<do not know> in what
 time-zone the specified date+time is supposed to refer to (it was just
@@ -343,22 +330,20 @@ default values, ordering algorithm, etc) are identical.
 
 =head2 sys.std.Temporal.Type.FloatDateTime
 
-This is an enumeration data type.  C<FloatDateTime> is to C<UTCDateTime>
+C<FloatDateTime> is to C<UTCDateTime>
 as C<FloatInstant> is to C<UTCInstant>.
 
 =head2 sys.std.Temporal.Type.FloatDate
 
-This is an enumeration data type.  C<FloatDate> is to C<UTCDate> as
-C<FloatInstant> is to C<UTCInstant>.
+C<FloatDate> is to C<UTCDate> as C<FloatInstant> is to C<UTCInstant>.
 
 =head2 sys.std.Temporal.Type.FloatTime
 
-This is an enumeration data type.  C<FloatTime> is to C<UTCTime> as
-C<FloatInstant> is to C<UTCInstant>.
+C<FloatTime> is to C<UTCTime> as C<FloatInstant> is to C<UTCInstant>.
 
 =head2 sys.std.Temporal.Type.UTCDuration
 
-This is a structure data type.  A C<UTCDuration> is a single amount of
+A C<UTCDuration> is a single amount of
 time, which is specified with arbitrary precision using 6 quantities in the
 same units as a C<UTCInstant> is structured with.  It is not fixed to any
 date or time and is agnostic to the calendar, other than the interpretation
