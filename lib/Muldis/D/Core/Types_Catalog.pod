@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.115.0.
+This document is Muldis::D::Core::Types_Catalog version 0.116.0.
 
 =head1 PREFACE
 
@@ -115,6 +115,12 @@ This graph slice shows all of the catalog scalar types:
                     sys.std.Core.Type.Cat.RoundMeth
                         sys.std.Core.Type.Cat.RoundMeth.*
                     sys.std.Core.Type.Cat.RatRoundRule
+
+                    # The following are other singleton types plus a union.
+
+                    sys.std.Core.Type.Cat.Singleton
+                        sys.std.Core.Type.Cat."-Inf"
+                        sys.std.Core.Type.Cat.Inf
 
 This graph slice shows all of the catalog nonscalar types:
 
@@ -241,6 +247,24 @@ used temporarily at runtime:
                 sys.std.Core.Type.Cat.ValRedCFuncNC
                 sys.std.Core.Type.Cat.OrdDetCFuncNC
 
+This graph slice shows all of the catalog types that compose any mixin
+types, shown grouped under the mixin types that they compose:
+
+    sys.std.Core.Type.Universal
+
+        sys.std.Core.Type.Ordered
+
+            sys.std.Core.Type.Cat.String
+            sys.std.Core.Type.Cat.Name
+            sys.std.Core.Type.Cat.NameChain
+            sys.std.Core.Type.Cat.Comment
+
+            sys.std.Core.Type.Ordinal
+
+                sys.std.Core.Type.Cat.Order
+                sys.std.Core.Type.Cat."-Inf"
+                sys.std.Core.Type.Cat.Inf
+
 =head1 LOW-LEVEL STRUCTURE TYPES
 
 These types only exist in the low-level type system, and should not be used
@@ -318,7 +342,7 @@ defined as a union type over all system-defined C<DHScalar> types, and just
 those types, for whose values all of the Muldis D standard dialects provide
 "opaque value literal" syntax for:  C<Bool>, C<Int>, C<Rat>, C<Blob>,
 C<Text>, C<Name>, C<NameChain>, C<Comment>, C<Order>,
-C<RoundMeth>, C<RatRoundRule>, C<TAIInstant>, C<TAIDuration>,
+C<RoundMeth>, C<RatRoundRule>, C<Singleton>, C<TAIInstant>, C<TAIDuration>,
 C<UTCInstant>, C<FloatInstant>, C<UTCDuration>.  The C<OVLScalar> type is
 mainly intended to be used as the declared type of some attributes of some
 other system-defined catalog types, as a compact or hard-coded way to
@@ -342,7 +366,8 @@ any possreps.  The cardinality of this type is infinity; to define a
 most-generalized finite C<String> subtype, you must specify a maximum
 length in elements that the subtype's values can have, and you must specify
 the 2 integer end-points of the inclusive range that all its values' C<Int>
-element values are in.  The C<String> type has a default ordering
+element values are in.  The C<String> type explicitly composes the
+C<Ordered> mixin type.  The C<String> type has a default ordering
 algorithm; for 2 distinct C<String> values, their order is determined as
 follows:  First eliminate any identical leading element sequences from both
 strings as those alone would make the strings compare as same (if the
@@ -401,7 +426,8 @@ using just its C<Name>, depending on the context; other times, a
 C<NameChain> must be used instead to also qualify the reference with a
 namespace.  A C<Name> has 1 system-defined possrep whose name is the empty
 string, which has 1 C<Text>-typed attribute whose name is the empty
-string.  A C<Name> is a simple wrapper for a C<Text> and all of its other
+string.  The C<Name> type explicitly composes the C<Ordered> mixin type.
+A C<Name> is a simple wrapper for a C<Text> and all of its other
 details such as default and minimum and maximum values and cardinality and
 default ordering algorithm all correspond directly.  But C<Name> is
 explicitly disjoint from C<Text> due to having a different intended
@@ -428,6 +454,7 @@ infinite-length string) and practically impossible.  The cardinality of
 this type is infinity; to define a most-generalized finite C<NameChain>
 subtype, you must specify a maximum number of sequence elements of its
 values, and each element must be of a finite C<Name> subtype.  The
+C<NameChain> type explicitly composes the C<Ordered> mixin type.  The
 C<NameChain> type has a default ordering algorithm; for 2 distinct
 C<NameChain> values, their order is determined as follows:  First eliminate
 any identical parent-most elements from both chains as those alone would
@@ -575,7 +602,8 @@ routine, except when defining a global-variable-alias in a recipe.
 A C<Comment> (scalar) is the text of a
 Muldis D code comment, which programmers can populate as an attribute of
 several catalog data types, such as whole routines or statements or
-expression nodes.  Every detail of C<Comment>'s representation (its 1
+expression nodes.  The C<Comment> type explicitly composes the
+C<Ordered> mixin type.  Every detail of C<Comment>'s representation (its 1
 possrep, default value and ordering algorithm, etc) is the same as C<Name>
 but it is explicitly disjoint due to having a different intended
 interpretation; it is intended just for commenting Muldis D code.  One main
@@ -596,7 +624,9 @@ main/only arguments, and that function results in an C<Order> value for the
 context to make use of.  The
 default value of C<Order> is C<Same>; its minimum and maximum values are,
 respectively, C<Increase> and C<Decrease>.  The cardinality of this type is
-3.  The C<Order> type has a default ordering algorithm that corresponds
+3.  The C<Order> type explicitly composes the C<Ordinal> mixin type, and by
+extension also implicitly composes the C<Ordered> mixin type.
+The C<Order> type has a default ordering algorithm that corresponds
 directly to the sequence in which its values are documented here;
 C<Increase> is ordered before C<Same>, and C<Same> before C<Decrease>.
 
@@ -672,6 +702,34 @@ of C<RatRoundRule> specifies a coersion to a whole number using the
 C<HalfEven> rounding method (its radix is 2 and its min exp is 0).  The
 C<RatRoundRule> type does I<not> have a default ordering algorithm.
 
+=head2 sys.std.Core.Type.Cat.Singleton
+
+The C<Singleton> type is explicitly defined as a union type over just the
+system-defined core singleton types which aren't otherwise included in
+another union type specific to a group of singleton types.  C<Singleton>
+only exists as a convenience for concrete Muldis D grammars that want to
+have a group type name for every system-defined opaque value.  C<Singleton>
+currently unions just these 2 types: C<-Inf>, C<Inf>.
+
+=head2 sys.std.Core.Type.Cat."-Inf"
+
+C<-Inf> is a singleton scalar type whose only value represents negative
+infinity.  It is intended for use as a special value in contexts that are
+sensitive to the ordering of a type's values, wherein it can be the
+canonical minimum-most value, and so would be ordered before every other
+possible value of C<Universal> that it might be compared with.  A C<-Inf>
+has 1 system-defined possrep whose name is the empty string and which has
+zero attributes.  The cardinality of this type is 1, and its only value is
+its default and minimum and maximum value.  The only value of C<-Inf> is
+also known as C<-∞>.  C<-Inf> explicitly composes C<Ordinal>.
+
+=head2 sys.std.Core.Type.Cat.Inf
+
+C<Inf> is a singleton scalar type whose only value represents positive
+infinity.  It is the same as C<-Inf> in every way except it is the
+canonical maximum-most value rather than minimum-most.  The only value of
+C<Inf> is also known as C<∞>.  C<Inf> explicitly composes C<Ordinal>.
+
 =head1 TYPES FOR DEFINING SYSTEM-DEFINED ENTITIES
 
 =head2 sys.std.Core.Type.Cat.System
@@ -688,7 +746,7 @@ A C<System> has these 14 attributes:
 
 =over
 
-=item C<comment> - C<single_of.Comment>
+=item C<scm_comment> - C<single_of.Comment>
 
 This is an optional programmer comment about the collection of
 system-defined entities as a whole.
@@ -755,7 +813,7 @@ whose root has no name.  A C<SysNspSet> only specifies that a system
 namespace exists, not which public entities it contains; see the
 C<System> which contains it for that.
 
-A C<SysNspSet> has these 3 attributes:
+A C<SysNspSet> has these 4 attributes:
 
 =over
 
@@ -770,10 +828,15 @@ This is the declared name of the system namespace within the namespace
 defined by C<parent>; other Muldis D code would reference it with the
 combination of C<parent> and C<name>.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about this specific system
 namespace.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this namespace's declaration relative to all
+of the named entities directly within the namespace defined by C<parent>.
 
 =back
 
@@ -785,7 +848,7 @@ C<name> attributes.  Its default value is empty.
 A C<Sys[Function|Updater|Recipe|Procedure]Set> is a C<DHRelation> that
 specifies a set of system-defined functions|updaters|recipes|procedures.
 
-A C<Sys[Function|Updater|Recipe|Procedure]Set> has these 4 attributes:
+A C<Sys[Function|Updater|Recipe|Procedure]Set> has these 5 attributes:
 
 =over
 
@@ -800,10 +863,15 @@ This is the declared name of the function|updater|recipe|procedure within
 the namespace defined by C<parent>; other Muldis D code would reference it
 with the combination of C<parent> and C<name>.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the
 function|updater|recipe|procedure as a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this routine's declaration relative to all of
+the named entities directly within the namespace defined by C<parent>.
 
 =item C<material> - C<Function|Updater|Recipe|Procedure>
 
@@ -825,7 +893,7 @@ system-defined types which are particularly special and unlike other types;
 it is used for declaring all system types that can't be defined like user
 types.
 
-A C<SysSpecTypeSet> has these 3 attributes:
+A C<SysSpecTypeSet> has these 4 attributes:
 
 =over
 
@@ -840,9 +908,14 @@ This is the declared name of the type within the namespace defined by
 C<parent>; other Muldis D code would reference it with the combination of
 C<parent> and C<name>.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the type as a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this type's declaration relative to all of
+the named entities directly within the namespace defined by C<parent>.
 
 =back
 
@@ -855,7 +928,7 @@ A C<Sys[Scalar|Tuple|Relation|Domain|Subset|Mixin]TypeSet> is a
 C<DHRelation> that specifies a set of
 scalar|tuple|relation|domain|subset|mixin system-defined types.
 
-A C<Sys[Scalar|Tuple|Relation|Domain|Subset|Mixin]TypeSet> has these 4
+A C<Sys[Scalar|Tuple|Relation|Domain|Subset|Mixin]TypeSet> has these 5
 attributes:
 
 =over
@@ -872,10 +945,15 @@ This is the declared name of the scalar|tuple|relation|domain|subset|mixin
 type within the namespace defined by C<parent>; other Muldis D code would
 reference it with the combination of C<parent> and C<name>.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the
 scalar|tuple|relation|domain|subset|mixin type as a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this type's declaration relative to all of
+the named entities directly within the namespace defined by C<parent>.
 
 =item C<material> - C<[Scalar|Tuple|Relation|Domain|Subset|Mixin]Type>
 
@@ -893,7 +971,7 @@ empty.
 A C<SysCatSet> is a C<DHRelation> that specifies a set of system-defined
 catalog dbvars; each tuple specifies one catalog dbvar.
 
-A C<SysCatSet> has these 4 attributes:
+A C<SysCatSet> has these 5 attributes:
 
 =over
 
@@ -901,9 +979,14 @@ A C<SysCatSet> has these 4 attributes:
 
 This is the fully-qualified name of the catalog dbvar.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the catalog dbvar as a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this catalog's declaration relative to all of
+the other catalogs.
 
 =item C<is_readonly> - C<Bool>
 
@@ -938,7 +1021,7 @@ A C<MountControlCat> has these 2 attributes:
 
 =over
 
-=item C<comment> - C<single_of.Comment>
+=item C<scm_comment> - C<single_of.Comment>
 
 This is an optional programmer comment about the depot mount control
 catalog as a whole.
@@ -971,7 +1054,7 @@ A C<MountControlSet> has these 8 attributes:
 This is the declared name of the depot mount; other Muldis D code would
 reference it with this name.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about this specific mount of the
 depot.
@@ -1088,7 +1171,7 @@ that C<details> generally corresponds to the Perl DBI's concept of a data
 source name or connection string.  But C<details> can also have other
 details like customizations on how to map a foreign DBMS' concepts to
 native Muldis D equivalents, or maybe information on where to find extra
-meta-data that has such info, or info to instruct a Muldis D interface to
+metadata that has such info, or info to instruct a Muldis D interface to
 fill in functionality missing in the actual depot of a less capable DBMS,
 like constraints or stored invokable routines.
 
@@ -1115,7 +1198,7 @@ A C<Federation> has these 3 attributes:
 
 =over
 
-=item C<comment> - C<single_of.Comment>
+=item C<scm_comment> - C<single_of.Comment>
 
 This is an optional programmer comment about the federation as a whole.
 
@@ -1158,7 +1241,7 @@ A C<DepotMountSet> has these 3 attributes:
 This is the declared name of the depot mount; other Muldis D code would
 reference it with this name.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about this specific mount of the
 depot.
@@ -1184,7 +1267,7 @@ A C<FedTypeMapSet> has these 2 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about this type mapping.
 
@@ -1217,7 +1300,7 @@ A C<Depot> has these 13 attributes:
 
 =over
 
-=item C<comment> - C<single_of.Comment>
+=item C<scm_comment> - C<single_of.Comment>
 
 This is an optional programmer comment about the [|sub]depot as a whole.
 
@@ -1261,7 +1344,7 @@ these subdepots are organized into a tree whose root is the depot.  A
 C<SubdepotSet> only specifies that a subdepot exists, not which depot
 entities it contains; see the C<Depot> which contains it for that.
 
-A C<SubdepotSet> has these 3 attributes:
+A C<SubdepotSet> has these 4 attributes:
 
 =over
 
@@ -1277,10 +1360,15 @@ This is the declared name of the subdepot within the namespace defined by
 C<parent>; other Muldis D code would reference it with the combination of
 C<parent> and C<name>.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about this specific subdepot as
 associated with this subdepot name.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this subdepot's declaration relative to all of
+the named entities directly within the namespace defined by C<parent>.
 
 =back
 
@@ -1294,7 +1382,7 @@ specifies a set of functions|updaters|recipes|procedures that a [|sub]depot
 might directly contain.  I<TODO: each routine may be either public for the
 DBMS as a whole or private to the subdepot.>
 
-A C<[Function|Updater|Recipe|Procedure]Set> has these 4 attributes:
+A C<[Function|Updater|Recipe|Procedure]Set> has these 5 attributes:
 
 =over
 
@@ -1310,10 +1398,15 @@ This is the declared name of the function|updater|recipe|procedure within
 the namespace defined by C<parent>; other Muldis D code would reference it
 with the combination of C<parent> and C<name>.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the
 function|updater|recipe|procedure as a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this routine's declaration relative to all of
+the named entities directly within the namespace defined by C<parent>.
 
 =item C<material> - C<Function|Updater|Recipe|Procedure>
 
@@ -1331,7 +1424,7 @@ that specifies a set of scalar|tuple|relation|domain|subset|mixin types
 that a [|sub]depot might directly contain.  I<TODO: each type may be either
 public for the DBMS as a whole or private to the subdepot.>
 
-A C<[Scalar|Tuple|Relation|Domain|Subset|Mixin]TypeSet> has these 4
+A C<[Scalar|Tuple|Relation|Domain|Subset|Mixin]TypeSet> has these 5
 attributes:
 
 =over
@@ -1348,10 +1441,15 @@ This is the declared name of the scalar|tuple|relation|domain|subset|mixin
 type within the namespace defined by C<parent>; other Muldis D code would
 reference it with the combination of C<parent> and C<name>.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the
 scalar|tuple|relation|domain|subset|mixin type as a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this type's declaration relative to all of
+the named entities directly within the namespace defined by C<parent>.
 
 =item C<material> - C<[Scalar|Tuple|Relation|Domain|Subset|Mixin]Type>
 
@@ -1388,7 +1486,7 @@ I<heading> and the 1 C<expr> defines the I<body>:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the function as a whole.
 
@@ -1634,6 +1732,19 @@ These are expression nodes that define routine or type reference literals.
 There is a distributed primary key over the C<name> attributes of all of an
 C<ExprNodeSet>'s attributes.  Its default value is empty.
 
+Note that, for each expression node in an C<ExprNodeSet>, iff the
+expression node is declared directly within its host atomic routine's body,
+then its C<scm_vis_ord> attribute is non-zero, and the latter gives the
+node's visible order relative to all other such expression nodes, and all
+update statements if applicable, of the host routine, and all update
+statements of said host routine; otherwise, iff the expression node is
+nested beneath another expression node or a statement node, then the
+C<scm_vis_ord> attribute isn't applicable, and is zero.  In other words,
+when generating concrete Muldis D code from a C<Function|Updater|Recipe>,
+the sole determinant of whether to nest any given expression node under
+another expression or statement node, or not, is based on whether its
+C<scm_vis_ord> is zero or not; zero means nested, non-zero means otherwise.
+
 =head2 sys.std.Core.Type.Cat.OVLScaValExprNodeSet
 
 An C<OVLScaValExprNodeSet> is a C<DHRelation> that specifies a set of value
@@ -1642,7 +1753,7 @@ I<not> being specified explicitly in terms of possrep attributes, but
 rather is specified using special "opaque value literal" syntax that all
 of the Muldis D standard dialects provide.
 
-An C<OVLScaValExprNodeSet> has these 3 attributes:
+An C<OVLScaValExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -1650,9 +1761,14 @@ An C<OVLScaValExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the expression (leaf) node.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<value> - C<OVLScalar>
 
@@ -1674,7 +1790,7 @@ and C<String>, although
 optimized Muldis D code will likely use C<OVLScaValExprNodeSet> where it
 can do so instead of C<ScaSelExprNodeSet>.
 
-A C<ScaSelExprNodeSet> has these 5 attributes:
+A C<ScaSelExprNodeSet> has these 6 attributes:
 
 =over
 
@@ -1682,10 +1798,15 @@ A C<ScaSelExprNodeSet> has these 5 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<type_name> - C<RPTypeNC>
 
@@ -1711,7 +1832,7 @@ attribute.  Its default value is empty.
 A C<TupSelExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents a tuple value selection.
 
-A C<TupSelExprNodeSet> has these 3 attributes:
+A C<TupSelExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -1719,10 +1840,15 @@ A C<TupSelExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<attrs> - C<NameExprMap>
 
@@ -1739,7 +1865,7 @@ attribute.  Its default value is empty.
 A C<RelSelExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents a relation value selection.
 
-A C<RelSelExprNodeSet> has these 4 attributes:
+A C<RelSelExprNodeSet> has these 5 attributes:
 
 =over
 
@@ -1747,10 +1873,15 @@ A C<RelSelExprNodeSet> has these 4 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<head> - C<set_of.Name>
 
@@ -1774,7 +1905,7 @@ attribute.  Its default value is empty.
 A C<SetSelExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents a set value selection.
 
-A C<SetSelExprNodeSet> has these 3 attributes:
+A C<SetSelExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -1782,10 +1913,15 @@ A C<SetSelExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<elems> - C<set_of.Name>
 
@@ -1805,7 +1941,7 @@ attribute.  Its default value is empty.
 An C<ArySelExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents an array value selection.
 
-An C<ArySelExprNodeSet> has these 3 attributes:
+An C<ArySelExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -1813,10 +1949,15 @@ An C<ArySelExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<elems> - C<array_of.Name>
 
@@ -1832,7 +1973,7 @@ attribute.  Its default value is empty.
 A C<BagSelExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents a bag value selection.
 
-A C<BagSelExprNodeSet> has these 3 attributes:
+A C<BagSelExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -1840,10 +1981,15 @@ A C<BagSelExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<elems> - C<bag_of.Name>
 
@@ -1874,7 +2020,7 @@ An C<SPIvlSelExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents a single-piece interval value
 selection.
 
-An C<SPIvlSelExprNodeSet> has these 3 attributes:
+An C<SPIvlSelExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -1882,10 +2028,15 @@ An C<SPIvlSelExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<interval> - C<sp_interval_of.Name>
 
@@ -1912,7 +2063,7 @@ An C<MPIvlSelExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents a multi-piece interval value
 selection.
 
-An C<MPIvlSelExprNodeSet> has these 3 attributes:
+An C<MPIvlSelExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -1920,10 +2071,15 @@ An C<MPIvlSelExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<elems> - C<mp_interval_of.Name>
 
@@ -1954,7 +2110,7 @@ An C<ListSelExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents a low-level list value
 selection.
 
-An C<ListSelExprNodeSet> has these 3 attributes:
+An C<ListSelExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -1962,10 +2118,15 @@ An C<ListSelExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<elems> - C<array_of.Name>
 
@@ -1983,7 +2144,7 @@ expression nodes where each node is an accessor or alias for an attribute
 of another, tuple-valued expression node, or is simply an alias for another
 expression node, defined in terms of a C<LexDataNC>.
 
-An C<AccExprNodeSet> has these 3 attributes:
+An C<AccExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -1991,9 +2152,14 @@ An C<AccExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the expression (leaf) node.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<target> - C<LexDataNC>
 
@@ -2011,7 +2177,7 @@ A C<FuncInvoExprNodeSet> is a C<DHRelation> that specifies a set of value
 expression nodes where each node represents the result of invoking a named
 function with specific arguments.
 
-A C<FuncInvoExprNodeSet> has these 4 attributes:
+A C<FuncInvoExprNodeSet> has these 5 attributes:
 
 =over
 
@@ -2019,10 +2185,15 @@ A C<FuncInvoExprNodeSet> has these 4 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<function> - C<MaterialNC>
 
@@ -2063,7 +2234,7 @@ for the certain data type (invoking it on something else would result in a
 failure/exception); so only known-safe/appropriate expressions then get
 evaluated.
 
-An C<IfElseExprNodeSet> has these 4 attributes:
+An C<IfElseExprNodeSet> has these 5 attributes:
 
 =over
 
@@ -2071,10 +2242,15 @@ An C<IfElseExprNodeSet> has these 4 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<if_then> - C<array_of.IfThenExprMap>
 
@@ -2122,7 +2298,7 @@ value equality test and one of the operands is the same for all the
 conditions in the set; also, with a given-when-default it doesn't matter
 what order the conditionals are tested to find a true resulting one.
 
-A C<GivenWhenDefExprNodeSet> has these 5 attributes:
+A C<GivenWhenDefExprNodeSet> has these 6 attributes:
 
 =over
 
@@ -2130,10 +2306,15 @@ A C<GivenWhenDefExprNodeSet> has these 5 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the expression node or
 the expression node (sub-)tree it is the root of.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<given> - C<Name>
 
@@ -2189,7 +2370,7 @@ the system catalog of a depot mount into native machine code) so at normal
 runtime it is as if the absolute-path value was what was originally a value
 literal in the source code.
 
-An C<APMaterialNCSelExprNodeSet> has these 3 attributes:
+An C<APMaterialNCSelExprNodeSet> has these 4 attributes:
 
 =over
 
@@ -2197,9 +2378,14 @@ An C<APMaterialNCSelExprNodeSet> has these 3 attributes:
 
 This is the declared name of the expression node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
-This is an optional programmer comment about the expression leaf node.
+This is an optional programmer comment about the expression (leaf) node.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order, if applicable, of this non-nested expression
+node relative to all of its sibling such expression nodes, or statements.
 
 =item C<referencing> - C<RelPathMaterialNC>
 
@@ -2235,7 +2421,7 @@ I<heading> and the 2 C<exprs>, C<stmt> define the I<body>:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the updater as a whole.
 
@@ -2329,14 +2515,20 @@ number of tuples it consists of, but:  At least 1 tuple is required iff the
 multi-update statement is composed into a specified updater body; otherwise
 there must be only be zero tuples for an unspecified updater body.
 
-A C<MultiUpdInvoStmt> has these 4 attributes:
+A C<MultiUpdInvoStmt> has these 5 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the single update statement as
 a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this single update statement relative to all
+of its sibling statements, or non-nested expression nodes, of its host
+updater's or recipe's multi-update statement.
 
 =item C<updater> - C<MaterialNC>
 
@@ -2385,7 +2577,7 @@ C<stmt_part_upd>, C<stmd_part_rcp> define the I<body>:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the recipe as a whole.
 
@@ -2466,11 +2658,12 @@ has zero parameters and has no specified I<body>.
 
 =head2 sys.std.Core.Type.Cat.RcpGlobalVarAliasMap
 
-An C<RcpGlobalVarAliasMap> is a C<DHRelation>.  It defines a set of lexical
+A C<RcpGlobalVarAliasMap> is a C<DHRelation>.  It defines a set of lexical
 variable names, with a declared global variable for each.  It is used to
 define lexical variables of recipes that are aliases for global variables,
-for reading or updating.  An C<RcpGlobalVarAliasMap> has 2 attributes,
-C<name> (a C<Name>) and C<global> (a C<DataNC>); the C<name> is the name of
+for reading or updating.  A C<RcpGlobalVarAliasMap> has 4 attributes,
+C<name> (a C<Name>), C<global> (a C<DataNC>), C<scm_comment> (a
+C<Comment>), and C<scm_vis_ord> (a C<NNInt>); the C<name> is the name of
 the lexical alias, and comprises a unary key; the C<global> is the
 invocation name of the global variable.  Its default value has zero tuples.
 
@@ -2481,14 +2674,20 @@ statement that is composed into a specified recipe body.  It is the same as
 a C<MultiUpdInvoStmt> except that tuple of a multi-update statement
 represents a single invocation of a recipe rather than an updater.
 
-A C<MultiRcpInvoStmt> has these 4 attributes:
+A C<MultiRcpInvoStmt> has these 5 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the single update statement as
 a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this single update statement relative to all
+of its sibling statements, or non-nested expression nodes, of its host
+updater's or recipe's multi-update statement.
 
 =item C<recipe> - C<MaterialNC>
 
@@ -2540,7 +2739,7 @@ I<heading> and the 2 C<vars>, C<stmt> define the I<body>:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the procedure as a whole.
 
@@ -2744,7 +2943,7 @@ An C<OVLScaValStmtNodeSet> has these 4 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the statement (leaf) node.
 
@@ -2786,7 +2985,7 @@ A C<LeaveStmtNodeSet> has these 3 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the statement leaf node.
 
@@ -2816,7 +3015,7 @@ A C<CompoundStmtNodeSet> has these 3 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the statement node or
 the statement node (sub-)tree it is the root of.
@@ -2851,7 +3050,7 @@ A C<FuncInvoStmtNodeSet> has these 5 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the statement (leaf) node.
 
@@ -2892,7 +3091,7 @@ An C<UpdInvoStmtNodeSet> has these 5 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the statement node or
 the statement node (sub-)tree it is the root of.
@@ -2936,7 +3135,7 @@ A C<RcpInvoStmtNodeSet> has these 5 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the statement node or
 the statement node (sub-)tree it is the root of.
@@ -2979,7 +3178,7 @@ A C<ProcInvoStmtNodeSet> has these 5 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the statement node or
 the statement node (sub-)tree it is the root of.
@@ -3037,7 +3236,7 @@ A C<TryCatchStmtNodeSet> has these 4 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the statement node or
 the statement node (sub-)tree it is the root of.
@@ -3083,7 +3282,7 @@ An C<IfElseStmtNodeSet> has these 4 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the statement node or
 the statement node (sub-)tree it is the root of.
@@ -3137,7 +3336,7 @@ A C<GivenWhenDefStmtNodeSet> has these 5 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the statement node or
 the statement node (sub-)tree it is the root of.
@@ -3199,7 +3398,7 @@ An C<IterateStmtNodeSet> has these 3 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the statement leaf node.
 
@@ -3230,7 +3429,7 @@ A C<LoopStmtNodeSet> has these 3 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about either the statement node or
 the statement node (sub-)tree it is the root of.
@@ -3265,7 +3464,7 @@ An C<APMaterialNCSelStmtNodeSet> has these 4 attributes:
 
 This is the declared name of the statement node.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the statement leaf node.
 
@@ -3303,11 +3502,11 @@ or none are.  You can not declare a scalar root type at all except
 by using a C<ScalarType>, and you can not define a scalar type
 with an incompletely defined attribute list at all.
 
-A C<ScalarType> has these 8 attributes:
+A C<ScalarType> has these 7 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the scalar
 [|sub]type as a whole.
@@ -3398,23 +3597,6 @@ then the subtype will use the same default value as its base type; but if
 the subtype's value set excludes said value, then a C<default> of
 C<Nothing> is invalid and C<default> must be a C<Single>.
 
-=item C<order> - C<maybe_of.RPFunctionNC>
-
-A scalar root type definition may optionally have a type-default
-total ordering function associated with it (a type being defined as a
-subtype may not); iff the type being defined qualifies and desires such an
-associated function, then C<order> is a C<Single> whose sole element
-matches the invocation name of an C<order-determination> function.  The
-function that this names must have exactly 4 parameters; the
-first two parameters, named C<topic> and C<other>, each have declared types
-that are the same as the scalar root type
-being defined, and this function is said root type's type-default
-ordering function; the third parameter, named C<misc_args>, is
-C<Tuple>-typed; the fourth parameter, named C<is_reverse_order>, is
-C<Bool>-typed; the function's result type must be C<Order>.  Iff
-the type being defined is a subtype of some other type or does not desire
-the function, then C<order> is C<Nothing>.
-
 =back
 
 The default value of C<ScalarType> defines a scalar root type with
@@ -3426,7 +3608,7 @@ it is a singleton type, whose default value is its only value.
 A C<PossrepSet> is a C<DHRelation> that specifies a set of possreps that
 a scalar [|sub]type might consist primarily of.
 
-A C<PossrepSet> has these 5 attributes:
+A C<PossrepSet> has these 6 attributes:
 
 =over
 
@@ -3434,9 +3616,14 @@ A C<PossrepSet> has these 5 attributes:
 
 This is the declared name of the possrep.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the possrep as a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this possrep's declaration relative to all of
+the other possreps of this scalar type declaration.
 
 =item C<attrs> - C<NameTypeMap>
 
@@ -3495,7 +3682,7 @@ A C<PossrepMapSet> has these 5 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about this bidirectional mapping.
 
@@ -3553,7 +3740,7 @@ A C<TupleType> has these 10 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the tuple
 [|sub]type as a whole.
@@ -3698,7 +3885,7 @@ A C<RelationType> has these 7 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the relation
 [|sub]type as a whole.
@@ -3863,13 +4050,18 @@ this matter is TODO.  Note that the reverse functions might have to be
 defined as per-tuple operations, separately for
 insert/substitute/delete.>
 
-A C<VirtualAttrMapSet> has these 5 attributes:
+A C<VirtualAttrMapSet> has these 6 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about this virtual attribute map.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this declaration relative to all of
+the other declarations beneath this tuple type declaration.
 
 =item C<determinant_attrs> - C<NameNCMap>
 
@@ -3925,7 +4117,7 @@ A C<KeySet> is a C<DHRelation> that specifies a set of candidate keys or
 unique key constraints for a relation type; each tuple specifies one
 candidate key.
 
-A C<KeySet> has these 4 attributes:
+A C<KeySet> has these 5 attributes:
 
 =over
 
@@ -3933,9 +4125,14 @@ A C<KeySet> has these 4 attributes:
 
 This is the declared name of the key.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the key as a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this declaration relative to all of
+the other declarations beneath this relation type declaration.
 
 =item C<attrs> - C<set_of.Name>
 
@@ -3982,7 +4179,7 @@ A C<DistribKeySet> is a C<DHRelation> that specifies a set of candidate
 distributed (unique) keys over relation-valued attributes of a
 tuple/database; each tuple specifies one distributed (unique) key.
 
-A C<DistribKeySet> has these 5 attributes:
+A C<DistribKeySet> has these 6 attributes:
 
 =over
 
@@ -3990,10 +4187,15 @@ A C<DistribKeySet> has these 5 attributes:
 
 This is the declared name of the distributed (unique) key.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the distributed (unique) key
 as a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this declaration relative to all of
+the other declarations beneath this tuple type declaration.
 
 =item C<attrs> - C<set_of.Name>
 
@@ -4043,7 +4245,7 @@ has more, then the host type attribute is a tuple/database and any
 further elements serve to make C<rel_name> actually address a component of
 said.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the participation.
 
@@ -4081,7 +4283,7 @@ latter.  Note that it is valid to define a subset constraint involving zero
 attributes, in which case the constraint is that the parent relation must
 have at least one tuple when the child relation has at least one tuple.
 
-A C<SubsetConstrSet> has these 6 attributes:
+A C<SubsetConstrSet> has these 7 attributes:
 
 =over
 
@@ -4089,10 +4291,15 @@ A C<SubsetConstrSet> has these 6 attributes:
 
 This is the declared name of the subset constraint.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the subset constraint as a
 whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this declaration relative to all of
+the other declarations beneath this tuple type declaration.
 
 =item C<parent> - C<NameChain>
 
@@ -4142,7 +4349,7 @@ constraint involving zero attributes, in which case the constraint is that
 at least one of the parent relations must have at least one tuple when the
 child relation has at least one tuple.
 
-A C<DistribSubsetConstrSet> has these 5 attributes:
+A C<DistribSubsetConstrSet> has these 6 attributes:
 
 =over
 
@@ -4150,10 +4357,15 @@ A C<DistribSubsetConstrSet> has these 5 attributes:
 
 This is the declared name of the subset constraint.
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the subset constraint as a
 whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this declaration relative to all of
+the other declarations beneath this tuple type declaration.
 
 =item C<parent_distrib_key> - C<NameChain>
 
@@ -4219,11 +4431,11 @@ a union/intersection/etc of other types (eg, to define a "Square" when you
 have "Rectangle", "Rhombus"), you have to first define a C<DomainType>,
 and then use that as the base type of a C<ScalarType>.
 
-A C<DomainType> has these 9 attributes:
+A C<DomainType> has these 8 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the domain type as a whole.
 
@@ -4280,28 +4492,6 @@ This matches the invocation name of a C<named-value> function that results
 in the default value of the domain type; it has zero parameters and its
 result type is the same as the domain type being defined.
 
-=item C<order> - C<maybe_of.RPFunctionNC>
-
-A domain type definition, where the domain type is a simple union over just
-singleton scalar root types, may optionally have a type-default
-total ordering function associated with it, iff the singleton types don't
-have their own C<order> defined and no other domain type which declares an
-C<order> ranges over any of those singleton types, in which case the domain
-type is treated as if it were the scalar root type declaring the values of
-the singletons in respect to order-determination semantics;
-iff the domain type being defined qualifies and desires such an
-associated function, then C<order> is a C<Single> whose sole element
-matches the invocation name of an C<order-determination> function.  The
-function that this names must have exactly 4 parameters; the
-first two parameters, named C<topic> and C<other>, each have declared types
-that are the same as the domain type
-being defined, and this function is said domain type's type-default
-ordering function; the third parameter, named C<misc_args>, is
-C<Tuple>-typed; the fourth parameter, named C<is_reverse_order>, is
-C<Bool>-typed; the function's result type must be C<Order>.  Iff
-the type being defined is a subtype of some other type or does not desire
-the function, then C<order> is C<Nothing>.
-
 =back
 
 The default value of C<DomainType> defines an alias for C<Universal>,
@@ -4333,7 +4523,7 @@ A C<SubsetType> has these 5 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the subset type as a whole.
 
@@ -4403,7 +4593,7 @@ A C<MixinType> has these 3 attributes:
 
 =over
 
-=item C<comment> - C<Comment>
+=item C<scm_comment> - C<Comment>
 
 This is an optional programmer comment about the mixin type as a whole.
 
@@ -4437,8 +4627,9 @@ meaning a set of names, with a declared data type name for each.  It forms
 the foundation for most componentized type definitions, including all
 tuple and relation types (for which it is named I<heading>), and it is
 used also for the components list of a scalar possrep.  It is also used
-to define parameter lists for routines.  A C<NameTypeMap> has 2 attributes,
-C<name> (a C<Name>) and C<type> (a C<RPTypeNC>); the C<name> is the
+to define parameter lists for routines.  A C<NameTypeMap> has 4 attributes,
+C<name> (a C<Name>), C<type> (a C<RPTypeNC>), C<scm_comment> (a
+C<Comment>), and C<scm_vis_ord> (a C<NNInt>); the C<name> is the
 declared name of the attribute or parameter, and comprises a unary key; the
 C<type> is the declared data type of the attribute or parameter.  Its
 default value has zero tuples.
@@ -4450,8 +4641,9 @@ list, meaning a set of names, with a declared local expression node (or
 parameter) name for each.  It is used to define collection literals; one
 C<NameExprMap> defines a whole C<Tuple> value.  It is also used to define
 argument lists for routine invocations by functions or updaters or recipes.
-A C<NameExprMap> has 2 attributes, C<name> and C<expr>, each of those being
-a C<Name>; the C<name> is the name of the tuple/etc attribute or routine
+A C<NameExprMap> has 3 attributes, C<name> and C<expr>, each of those being
+a C<Name>, and C<scm_vis_ord> (a
+C<NNInt>); the C<name> is the name of the tuple/etc attribute or routine
 argument, and comprises a unary key; the C<expr> is the declared local name
 (in the C<lex> namespace) of the expression node (or parameter or variable)
 which defines the value for the attribute or argument.  Its default value
@@ -4460,17 +4652,18 @@ has zero tuples.
 =head2 sys.std.Core.Type.Cat.NameNCMap
 
 A C<NameNCMap> is a C<DHRelation>.  It defines an association of a short
-name with a name chain, to be used for aliasing the latter with
-the former in a particular context.  A C<NameNCMap> has 2 attributes,
-C<name> (a C<Name>) and C<nc> (a C<NameChain>); each of those is a
-unary key.  Its default value has zero tuples.
+name with a name chain, to be used for aliasing the latter with the former
+in a particular context.  A C<NameNCMap> has 3 attributes, C<name> (a
+C<Name>), C<nc> (a C<NameChain>), and C<scm_vis_ord> (a C<NNInt>); each of
+those is a unary key.  Its default value has zero tuples.
 
 =head2 sys.std.Core.Type.Cat.AttrRenameMap
 
 An C<AttrRenameMap> is a C<DHRelation>.  It is used as a specification for
-how to rename attributes of some collection.  An C<AttrRenameMap> has 2
+how to rename attributes of some collection.  An C<AttrRenameMap> has 3
 attributes, C<after> and C<before>, each of those being a C<Name>, and each
-of those being a unary key.  Its default value has zero tuples.
+of those being a unary key; the 3rd attribute is C<scm_vis_ord> (a
+C<NNInt>).  Its default value has zero tuples.
 
 =head2 sys.std.Core.Type.Cat.OrderByName
 
@@ -4523,7 +4716,7 @@ value is a reference to the C<sys.std.Core.Cat.reduce_to_v1> function.
 
 C<OrdDetCFuncNC> is a non-proper subtype of C<CurriedFuncNC> that is
 conceptually a reference to an C<order-determination> function.  Its
-default value is a reference to the C<sys.std.Core.Scalar.order> function.
+default value is a reference to the C<sys.std.Core.Ordered.order> function.
 This type is conceptually intended for use as the declared type of a
 routine parameter that would take the name of an C<order-determination>
 function, but that parameter is optional and should default to the

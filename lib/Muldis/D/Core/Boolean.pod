@@ -9,7 +9,7 @@ Muldis D boolean logic operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Boolean version 0.115.0.
+This document is Muldis::D::Core::Boolean version 0.116.0.
 
 =head1 PREFACE
 
@@ -26,6 +26,35 @@ are specific to the core data type C<Bool>, a superset of all the generic
 ones that a typical programming language should have.
 
 I<This documentation is pending.>
+
+=head1 FUNCTIONS IMPLEMENTING VIRTUAL ORDERED FUNCTIONS
+
+=head2 sys.std.Core.Boolean.order
+
+C<< function sys.std.Core.Boolean.order (Order <-- $topic : Bool,
+$other : Bool, $misc_args? : Tuple, $is_reverse_order? : Bool)
+implements sys.std.Core.Ordered.order >>
+
+This is a (total) C<order-determination> function specific to C<Bool>.  Its
+only valid C<misc_args> argument is C<Tuple:D0>.
+
+=head1 FUNCTIONS IMPLEMENTING VIRTUAL ORDINAL FUNCTIONS
+
+=head2 sys.std.Core.Boolean.pred
+
+C<< function sys.std.Core.Boolean.pred (Bool <-- $topic : Bool)
+implements sys.std.Core.Ordered.Ordinal.pred >>
+
+This function results in the value that precedes its argument.  It results
+in C<Bool:False> iff its argument is C<Bool:True>, and C<-Inf> otherwise.
+
+=head2 sys.std.Core.Boolean.succ
+
+C<< function sys.std.Core.Boolean.succ (Bool <-- $topic : Bool)
+implements sys.std.Core.Ordered.Ordinal.succ >>
+
+This function results in the value that succeeds its argument.  It results
+in C<Bool:True> iff its argument is C<Bool:False>, and C<Inf> otherwise.
 
 =head1 FUNCTIONS FOR BOOLEAN LOGIC
 

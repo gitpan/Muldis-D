@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.115.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.116.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Hosted Data Muldis D> standard
 dialect named C<HDMD_Perl6_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.115.0',
+standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.116.0',
 'HDMD_Perl6_STD' ]>.
 
 The C<HDMD_Perl6_STD> dialect is defined to be hosted in Perl 6, and is
@@ -125,7 +125,7 @@ repertoire; it is typically the Perl C<Str> value C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a Perl C<Str> formatted as per
-C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.115.0>.
+C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.116.0>.
 
 =item C<ln_dialect>
 
@@ -159,12 +159,12 @@ C<temporal>.
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '0.115.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.116.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended'
     } ]
 
-    [ 'Muldis_D', 'http://muldis.com', '0.115.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.116.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended',
         standard_syntax_extensions => Set.new('temporal')
@@ -199,7 +199,7 @@ intended to actually be used.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.115.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.116.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'the_floor',
             op_char_repertoire => 'basic'
         } ],
@@ -259,7 +259,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.115.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.116.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'code_as_data',
             op_char_repertoire => 'basic'
         } ],
@@ -270,7 +270,7 @@ Examples:
     ]
 
     [
-       [ 'Muldis_D', 'http://muldis.com', '0.115.0', 'HDMD_Perl6_STD', {
+       [ 'Muldis_D', 'http://muldis.com', '0.116.0', 'HDMD_Perl6_STD', {
           catalog_abstraction_level => 'code_as_data',
           op_char_repertoire => 'basic'
        } ],
@@ -316,7 +316,7 @@ described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.115.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.116.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'plain_rtn_inv',
             op_char_repertoire => 'basic'
         } ],
@@ -341,7 +341,7 @@ EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.115.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.116.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'rtn_inv_alt_syn',
             op_char_repertoire => 'basic'
         } ],
@@ -425,17 +425,17 @@ add syntax for operators.
 A C<value> node is a Muldis D value literal, which is a common special case
 of a Muldis D value selector.
 
-There are 23 main varieties of C<value> node, each of which is a named node
-kind of its own:  C<Bool>, C<Order>, C<RoundMeth>, C<Int>, C<Rat>,
-C<Blob>, C<Text>, C<Name>, C<NameChain>, C<PNSQNameChain>, C<Comment>,
-C<RatRoundRule>, C<Scalar>, C<Tuple>, C<Database>, C<Relation>,
+There are 24 main varieties of C<value> node, each of which is a named node
+kind of its own:  C<Singleton>, C<Bool>, C<Order>, C<RoundMeth>, C<Int>,
+C<Rat>, C<Blob>, C<Text>, C<Name>, C<NameChain>, C<PNSQNameChain>,
+C<Comment>, C<RatRoundRule>, C<Scalar>, C<Tuple>, C<Database>, C<Relation>,
 C<Set>, C<Maybe>, C<Array>, C<Bag>, C<[S|M]PInterval>, C<List>.
 
 Fundamentally, the various Muldis D scalar and collection types are
 represented by their equivalent Perl native scalar and collection types.
 But since Muldis D is more strongly typed, or at least differently typed,
 than Perl, each C<value> node is represented by a Perl Seq|Array, whose
-elements include both the payload Perl literal plus explicit meta-data for
+elements include both the payload Perl literal plus explicit metadata for
 how to interpret that Perl literal for mapping to Muldis D.
 
 =head2 Value Literal Common Elements
@@ -451,15 +451,15 @@ Every GCVL has 1-3 ordered elements:
 
 This is a Perl C<Str> value of the format C<< <[A..Z]> <[ a..z A..Z ]>+ >>;
 it identifies the data type of the value literal in broad terms and is the
-only external meta-data of C<value_payload> generally necessary to
+only external metadata of C<value_payload> generally necessary to
 interpret the latter; what grammars are valid for C<value_payload> depend
 just on C<value_kind>.
 
-Between the various kinds of C<value> node, these 39 values are allowed for
-C<value_kind>:  C<Bool>, C<Order>, C<RoundMeth>, C<[|NN|P]Int>,
-C<[|NN|P]Rat>, C<[|Octet]Blob>, C<Text>, C<Name>, C<NameChain>,
-C<PNSQNameChain>, C<Comment>, C<RatRoundRule>, C<[|DH]Scalar>,
-C<[|DH]Tuple>, C<Database>, C<[|DH]Relation>, C<[|DH]Set>,
+Between the various kinds of C<value> node, these 40 values are allowed for
+C<value_kind>:  C<Singleton>, C<Bool>, C<Order>, C<RoundMeth>,
+C<[|NN|P]Int>, C<[|NN|P]Rat>, C<[|Octet]Blob>, C<Text>, C<Name>,
+C<NameChain>, C<PNSQNameChain>, C<Comment>, C<RatRoundRule>,
+C<[|DH]Scalar>, C<[|DH]Tuple>, C<Database>, C<[|DH]Relation>, C<[|DH]Set>,
 C<[|DH][Maybe|Single]>, C<[|DH]Array>, C<[|DH]Bag>, C<[|DH][S|M]PInterval>,
 C<List>.
 
@@ -474,9 +474,9 @@ assertion that the Muldis D value denoted by C<value_payload> is a member
 of the named subtype.  Its format is a C<PNSQNameChain_payload> node.  Iff
 C<value_kind> is C<[|DH]Scalar> then C<type_name> is mandatory; otherwise,
 C<type_name> is optional for all C<value>, except that C<type_name> must be
-omitted when C<value_kind> is one of the 2 [C<Bool>, C<Order>]; this isn't
-because those 2 types can't be subtyped, but because in practice doing so
-isn't useful.
+omitted when C<value_kind> is one of the 3 [C<Singleton>, C<Bool>,
+C<Order>]; this isn't because those 3 types can't be subtyped, but because
+in practice doing so isn't useful.
 
 =item C<value_payload>
 
@@ -496,6 +496,8 @@ C<value> node as follows:
 
     Muldis D   <- Perl 6
     ----------------------------
+    -Inf       <- -Inf
+    Inf        <- Inf|+Inf
     Bool       <- Bool
     Order      <- Order
     Int        <- Int
@@ -512,6 +514,18 @@ might claim to do multiple type interfaces.
 For GCVL and SCVL examples, see the subsequent documentation sections.
 
 =head1 OPAQUE VALUE LITERALS
+
+=head2 Singleton Literals
+
+A C<Singleton> node represents a value of any of the singleton scalar types
+that C<sys.std.Core.Type.Cat.Singleton> is a union over.  The payload must
+be one of these 2 special named Perl values: C<-Inf>, C<Inf|+Inf>.
+
+Examples:
+
+    :Singleton(-Inf)
+
+    Inf
 
 =head2 Boolean Literals
 
@@ -1043,6 +1057,9 @@ Examples I<TODO: What is the actual syntax for the P6 Set type?>:
 
     :MPInterval( Set.new(1..3,6,8..9) )  # 6 elements #
 
+    :MPInterval( Set.new(-Inf..3,14..21,29..Inf) )
+        # all Int besides {4..13,22..28} #
+
 =head2 Low Level List Selectors
 
 A C<List> node represents a literal or selector invocation for a low-level
@@ -1172,7 +1189,7 @@ middle element is C<material_declared_name>.
 =item C<material_kind>
 
 This is a Perl C<Str> value of the format C<< [<[ a..z ]>+] ** '-' >>; it
-identifies the kind of the material and is the only external meta-data of
+identifies the kind of the material and is the only external metadata of
 C<material_payload> generally necessary to interpret the latter; what
 grammars are valid for C<material_payload> depend just on C<material_kind>.
 
@@ -1337,7 +1354,7 @@ Examples:
 
     [ 'if-else-expr',
         [
-            [ 'op', 'is-empty', [['$','ary']] ] => ['$','empty_result'],
+            ['func-invo','is_empty',[['$','ary']]] => ['$','empty_result'],
         ],
         [ 'op', '.[]', [['$','ary'], 0] ]
     ]

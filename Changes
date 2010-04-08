@@ -1,6 +1,186 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-04-07  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.116.0 is released on CPAN as
+    Muldis-D-0.116.0.tar.gz.
+
+    * This release partly features the addition of an initial complement of
+    system-defined mixin types, specifically "Ordered" and "Ordinal", where
+    the latter is a more specific example of, and composes, the former.  A
+    type would compose "Ordered" if it is an ordered type, such that you
+    can take all of its values and arrange them on a line in some
+    definitive order where every value can be said is "before" all values
+    on one side and "after" all values on the other side.  A type would
+    compose "Ordinal" if it is an ordinal type, such that between every
+    pair of values there is a known finite count of values between them,
+    and those can be enumerated in order.  Ordered/ordinal types tend to be
+    scalar types, but they don't have to be.  Ordered types like "Bool" and
+    "Int" are also ordinal, while ordered types like "Rat", "Blob", "Text"
+    are not also ordinal.  Further to this new feature, various
+    ordered-sensitive functions were refactored, such that we see the first
+    system-defined virtual functions and implementing counterparts; the
+    "order" virtual is for all ordered types, and the two "pred","succ" for
+    "ordinal".  And so, now "order"/"<=>" in particular is now a properly
+    elegant generic overloaded operator such as any user can make, rather
+    than a special case with specific support in the system catalog.  And
+    "--","++" ("pred","succ") are no longer integer-specific.
+
+    * This release partly features large enhancements to the system catalog
+    and concrete grammars that improve support for the preservation of
+    non-behaviour-impacting metadata in Muldis D source code, such as code
+    comments and code element ordinal positions, which is important for
+    helping the code to be easier to read and update by programmers, and
+    for helping deparsed or translated code better resemble the original.
+    (Actually, some of the intended improvements for comments didn't make
+    it, so they are pending in a future release.)
+
+    * (Routines_Catalog.pod)  Updated the "create_depot_mount" recipe to
+    add the boolean parameter "allow_auto_run"; this should have been done
+    in release 0.114.0 but wasn't.
+
+    * (Types_Catalog.pod, Basics.pod, PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)
+    In Types_Catalog.pod, added the 2 new singleton scalar types
+    "sys.std.Core.Type.Cat.[-Inf|Inf]", which are canonical minimum-most
+    and maximum-most values for the entire Muldis D type system; they would
+    compare as "before" or "after" all other "Universal" values,
+    respectively.  Also added the new union type
+    "sys.std.Core.Type.Cat.Singleton" which ranges over just the 2 new
+    infinity values for now.  In Basics.pod, updated the "NOTES ON TEXT
+    CHARACTER LITERALS" main pod section to add "∞" to the list.  In all 3
+    STD.pod, added new pod sub-section named "Singleton Literals" to the
+    start of the main pod section "OPAQUE VALUE LITERALS", which declares
+    specific literal/selector syntax, as a new "Singleton" value node kind,
+    for every singleton value that "Singleton" ranges over, in this case
+    just "-Inf" and "Inf".  Also in PTMD_STD.pod, made "Singleton" the 9th
+    value node kind whose values may all omit the "value_kind" portion of a
+    GCVL for brevity.  Also in HDMD_Perl6_STD.pod, added the 2 special Perl
+    6 values "-Inf" and "Inf|+Inf" to the data types for which a GCVL may
+    alternately be just its payload for brevity.  Also in
+    Types_Catalog.pod, updated the catalog type "OVLScalar" to add
+    "Singleton" to what it ranges over.
+
+    * (Types.pod, PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  In Types.pod,
+    updated the 2 data types "[S|M]PInterval" so that they now also support
+    unbounded/infinite intervals, which is accomplished by using the 2 new
+    infinity values "-Inf", "Inf" as interval endpoints.  Also changed the
+    default value of C<SPInterval> to have "Inf" and "-Inf" for its "min"
+    and "max" attributes, rather than "True" and "False"; it still
+    represents the empty interval, same as before, though.  In all 3
+    STD.pod, updated the "Interval Selectors" pod sub-section to add a new
+    code example demonstrating an unbounded multi-part interval literal.
+
+    * (Ordered.pod)  Updated the 3 functions "min|max|minmax" to use the 2
+    new infinity values, as appropriate, as identity values when the
+    functions' topic arguments have zero elements, rather than the
+    functions failing.
+
+    * (Types.pod, Types_Catalog.pod, Temporal.pod)  In Types.pod, added new
+    main pod section "GENERIC MIXIN DATA TYPES", just prior to "GENERIC
+    SCALAR DATA TYPES", which declares the 2 new mixin types
+    "sys.std.Core.Type.Ord[ered|inal]".  Also updated the descriptions of
+    the 5 scalar types "Bool","Int","Rat","Blob","Text" so that the last 3
+    directly compose the "Ordered" type and the first 2 directly compose
+    the "Ordinal" type (and indirectly the "Ordered" type).  In
+    Types_Catalog.pod, updated the descriptions of the 7 scalar types
+    "String","Name","NameChain","Comment","Order","-Inf", "Inf" so that the
+    first 4 directly compose "Ordered" and the last 3 directly compose
+    "Ordinal".  In Temporal.pod, updated the descriptions of the 5 scalar
+    types "[TAI|UTC|Float]Instant", "[TAI|UTC]Duration" so that they
+    directly compose "Ordered".  In all 3 files, updated "TYPE SUMMARY" to
+    add a graph slice showing types composing mixins grouped by the latter.
+
+    * (Ordered.pod, Scalar.pod, PTMD_STD.pod, Array.pod, Interval.pod,
+    Tuple.pod, Types_Catalog.pod)  Moved the function
+    "sys.std.Core.Scalar.order" from Scalar.pod to Ordered.pod, in the
+    process renaming it to "sys.std.Core.Ordered.order".  Updated the
+    references to that function in 6 files to use the new name.
+
+    * (Ordered.pod, Types_Catalog.pod, Boolean.pod, Integer.pod,
+    Rational.pod, Blob.pod, Text.pod, Temporal.pod)  In Ordered.pod,
+    redefined the "order" function to specifically say that it is a virtual
+    function; updated its signature to specify this by adding the "@"
+    character to the end of the "topic" and "other" parameters, which
+    designates them as "dispatch params", and having at least one of those
+    is part of how a routine is marked as virtual (besides having no
+    defined routine body); also wrapped "order" in a new main pod section
+    "VIRTUAL FUNCTIONS FOR THE ORDERED MIXIN TYPE", and updated its
+    description.  In Types_Catalog.pod, updated each of the 2 catalog types
+    "[Scalar|Domain]Type" to remove its "order" attribute, since an ordered
+    type no longer specifies its default order-determination function in
+    the type definition itself.  In each of the other 6 files, added a new
+    main pod section "FUNCTIONS IMPLEMENTING VIRTUAL ORDERED FUNCTIONS"
+    which contains one or more functions with "order" unqualified names,
+    each of which has a signature like the virtual "order" but for more
+    specific types, no "@", and "implements sys.std.Core.Ordered.order"
+    appended, which is how the virtual-implementer association is defined;
+    Temporal.pod had 5 "order" functions, for its 5 main types, and the
+    other 5-of-6 files have one "order" function each.
+
+    * (Ordered.pod, Integer.pod, PTMD_STD.pod, Boolean.pod)  In
+    Ordered.pod, added new main pod section "VIRTUAL FUNCTIONS FOR THE
+    ORDINAL MIXIN TYPE" which includes the 2 new virtual functions
+    "sys.std.Core.Ordered.Ordinal.[pred|succ]"; these functions are
+    generalized copies of Integer.pod's "sys.std.Core.Integer.[pred|succ]";
+    in Integer.pod, updated the latter 2 functions to make them implement
+    the 2 new functions rather than being standalone, and wrapped up the
+    latter 2 in a new main pod section "FUNCTIONS IMPLEMENTING VIRTUAL
+    ORDINAL FUNCTIONS".  In PTMD_STD.pod, and the first 2 files, reflected
+    that the special postfix alternate function syntaxes "--","++" are now
+    for "Ordinal.[pred|succ]" rather than the "Integer" versions.  In
+    Boolean.pod, added the 2 "sys.std.Core.Boolean.[pred|succ]" functions
+    in their own new "... ORDINAL ..." main pod section.
+
+    * (Scalar.pod)  Updated all of the function signatures having a
+    "possrep" parameter so that any other parameters whose declared type
+    was "Scalar" is now "ScalarWP" instead.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Updated the pod sub-section
+    "Generic If-Else Expressions" to update a code example to use a specced
+    "is_empty" func-invo node instead of unspecced "is-empty" alt-syn node.
+
+    * (Temporal.pod)  Added the 2 new functions
+    "sys.std.Temporal.[TAI|UTC]Duration.abs_diff", so now every temporal
+    type consistently has at least the 2 functions "diff" and "abs_diff".
+
+    * (D.pm, Basics.pod, Types.pod, Types_Catalog.pod, PTMD_STD.pod,
+    HDMD_Perl[6|5]_STD.pod, Counted.pod)  Fixed all misspellings of
+    'metadata' (using 'meta-data' was incorrect).
+
+    * (Types_Catalog.pod, PTMD_STD.pod)  Updated every (nonscalar) catalog
+    type having a "comment" attribute to rename th latter to "scm_comment".
+
+    * (Types_Catalog.pod)  Updated each of these 2 (nonscalar) catalog
+    types to add a "scm_comment" (source code metadata code comment)
+    attribute: "RcpGlobalVarAliasMap", "NameTypeMap".  And so, one can now
+    attach a comment specifically to a declaration of a single type
+    attribute or routine parameter or variable, etc.
+
+    * (Types_Catalog.pod)  Updated each of these 52 (nonscalar) catalog
+    types to add a "scm_vis_ord" (source code metadata visual element
+    order) attribute, of type "NNInt": "Sys[Nsp|SpecType|Cat]Set",
+    "SubdepotSet", "[|Sys][Function|Updater|Recipe|Procedure]Set",
+    "[|Sys][Scalar|Tuple|Relation|Domain|Subset|Mixin]TypeSet",
+    "OVLScaValExprNodeSet",
+    "[Sca|Tup|Rel|Set|Ary|Bag|[S|M]PIvl|List]SelExprNodeSet",
+    "[Acc|FuncInvo|IfElse|GivenWhenDef|APMaterialNCSel]ExprNodeSet",
+    "Multi[Upd|Rcp]InvoStmt", "RcpGlobalVarAliasMap", "PossrepSet",
+    "VirtualAttrMapSet", "[|Distrib][Key|SubsetConstr]Set", "NameTypeMap",
+    "NameExprMap", "NameNCMap", "AttrRenameMap".
+
+    * (Basics.pod, PTMD_STD.pod)  In Basics.pod, added new main pod section
+    near the end named "SOURCE CODE METADATA", with the initial 2
+    sub-sections "Code Comments" and "Visual Element Order"; these outline
+    how the Muldis D system catalog supports the storage of explicit
+    metadata, currently code comments and ordinal code element positions,
+    that has no impact on the behaviour of the code but is important for
+    human readers or updaters of the code; these also provide some detail
+    the intended interpretation of this metadata and how concrete grammars
+    should work with it.  In PTMD_STD.pod, added a paragraph to the
+    "plain_rtn_inv" pod sub-section to say that parsers which support this
+    or higher catalog abstr levels should preserve all prev desc metadata.
+
 2010-04-02  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.115.0 is released on CPAN as
@@ -1981,7 +2161,7 @@
     code like normal data is, and is the only version that a "value" or
     "expr" node may "be".  The new "non_value_comment" retains the more
     complicated hash-mark-delimited syntax of the old version, and is now
-    just used in the "put it anywhere as meta-data" use, and it never has a
+    just used in the "put it anywhere as metadata" use, and it never has a
     prefix such as "Comment:".  The new "Comment" is also now an 8th type
     whose literals may always be a SCVL format in a GCVL context, because
     it is distinguished as the only thing to use backticks.  This split was
@@ -3679,7 +3859,7 @@
     * (PTMD_STD.pod)  Updated "Comment" literals in a few ways.  A
     "Comment" GCVL may no longer omit its "value_kind"; this is to help
     distinguish comment literals intended to be actual data (these have the
-    "value_kind") from those intended to be meta-data for other code (these
+    "value_kind") from those intended to be metadata for other code (these
     are SCVLs and still lack the "value_kind").  Whitespace between comment
     payload segments is now mandatory rather than optional.  A payload
     segment may now be just a run of 2+ hash-marks, in order that one can
@@ -5447,7 +5627,7 @@
     which are 'Int' and 'Blob' and 'Rat|Num|Int' objects; you can no longer
     specify such literals as Perl 6 Str objects, or specify Rat payloads as
     a collection of Int components; for all 7 types, you can no longer use
-    'Str' objects plus max-col-val meta-data to get the Muldis D
+    'Str' objects plus max-col-val metadata to get the Muldis D
     implementation convert the results from a PTMD_Tiny tokenizer, but
     rather you must now use the native facilities of Perl 6 to support
     denoting numeric literals in any base from 2 thru 36; Perl 6 can do the
@@ -5457,7 +5637,7 @@
     typical Perl 5 forms of those values, plus the string results of a
     PTMD_Tiny parser in Perl 5.  One large further change in Perl 5 is that
     you now use a 1-element hash ref to group a max-col-val (the key) with
-    the main payload it is meta-data for (the value); this is instead of
+    the main payload it is metadata for (the value); this is instead of
     using a 2-element array ref; this change was made so that one could
     disambiguate 'Rat' payloads like "['2', '11001001']" (is the first
     element a max-col-val or a numerator?) without using messy further
@@ -5659,9 +5839,9 @@
 
     * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  In a reversal of one aspect of
     release 0.20.0, updated most nonscalar value literal syntax to re-add
-    the then-removed explicit meta-data of what specific data type the
+    the then-removed explicit metadata of what specific data type the
     nonscalar value is a member of, rather than it for example being a
-    generic relation value.  But use of this meta-data is now optional
+    generic relation value.  But use of this metadata is now optional
     rather than mandatory like in its previous incarnation.  Also removed
     the 'treat_as_type' lexical pragma, which is now redundant.
 
@@ -5962,7 +6142,7 @@
     Used together with the "auto_complete" language-name-level pragma, this
     can help determine what names and types of attributes need to be
     auto-added to literals that are otherwise "just a relation|tuple" and
-    lack that specific meta-data, such as with argument values for
+    lack that specific metadata, such as with argument values for
     bootloader-invoked routines that have "Relation" typed parameters.
 
     * (Basics.pod, Types_Catalog.pod, PTMD_Tiny.pod)  Fixed typos.
@@ -7760,7 +7940,7 @@
     * (PTMD_Tiny.pod, HDMD_Perl_Tiny.pod)  Updated every nonscalar literal
     grammar token and phmd node to remove its element that specifies a
     predefined type name which constrains/defines the literal's heading.
-    This meta-data was verbosity that couldn't really be used except within
+    This metadata was verbosity that couldn't really be used except within
     the DBMS, wherein it already existed there in code definitions that is
     processing the literals.  As an exception to this straight-removal, for
     plain relation literals, a new replacement feature was added for the

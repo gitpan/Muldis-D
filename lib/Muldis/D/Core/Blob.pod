@@ -9,7 +9,7 @@ Muldis D bit string operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Blob version 0.115.0.
+This document is Muldis::D::Core::Blob version 0.116.0.
 
 =head1 PREFACE
 
@@ -26,6 +26,17 @@ are specific to the core data type C<Blob>, essentially all the generic
 ones that a typical programming language should have.
 
 I<This documentation is pending.>
+
+=head1 FUNCTIONS IMPLEMENTING VIRTUAL ORDERED FUNCTIONS
+
+=head2 sys.std.Core.Blob.order
+
+C<< function sys.std.Core.Blob.order (Order <-- $topic : Blob,
+$other : Blob, $misc_args? : Tuple, $is_reverse_order? : Bool)
+implements sys.std.Core.Ordered.order >>
+
+This is a (total) C<order-determination> function specific to C<Blob>.  Its
+only valid C<misc_args> argument is C<Tuple:D0>.
 
 =head1 GENERIC FUNCTIONS FOR BLOBS
 

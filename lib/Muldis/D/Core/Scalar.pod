@@ -9,7 +9,7 @@ Muldis D operators for all scalar types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Scalar version 0.115.0.
+This document is Muldis::D::Core::Scalar version 0.116.0.
 
 =head1 PREFACE
 
@@ -41,7 +41,7 @@ no explicit argument is given to it.
 
 =head2 sys.std.Core.Scalar.attr
 
-C<< function sys.std.Core.Scalar.attr (Universal <-- $topic : Scalar,
+C<< function sys.std.Core.Scalar.attr (Universal <-- $topic : ScalarWP,
 $possrep? : Name, $name? : Name) >>
 
 This function results in the scalar or nonscalar value of the possrep
@@ -53,8 +53,8 @@ this operation is also known as C<.${}>.
 
 =head2 sys.std.Core.Scalar.update_attr
 
-C<< function sys.std.Core.Scalar.update_attr (Scalar <-- $topic : Scalar,
-$possrep? : Name, $name? : Name, $value : Universal) >>
+C<< function sys.std.Core.Scalar.update_attr (ScalarWP <--
+$topic : ScalarWP, $possrep? : Name, $name? : Name, $value : Universal) >>
 
 This function results in its C<topic> argument but that its possrep
 attribute whose possrep name is C<possrep> and whose attribute name is
@@ -68,8 +68,8 @@ attribute.
 
 =head2 sys.std.Core.Scalar.multi_update
 
-C<< function sys.std.Core.Scalar.multi_update (Scalar <-- $topic : Scalar,
-$possrep? : Name, $attrs : Tuple) >>
+C<< function sys.std.Core.Scalar.multi_update (ScalarWP <--
+$topic : ScalarWP, $possrep? : Name, $attrs : Tuple) >>
 
 This function is like C<sys.std.Core.Scalar.update_attr> except that it
 handles N scalar possrep attributes at once rather than just 1.  The
@@ -81,7 +81,7 @@ I<sys.std.Core.Scalar.static_subst>.
 
 =head2 sys.std.Core.Scalar.projection
 
-C<< function sys.std.Core.Scalar.projection (Tuple <-- $topic : Scalar,
+C<< function sys.std.Core.Scalar.projection (Tuple <-- $topic : ScalarWP,
 $possrep? : Name, $attr_names : set_of.Name) >>
 
 This function results in the C<Tuple> that is the projection of the
@@ -97,7 +97,7 @@ C<topic> doesn't have.  Note that this operation is also known as C<${}>.
 =head2 sys.std.Core.Scalar.cmpl_proj
 
 C<< function sys.std.Core.Scalar.cmpl_proj (Tuple <--
-$topic : Scalar, $possrep? : Name, $attr_names : set_of.Name) >>
+$topic : ScalarWP, $possrep? : Name, $attr_names : set_of.Name) >>
 
 This function is the same as C<projection> but that it results in the
 complementary subset of possrep attributes of C<topic> when given the same
@@ -106,7 +106,7 @@ arguments.  Note that this operation is also known as C<${!}>.
 =head2 sys.std.Core.Scalar.Tuple_from_Scalar
 
 C<< function sys.std.Core.Scalar.Tuple_from_Scalar (Tuple <--
-$topic : Scalar, $possrep? : Name) >>
+$topic : ScalarWP, $possrep? : Name) >>
 
 This function results in the C<Tuple> that has all the same attributes of
 the possrep of C<topic> whose name is given in C<possrep>; in other words,
@@ -116,54 +116,18 @@ that C<topic> doesn't have.
 
 =head2 sys.std.Core.Scalar.Scalar_from_Tuple
 
-C<< function sys.std.Core.Scalar.Scalar_from_Tuple (Scalar <--
+C<< function sys.std.Core.Scalar.Scalar_from_Tuple (ScalarWP <--
 $topic : Tuple, $type : APTypeNC, $possrep? : Name) >>
 
-This function results in the C<Scalar> value whose scalar root
+This function results in the C<ScalarWP> value whose scalar root
 [|sub]type is named by C<type>, which has a possrep whose name matches
 C<possrep>, and whose complete set of attributes of that named possrep
 match the attributes of C<topic>.  This function can be used to select any
 scalar value at all that has a possrep.
 
-=head2 sys.std.Core.Scalar.order
-
-C<< function sys.std.Core.Scalar.order (Order <-- $topic : Scalar,
-$other : Scalar, $misc_args? : Tuple, $is_reverse_order? : Bool) >>
-
-This C<order-determination> function is the externalization of a scalar
-root type's type-default (total) C<order-determination> function.  This
-function results in C<Order:Same> iff its C<topic> and C<other> arguments
-are exactly the same value, and otherwise it results in C<Order:Increase>
-if the value of the C<other> argument is considered to be an increase (as
-defined by the type) over the value of the C<topic> argument, and otherwise
-it results in C<Order:Decrease> as the reverse of the last condition would
-be true.  This function will fail if its C<topic> and C<other> arguments
-are not values of a common scalar root type that declares a type-default
-C<order-determination> function; this function will otherwise warn if the
-declared types of those arguments are not both subtypes of such a common
-scalar root type.  Note that C<order-determination> functions are
-considered the only fundamental order-sensitive operators, and all others
-are defined over them.  This function also has a C<Tuple>-typed third
-parameter, named C<misc_args>, which carries optional customization details
-for the order-determination algorithm; this permits the function to
-implement a choice between multiple (typically similar) ordering algorithms
-rather than just one, which reduces the number of functions needed for
-supporting that choice; if the algorithm is not customizable, then a
-tuple argument would be of degree zero.  This function also has a
-C<Bool>-typed fourth parameter, named C<is_reverse_order>; a C<Bool:False>
-argument means the function's algorithm operates as normal when given any
-particular 3 other arguments (meaning a sorting operation based on it will
-place elements in ascending order), while a C<Bool:True> argument means the
-function's algorithm operates in reverse, so the function results in the
-reverse C<Order> value it would have otherwise when given the same 3 other
-arguments (meaning a sorting operation based on it will place elements in
-descending order).  The C<misc_args> and C<is_reverse_order> parameters are
-optional and default to the zero-attribute tuple and C<Bool:False>,
-respectively, if no explicit arguments are given to them.
-
 =head2 sys.std.Core.Scalar.has_possrep
 
-C<< function sys.std.Core.Scalar.has_possrep (Bool <-- $topic : Scalar,
+C<< function sys.std.Core.Scalar.has_possrep (Bool <-- $topic : ScalarWP,
 $possrep? : Name) >>
 
 This function results in C<Bool:True> iff its C<topic> argument has a
@@ -173,14 +137,14 @@ C<Bool:False>.
 =head2 sys.std.Core.Scalar.possrep_names
 
 C<< function sys.std.Core.Scalar.possrep_names (set_of.Name <--
-$topic : Scalar) >>
+$topic : ScalarWP) >>
 
 This function results in the set of the names of the possreps of its
 argument.
 
 =head2 sys.std.Core.Scalar.degree
 
-C<< function sys.std.Core.Scalar.degree (NNInt <-- $topic : Scalar,
+C<< function sys.std.Core.Scalar.degree (NNInt <-- $topic : ScalarWP,
 $possrep? : Name) >>
 
 This function results in the degree of its C<topic> argument's possrep
@@ -189,7 +153,7 @@ possrep has).
 
 =head2 sys.std.Core.Scalar.has_attrs
 
-C<< function sys.std.Core.Scalar.has_attrs (Bool <-- $topic : Scalar,
+C<< function sys.std.Core.Scalar.has_attrs (Bool <-- $topic : ScalarWP,
 $possrep? : Name, $attr_names : set_of.Name) >>
 
 This function results in C<Bool:True> iff, for every one of the attribute
@@ -201,7 +165,7 @@ result is C<Bool:True> if C<attr_names> is empty.
 =head2 sys.std.Core.Scalar.attr_names
 
 C<< function sys.std.Core.Scalar.attr_names (set_of.Name <--
-$topic : Scalar, $possrep? : Name) >>
+$topic : ScalarWP, $possrep? : Name) >>
 
 This function results in the set of the names of the attributes of its
 C<topic> argument's possrep whose name is given by C<possrep>.

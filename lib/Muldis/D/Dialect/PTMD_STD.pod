@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.115.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.116.0.
 
 =head1 PREFACE
 
@@ -21,11 +21,11 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.115.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.116.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
-by Muldis D programs at runtime) as to what non-critical meta-data it
+by Muldis D programs at runtime) as to what non-critical metadata it
 explicitly stores; so code in the C<PTMD_STD> dialect should be
 round-trippable with the system catalog with the result maintaining all the
 details that were started with.  Since it matches the system catalog, this
@@ -245,7 +245,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.115.0>.
+C<ln_base_authority>; it is typically a character string like C<0.116.0>.
 
 =item C<ln_dialect>
 
@@ -266,12 +266,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.115.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.116.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.115.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.116.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {temporal}
@@ -354,7 +354,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.115.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.116.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -436,7 +436,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.115.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.116.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -445,7 +445,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.115.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.116.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -520,13 +520,21 @@ like user-defined routines and types.  The code is mostly just nested
 invocations of functions or procedures in basic polish notation, and both
 that code and material declarations have a C-language-like syntax.
 
+It is expected that every Muldis D implementation which supports at least
+the C<plain_rtn_inv> level will, as much as is reasonably possible,
+preserve all non-behaviour-affecting metadata that is directly supported
+for storage by the system catalog itself, as described in
+L<Muldis::D::Basics/SOURCE CODE METADATA>.  Primarily this means preserving
+non-value code comments, and preserving the declared relative ordinal
+position of code elements.
+
 Code written to the C<plain_rtn_inv> level can employ all of the language
 grammar constructs that C<code_as_data> can, plus all of those
 described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.115.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.116.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -585,7 +593,7 @@ EXPRESSIONS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.115.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.116.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -635,6 +643,9 @@ Muldis D implementations and older text editors.
 When the C<op_char_repertoire> pragma is C<basic>, then the
 following grammar definitions are in effect:
 
+    <Singleton> ::=
+        <Singleton_payload__op_cr_basic>
+
     <Bool_payload> ::=
         <Bool_payload__op_cr_basic>
 
@@ -682,6 +693,9 @@ and the code is otherwise more terse and arguably appears more attractive.
 
 When the C<op_char_repertoire> pragma is C<extended>, then the
 following grammar definitions are in effect:
+
+    <Singleton> ::=
+        <Singleton_payload__op_cr_extended>
 
     <Bool_payload> ::=
         <Bool_payload__op_cr_extended>
@@ -765,7 +779,8 @@ Grammar:
         | <coll_value_selector>
 
     <opaque_value_literal> ::=
-          <Bool>
+          <Singleton>
+        | <Bool>
         | <Order>
         | <RoundMeth>
         | <Int>
@@ -832,17 +847,17 @@ selectors.
 A I<generic context value literal> (or I<GCVL>) is a value literal that can
 be properly interpreted in a context that is expecting I<a> value but has
 no expectation that said value belongs to a specific data type; in the
-general case, a GCVL includes explicit I<value kind> meta-data (such as,
+general case, a GCVL includes explicit I<value kind> metadata (such as,
 "this is an C<Int>" or "this is a C<Name>"); but with a few specific data
-types (see the C<value_kind> node description for details) that meta-data
+types (see the C<value_kind> node description for details) that metadata
 may be omitted for brevity because the main literal has mutually uniquely
 identifying characteristics.  For example, each element of a generic Muldis
 D collection value, such as a member of an array or tuple, could
 potentially have any type at all.  In contrast, a I<specific context value
 literal> (or I<SCVL>) is a value literal that does not include explicit
-value kind meta-data, even when the main literal doesn't have uniquely
+value kind metadata, even when the main literal doesn't have uniquely
 identifying characteristics, because the context of its use supplies said
-meta-data.  For example, in a tuple value literal it is assumed that a
+metadata.  For example, in a tuple value literal it is assumed that a
 value literal in an attribute name position must denote a C<Name>.  The
 grammar token C<value>|C<x_value> denotes a GCVL, as do most short-named
 grammar tokens, like C<Int> or C<Name>; in contrast, a grammar token
@@ -859,7 +874,8 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         <value_payload>
 
     <value_kind> ::=
-          Bool
+          Singleton
+        | Bool
         | Order
         | RoundMeth
         | Int | NNInt | PInt
@@ -887,7 +903,8 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         <PNSQNameChain_payload>
 
     <value_payload> ::=
-          <Bool_payload>
+          <Singleton_payload>
+        | <Bool_payload>
         | <Order_payload>
         | <RoundMeth_payload>
         | <Int_payload>
@@ -919,15 +936,15 @@ So a C<x_value>|C<value> node has 1-3 elements in general:
 
 This is a character string of the format C<< <[A..Z]> <[ a..z A..Z ]>+ >>;
 it identifies the data type of the value literal in broad terms and is the
-only external meta-data of C<value_payload> generally necessary to
+only external metadata of C<value_payload> generally necessary to
 interpret the latter; what grammars are valid for C<value_payload> depend
 just on C<value_kind>.
 
-For all values of just the 8 data types [C<Bool>, C<Order>,
+For all values of just the 9 data types [C<Singleton>, C<Bool>, C<Order>,
 C<RoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>, C<Comment>], the
 C<value_kind> portion of a GCVL may be omitted for brevity, but the code
 parser should still be able to infer it easily by examining the first few
-characters of the C<value_payload>, which for each of said 8 data types has
+characters of the C<value_payload>, which for each of said 9 data types has
 a mutually uniquely identifying format, which is also distinct from all
 possible C<value_kind>.  Note that omission of C<value_kind> is only
 allowed when the GCVL doesn't include a C<type_name> element.
@@ -944,8 +961,9 @@ and serves as an assertion that the Muldis D value denoted by
 C<value_payload> is a member of the named subtype.  Iff C<value_kind> is
 C<[|DH]Scalar> then C<type_name> is mandatory; otherwise, C<type_name> is
 optional for all C<value>, except that C<type_name> must be omitted when
-C<value_kind> is one of the 2 [C<Bool>, C<Order>]; this isn't because those
-2 types can't be subtyped, but because in practice doing so isn't useful.
+C<value_kind> is one of the 3 [C<Singleton>, C<Bool>, C<Order>]; this isn't
+because those 3 types can't be subtyped, but because in practice doing so
+isn't useful.
 
 How a Muldis D parser treats a C<value> node with a C<type_name> element
 depends on the wider context.  In the general case where the C<value> is an
@@ -975,6 +993,42 @@ C<sys.std.Core.Type.Cat.OVLScaValExprNodeSet>, a tuple of which is what
 every kind of C<opaque_value_literal> node distills to when it is beneath
 the context of a C<depot> node, as it describes some semantics.
 
+=head2 Singleton Literals
+
+Grammar:
+
+    <Singleton> ::=
+        [Singleton ':' <unspace>]?
+        <Singleton_payload>
+
+    <Singleton_payload__op_cr_basic> ::=
+        '-Inf' | Inf
+
+    <Singleton_payload__op_cr_extended> ::=
+          <Singleton_payload__op_cr_basic>
+        | '-∞' | '∞'
+
+A C<Singleton> node represents a value of any of the singleton scalar types
+that C<sys.std.Core.Type.Cat.Singleton> is a union over.
+
+Some of the keywords are aliases for each other:
+
+    keyword | aliases
+    --------+--------
+    -Inf    | -∞
+    Inf     | ∞
+
+These are the singleton types corresponding to the keywords:
+
+    -Inf -> sys.std.Core.Type.Cat."-Inf"
+    Inf  -> sys.std.Core.Type.Cat.Inf
+
+Examples:
+
+    Singleton:-Inf
+
+    ∞
+
 =head2 Boolean Literals
 
 Grammar:
@@ -998,10 +1052,10 @@ singleton types that the C<Bool> type is defined as a union over.
 
 Some of the keywords are aliases for each other:
 
-    keyword   | aliases
-    ----------+--------
-    False     | ⊥
-    True      | ⊤
+    keyword | aliases
+    --------+--------
+    False   | ⊥
+    True    | ⊤
 
 Examples:
 
@@ -1641,13 +1695,13 @@ that isn't a comment, such as when the comment I<is> an C<expr> or C<value>
 node.
 
 A C<non_value_comment> node, in contrast, is strictly not part of the code
-proper; Muldis D code can contain these almost anywhere as meta-data for
+proper; Muldis D code can contain these almost anywhere as metadata for
 the code, and in large part it is treated as if it were part of the
 insignificant whitespace; that all being said, generally speaking any
 C<non_value_comment> is retained in the parse tree adjusted to live in the
 contextually nearest place where a resulting system catalog node has a
-C<comment> attribute.  I<Details of determining the contextually nearest
-place for these comments to go is pending.>
+C<scm_comment> attribute.  I<Details of determining the contextually
+nearest place for these comments to go is pending.>
 
 Syntactically, a C<non_value_comment> node differs from C<Comment_payload>
 only in that each string segment is delimited by number-signs/hash-marks
@@ -2338,6 +2392,8 @@ Examples:
 
     MPInterval:{1..3,6,8..9}  # 6 elements #
 
+    MPInterval:{-Inf..3,14..21,29..Inf}  # all Int besides {4..13,22..28} #
+
 =head2 Low Level List Selectors
 
 Grammar:
@@ -2641,7 +2697,7 @@ So a C<x_material>|C<material> node has 2-3 elements in general:
 =item C<material_kind>
 
 This is a character string of the format C<< [<[ a..z ]>+] ** '-' >>; it
-identifies the kind of the material and is the only external meta-data of
+identifies the kind of the material and is the only external metadata of
 C<material_payload> generally necessary to interpret the latter; what
 grammars are valid for C<material_payload> depend just on C<material_kind>.
 
@@ -2991,7 +3047,7 @@ Examples:
 
     if $foo > 5 then $bar else $baz
 
-    if $ary is-empty then $empty_result else $ary.[0]
+    if is_empty($ary) then $empty_result else $ary.[0]
 
     if $x = ∅ or $y = ∅ then ∅
         else s ((v $x) i+ ((v $y) i^ 3)
@@ -3600,8 +3656,8 @@ C<monadic_postfix_op_invo> supplies the value of that argument.
 
 This table indicates which function is invoked by each keyword:
 
-    ++ -> Core.Integer.succ( $expr )
-    -- -> Core.Integer.pred( $expr )
+    ++ -> Core.Ordered.Ordinal.succ( $expr )
+    -- -> Core.Ordered.Ordinal.pred( $expr )
     i! -> Core.Integer.factorial( $expr )
 
 Examples:
@@ -4006,7 +4062,7 @@ Some of the keywords are aliases for each other:
 
 This table indicates which function is invoked by each keyword:
 
-    <=> -> Core.Scalar.order( $lhs, $rhs )
+    <=> -> Core.Ordered.order( $lhs, $rhs )
 
     min -> Core.Ordered.min( Set:{ $expr[0], ..., $expr[n] } )
     max -> Core.Ordered.max( Set:{ $expr[0], ..., $expr[n] } )
