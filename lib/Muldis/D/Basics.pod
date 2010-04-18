@@ -9,7 +9,7 @@ Muldis::D::Basics -
 
 =head1 VERSION
 
-This document is Muldis::D::Basics version 0.117.0.
+This document is Muldis::D::Basics version 0.118.0.
 
 =head1 PREFACE
 
@@ -255,7 +255,7 @@ order to use all Muldis D features:
     "   | F;22 | QUOTATION MARK         | double-quot; delim quot Name lits
     #   | F;23 | NUMBER SIGN            | delim not-val Comments, cardin op
     $   | F;24 | DOLLAR SIGN            | sigil f data/val entnms, rep scal
-    %   | F;25 | PERCENT SIGN           | sigil rep tuples; modulo/rem op
+    %   | F;25 | PERCENT SIGN           | sigil rep tuples
     &   | F;26 | AMPERSAND              | sigil for subj-to-upd params/args
     '   | F;27 | APOSTROPHE             | single-quot; delim Text|Blob lits
     (   | F;28 | LEFT PARENTHESIS       | delim param/arg list
@@ -3487,7 +3487,8 @@ type.func_result[.<path-elem-to-func>]**1..*[.<path-elem-to-attr>]**0..*
 A slightly more complicated scenario is taking the declared type of a
 routine parameter, which takes the form C<<
 type.param[.<path-elem-to-rtn>]**1..*.<param-name>[.<path-elem-to-attr>]**0
-..* >>, for example C<type.param.sys.std.Core.Integer.quotient.divisor>.
+..* >>, for example
+C<type.param.sys.std.Core.Integer.whole_quotient.divisor>.
 
 Another scenario is first taking the declared type of something where that
 type is a relation type, and then taking the tuple type in terms of which

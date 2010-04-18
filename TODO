@@ -53,43 +53,18 @@ most important type, etc; when doing "recipe", we'd get "updater" for free.
 
 ----------
 
-* Maybe rename Integer.pod to Integral.pod,
-Text.pod to Textual.pod, Blob.pod to Blobby.pod, etc.
-Or standardize in some other way between mixins and types named after.
-
 * Create the following mixins and group types and ops under them:
-    - Boolean :
-        - tps: Bool ... and maybe Blobby/Blob (treat logi ops as bitwise)?
-        - ops: not/!, and, or, etc
-    - Diffable :
-        - tps: Numeric, Instant
-        - ops: diff/-, abs_diff/|-| (for Instant, both result in Duration)
-    - Numeric :
-        - tps: Integer, Rational, Duration, ... in the future, Complex etc
-        - ops: abs/||, sum/+, range, mean, median, mode,
-            product/*, quotient/'/' (for Duration, last 2 hv Rat 2nd param)
-    - Integer :
-        - tps: Int
-        - ops: remainder/mod/%, power/i^, factorial/i!, fetch_random
-    - Rational :
-        - tps: Rat
-        - ops: power/r^, log, natural_[power|log], fetch_random
-    - Stringy :
-        - tps: Blobby, Textual, String, NameChain ... mbe Array in general?
-        - ops: catenation/~, replication/x
-    - Blobby :
-        - tps: Blob
-        - ops: other Blob ops
-    - Textual :
-        - tps: Text, Name, Comment
-        - ops: other Text ops
     - Collective :
         - tps: Set, Array, Bag, SPInterval, MPInterval
         - ops: in/∈, has/∋
     - Instant :
         - tps: TAIInstant, UTCInstant, FloatInstant
-        - ops: later, earlier (both have second param of Duration)
+        - ops: later, earlier (both have second param of Duration),
+            diff/-, abs_diff/|-| (both result in Duration),
+            fetch_curr_* (bec no a func, target param canbe dispatch param)
     - Duration :
+        - note: while resembling Numeric, this shouldn't do Numeric,
+            probably; or maybe so; Duration's mul,div hv Rat 2nd param
         - tps: TAIDuration, UTCDuration
         - ops: (none added)
 And these types have these similar ops:
@@ -327,9 +302,6 @@ IDEA:  Maybe make all normal math/etc ops work with the extended versions
 those special values they just use a declared type excluding them, and then
 the normal type constraints will take care of throwing exceptions when one
 divides by zero for example.
-And so we then can also rid ourselves of having to use Maybe (as it stands
-now based on Set) in as many situations as we do now, where functions come
-in pairs where one chooses between a Maybe or a possible exception.
 
 * Flesh out Interval.pod to add a complement of functions for comparing
 multiple intervals in different ways, such as is-subset, is-overlap,
@@ -384,8 +356,16 @@ to be used as a default or internal representation everywhere.
 
 ----------
 
-* Update the STD dialects concerning that integer division and modulo now
-have a mandatory third parameter, not yet shown, the rounding-method.
+* Consider updating PTMD_STD only to add more precedence levels.  For
+example by splitting math into exponentiative, multiplicative, additive,
+these being crossed with dyadic-infox, reducing-infix.  Or for example by
+making 'and' higher than 'or', 'join' higher than 'union', etc.  Or for
+example making most ops higher than comparison ops, which are in turn
+higher than logical connectives.  On the other hand, it is possible that
+some code may be more readable when we have more parenthesis in the
+expressions anyway, and the current rules are fairly simple.  Of course,
+the Perl-STD grammars are not affected by all this, as they effectively
+always use parenthesis to force desired precedence.
 
 * IN PROGRESS ...
 Update the STD dialects with special syntax for declaring whole depots

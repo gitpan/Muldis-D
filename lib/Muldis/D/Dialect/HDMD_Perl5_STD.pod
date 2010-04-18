@@ -9,7 +9,7 @@ How to format Perl 5 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.117.0.
+This document is Muldis::D::Dialect::HDMD_Perl5_STD version 0.118.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Hosted Data Muldis D> standard
 dialect named C<HDMD_Perl5_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.117.0',
+standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.118.0',
 'HDMD_Perl5_STD' ]>.
 
 The C<HDMD_Perl5_STD> dialect is defined to be hosted in Perl 5, and is
@@ -125,7 +125,7 @@ repertoire; it is typically the Perl character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.117.0>.
+C<ln_base_authority>; it is typically a character string like C<0.118.0>.
 
 =item C<ln_dialect>
 
@@ -159,12 +159,12 @@ C<temporal>.
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '0.117.0', 'HDMD_Perl5_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.118.0', 'HDMD_Perl5_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended'
     } ]
 
-    [ 'Muldis_D', 'http://muldis.com', '0.117.0', 'HDMD_Perl5_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.118.0', 'HDMD_Perl5_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended',
         standard_syntax_extensions => ['temporal']
@@ -199,7 +199,7 @@ intended to actually be used.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.117.0', 'HDMD_Perl5_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.118.0', 'HDMD_Perl5_STD', {
             catalog_abstraction_level => 'the_floor',
             op_char_repertoire => 'basic'
         } ],
@@ -263,7 +263,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.117.0', 'HDMD_Perl5_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.118.0', 'HDMD_Perl5_STD', {
             catalog_abstraction_level => 'code_as_data',
             op_char_repertoire => 'basic'
         } ],
@@ -274,7 +274,7 @@ Examples:
     ]
 
     [
-       [ 'Muldis_D', 'http://muldis.com', '0.117.0', 'HDMD_Perl5_STD', {
+       [ 'Muldis_D', 'http://muldis.com', '0.118.0', 'HDMD_Perl5_STD', {
           catalog_abstraction_level => 'code_as_data',
           op_char_repertoire => 'basic'
        } ],
@@ -323,7 +323,7 @@ described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.117.0', 'HDMD_Perl5_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.118.0', 'HDMD_Perl5_STD', {
             catalog_abstraction_level => 'plain_rtn_inv',
             op_char_repertoire => 'basic'
         } ],
@@ -348,13 +348,13 @@ EXPRESSIONS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.117.0', 'HDMD_Perl5_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.118.0', 'HDMD_Perl5_STD', {
             catalog_abstraction_level => 'rtn_inv_alt_syn',
             op_char_repertoire => 'basic'
         } ],
         [ 'depot', { 'depot-catalog' => [
             [ 'function', 'cube', [ 'Int', { topic => 'Int' }, [
-                [ 'op', 'i^', [ ['$','topic'], 3 ] ]
+                [ 'op', 'exp', [ ['$','topic'], 3 ] ]
             ] ] ]
         ] } ]
     ]
@@ -1336,7 +1336,7 @@ Examples:
     # A depot having just one function and no dbvar. #
     [ 'depot', { 'depot-catalog' => [
         [ 'function', 'cube', [ 'Int', { topic => 'Int' }, [
-            [ 'op', 'i^', [ ['$','topic'], 3 ] ]
+            [ 'op', 'exp', [ ['$','topic'], 3 ] ]
         ] ] ]
     ] } ]
 
@@ -1478,15 +1478,13 @@ Examples:
     [ 'func-invo', 'Nothing' ]
 
     # single mandatory param #
-    [ 'func-invo', 'Integer.median',
-        [ [ 'Bag', [ 22, 20, 21, 20, 21, 21, 23 ] ] ] ]
+    [ 'func-invo', 'median', [ [ 'Bag', [22, 20, 21, 20, 21, 21, 23] ] ] ]
 
     # single mandatory param #
     [ 'func-invo', 'factorial', { topic => 5 } ]
 
     # two mandatory params #
-    [ 'func-invo', 'Rational.quotient',
-        { dividend => 43.7, divisor => 16.9 } ]
+    [ 'func-invo', 'frac_quotient', { dividend => 43.7, divisor => 16.9 } ]
 
     # one mandatory 'topic' param, two optional #
     [ 'func-invo', 'nlx.lib.barfunc', [ ['$','mand_arg'] ],
@@ -1530,7 +1528,7 @@ Examples:
         [ 'op', '.[]', [['$','ary'], 0] ]
     ]
 
-    [ 'op', 't~', ['My answer is: ',
+    [ 'op', '~', ['My answer is: ',
         [ '??!!', [ [['$','maybe'] => 'yes'] ], 'no' ]] ]
 
 =head2 Generic Given-When-Default Expressions
@@ -1606,13 +1604,13 @@ Examples:
 
     [ 'op', 'xor', [ ['Bool','True'], ['Bool','False'], ['Bool','True'] ] ]
 
-    [ 'op', 'i+', [ 14, 3, -5 ] ]
+    [ 'op', '+', [ 14, 3, -5 ] ]
 
-    [ 'op', 'i*', [ -6, 2, 25 ] ]
+    [ 'op', '*', [ -6, 2, 25 ] ]
 
-    [ 'op', 'r+', [ 4.25, -0.002, 1.0 ] ]
+    [ 'op', '+', [ 4.25, -0.002, 1.0 ] ]
 
-    [ 'op', 'r*', [ 69.3, [ 'Rat', [15,2,6] ], [ 'Rat', [49,23] ] ] ]
+    [ 'op', '*', [ 69.3, [ 'Rat', [15,2,6] ], [ 'Rat', [49,23] ] ] ]
 
     [ 'op', '∪', [ [ 'Set', [ 1, 3, 5 ] ],
         [ 'Set', [ 4, 5, 6 ] ], [ 'Set', [ 0, 9 ] ] ] ]
@@ -1630,12 +1628,12 @@ Examples:
     [ 'op', '[<=>]', [ ['Order','Same'],
         ['Order','Increase'], ['Order','Decrease'] ] ]
 
-    [ 'op', 'b~', [ [ 'Blob', { F => 'DEAD' } ],
+    [ 'op', '~', [ [ 'Blob', { F => 'DEAD' } ],
         [ 'Blob', { 1 => '10001101' } ], [ 'Blob', { F => 'BEEF' } ] ] ]
 
-    [ 'op', 't~', [ 'hello', ' ', 'world' ] ]
+    [ 'op', '~', [ 'hello', ' ', 'world' ] ]
 
-    [ 'op', 'a~', [ [ 'Array', [ 24, 52 ] ],
+    [ 'op', '~', [ [ 'Array', [ 24, 52 ] ],
         [ 'Array', [ -9 ] ], [ 'Array', [ 0, 11, 24, 7 ] ] ] ]
 
     [ 'op', '//', [ ['$','a'], ['$','b'], 42 ] ]
@@ -1656,9 +1654,9 @@ Examples:
 
     [ 'op', 'nand', [ ['Bool','False'], ['Bool','True'] ] ]
 
-    [ 'op', 'i|-|', [ 15, 17 ] ]
+    [ 'op', '|-|', [ 15, 17 ] ]
 
-    [ 'op', 'r|-|', [ 7.5, 9.0 ] ]
+    [ 'op', '|-|', [ 7.5, 9.0 ] ]
 
 =head2 Simple Non-symmetric Dyadic Infix Operators
 
@@ -1678,19 +1676,15 @@ Examples:
 
     [ 'op', 'implies', [ ['Bool','True'], ['Bool','False'] ] ]
 
-    [ 'op', 'i-', [ 34, 21 ] ]
+    [ 'op', '-', [ 34, 21 ] ]
 
-    [ 'op', 'i/', [ 5, 3 ] ]
+    [ 'op', 'exp', [ 2, 63 ] ]
 
-    [ 'op', '%', [ 5, 3 ] ]
+    [ 'op', '-', [ 9.2, 0.1 ] ]
 
-    [ 'op', 'i^', [ 2, 63 ] ]
+    [ 'op', '/', [[ 'Rat', {1 => '101.01'} ], [ 'Rat', {1 => '11.0'} ]] ]
 
-    [ 'op', 'r-', [ 9.2, 0.1 ] ]
-
-    [ 'op', 'r/', [[ 'Rat', {1 => '101.01'} ], [ 'Rat', {1 => '11.0'} ]] ]
-
-    [ 'op', 't-x', [ '-', 80 ] ]
+    [ 'op', 'x', [ '-', 80 ] ]
 
     [ 'op', '∖', [ [ 'Set', [ 8, 4, 6, 7 ] ], [ 'Set', [ 9, 0, 7 ] ] ] ]
 
@@ -1708,9 +1702,9 @@ Examples:
 
     [ 'op', 'not', [['Bool','True']] ]
 
-    [ 'op', 'i||', -23 ]
+    [ 'op', '||', -23 ]
 
-    [ 'op', 'r||', -4.59 ]
+    [ 'op', '||', -4.59 ]
 
     [ 'op', 'r#', [[ 'Set', [ 5, -1, 2 ] ]] ]
 
@@ -1718,7 +1712,7 @@ Examples:
 
     [ 'op', 'r', [['$','tupvar']] ]
 
-    [ 'op', 's', [[ 'op', 'r+',
+    [ 'op', 's', [[ 'op', '+',
         [[ 'op', 'v', [['$','a']] ], [ 'op', 'v', [['$','b']] ]] ]] ]
 
 =head2 Simple Monadic Postfix Operators
@@ -1796,9 +1790,9 @@ Examples:
 
     [ 'op', '[]', [['$','ary'], [10,'..',14]] ]
 
-=head2 Rational Operators That Do Rounding
+=head2 Numeric Operators That Do Rounding
 
-A C<rat_op_invo_with_round> node has exactly 2-3 main op args, each of
+A C<num_op_invo_with_round> node has exactly 2-3 main op args, each of
 which is an C<expr> node that defines an input value for the operator.
 When there are 2 main op args, the first and second args are C<expr> and
 C<round_rule>, respectively.  When there are 3 main op args, the first,
@@ -1806,14 +1800,18 @@ second and third args are C<lhs>, C<rhs> and C<round_rule>, respectively.
 
 Examples:
 
+    [ 'op', 'div', [ 5, 3, ['RoundMeth','ToZero'] ] ]
+
+    [ 'op', 'mod', [ 5, 3, ['RoundMeth','ToZero'] ] ]
+
     [ 'op', 'round', [ ['$','foo'],
         [ 'RatRoundRule', [10,-2,'HalfEven'] ] ] ]
 
-    [ 'op', 'r^', [ 2.0, 0.5, [ 'RatRoundRule', [2,-7,'ToZero'] ] ] ]
+    [ 'op', '**', [ 2.0, 0.5, [ 'RatRoundRule', [2,-7,'ToZero'] ] ] ]
 
     [ 'op', 'log', [ 309.1, 5.4, [ 'RatRoundRule', [10,-4,'HalfUp'] ] ] ]
 
-    [ 'op', 'e^', [ 6.3, [ 'RatRoundRule', [10,-6,'Up'] ] ] ]
+    [ 'op', 'e**', [ 6.3, [ 'RatRoundRule', [10,-6,'Up'] ] ] ]
 
     [ 'op', 'log-e', [ 17.0, [ 'RatRoundRule', [3,-5,'Down'] ] ] ]
 

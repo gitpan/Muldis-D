@@ -1,6 +1,159 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-04-17  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.118.0 is released on CPAN as
+    Muldis-D-0.118.0.tar.gz.
+
+    * This release features the addition of the 2 system-defined mixin
+    types "Numeric" and "Stringy"; the former would be composed by types
+    like "Int" and "Rat", while the latter would be composed by types like
+    "Blob" and "Text".  Related to this, the concrete grammars concerning
+    math and string ops have been consolidated and greatly improved.
+
+    * (PTMD_STD.pod)  In the "DBMS Entity Name Literals" pod sub-section,
+    updated the paragraph about the first special case of "PNSQNameChain"
+    supporting abbreviated chains, to say that if there are multiple
+    in-core routines with the same unqualified name, then that unqualified
+    name may be used for a routine invocation iff exactly 1 of the
+    candidates is a virtual routine and the other candidates implement it;
+    the invocation would then resolve to the virtual routine.
+
+    * (PTMD_STD.pod)  Updated the "NESTING PRECEDENCE RULES" main pod
+    section to give bullet-headings to the 7 precedence levels: "Terms",
+    "P[ost|re]fix", "[Dyadic|Reducing] Infix", "Conditional", "Naming".
+
+    * (Integer.pod, Rational.pod, Ordered.pod, Relation.pod, Set.pod,
+    Array.pod, Bag.pod, Counted.pod)  Removed all 14 "maybe_" variants of
+    built-in functions in order to simplify the language.  Between
+    Integer.pod and Rational.pod, 6 functions that would fail due to a
+    division by zero had counterparts that wrapped the normal result in a
+    Maybe and resulted in nothing when said failure would otherwise occur:
+    "[Integer|Rational].maybe_[quotient|mean]",
+    "Integer.maybe_[remainder|quot_and_rem]"; instead of using those, users
+    can just invoke the normal versions conditionally based on an easily
+    testable input.  In Ordered.pod, 3 N-ary functions that would result in
+    special infinity values as identities if they have zero inputs have
+    counterparts that wrapped the normal result: "maybe_[min|max|minmax]";
+    users should use the normal versions and either conditionally invoke
+    them or conditionally test the results.  In each of the other 5 pod
+    files, there was a single generic reduction operator that took an
+    explicit identity value argument, and a variant saved the need for that
+    argument by resulting in a Maybe:
+    "[Relation|Set|Array|Bag].maybe_reduction",
+    "Counted.counted_maybe_reduction"; use the normal versions instead.
+
+    * (Integer.pod, Rational.pod)  Corrected each of the 2 functions
+    "sys.std.Core.[Integer|Rational].range" so that it now fails if given
+    zero inputs rather than resulting in zero; while a range of zero is the
+    correct answer for a single-element set, a zero-elem set has no range.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  In all 3 STD.pod, renamed the
+    "Rational Operators That Do Rounding" pod sub-section to substitute in
+    "Numeric", and renamed all grammar nodes that it declared from
+    containing "rat_op" to containing "num_op".
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, Integer.pod, Basics.pod)
+    Regarding the "Integer.remainder" function, eliminated the alternate
+    infix op syntax "%" and instead standardized on "mod" for that purpose.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, Integer.pod, Rational.pod)
+    Renamed the alternate syntaxes for all 5 math functions that do either
+    division or exponentiation.  The spellings were changed as follows:
+    "i/" -> "div", "r/" -> "/", "i^" -> "exp", "r^" -> "**", "e^" -> "e**".
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Updated the concrete grammars
+    to reflect that the integer division and modulo operators have a
+    mandatory "round_meth" 3rd parameter; this completes a spec change
+    begun in release 0.113.0, where the function sigs gained the parameter.
+    In all 3 STD.pod, moved "div" and "mod" from the "Simple Non-symmetric
+    Dyadic Infix Operators" pod sub-section to "Numeric Operators That Do
+    Rounding", with appropriate grammar and example code updates.
+
+    * (Integer.pod, Rational.pod, PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod,
+    Basics.pod)  In Integer.pod, renamed each of the 3 functions
+    "quotient", "mean", "mean_of_median" to prepend "whole_".  In
+    Rational.pod, renamed each of the same 3 functions to prepend "frac_".
+    In all 6 files, updated any references to the renamed as appropriate.
+
+    * (Integer.pod, Rational.pod)  Added 8 numeric functions and tweaked
+    the descriptions of others so to bring the complement of integer and
+    rational functions as much in sync with each other as is reasonably
+    possible, and otherwise fill in some related functionality gaps.  In
+    Integer.pod, added these 3 functions: "frac_quotient", "frac_mean",
+    "frac_mean_of_median".  In Rational.pod, added these 3 functions:
+    "whole_quotient", "remainder", "quot_and_rem".  In both files, added
+    the 1 function "power_with_whole_exp".
+
+    * (Types.pod)  In Types.pod, added new mixin type
+    "sys.std.Core.Type.Numeric" in the main pod section "GENERIC MIXIN DATA
+    TYPES".  Also updated the descriptions of the 2 scalar types
+    "Int","Rat" so that they directly compose "Numeric".  Also updated the
+    "TYPE SUMMARY".
+
+    * Added new initially-empty file Core/Numeric.pod whose purpose is to
+    consolidate the main virtual routines associated with the "Numeric"
+    type.  Updated Core.pod and the README file to reflect the added file.
+
+    * (Numeric.pod, Integer.pod, Rational.pod)  In Numeric.pod, added new
+    main pod section "VIRTUAL FUNCTIONS FOR THE NUMERIC MIXIN TYPE" which
+    includes 15 new virtual functions in the "sys.std.Core.Numeric.\w+"
+    namespace: "abs", "sum", "[|abs_]diff", "product",
+    "[frac|whole]_quotient", "remainder", "quot_and_rem", "range",
+    "frac_mean", "median", "frac_mean_of_median", "mode",
+    "power_with_whole_exp".  In each of Integer.pod and Rational.pod,
+    updated each of the 15 functions with the same unqualified names so
+    that it implements the same-named new function, and wrapped up the 15
+    functions into the new main pod section "FUNCTIONS IMPLEMENTING VIRTUAL
+    NUMERIC FUNCTIONS".  Following these changes, in Integer.pod, the main
+    pod section "FUNCTIONS FOR INTEGER MATH" now just has these 4
+    functions: "whole_mean[|_of_median]", "power", "factorial"; in
+    Rational.pod, the main pod section "FUNCTIONS FOR RATIONAL MATH" just
+    has these 5 functions: "round", "[|natural_][power|log]".
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, Numeric.pod, Integer.pod,
+    Rational.pod)  Reorganized all of the special alternate function
+    syntaxes that had belonged to any of the 30 math functions that gained
+    a virtual analogy, so that now only the latter have associated special
+    syntaxes and the former now don't.  The following 5 
+    "Integer","Rational" pairs of syntaxes
+    were consolidated into a single "Numeric" syntax each:
+    "[i|r][+|*|-]" -> "[+|*|-]", "i|-|","r|-|" -> "|-|",
+    "i||","r||" -> "||".  The 2 syntaxes "div","mod" were simply moved from
+    "Integer" to "Numeric", and the 1 "/" from "Rational" to "Numeric". 
+    The 1 new syntax "^" was added initially in "Numeric", for the
+    "power_with_whole_exp" function.
+
+    * (Types.pod, Types_Catalog.pod)  In Types.pod, added new mixin type
+    "sys.std.Core.Type.Stringy" in the main pod section "GENERIC MIXIN DATA
+    TYPES".  Also updated the descriptions of the 2 scalar types
+    "Blob","Text", and the 1 nonscalar type "Array", so that they directly
+    compose "Stringy".  In Types_Catalog.pod, updated the descriptions of
+    the 4 scalar types "String","Name","NameChain","Comment" so that they
+    directly compose "Stringy".  Also updated "TYPE SUMMARY" in both files.
+
+    * Added new initially-empty file Core/Stringy.pod whose purpose is to
+    consolidate the main virtual routines associated with the "Stringy"
+    type.  Updated Core.pod and the README file to reflect the added file.
+
+    * (Stringy.pod, Blob.pod, Text.pod, Array.pod)  In Stringy.pod, added
+    new main pod section "VIRTUAL FUNCTIONS FOR THE STRINGY MIXIN TYPE"
+    which includes 2 new virtual functions in the
+    "sys.std.Core.Stringy.\w+" namespace: "catenation", "replication".  In
+    each of Blob.pod, Text.pod, and Array.pod, updated each of the 2
+    functions with the same unqualified names so that it implements the
+    same-named new function, and wrapped up the 2 functions into the new
+    main pod section "FUNCTIONS IMPLEMENTING VIRTUAL STRINGY FUNCTIONS".
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, Stringy.pod, Blob.pod,
+    Text.pod, Array.pod)  Reorganized all of the special alternate function
+    syntaxes that had belonged to any of the 6 stringy functions that
+    gained a virtual analogy, so that now only the latter have associated
+    special syntaxes and the former now don't.  The following 2
+    "Blob","Text","Array" triples of syntaxes were consolidated into a
+    single "Stringy" syntax each: "[b|t|a][~|-x]" -> "[~|x]".
+
 2010-04-11  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.117.0 is released on CPAN as

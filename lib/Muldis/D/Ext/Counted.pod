@@ -9,7 +9,7 @@ Muldis D extension for count-sensitive relational operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Counted version 0.117.0.
+This document is Muldis::D::Ext::Counted version 0.118.0.
 
 =head1 PREFACE
 
@@ -174,15 +174,6 @@ multiplicity.  This function's C<topic> argument has a C<tcount> attribute
 while its C<identity> argument does not, and both the result tuple of
 C<func> and its C<v1> and C<v2> arguments don't have the C<tcount>
 attribute either.
-
-=head2 sys.std.Counted.counted_maybe_reduction
-
-C<< function sys.std.Counted.counted_maybe_reduction (maybe_of.Tuple <--
-$topic : Relation, $func : ValRedCFuncNC, $count_attr_name : Name) >>
-
-This function is to C<sys.std.Core.Relation.maybe_reduction> as
-C<sys.std.Counted.counted_reduction> is to
-C<sys.std.Core.Relation.reduction>.
 
 =head2 sys.std.Counted.counted_map
 

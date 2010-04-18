@@ -9,7 +9,7 @@ Muldis D generic ordered-sensitive operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Ordered version 0.117.0.
+This document is Muldis::D::Core::Ordered version 0.118.0.
 
 =head1 PREFACE
 
@@ -205,34 +205,6 @@ This function results in a binary tuple whose attribute names are C<min>
 and C<max> and whose respective attribute values are what
 C<sys.std.Core.Ordered.min> and C<sys.std.Core.Ordered.max> would
 result in when given the same arguments.
-
-=head2 sys.std.Core.Ordered.maybe_min
-
-C<< function sys.std.Core.Ordered.maybe_min (Maybe <-- $topic : Set,
-$func? : OrdDetCFuncNC) >>
-
-This function is exactly the same as C<sys.std.Core.Ordered.min> except
-that it results in a C<Maybe> of what is otherwise the result type, and
-that result has zero elements if the argument has zero elements.
-
-=head2 sys.std.Core.Ordered.maybe_max
-
-C<< function sys.std.Core.Ordered.maybe_max (Maybe <-- $topic : Set,
-$func? : OrdDetCFuncNC) >>
-
-This function is to C<sys.std.Core.Ordered.max> as
-C<sys.std.Core.Ordered.maybe_min> is to C<sys.std.Core.Ordered.min>.
-
-=head2 sys.std.Core.Ordered.maybe_minmax
-
-C<< function sys.std.Core.Ordered.maybe_minmax (Relation <--
-$topic : Set, $func? : OrdDetCFuncNC) >>
-
-This function results in a binary relation whose attribute names are C<min>
-and C<max>.  If C<topic> has zero values then the result has a single tuple
-whose respective attribute values are what C<sys.std.Core.Ordered.min>
-and C<sys.std.Core.Ordered.max> would result in when given the same
-arguments; if C<topic> has zero values, then the result has zero tuples.
 
 =head1 SEE ALSO
 
