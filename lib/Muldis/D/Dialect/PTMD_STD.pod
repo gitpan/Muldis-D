@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.122.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.123.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.122.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.123.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -248,7 +248,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.122.0>.
+C<ln_base_authority>; it is typically a character string like C<0.123.0>.
 
 =item C<ln_dialect>
 
@@ -269,12 +269,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.122.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.122.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -357,7 +357,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.122.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -439,7 +439,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.122.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -448,7 +448,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.122.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -495,6 +495,12 @@ following grammar definitions are in effect:
     <expr> ::=
         <expr__plain_rtn_inv>
 
+    <update_stmt> ::=
+        <update_stmt__plain_rtn_inv>
+
+    <proc_stmt> ::=
+        <proc_stmt__plain_rtn_inv>
+
 This abstraction level is the lowest one that can be recommended for
 general use, and every Muldis D implementation that is expected to be
 directly used by programmers (in contrast to its main use just being by way
@@ -533,11 +539,13 @@ position of code elements.
 
 Code written to the C<plain_rtn_inv> level can employ all of the language
 grammar constructs that C<code_as_data> can, plus all of those
-described in these main pod sections: L</GENERIC VALUE EXPRESSIONS>.
+described in these main pod sections: L</MATERIAL SPECIFICATION>,
+L</GENERIC VALUE EXPRESSIONS>, L</GENERIC UPDATER OR RECIPE STATEMENTS>,
+L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.122.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -560,6 +568,12 @@ the following grammar definitions are in effect:
 
     <expr> ::=
         <expr__rtn_inv_alt_syn>
+
+    <update_stmt> ::=
+        <update_stmt__rtn_inv_alt_syn>
+
+    <proc_stmt> ::=
+        <proc_stmt__rtn_inv_alt_syn>
 
 This abstraction level is the highest one and is the most recommended one
 for general use, assuming that all the Muldis D implementations you want to
@@ -592,11 +606,11 @@ parse grammar than SQL in its general case.
 Code written to the C<rtn_inv_alt_syn> level can employ all of the language
 grammar constructs that C<plain_rtn_inv> can, plus all of those described
 in these main pod sections: L</FUNCTION INVOCATION ALTERNATE SYNTAX
-EXPRESSIONS>.
+EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.122.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -670,6 +684,9 @@ following grammar definitions are in effect:
     <dyadic_compare_op> ::=
         <dyadic_compare_op__op_cr_basic>
 
+    <imp_nonsym_dyadic_infix_op> ::=
+        <imp_nonsym_dyadic_infix_op__op_cr_basic>
+
 =head2 extended
 
 The C<extended> operator character repertoire is the largest one, and it
@@ -720,6 +737,9 @@ following grammar definitions are in effect:
 
     <dyadic_compare_op> ::=
         <dyadic_compare_op__op_cr_extended>
+
+    <imp_nonsym_dyadic_infix_op> ::=
+        <imp_nonsym_dyadic_infix_op__op_cr_extended>
 
 =head1 STANDARD SYNTAX EXTENSIONS
 
@@ -2441,14 +2461,14 @@ Grammar:
         <Database>
 
     <catalog__plain_rtn_inv> ::=
-          <Database>
+          <catalog__code_as_data>
         | <depot_catalog_payload>
 
     <depot_catalog_payload> ::=
         '{' <ws>?
             [[
                   <subdepot>
-                | <material>
+                | <named_material>
                 | <self_local_dbvar_type>
             ] ** <ws>]?
         <ws>? '}'
@@ -2623,6 +2643,7 @@ Every material has 2-3 elements, illustrated by this grammar:
         | recipe
         | procedure
             | 'system-service'
+            | transaction
         | 'scalar-type'
         | 'tuple-type'
             | 'database-type'
@@ -2717,13 +2738,6 @@ I<TODO.>
 Grammar:
 
     <expr__plain_rtn_inv> ::=
-        <expr_core_options>
-
-    <expr__rtn_inv_alt_syn> ::=
-          <expr_core_options>
-        | <func_invo_alt_syntax>
-
-    <expr_core_options> ::=
           <delim_expr>
         | <expr_name>
         | <named_expr>
@@ -2734,10 +2748,17 @@ Grammar:
         | <given_when_def_expr>
         | <material_ref_sel_expr>
 
+    <expr__rtn_inv_alt_syn> ::=
+          <expr__plain_rtn_inv>
+        | <func_invo_alt_syntax>
+
     <delim_expr> ::=
         '(' <ws>? <expr> <ws>? ')'
 
     <expr_name> ::=
+        <lex_entity_name>
+
+    <lex_entity_name> ::=
         <data_sigil> <Name_payload>
 
     <data_sigil> ::=
@@ -2864,21 +2885,23 @@ Grammar:
 
     <func_arg_list> ::=
         '(' <ws>?
-            [[<named_ro_arg> | <anon_ro_arg> | <same_named_ro_arg>]
-                ** [<ws>? ',' <ws>?]]?
+            [<func_arg> ** [<ws>? ',' <ws>?]]?
         <ws>? ')'
 
-    <named_ro_arg> ::=
-        <param_name> <ws>? '=>' <ws>? <expr>
+    <func_arg> ::=
+        <named_ro_arg> | <anon_ro_arg> | <same_named_ro_arg>
 
-    <param_name> ::=
+    <named_ro_arg> ::=
+        <invo_param_name> <ws>? '=>' <ws>? <expr>
+
+    <invo_param_name> ::=
         <Name_payload>
 
     <anon_ro_arg> ::=
         <expr>
 
     <same_named_ro_arg> ::=
-        <data_sigil> <pair_cosigil> <param_name>
+        <data_sigil> <pair_cosigil> <invo_param_name>
 
 A C<func_invo> node represents the result of invoking a named
 function with specific arguments.  It is interpreted as a tuple of a
@@ -2929,7 +2952,8 @@ ability to parse exploiting Muldis D code piecemeal.>
 
 A special shorthand for C<named_ro_arg> also exists, C<same_named_ro_arg>,
 which may be used only if the C<expr> of the otherwise-C<named_ro_arg> is
-an C<expr_name> and that C<expr_name> is identical to the C<param_name>.
+an C<expr_name> and that C<expr_name> is identical to the
+C<invo_param_name>.
 In this situation, the identical name can be specified just once, which is
 the shorthand; for example, the named argument C<< foo => $foo >> may
 alternately be written out as C<< $>foo >> (the C<< > >> being meant to
@@ -3112,6 +3136,243 @@ Examples:
 
     # a reference to a data type #
     <nlx.lib.foo_type>
+
+=head1 GENERIC UPDATER OR RECIPE STATEMENTS
+
+Grammar:
+
+    <update_stmt__plain_rtn_inv> ::=
+        <imus_imp_invo>
+
+    <update_stmt__rtn_inv_alt_syn> ::=
+          <update_stmt__plain_rtn_inv>
+        | <imp_invo_alt_syntax>
+
+An C<update_stmt> node is a single member statement of a multi-update
+statement, which must be composed beneath a C<depot>, or specifically into
+an updater or recipe definition, because in the general case a
+C<update_stmt> can I<not> be completely evaluated at compile time.  It is
+interpreted as a tuple of a Muldis D C<sys.std.Core.Type.Cat.MultiUpdStmt>
+value.
+
+=head2 Generic In-Multi-Update-Statement Imperative Invocation Statements
+
+Grammar:
+
+    <imus_imp_invo> ::=
+        <routine_name> <unspace> <imus_imp_arg_list>
+
+    <imus_imp_arg_list> ::=
+        '(' <ws>?
+            [<imus_imp_arg> ** [<ws>? ',' <ws>?]]?
+        <ws>? ')'
+
+    <imus_imp_arg> ::=
+          <named_upd_arg>
+        | <named_ro_arg>
+        | <anon_upd_arg>
+        | <anon_ro_arg>
+        | <same_named_upd_arg>
+        | <same_named_ro_arg>
+
+    <named_upd_arg> ::=
+        <upd_cosigil> <named_ro_arg>
+
+    <upd_cosigil> ::=
+        '&'
+
+    <anon_upd_arg> ::=
+        <upd_cosigil> <anon_ro_arg>
+
+    <same_named_upd_arg> ::=
+        <upd_cosigil> <same_named_ro_arg>
+
+An C<imus_imp_invo> node represents the invocation of a named updater
+or recipe, with specific subject-to-update or read-only arguments, as a
+single member statement of a multi-update statement of an updater or
+recipe.  It is interpreted as a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.MultiUpdStmt> value.  The C<routine_name> element
+specifies the C<imperative> attribute of the new C<MultiUpdStmt>, which is
+the name of the updater or recipe being invoked, and the
+C<imus_imp_arg_list> element specifies the C<upd_args> plus C<ro_args>
+attributes, one tuple thereof per C<imus_imp_arg>; each C<imus_imp_arg>
+having an C<upd_cosigil> yields an C<upd_args> tuple, and each
+C<imus_imp_arg> without one yields a C<ro_args> tuple.
+
+In the general case of an updater or recipe invocation, all of the
+arguments are named, as per C<named_[upd|ro]_arg>, and formatting an
+C<imus_imp_invo> node that way is always allowed.  In some (common) special
+cases, some (which might be all) arguments may be anonymous, as per
+C<anon_[upd|ro]_arg>.  For further details on this, see the C<func_invo>
+node kind, under L</Generic Function Invocation Expressions>, because the
+rules regarding when arguments may be anonymous or must be named are
+the same for all 4 main routine kinds.
+
+The sole exception to said rules is that the rules are evaluated
+independently for subject-to-update arguments and read-only arguments,
+because those 2 argument groups and their corresponding parameters
+effectively have independent namespaces with respect to that the presence
+or absence of an C<upd_cosigil> can always be counted on to distinguish the
+groups.  This means, for example, that you can have an anonymous
+subject-to-update argument plus an anonymous read-only argument to a
+system-defined updater or recipe where none of the corresponding parameters
+are named C<topic>.
+
+The C<imus_imp_invo> node kind also has the same special shorthand for
+named arguments, in the form of C<same_named_[upd|ro]_arg>, as the
+C<func_invo> node kind does with its C<same_named_ro_arg>, but that
+C<imus_imp_invo>'s version also works with subject-to-update arguments.
+
+Examples:
+
+    # two mandatory params, one s-t-u, one r-o #
+    assign( &$foo, 3 )
+
+    # same as previous #
+    assign( 3, &$foo )
+
+    # still same as previous but with all-named syntax #
+    assign( &target => $foo, v => 3 )
+
+    # three mandatory params #
+    nlx.lib.lookup( &$>addr, $>people, $>name )
+
+=head1 GENERIC PROCEDURE STATEMENTS
+
+Grammar:
+
+    <proc_stmt__plain_rtn_inv> ::=
+          <stmt_name>
+        | <named_stmt>
+        | <ovl_sca_val_stmt>
+        | <leave_stmt>
+        | <compound_stmt>
+        | <iproc_func_invo>
+        | <iproc_imp_invo>
+        | <try_catch_stmt>
+        | <if_else_stmt>
+        | <given_when_def_stmt>
+        | <iterate_stmt>
+        | <loop_stmt>
+        | <material_ref_sel_stmt>
+
+    <proc_stmt__rtn_inv_alt_syn> ::=
+          <proc_stmt__plain_rtn_inv>
+        | <imp_invo_alt_syntax>
+
+    <stmt_name> ::=
+        <stmt_sigil> <Name_payload>
+
+    <stmt_sigil> ::=
+        '|'
+
+    <named_stmt> ::=
+        <stmt_name> <ws> <infix_bind_op> <ws> <proc_stmt>
+
+A C<proc_stmt> node is the general case of a Muldis D statement tree, which
+must be composed beneath a C<depot>, or specifically into a procedure
+definition, because in the general case a C<proc_stmt> can I<not> be
+completely evaluated at compile time.
+
+A C<proc_stmt> node in the PTMD_STD grammar corresponds directly to a tuple
+of an attribute of a value of the catalog data type
+C<sys.std.Core.Type.Cat.StmtNodeSet>, which is how a statement node is
+actually represented in Muldis D's nonsugared form, which is as a component
+of the system catalog.  Or more specifically, an entire tree of PTMD_STD
+C<proc_stmt> nodes corresponds to a set of said attribute tuples, one
+attribute tuple per C<proc_stmt> node.  In the nonsugared form, every
+C<proc_stmt> node has an explicitly designated name, as per a PTMD_STD
+C<named_stmt> node, and all child nodes are not declared inline with their
+parent nodes but rather are declared in parallel with them, and the parents
+refer to their children by their names.  A feature of the PTMD_STD grammar
+is that statement nodes may be declared without explicit names, such that
+the parser would generate names for them when deriving system catalog
+entries, and that is why PTMD_STD supports, and encourages the use of for
+code brevity/readability, the use of inline-declared statement nodes.
+
+Iff a C<proc_stmt> is an C<stmt_name>, then this typically means that the
+parent C<proc_stmt> is having at least one of its children declared with an
+explicit name rather than inline, same as the corresponding system catalog
+entry would do, and then the C<stmt_name> is the invocation name of that
+child.
+
+Examples:
+
+    # a stmt_name node #
+    |foo_stmt
+
+    # a named_stmt node #
+    |bar_stmt ::= nlx.lib.swap( &$>first, &$>second )
+
+=head2 Generic In-Procedure Imperative Invocation Statements
+
+Grammar:
+
+    <iproc_imp_invo> ::=
+        <routine_name> <unspace> <iproc_imp_arg_list>
+
+    <iproc_imp_arg_list> ::=
+        '(' <ws>?
+            [<iproc_imp_arg> ** [<ws>? ',' <ws>?]]?
+        <ws>? ')'
+
+    <iproc_imp_arg> ::=
+          <iproc_named_upd_arg>
+        | <iproc_named_ro_arg>
+        | <iproc_anon_upd_arg>
+        | <iproc_anon_ro_arg>
+        | <iproc_same_named_upd_arg>
+        | <iproc_same_named_ro_arg>
+
+    <iproc_named_upd_arg> ::=
+        <upd_cosigil> <iproc_named_ro_arg>
+
+    <iproc_named_ro_arg> ::=
+        <invo_param_name> <ws>? '=>' <ws>? <var_name>
+
+    <iproc_anon_upd_arg> ::=
+        <upd_cosigil> <iproc_anon_ro_arg>
+
+    <iproc_anon_ro_arg> ::=
+        <var_name>
+
+    <var_name> ::=
+        <lex_entity_name>
+
+    <iproc_same_named_upd_arg> ::=
+        <upd_cosigil> <iproc_same_named_ro_arg>
+
+    <iproc_same_named_ro_arg> ::=
+        <data_sigil> <pair_cosigil> <invo_param_name>
+
+An C<iproc_imp_invo> node represents the invocation of a named imperative
+routine, with specific subject-to-update or read-only arguments, as a
+statement of a procedure.  It is interpreted as a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.ImpInvoStmtNodeSet> value.  The C<routine_name>
+element specifies the C<imperative> attribute of the new
+C<ImpInvoStmtNodeSet>, which is the name of the imperative routine being
+invoked, and the C<iproc_imp_arg_list> element specifies the C<upd_args>
+plus C<ro_args> attributes, one tuple thereof per C<iproc_imp_arg>; each
+C<iproc_imp_arg> having an C<upd_cosigil> yields an C<upd_args> tuple, and
+each C<iproc_imp_arg> without one yields a C<ro_args> tuple.
+
+For details regarding the variation of formats that an C<iproc_imp_arg> can
+have, including when arguments may be anonymous or be written out in
+shorthand, see the C<imus_imp_invo> node kind, under L</Generic
+In-Multi-Update-Statement Imperative Invocation Statements>, because the
+rules regarding these things are the same for imperatives invoked by a
+procedure as for imperatives invoked by an updater or recipe.  The only
+main difference between an C<iproc_imp_invo> and a C<imus_imp_invo> is that
+the former may only name its host procedure's variables (or parameters) as
+arguments while the latter can use arbitrary value expressions for that.
+
+Examples:
+
+    fetch_curr_instant( &$now )
+
+    prompt_Text_line( &$user_input, $message )
+
+    Integer.fetch_random( &$rand, $interval )
 
 =head1 FUNCTION INVOCATION ALTERNATE SYNTAX EXPRESSIONS
 
@@ -4062,6 +4323,164 @@ Examples (for now sans any use of extra op args, which are atypical):
     $a ∈i SPInterval:{1..5}
 
     $foo ∉i SPInterval:{$min..^$max}
+
+=head1 IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS
+
+Grammar:
+
+    <imp_invo_alt_syntax> ::=
+          <imp_monadic_postfix_op_invo>
+        | <imp_nonsym_dyadic_infix_op_invo>
+        | ...
+
+An C<imp_invo_alt_syntax> node represents the invocation of a named
+system-defined imperative routine with specific arguments.  It is
+interpreted as a tuple of a Muldis D C<sys.std.Core.Type.Cat.MultiUpdStmt>
+or C<sys.std.Core.Type.Cat.ImpInvoExprNodeSet> value.  An
+C<imp_invo_alt_syntax> node is a lot like an C<imus_imp_invo> or
+C<iproc_imp_invo> node in purpose and interpretation but it differs in
+several significant ways.
+
+While an C<imus_imp_invo> or C<iproc_imp_invo> node can be used to invoke
+any imperative routine at all (except that an C<imus_imp_invo> can't invoke
+a procedure), an C<imp_invo_alt_syntax> node can only invoke a fraction of
+them, and only standard system-defined imperative routines.  While an
+C<imus_imp_invo> or C<iproc_imp_invo> node uses a simple common format with
+all imperative routines, written in prefix notation with generally named
+arguments, an C<imp_invo_alt_syntax> node uses potentially unique syntax
+for each imperative routine, often written in infix notation, although
+inter-imperative routine format consistency is still applied as much as is
+reasonably possible.
+
+Broadly speaking, an C<imp_invo_alt_syntax> node has 2-3 kinds of payload
+elements:  The first is the determinant of what imperative routine to
+invoke, hereafter referred to as an I<op> or I<keyword>.  The second is an
+ordered list of 1-N mandatory imperative routine inputs, hereafter referred
+to as I<main op args>, whose elements typically have generic names like
+C<var_name> or C<lhs_var> or C<rhs_var>.  The (optional) third is a named
+list of optional imperative routine inputs, hereafter referred to as
+I<extra op args>, whose elements tend to have more purpose-specific names
+such as C<using_clause>, though note that things like C<using_clause> can
+be either mandatory or optional depending on the op they are being used
+with.
+
+Note that, with each of the main imperative invocation alternate syntax
+statement nodes documented in this main POD section (members of
+C<imp_invo_alt_syntax> etc), any occurrences of child C<var_name> nodes
+should be read as being C<expr> nodes instead in contexts where instances
+of the main nodes are being composed beneath C<updater> or C<recipe> nodes,
+and just as C<var_name> nodes when composed beneath C<procedure> nodes.
+This is because any argument to an imperative invocation may be any value
+or pseudo-variable expression (including a parameter) when that invocation
+is in an updater or recipe, but said argument can only be a lexical
+variable or parameter name when in a procedure.
+
+Note that the imperative routines with alternate syntax include updaters,
+recipes, and procedures, and they are all shown in one list for simplicity.
+But only alternate syntax for updaters is valid in an updater, and only
+alternate syntax for updaters and recipes is valid in a recipe; all of
+these alternate syntaxes are valid in a procedure.
+
+=head2 Imperative Simple Monadic Postfix Operators
+
+Grammar:
+
+    <imp_monadic_postfix_op_invo> ::=
+        <var_name> <ws> <imp_monadic_postfix_op>
+
+    <imp_monadic_postfix_op> ::=
+        ':=++' | ':=--'
+
+An C<imp_monadic_postfix_op_invo> node is for using prefix notation to
+invoke a monadic operator imperative routine.  Such a imperative routine
+takes exactly 1 argument, which is the input of the operation.  A single
+C<imp_monadic_postfix_op_invo> node is equivalent to a single
+C<imus_imp_invo> or C<iproc_imp_invo> node whose C<imus_imp_arg_list> or
+C<iproc_imp_arg_list> element defines 1 argument, and the 1 C<var_name>
+element of the C<imp_monadic_postfix_op_invo> supplies the value of that
+argument.
+
+This table indicates which imperative routine is invoked by each keyword:
+
+    :=++ -> Core.Ordered.Ordinal.assign_succ( $var_name )
+    :=-- -> Core.Ordered.Ordinal.assign_pred( $var_name )
+
+Examples:
+
+    $counter :=++
+
+    $countdown :=--
+
+=head2 Imperative Simple Non-symmetric Dyadic Infix Operators
+
+Grammar:
+
+    <imp_nonsym_dyadic_infix_op_invo> ::=
+        <lhs_var> <ws> <imp_nonsym_dyadic_infix_op_invo> <ws> <rhs_var>
+
+    <lhs_var> ::=
+        <var_name>
+
+    <rhs_var> ::=
+        <var_name>
+
+    <imp_nonsym_dyadic_infix_op__op_cr_basic> ::=
+          ':='
+        | ':=union'
+        | ':=where' | ':=!where' | ':=not-where'
+        | ':=intersect' | ':=minus' | ':=except'
+        | ':=!matching' | ':=not-matching' | ':=antijoin | ':=semiminus'
+        | ':=matching' | ':=semijoin'
+        | ':=exclude' | ':=symdiff'
+
+    <imp_nonsym_dyadic_infix_op__op_cr_extended> ::=
+          <imp_nonsym_dyadic_infix_op__op_cr_basic>
+        | ':=∪'
+        | ':=∩' | ':=∖' | ':=⊿' | ':=⋉'
+        | ':=∆'
+
+An C<imp_nonsym_dyadic_infix_op_invo> node is for using infix notation to
+invoke a non-symmetric dyadic operator imperative routine.  Such an
+imperative routine takes exactly 2 arguments.  A single
+C<imp_nonsym_dyadic_infix_op_invo> node is equivalent to a single
+C<imus_imp_invo> or C<iproc_imp_invo> node whose C<imus_imp_arg_list> or
+C<iproc_imp_arg_list> element defines 2 arguments, and the 2 C<var_name>
+elements of the C<imp_nonsym_dyadic_infix_op_invo> supply the values of
+those arguments, which are associated in the appropriate sequence.  When
+using this infix syntax, the C<&> cosigil isn't used to mark the
+subject-to-update argument(s).
+
+Some of the keywords are aliases for each other:
+
+    keyword     | aliases
+    ------------+--------
+    :=union     | :=∪
+    :=!where    | :=not-where
+    :=intersect | :=∩
+    :=minus     | :=∖ :=except
+    :=!matching | :=⊿ :=not-matching :=antijoin :=semiminus
+    :=matching  | :=⋉ :=semijoin
+    :=exclude   | :=∆ :=symdiff
+
+This table indicates which imperative routine is invoked by each keyword:
+
+    :=          -> Core.Universal.assign( &$lhs_var, $rhs_var )
+    :=union     -> Core.Relation.assign_union( &$lhs_var, $rhs_var )
+    :=where     -> Core.Relation.assign_restriction( &$lhs_var, $rhs_var )
+    :=!where    -> Core.Relation.assign_cmpl_restr( &$lhs_var, $rhs_var )
+    :=intersect -> Core.Relation.assign_intersection( &$lhs_var, $rhs_var )
+    :=minus     -> Core.Relation.assign_diff( &$lhs_var, $rhs_var )
+    :=!matching -> Core.Relation.assign_semidiff( &$lhs_var, $rhs_var )
+    :=matching  -> Core.Relation.assign_semijoin( &$lhs_var, $rhs_var )
+    :=exclude   -> Core.Relation.assign_exclusion( &$lhs_var, $rhs_var )
+
+Examples:
+
+    # assign 3 to $foo #
+    $foo := 3
+
+    # delete every person in $people whose age is either 10 or 20 #
+    $people :=!matching Relation:{ { age => 10 }, { age => 20 } }
 
 =head1 NESTING PRECEDENCE RULES
 

@@ -9,7 +9,7 @@ Muldis D generic ordered-sensitive operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Ordered version 0.122.0.
+This document is Muldis::D::Core::Ordered version 0.123.0.
 
 =head1 PREFACE
 
@@ -205,6 +205,28 @@ This function results in a binary tuple whose attribute names are C<min>
 and C<max> and whose respective attribute values are what
 C<sys.std.Core.Ordered.min> and C<sys.std.Core.Ordered.max> would
 result in when given the same arguments.
+
+=head1 VIRTUAL UPDATERS FOR THE ORDINAL MIXIN TYPE
+
+=head2 sys.std.Core.Ordered.Ordinal.assign_pred
+
+C<updater sys.std.Core.Ordered.Ordinal.assign_pred (&$topic@ : Ordinal)
+{...}>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Ordered.Ordinal.pred> function with the same argument, and
+then assigning the result of that function to its argument.  Note that this
+operation is also known as C<:=-->.
+
+=head2 sys.std.Core.Ordered.Ordinal.assign_succ
+
+C<updater sys.std.Core.Ordered.Ordinal.assign_succ (&$topic@ : Ordinal)
+{...}>
+
+This update operator is a short-hand for first invoking the
+C<sys.std.Core.Ordered.Ordinal.succ> function with the same argument, and
+then assigning the result of that function to its argument.  Note that this
+operation is also known as C<:=++>.
 
 =head1 SEE ALSO
 

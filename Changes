@@ -1,6 +1,120 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-04-27  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.123.0 is released on CPAN as
+    Muldis-D-0.123.0.tar.gz.
+
+    * This release features the addition of concrete syntax in all 3 Muldis
+    D dialects for writing statements of imperative routines, particularly
+    ones for invoking imperative routines; both generic invocation syntax
+    for any imperative plus special alternate syntax for 11 imperatives
+    including the generic variable assignment operator ":=" are included.
+    This complements the long-existing concrete syntax for invoking
+    functions and writing value expressions.  And so now the vast majority
+    of what one would normally write within a routine body is now specced.
+    The most important related thing still not specced is declaring the
+    scaffolding and interfaces/signatures of routines, as well as inlining
+    a routine inside a routine ("with" clause), and those are expected to
+    be delivered in the very next release.  Also still not specced and not
+    to be delivered until later on include most kinds of statements one
+    would only find in a procedure that aren't routine invocations, such as
+    imperative conditionals and loops, especially loops.
+
+    * (Types_Catalog.pod)  For each of the 4 catalog types "Function",
+    "Updater", "Recipe", "Procedure" updated the description with its
+    "dispatch_params" attribute to clarify that any given routine parameter
+    can not be both a dispatch parameter and an optional parameter.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  In the "plain_rtn_inv" pod
+    sub-section, corrected a mistaken omission by adding "MATERIAL
+    SPECIFICATION" to the list of main pod sections whose grammar
+    constructs code at the "plain_rtn_inv" abstraction level may employ.
+
+    * (PTMD_STD.pod)  Updated the "Material Specification Common Elements"
+    pod sub-section to add "transaction" as an option (subservient to
+    "procedure" like "system-service") to the "material_kind" grammar node.
+
+    * (PTMD_STD.pod)  Multiple small grammar updates or refactors.  Split
+    the "func_arg_list" grammar node into itself plus "func_arg", and
+    "expr_name" into itself plus "lex_entity_name".  Renamed the
+    "param_name" node to "invo_param_name".  The "depot_catalog_payload"
+    node now composes a "named_material" rather than a "material".  The
+    "expr_core_options" node has been merged into the "expr__plain_rtn_inv"
+    node, and "expr__rtn_inv_alt_syn" now composes the latter rather than
+    the former.  The "catalog__plain_rtn_inv" node now composes
+    "catalog__code_as_data" rather than "Database", which is composed by
+    its replacement anyway.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, Basics.pod)  In all 3 STD.pod,
+    added the 2 new main pod sections "GENERIC [UPDATER OR
+    RECIPE|PROCEDURE] STATEMENTS", which have the same role as "GENERIC
+    VALUE EXPRESSIONS" but that they describe the generic imperative
+    statement syntaxes rather than the generic value expression syntaxes;
+    the 2 new sections initially have no pod sub-sections.  In PTMD_STD,
+    these sections introduced these new 4 main node kinds: "update_stmt",
+    "proc_stmt", "stmt_name", "named_stmt"; they also include example code
+    for the last 2 of those 4.  In all 3 STD.pod, in the "plain_rtn_inv"
+    pod sub-section, added the 2 new main pod sections to the list of those
+    whose grammar constructs code at the "plain_rtn_inv" abstraction level
+    may employ.  In Basics.pod, updated the main pod section "NOTES ON TEXT
+    CHARACTER LITERALS" concerning the "|" char, which is now the sigil for
+    statement node names as seen in "stmt_name", "named_stmt".
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Added the 2 new pod
+    sub-sections "Generic In-[Multi-Update-Statement|Procedure] Imperative
+    Invocation Statements", one each respectively in the 2 main pod
+    sections "GENERIC [UPDATER OR RECIPE|PROCEDURE] STATEMENTS"; these have
+    the same role as "Generic Function Invocation Expressions" but that
+    they are for invoking imperative routines rather than functions.  In
+    PTMD_STD, these sections introduced these new 2 main node kinds:
+    "imus_imp_invo", "iproc_imp_invo"; they both also include example code.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Added the new main pod
+    section "IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS", which has
+    the same role as "FUNCTION INVOCATION ALTERNATE SYNTAX EXPRESSIONS" but
+    that it describes special syntaxes for invocations of imperative
+    routines rather than of functions; the 2 new sections initially have no
+    pod sub-sections.  In the "rtn_inv_alt_syn" pod sub-section, added the
+    new main pod section to the list of those whose grammar constructs code
+    at the "rtn_inv_alt_syn" abstraction level may employ.  In PTMD_STD,
+    the new section introduced the new main node kind
+    "imp_invo_alt_syntax".  In PTMD_STD.pod, also split each of the 2
+    grammar nodes "update_stmt", "proc_stmt" 3 ways, into itself plus
+    otherwise-same-named variants suffixed with "__plain_rtn_inv" or
+    "__rtn_inv_alt_syn", and tied those triples to the current catalog
+    abstraction level, such that the "__plain_rtn_inv" variant was the same
+    as the pre-split node, and the "__rtn_inv_alt_syn" variant adds to that
+    the "imp_invo_alt_syntax" grammar options.
+
+    * (Ordered.pod, Integer.pod, Boolean.pod)  In Ordered.pod, added the
+    new main pod section "VIRTUAL UPDATERS FOR THE ORDINAL MIXIN TYPE"
+    which includes the 2 new virtual updaters
+    "sys.std.Core.Ordered.Ordinal.assign_[pred|succ]".  In each of
+    Integer.pod and Boolean.pod, added the new main pod section "UPDATERS
+    IMPLEMENTING VIRTUAL ORDINAL FUNCTIONS" which includes 2 new updaters
+    which implement the 2 virtuals and have the same unqualified names.
+    These new updaters provide the exact same functionality as the "--" and
+    "++" monadic operators common to programming languages which decrement
+    or increment a var; Muldis D's existing "pred|succ" weren't mutators.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Within the main pod section
+    "IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS", added the 2 new
+    pod sub-sections "Imperative Simple [Monadic Postfix|Non-symmetric
+    Dyadic Infix] Operators".  The additions provide concrete syntaxes
+    specific to these 11 updaters: 2 "Ordinal.assign_[succ|pred]" as
+    ":=++",":=--", 1 "Universal.assign" as ":=", 8 "Relation.assign_\w+";
+    the unique parts of the latter 8's names being: "union", "restriction",
+    "cmpl_restr", "intersection", "diff", "semidiff", "semijoin",
+    "exclusion".  In PTMD_STD, the 2 new sub-sections introduced the 2 new
+    main node kinds "imp_[monadic_postfix|nonsym_dyadic_infix]_op_invo";
+    both new sections included example code.
+
+    * (Relation.pod, Universal.pod, Ordered.pod)  Added also-known-as notes
+    for 11 assign/assign-shorthand updaters in correspondence to previous
+    change item.
+
 2010-04-25  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.122.0 is released on CPAN as

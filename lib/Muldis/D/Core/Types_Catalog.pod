@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.122.0.
+This document is Muldis::D::Core::Types_Catalog version 0.123.0.
 
 =head1 PREFACE
 
@@ -1491,7 +1491,8 @@ have no I<body> specified.  This attribute indicates the subset of the
 function's parameters whose invocation arguments' types are consulted to
 determine which other function, that explicitly implements this virtual
 one, is automatically dispatched to.  Each element of C<dispatch_params>
-must match a parameter name in C<params>.
+must match a parameter name in C<params>.  Any given parameter can not be
+both a dispatch parameter and an optional parameter.
 
 =item C<implements> - C<set_of.RPFunctionNC>
 
@@ -2433,7 +2434,8 @@ have no I<body> specified.  This attribute indicates the subset of the
 updater's parameters whose invocation arguments' types are consulted to
 determine which other updater, that explicitly implements this virtual
 one, is automatically dispatched to.  Each element of C<dispatch_params>
-must match a parameter name in C<upd_params> or C<ro_params>.
+must match a parameter name in C<upd_params> or C<ro_params>.  Any given
+parameter can not be both a dispatch parameter and an optional parameter.
 
 =item C<implements> - C<set_of.RPImperativeNC>
 
@@ -2591,7 +2593,8 @@ have no I<body> specified.  This attribute indicates the subset of the
 recipe's parameters whose invocation arguments' types are consulted to
 determine which other recipe, that explicitly implements this virtual
 one, is automatically dispatched to.  Each element of C<dispatch_params>
-must match a parameter name in C<upd_params> or C<ro_params>.
+must match a parameter name in C<upd_params> or C<ro_params>.  Any given
+parameter can not be both a dispatch parameter and an optional parameter.
 
 =item C<implements> - C<set_of.RPImperativeNC>
 
@@ -2690,7 +2693,8 @@ have no I<body> specified.  This attribute indicates the subset of the
 procedure's parameters whose invocation arguments' types are consulted to
 determine which other procedure, that explicitly implements this virtual
 one, is automatically dispatched to.  Each element of C<dispatch_params>
-must match a parameter name in C<upd_params> or C<ro_params>.
+must match a parameter name in C<upd_params> or C<ro_params>.  Any given
+parameter can not be both a dispatch parameter and an optional parameter.
 
 =item C<implements> - C<set_of.RPImperativeNC>
 
@@ -2705,7 +2709,7 @@ subtypes of the corresponding ones of the virtuals.
 
 Iff this is C<Bool:True> then the procedure is explicitly declared to be a
 C<system-service>, meaning it will be subject to tighter constraints on its
-allowed actions (it may not see any global variables) and its execution
+allowed actions (it may not invoke any recipes / globals) and its execution
 will automatically be entirely contained within a single transaction of the
 highest possible isolation level, "serializable", same as an recipe is;
 iff this is C<Bool:False> then the procedure is I<not> explicitly declared
