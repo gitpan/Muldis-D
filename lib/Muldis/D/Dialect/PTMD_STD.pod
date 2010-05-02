@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.123.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.124.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.123.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.124.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -248,7 +248,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.123.0>.
+C<ln_base_authority>; it is typically a character string like C<0.124.0>.
 
 =item C<ln_dialect>
 
@@ -269,12 +269,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -357,7 +357,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -439,7 +439,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -448,7 +448,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -545,7 +545,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -610,7 +610,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.123.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -1798,9 +1798,9 @@ C<depot> node, as it describes some semantics.
 
 Examples:
 
-    Scalar:sys.std.Core.Type.Cat.Name:{ "" => 'the_thing' }
+    Scalar:Name:{ "" => 'the_thing' }
 
-    Scalar:sys.std.Core.Type.Rat:float;{
+    Scalar:Rat:float;{
         mantissa => 45207196,
         radix    => 10,
         exponent => 37
@@ -2500,7 +2500,7 @@ such namespaces.
 But a C<subdepot> node doesn't have a corresponding data type for its
 entire content like with a C<depot_catalog_payload>; rather, a C<subdepot>
 node hierarchy is stored flattened in the system catalog, such that each
-tuple of the C<subdepot> attribute from the parent C<Depot> names one
+tuple of the C<subdepots> attribute from the parent C<Depot> names one
 subdepot that exists, and all the subdepot's materials are flattened into
 tuples of the materials-defining attributes of the C<Depot>.
 
@@ -2693,21 +2693,470 @@ sans its name.  Format varies with C<material_kind>.
 
 For material examples, see the subsequent documentation sections.
 
+Note that, for simplicity, the subsequent sections assume for now that
+C<named_material> is the only valid option, and so the
+C<material_declared_name> isn't optional, and the only way to embed a
+material in another is using a C<with_clause>.
+
 =head2 Function Specification
 
-I<TODO.>
+Grammar:
+
+    <function> ::=
+        <function_kind>
+        <ws> <material_declared_name>
+        <ws> <function_payload>
+
+    <function_kind> ::=
+          function
+        | 'named-value'
+        | 'value-map'
+        | 'value-map-unary'
+        | 'value-filter'
+        | 'value-constraint'
+        | 'transition-constraint'
+        | 'value-reduction'
+        | 'order-determination'
+
+    <function_payload> ::=
+        <function_heading> <ws> <function_body>
+
+    <function_heading> ::=
+        <func_signature> [<ws> <implements_clause>]*
+
+    <func_signature> ::=
+        '(' <ws>?
+            <result_type> <ws>? '<--'
+            [<ws>? <func_param> ** [<ws>? ',' <ws>?]]?
+        <ws>? ')'
+
+    <result_type> ::=
+        <type_name>
+
+    <func_param> ::=
+        <ro_reg_param>
+
+    <function_body> ::=
+        <nonempty_function_body> | <empty_routine_body>
+
+    <nonempty_function_body> ::=
+        '{' <ws>?
+            [[<with_clause> | <named_expr>] <ws>]*
+            <expr>
+        <ws>? '}'
+
+A C<function> node specifies a new function that lives in a depot or
+subdepot.  A C<function> node in the PTMD_STD grammar corresponds directly
+to a tuple of the C<functions> attribute of a value of the catalog data
+type C<sys.std.Core.Type.Cat.Depot>, which is how a function specification
+is actually represented in Muldis D's nonsugared form, which is as a
+component of the system catalog.  The C<functions> tuple has 2 primary
+attributes, C<name> and C<material>, which are valued from the C<function>
+node's C<material_declared_name> and C<function_payload> elements,
+respectively.
+
+A C<function_payload> specifies an entire function besides its name.  It is
+interpreted as a Muldis D C<sys.std.Core.Type.Cat.Function> value.  The
+C<function_heading> element specifies the function's public interface,
+which is these 5 attributes of the new C<Function>: C<result_type>,
+C<params>, C<opt_params>, C<dispatch_params>, C<implements>.  The
+C<function_body> element specifies the function's implementation, which is
+the 1 attribute C<expr> of the new C<Function>.
+
+The C<function_kind> has no impact at all on the interpretation of a
+C<function>.  However, it can serve to apply additional constraints on the
+allowed values of the resulting C<Function>, in the manner of simple
+subset-type constraints, and similarly it can serve to add
+self-documentation to the intended purpose or use of the function.  Iff
+C<function_kind> is C<function> then there are no such subset-type
+constraints applied, as the node is simply denoting a generic function; any
+other value of C<function_kind> means that the node is denoting a value of
+a proper subtype of C<Function>, and so that subtype's respective
+constraints are applied to the new C<Function>.  The various
+C<function_kind> map to C<Function> subtypes as follows:
+
+    function kind         | catalog data type
+    ----------------------+------------------
+    function              | Function
+    named-value           | NamedValFunc
+    value-map             | ValMapFunc
+    value-map-unary       | ValMapUFunc
+    value-filter          | ValFiltFunc
+    value-constraint      | ValConstrFunc
+    transition-constraint | TransConstrFunc
+    value-reduction       | ValRedFunc
+    order-determination   | OrdDetFunc
+
+The C<function_heading>'s C<result_type> is interpreted as the
+C<Function>'s C<result_type> attribute.
+
+Any of these kinds of components of a C<function> node are interpreted in
+exactly the same manner as for an C<updater> node, as a C<Function> is to
+an C<Updater>: C<ro_reg_param> (but that the C<Function> attribute is named
+C<params> rather than C<ro_params>), C<implements_clause>,
+C<empty_routine_body>, C<with_clause>, C<named_expr>.
+
+A C<nonempty_function_body> must have at least one C<expr>, because a
+function must by definition result in a value, and that C<expr> says what
+this result value is.  Said result-determining C<expr> must either not be a
+C<named_expr> or it must be a C<named_expr> whose direct C<expr_name> is
+the empty string; the latter option is saying explicitly what the parser
+would otherwise name the C<expr> implicitly.  A C<nonempty_function_body>
+may have at most one C<expr> that isn't a C<named_expr>, because it can
+only have one result-determining C<expr>.
+
+Examples:
+
+    function cube (Int <-- $topic : Int) {
+        $topic exp 3
+    }
 
 =head2 Updater Specification
 
-I<TODO.>
+Grammar:
+
+    <updater> ::=
+        updater
+        <ws> <material_declared_name>
+        <ws> <updater_payload>
+
+    <updater_payload> ::=
+        <updater_heading> <ws> <updater_body>
+
+    <updater_heading> ::=
+        <upd_signature> [<ws> <implements_clause>]*
+
+    <upd_signature> ::=
+        '(' <ws>?
+            <upd_param> ** [<ws>? ',' <ws>?]
+        <ws>? ')'
+
+    <upd_param> ::=
+        <upd_reg_param> | <ro_reg_param>
+
+    <updater_body> ::=
+        <nonempty_updater_or_recipe_body> | <empty_routine_body>
+
+An C<updater> node specifies a new updater that lives in a depot or
+subdepot.  An C<updater> node in the PTMD_STD grammar corresponds directly
+to a tuple of the C<updaters> attribute of a value of the catalog data type
+C<sys.std.Core.Type.Cat.Depot>, which is how an updater specification is
+actually represented in Muldis D's nonsugared form, which is as a component
+of the system catalog.  The C<updaters> tuple has 2 primary attributes,
+C<name> and C<material>, which are valued from the C<updater> node's
+C<material_declared_name> and C<updater_payload> elements, respectively.
+
+An C<updater_payload> specifies an entire updater besides its name.  It is
+interpreted as a Muldis D C<sys.std.Core.Type.Cat.Updater> value.  The
+C<updater_heading> element specifies the updater's public interface, which
+is these 5 attributes of the new C<Updater>: C<upd_params>, C<ro_params>,
+C<opt_params>, C<dispatch_params>, C<implements>.  The C<updater_body>
+element specifies the updater's implementation, which is the 2 attributes
+C<exprs> and C<stmt> of the new C<Updater>.
+
+Any of these kinds of components of an C<updater> node are interpreted in
+exactly the same manner as for a C<recipe> node, as an C<Updater> is to a
+C<Recipe>: C<upd_reg_param>, C<ro_reg_param>, C<implements_clause>,
+C<empty_routine_body>, C<with_clause>, C<update_stmt>, C<named_expr>,
+C<expr>.  In fact, the only structural difference between an updater and a
+recipe is that a recipe has global parameters and an updater doesn't.
+
+Examples:
+
+    updater make_coprime (&$a : NNInt, &$b : NNInt) {
+        with function gcd (NNInt <-- $a : NNInt, $b : NNInt) {
+            $b = 0 ?? $a !! rtn( a => $b, b => $a mod $b round Down )
+        }
+        $gcd ::= nlx.lib.gcd( $>a, $>b )
+        $a := $a div $gcd round Down
+        $b := $b div $gcd round Down
+    }
 
 =head2 Recipe Specification
 
-I<TODO.>
+Grammar:
+
+    <recipe> ::=
+        recipe
+        <ws> <material_declared_name>
+        <ws> <recipe_payload>
+
+    <recipe_payload> ::=
+        <recipe_heading> <ws> <recipe_body>
+
+    <recipe_heading> ::=
+        <rcp_signature> [<ws> <implements_clause>]*
+
+    <rcp_signature> ::=
+        '(' <ws>?
+            <rcp_param> ** [<ws>? ',' <ws>?]
+        <ws>? ')'
+
+    <rcp_param> ::=
+          <upd_reg_param>
+        | <ro_reg_param>
+        | <upd_global_param>
+        | <ro_global_param>
+
+    <upd_reg_param> ::=
+        <upd_cosigil> <ro_reg_param>
+
+    <upd_cosigil> ::=
+        '&'
+
+    <ro_reg_param> ::=
+        <param_name> <param_flag>? <ws>? ':' <ws>? <type_name>
+
+    <param_name> ::=
+        <lex_entity_name>
+
+    <lex_entity_name> ::=
+        <data_sigil> <Name_payload>
+
+    <data_sigil> ::=
+        '$'
+
+    <param_flag> ::=
+        <opt_param_flag> | <dispatch_param_flag>
+
+    <opt_param_flag> ::=
+        '?'
+
+    <dispatch_param_flag> ::=
+        '@'
+
+    <upd_global_param> ::=
+        <upd_cosigil> <ro_global_param>
+
+    <ro_global_param> ::=
+        <param_name> <ws>? <infix_bind_op> <ws>? <global_var_name>
+
+    <infix_bind_op> ::=
+        '::='
+
+    <global_var_name> ::=
+        <PNSQNameChain_payload>
+
+    <implements_clause> ::=
+        implements <ws> <routine_name>
+
+    <routine_name> ::=
+        <PNSQNameChain_payload>
+
+    <recipe_body> ::=
+        <nonempty_updater_or_recipe_body> | <empty_routine_body>
+
+    <nonempty_updater_or_recipe_body> ::=
+        '{' <ws>?
+            [[<with_clause> | <named_expr> | <update_stmt>] <ws>]*
+            <update_stmt>
+        <ws>? '}'
+
+    <with_clause> ::=
+        with <ws> <named_material>
+
+    <empty_routine_body> ::=
+        '{' <ws>? '...' <ws>? '}'
+
+A C<recipe> node specifies a new recipe that lives in a depot or subdepot.
+A C<recipe> node in the PTMD_STD grammar corresponds directly to a tuple of
+the C<recipes> attribute of a value of the catalog data type
+C<sys.std.Core.Type.Cat.Depot>, which is how a recipe specification is
+actually represented in Muldis D's nonsugared form, which is as a component
+of the system catalog.  The C<recipes> tuple has 2 primary attributes,
+C<name> and C<material>, which are valued from the C<recipe> node's
+C<material_declared_name> and C<recipe_payload> elements, respectively.
+
+A C<recipe_payload> specifies an entire recipe besides its name.  It is
+interpreted as a Muldis D C<sys.std.Core.Type.Cat.Recipe> value.  The
+C<recipe_heading> element specifies the recipe's public interface, which is
+these 7 attributes of the new C<Recipe>: C<upd_params>, C<ro_params>,
+C<opt_params>, C<upd_global_params>, C<ro_global_params>,
+C<dispatch_params>, C<implements>.  The C<recipe_body> element specifies
+the recipe's implementation, which is the 2 attributes C<exprs> and C<stmt>
+of the new C<Recipe>.
+
+Iff the C<recipe_heading> has at least one C<upd_reg_param> or
+C<ro_reg_param>, then the recipe has one or more regular parameters, which
+are what another routine can explicitly supply arguments for in an
+invocation of the recipe; each regular parameter is either
+subject-to-update or read-only.  Each C<upd_reg_param> is primarily
+interpreted as a tuple of the C<Recipe>'s C<upd_params> attribute, and each
+C<ro_reg_param> is primarily interpreted as a tuple of the C<Recipe>'s
+C<ro_params> attribute; for each tuple, the C<param_name> and C<type_name>,
+respectively, of the C<upd_reg_param> or C<ro_reg_param> provide the
+tuple's C<name> and C<type> attribute.  Iff any of the parameters have an
+C<opt_param_flag>, then those parameters are optional to supply arguments
+for; for each parameter with an C<opt_param_flag>, the C<Recipe>'s
+C<opt_params> attribute has a tuple with the parameter's C<param_name>.
+Iff any of the parameters have a C<dispatch_param_flag>, then the recipe is
+being explicitly declared to be a virtual recipe, and so the C<recipe_body>
+must be C<empty_routine_body>; for each parameter with a
+C<dispatch_param_flag>, the C<Recipe>'s C<dispatch_params> attribute has a
+tuple with the parameter's C<param_name>.
+
+Iff the C<recipe_heading> has at least one C<upd_global_param> or
+C<ro_global_param>, then the recipe has one or more global parameters,
+which are lexical aliases for global variables; each global parameter is
+either subject-to-update or read-only.  Each C<upd_global_param> is
+primarily interpreted as a tuple of the C<Recipe>'s C<upd_global_params>
+attribute, and each C<ro_global_param> is primarily interpreted as a tuple
+of the C<Recipe>'s C<ro_global_params> attribute; for each tuple, the
+C<param_name> and C<global_var_name>, respectively, of the
+C<upd_global_param> or C<ro_global_param> provide the tuple's C<name> and
+C<global> attribute.
+
+Iff the C<recipe_heading> has at least one C<implements_clause>, then the
+recipe is explicitly declaring that it implements one or more virtual
+recipe, one being named by each C<implements_clause>.  Each
+C<implements_clause> is interpreted as a tuple of the C<Recipe>'s
+C<implements> attribute.
+
+Iff the C<recipe_body> is an C<empty_routine_body>, then the C<Recipe>'s
+C<exprs> and C<stmt> attributes are both empty.
+
+Iff the C<recipe_body> has at least one C<with_clause>, then the recipe is
+explicitly declaring that it has one or more inner materials, such that the
+other materials are conceptually part of the implementation of the recipe;
+each C<with_clause> specifies one inner material in its C<named_material>
+element.  A C<with_clause> is not interpreted as any part of the C<Recipe>
+but rather results in other additions to its parent C<Depot>, in a manner
+similar to as if the C<named_material> were specified externally of the
+C<recipe> node; but see the L</MATERIAL SPECIFICATION> main description for
+details on the complete effects of specifying an inner material.
+
+A C<nonempty_updater_or_recipe_body> must have at least one C<update_stmt>,
+because a recipe must by definition update at least one of its (regular or
+global) parameters, though possibly to the same value it already has, lest
+it otherwise be an unconditional no-op.  Each C<update_stmt> is interpreted
+as a tuple of the C<Recipe>'s C<stmt> attribute.
+
+Iff the C<recipe_body> directly has at least one C<named_expr>, then each
+such C<named_expr> is interpreted as a tuple of an attribute of the
+C<Recipe>'s C<exprs> attribute such that said tuple's C<name> is explicitly
+user-defined rather than generated by the parser.  Any C<expr> contained in
+a C<recipe_body> by way of one of its direct C<update_stmt> or
+C<named_expr> will similarly be interpreted as a tuple of an attribute of
+the C<Recipe>'s C<exprs> attribute, where said tuple's C<name> is either
+user-defined or generated as appropriate for the kind of C<expr>.
+
+Examples:
+
+    recipe count_heads (&$count : NNInt, $search : Text,
+            $people ::= $fed.data.db1.people) {
+        with value-filter filt (Bool <-- $topic : Tuple, $search : Text) {
+            $.name like ('%' ~ $search ~ '%')
+        }
+        $count := r# ($people where <nlx.lib.filt>( $>search ))
+    }
 
 =head2 Procedure Specification
 
-I<TODO.>
+Grammar:
+
+    <procedure> ::=
+        <procedure_kind>
+        <ws> <material_declared_name>
+        <ws> <procedure_payload>
+
+    <procedure_kind> ::=
+        procedure | 'system-service' | transaction
+
+    <procedure_payload> ::=
+        <procedure_heading> <ws> <procedure_body>
+
+    <procedure_heading> ::=
+        <proc_signature> [<ws> <implements_clause>]*
+
+    <proc_signature> ::=
+        '(' <ws>?
+            [<proc_param> ** [<ws>? ',' <ws>?]]?
+        <ws>? ')'
+
+    <proc_param> ::=
+        <upd_reg_param> | <ro_reg_param>
+
+    <procedure_body> ::=
+        <nonempty_procedure_body> | <empty_routine_body>
+
+    <nonempty_procedure_body> ::=
+        '{' <ws>?
+            [[<with_clause> | <proc_var> | <proc_stmt>] <ws>]*
+            <proc_stmt>
+        <ws>? '}'
+
+    <proc_var> ::=
+        var <ws> <var_name> <ws>? ':' <ws>? <type_name>
+
+A C<procedure> node specifies a new procedure that lives in a depot or
+subdepot.  A C<procedure> node in the PTMD_STD grammar corresponds directly
+to a tuple of the C<procedures> attribute of a value of the catalog data
+type C<sys.std.Core.Type.Cat.Depot>, which is how a procedure specification
+is actually represented in Muldis D's nonsugared form, which is as a
+component of the system catalog.  The C<procedures> tuple has 2 primary
+attributes, C<name> and C<material>, which are valued from the C<procedure>
+node's C<material_declared_name> and C<procedure_payload> elements,
+respectively.
+
+A C<procedure_payload> specifies an entire procedure besides its name.  It
+is interpreted as a Muldis D C<sys.std.Core.Type.Cat.Procedure> value.  The
+C<procedure_heading> element specifies the procedure's public interface,
+which is these 7 attributes of the new C<Procedure>: C<upd_params>,
+C<ro_params>, C<opt_params>, C<dispatch_params>, C<implements>,
+C<is_system_service>, C<is_transaction>.  The C<procedure_body> element
+specifies the procedure's implementation, which is the 2 attributes
+C<vars> and C<stmt> of the new C<Procedure>.
+
+The C<procedure_kind> element of a C<procedure> node is the sole
+determinant of the values of the C<is_system_service> and C<is_transaction>
+attributes of the resulting C<Procedure>; for each valid combination there
+also exists a C<Procedure> subtype.  It also can serve to add
+self-documentation to the intended purpose or use of the procedure.  The
+various C<procedure_kind> map to attribute values and C<Procedure> subtypes
+as follows:
+
+    procedure kind | is_system_service | is_transaction | catalog data type
+    ---------------+-------------------+----------------+------------------
+    procedure      | Bool:False        | Bool:False     | Procedure
+    system-service | Bool:True         | Bool:True      | SystemService
+    transaction    | Bool:False        | Bool:True      | Transaction
+
+Any of these kinds of components of a C<procedure> node are interpreted in
+exactly the same manner as for an C<updater> node, as a C<Procedure> is to
+an C<Updater>: C<upd_reg_param>, C<ro_reg_param>, C<implements_clause>,
+C<empty_routine_body>, C<with_clause>.
+
+Iff the C<procedure_body> has at least one C<proc_var>, then the procedure
+has one or more regular lexical variables, whose names are explicitly
+user-defined rather than generated by the parser, which are the exclusive
+means (besides its own subject-to-update parameters) for a procedure to
+directly shuttle transient data between its statements for use as their
+arguments or logic branch conditions.  Each C<proc_var> is interpreted as a
+tuple of the C<Procedure>'s C<vars> attribute; for each tuple, the
+C<var_name> and C<type_name>, respectively, of the C<proc_var> provide the
+tuple's C<name> and C<type> attribute.
+
+A C<nonempty_procedure_body> must have at least one C<proc_stmt>, although
+that C<proc_stmt> can simply cause the procedure to exit, making the
+procedure a no-op.  Each C<proc_stmt> is interpreted as a tuple of an
+attribute of the the C<Procedure>'s C<stmt> attribute.  A C<proc_stmt> may
+also, and typically does, also have nested C<proc_stmt>, thereby forming a
+tree, and that tree is flattened with each nested C<proc_stmt> becoming its
+own tuple under C<stmt> like with the first.
+
+Examples:
+
+    procedure print_curr_time () {
+        var $now : Instant
+        fetch_curr_instant( &$now )
+        with updater compose_message (&$message : Text, $now : Instant) {
+            $message := 'The current time is: '
+                ~ nlx.par.lib.utils.time_as_text( time => $now )
+        }
+        var $message : Text
+        nlx.lib.compose_message( &$>message, $>now )
+        write_Text_line( $message )
+    }
 
 =head2 Scalar Type Specification
 
@@ -2758,17 +3207,8 @@ Grammar:
     <expr_name> ::=
         <lex_entity_name>
 
-    <lex_entity_name> ::=
-        <data_sigil> <Name_payload>
-
-    <data_sigil> ::=
-        '$'
-
     <named_expr> ::=
         <expr_name> <ws> <infix_bind_op> <ws> <expr>
-
-    <infix_bind_op> ::=
-        '::='
 
 An C<expr> node is the general case of a Muldis D value expression tree
 (which normally denotes a Muldis D value selector), which must be composed
@@ -2879,9 +3319,6 @@ Grammar:
 
     <func_invo> ::=
         <routine_name> <unspace> <func_arg_list>
-
-    <routine_name> ::=
-        <PNSQNameChain_payload>
 
     <func_arg_list> ::=
         '(' <ws>?
@@ -3119,6 +3556,17 @@ the routine embedding this expression node, of the routine or type that the
 new C<AbsPathMaterialNC> value is supposed to facilitate portable invoking
 of, from any other routine besides the embedding routine.
 
+A C<material_ref> node also serves as a less-verbose alternate syntax for a
+C<PNSQNameChain> node, but only for C<PNSQNameChain> values where you
+actually don't want a relative-path name-chain value.  For any
+C<material_ref> node whose C<material_name> is already an
+C<AbsPathMaterialNC> payload, a Muldis D parser will silently replace the
+C<material_ref> node with a C<PNSQNameChain> node whose payload is its
+C<material_name>.  In other words, you can safely use any primary namespace
+qualified name chain in a C<material_ref> node and get the result that you
+would reasonably expect.  This is primarily useful for system-defined types
+and routines.
+
 A C<curried_func> node represents a value of the
 C<sys.std.Core.Type.Cat.CurriedFuncNC> type.  It is a special shorthand
 syntax for a C<Tuple> node that defines a tuple with 2 attributes,
@@ -3177,9 +3625,6 @@ Grammar:
 
     <named_upd_arg> ::=
         <upd_cosigil> <named_ro_arg>
-
-    <upd_cosigil> ::=
-        '&'
 
     <anon_upd_arg> ::=
         <upd_cosigil> <anon_ro_arg>
@@ -3244,17 +3689,14 @@ Grammar:
     <proc_stmt__plain_rtn_inv> ::=
           <stmt_name>
         | <named_stmt>
-        | <ovl_sca_val_stmt>
-        | <leave_stmt>
-        | <compound_stmt>
-        | <iproc_func_invo>
         | <iproc_imp_invo>
         | <try_catch_stmt>
         | <if_else_stmt>
         | <given_when_def_stmt>
+        | <compound_stmt>
+        | <leave_stmt>
         | <iterate_stmt>
         | <loop_stmt>
-        | <material_ref_sel_stmt>
 
     <proc_stmt__rtn_inv_alt_syn> ::=
           <proc_stmt__plain_rtn_inv>
@@ -3304,6 +3746,72 @@ Examples:
     # a named_stmt node #
     |bar_stmt ::= nlx.lib.swap( &$>first, &$>second )
 
+=head2 Procedure Value Expressions
+
+Grammar:
+
+    <proc_expr> ::=
+          <var_name>
+        | <opaque_value_literal>
+        | <material_ref>
+        | <nil_func_invo>
+
+    <var_name> ::=
+        <lex_entity_name>
+
+    <nil_func_invo> ::=
+        <routine_name> '()'
+
+A C<proc_expr> node is the general case of a Muldis D value expression
+which may be composed within the body of a procedure.  A C<proc_expr> node
+is a proper subset of an C<expr> node, specifically the subset of the
+language grammar constructs of C<expr> that are valid for use within the
+body of a procedure, which is very restricted in that regard relative to
+the body of an atomic routine in which any C<expr> is valid.
+
+A C<var_name> node has exactly the same format as an C<expr_name> node, and
+it has the same interpretation as well except that it references a lexical
+variable or parameter of the containing procedure, rather than an
+expression node or parameter.  A C<var_name> node corresponds directly to
+the native system catalog entry that would be used where it appears in
+code; a routine invocation argument value in the system catalog is natively
+the name of a lexical variable or parameter, as are all other places in a
+procedure body that take an input value or store an output value.
+
+A C<proc_expr> that isn't a C<var_name> is treated as a triple of distinct
+lexical elements of its containing procedure.  The first lexical element is
+the declaration of a lexical variable whose name is generated by the
+parser; the second lexical element is a procedure statement which assigns a
+statically determined value to that variable; the third lexical element is
+a C<var_name> that is used where the C<proc_expr> had appeared, which names
+the lexical variable so that the previously assigned value can be used
+there.  The lexical variable is effectively a temporary constant since it
+is assigned to only once with a value that is hard-coded and is used
+exactly once, and it has no user-visible name in the original code.  Note
+that a sufficiently intelligent parser can notice if multiple such
+temporary variables are given the same value and optimize the code so in
+fact just one variable is declared, assigned to once, read multiple times.
+
+Iff a C<proc_expr> is an C<opaque_value_literal>, then the second lexical
+element it becomes is a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.OVLScaValStmtNodeSet> value, and the declared type
+of the variable is the most-specific system-defined type of the value
+denoted by the C<opaque_value_literal>.
+
+Iff a C<proc_expr> is an C<material_ref>, then:  Iff its C<material_name>
+element is I<not> already an C<AbsPathMaterialNC>, then the second lexical
+element the C<proc_expr> becomes is a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.APMaterialNCSelStmtNodeSet> value; otherwise, the
+second lexical element is a tuple of a C<OVLScaValStmtNodeSet>; in either
+case, the declared type of the variable is C<AbsPathMaterialNC>.
+
+A C<nil_func_invo> node has exactly the same format as a C<func_invo> node
+whose C<func_arg_list> is empty but that it also disallows any
+insignificant whitespace.  Iff a C<proc_expr> is a C<nil_func_invo>, then
+the second lexical element it becomes is a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.NilFuncInvoStmtNodeSet> value, and the declared
+type of the variable is C<Universal>.
+
 =head2 Generic In-Procedure Imperative Invocation Statements
 
 Grammar:
@@ -3325,22 +3833,19 @@ Grammar:
         | <iproc_same_named_ro_arg>
 
     <iproc_named_upd_arg> ::=
-        <upd_cosigil> <iproc_named_ro_arg>
+        <upd_cosigil> <invo_param_name> <ws>? '=>' <ws>? <var_name>
 
     <iproc_named_ro_arg> ::=
-        <invo_param_name> <ws>? '=>' <ws>? <var_name>
+        <invo_param_name> <ws>? '=>' <ws>? <proc_expr>
 
     <iproc_anon_upd_arg> ::=
-        <upd_cosigil> <iproc_anon_ro_arg>
+        <upd_cosigil> <var_name>
 
     <iproc_anon_ro_arg> ::=
-        <var_name>
-
-    <var_name> ::=
-        <lex_entity_name>
+        <proc_expr>
 
     <iproc_same_named_upd_arg> ::=
-        <upd_cosigil> <iproc_same_named_ro_arg>
+        <upd_cosigil> <data_sigil> <pair_cosigil> <invo_param_name>
 
     <iproc_same_named_ro_arg> ::=
         <data_sigil> <pair_cosigil> <invo_param_name>
@@ -3366,11 +3871,29 @@ main difference between an C<iproc_imp_invo> and a C<imus_imp_invo> is that
 the former may only name its host procedure's variables (or parameters) as
 arguments while the latter can use arbitrary value expressions for that.
 
+As a common special situation, iff an C<iproc_imp_invo> node specifies an
+invocation of the updater C<sys.std.Core.Universal.assign> I<and> that
+updater's C<v> argument is specified by a C<proc_expr> node that isn't a
+C<var_name> node, then the C<iproc_imp_invo> node is I<not> actually
+interpreted as a tuple of a Muldis D C<ImpInvoStmtNodeSet> value as in the
+general case.  Rather, the process described in L</Procedure Value
+Expressions>, where the C<proc_expr> node is treated as a triple of
+distinct lexical elements, is altered such that the lexical variable it
+declares just takes the name from the C<var_name> given to the updater's
+C<target> argument, rather than the variable's name being generated by the
+parser, and the C<iproc_imp_invo> node simply disappears without creating a
+catalog statement node that reads from this variable; so ultimately the
+C<iproc_imp_invo> node just creates a catalog statement that sets the
+variable, as a tuple of a C<OVLScaValStmtNodeSet> or
+C<APMaterialNCSelStmtNodeSet> or C<NilFuncInvoStmtNodeSet> value.  This
+means that the single concrete syntax of the C<iproc_imp_invo> grammar node
+is used to define tuples of 4 different C<StmtNodeSet> attributes.
+
 Examples:
 
     fetch_curr_instant( &$now )
 
-    prompt_Text_line( &$user_input, $message )
+    prompt_Text_line( &$name, 'Enter a person\as name: ' )
 
     Integer.fetch_random( &$rand, $interval )
 
@@ -4357,7 +4880,7 @@ elements:  The first is the determinant of what imperative routine to
 invoke, hereafter referred to as an I<op> or I<keyword>.  The second is an
 ordered list of 1-N mandatory imperative routine inputs, hereafter referred
 to as I<main op args>, whose elements typically have generic names like
-C<var_name> or C<lhs_var> or C<rhs_var>.  The (optional) third is a named
+C<var_name> or C<lhs_var> or C<rhs_expr>.  The (optional) third is a named
 list of optional imperative routine inputs, hereafter referred to as
 I<extra op args>, whose elements tend to have more purpose-specific names
 such as C<using_clause>, though note that things like C<using_clause> can
@@ -4366,14 +4889,18 @@ with.
 
 Note that, with each of the main imperative invocation alternate syntax
 statement nodes documented in this main POD section (members of
-C<imp_invo_alt_syntax> etc), any occurrences of child C<var_name> nodes
-should be read as being C<expr> nodes instead in contexts where instances
-of the main nodes are being composed beneath C<updater> or C<recipe> nodes,
-and just as C<var_name> nodes when composed beneath C<procedure> nodes.
-This is because any argument to an imperative invocation may be any value
-or pseudo-variable expression (including a parameter) when that invocation
-is in an updater or recipe, but said argument can only be a lexical
-variable or parameter name when in a procedure.
+C<imp_invo_alt_syntax> etc), any occurrences of child C<var_name> or
+C<proc_expr> nodes should be read as being C<expr> nodes instead in
+contexts where instances of the main nodes are being composed beneath
+C<updater> or C<recipe> nodes, and just as C<var_name> or C<proc_expr>
+nodes when composed beneath C<procedure> nodes.  This is because any
+argument to an imperative invocation may be any value or pseudo-variable
+expression (including a parameter) when that invocation is in an updater or
+recipe, but said argument can only be a lexical variable or parameter name
+when in a procedure, except that arguments to read-only parameters in a
+procedure may alternately be an opaque value literal or niladic function
+invocation, those being an abstraction over the assignment to and use of a
+temporary lexical variable for the argument.
 
 Note that the imperative routines with alternate syntax include updaters,
 recipes, and procedures, and they are all shown in one list for simplicity.
@@ -4398,7 +4925,7 @@ C<imp_monadic_postfix_op_invo> node is equivalent to a single
 C<imus_imp_invo> or C<iproc_imp_invo> node whose C<imus_imp_arg_list> or
 C<iproc_imp_arg_list> element defines 1 argument, and the 1 C<var_name>
 element of the C<imp_monadic_postfix_op_invo> supplies the value of that
-argument.
+argument and takes its result.
 
 This table indicates which imperative routine is invoked by each keyword:
 
@@ -4416,13 +4943,13 @@ Examples:
 Grammar:
 
     <imp_nonsym_dyadic_infix_op_invo> ::=
-        <lhs_var> <ws> <imp_nonsym_dyadic_infix_op_invo> <ws> <rhs_var>
+        <lhs_var> <ws> <imp_nonsym_dyadic_infix_op_invo> <ws> <rhs_expr>
 
     <lhs_var> ::=
         <var_name>
 
-    <rhs_var> ::=
-        <var_name>
+    <rhs_expr> ::=
+        <proc_expr>
 
     <imp_nonsym_dyadic_infix_op__op_cr_basic> ::=
           ':='
@@ -4444,11 +4971,11 @@ invoke a non-symmetric dyadic operator imperative routine.  Such an
 imperative routine takes exactly 2 arguments.  A single
 C<imp_nonsym_dyadic_infix_op_invo> node is equivalent to a single
 C<imus_imp_invo> or C<iproc_imp_invo> node whose C<imus_imp_arg_list> or
-C<iproc_imp_arg_list> element defines 2 arguments, and the 2 C<var_name>
-elements of the C<imp_nonsym_dyadic_infix_op_invo> supply the values of
-those arguments, which are associated in the appropriate sequence.  When
-using this infix syntax, the C<&> cosigil isn't used to mark the
-subject-to-update argument(s).
+C<iproc_imp_arg_list> element defines 2 arguments, and the C<var_name> plus
+C<proc_expr> elements of the C<imp_nonsym_dyadic_infix_op_invo> supply the
+values of those arguments, which are associated in the appropriate
+sequence.  When using this infix syntax, the C<&> cosigil isn't used to
+mark the subject-to-update argument(s).
 
 Some of the keywords are aliases for each other:
 
@@ -4464,15 +4991,15 @@ Some of the keywords are aliases for each other:
 
 This table indicates which imperative routine is invoked by each keyword:
 
-    :=          -> Core.Universal.assign( &$lhs_var, $rhs_var )
-    :=union     -> Core.Relation.assign_union( &$lhs_var, $rhs_var )
-    :=where     -> Core.Relation.assign_restriction( &$lhs_var, $rhs_var )
-    :=!where    -> Core.Relation.assign_cmpl_restr( &$lhs_var, $rhs_var )
-    :=intersect -> Core.Relation.assign_intersection( &$lhs_var, $rhs_var )
-    :=minus     -> Core.Relation.assign_diff( &$lhs_var, $rhs_var )
-    :=!matching -> Core.Relation.assign_semidiff( &$lhs_var, $rhs_var )
-    :=matching  -> Core.Relation.assign_semijoin( &$lhs_var, $rhs_var )
-    :=exclude   -> Core.Relation.assign_exclusion( &$lhs_var, $rhs_var )
+    :=          -> Core.Universal.assign( &$lhs_var, $rhs_expr )
+    :=union     -> Core.Relation.assign_union( &$lhs_var, $rhs_expr )
+    :=where     -> Core.Relation.assign_restriction( &$lhs_var, $rhs_expr )
+    :=!where    -> Core.Relation.assign_cmpl_restr( &$lhs_var, $rhs_expr )
+    :=intersect -> Core.Relation.assign_intersection( &$lhs_var,$rhs_expr )
+    :=minus     -> Core.Relation.assign_diff( &$lhs_var, $rhs_expr )
+    :=!matching -> Core.Relation.assign_semidiff( &$lhs_var, $rhs_expr )
+    :=matching  -> Core.Relation.assign_semijoin( &$lhs_var, $rhs_expr )
+    :=exclude   -> Core.Relation.assign_exclusion( &$lhs_var, $rhs_expr )
 
 Examples:
 

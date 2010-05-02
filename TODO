@@ -41,15 +41,29 @@ implementations over multiple SQL DBMSs.
 ----------
 
 * FIRST PRIORITY ...
-Flesh out the concrete Muldis D syntax for defining whole routines and
-types et al.  Arguably, "recipe" is the single most important to do first,
-since that is what normal database queries/DM/DD are by default and
-entirely if we just use system-defined types, then "function" is the next
-most important for higher-order functions, then a subset of "tuple" and
-"relation" are the next most for defining database schemas; that subset
-just being the list of attributes, and a slightly larger subset adding key
-constraints, and then subset constraints, and then "subset-type" is next
-most important type, etc; when doing "recipe", we'd get "updater" for free.
+Flesh out the concrete Muldis D syntax for defining whole
+types.  Start with "tuple-type", "relation-type", "subset-type".  Include
+normal keys and subset constraints; distributed keys can wait for later.
+
+* Remove the "default" attribute from "MixinType" and instead allow a
+composing type to declare that it provides its default value.  This is
+conceptually the proper way to do it.  Change the declared type of
+"composed_mixins" to some new binary tuple type with "type" (RPTypeNC) and
+"provides_its_default" (Bool).  A providing composing type always gives its
+own default value for the mixin's default; they can't be different; if you
+want different, declare a subtype of the value provider to be what composes
+the mixin.  No more than one visible type may declare provision of the
+default value for a mixin.  If a system-defined type claims to provide a
+default for a mixin, no user-defined type ever can (see "Ordered",
+"Ordinal", "Numeric", "Stringy"); if a system-defined mixin exists that no
+system-defined type composes (see "Instant", "Duration") then exactly one
+user-defined type in a mounted depot may claim to provide its default, and
+that only affects code in that depot which asks for the default value of
+said types.  A user-defined mixin type can only be composed by user-defined
+types in the same depot.  Asking a mixin type for its default will fail
+unless a visible type claims its default.  Maybe, if exactly one visible
+type composes a mixin, that one could provide the mixin's default value
+implicitly even if it doesn't claim to?  This might work better.
 
 ----------
 
@@ -333,12 +347,6 @@ some code may be more readable when we have more parenthesis in the
 expressions anyway, and the current rules are fairly simple.  Of course,
 the Perl-STD grammars are not affected by all this, as they effectively
 always use parenthesis to force desired precedence.
-
-* IN PROGRESS ...
-Update the STD dialects with special syntax for declaring whole depots
-in a single expression, catalog+data.  This can be useful for example with
-a simple Muldis D implementation that wants to represent a persisted depot
-on disk as a single file that is Muldis D source code.
 
 * IN PROGRESS ...
 Update the STD dialects with special syntax for some nonscalar catalog
