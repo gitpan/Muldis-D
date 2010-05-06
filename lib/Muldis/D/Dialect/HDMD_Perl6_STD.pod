@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.124.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.125.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Hosted Data Muldis D> standard
 dialect named C<HDMD_Perl6_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.124.0',
+standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.125.0',
 'HDMD_Perl6_STD' ]>.
 
 The C<HDMD_Perl6_STD> dialect is defined to be hosted in Perl 6, and is
@@ -125,7 +125,7 @@ repertoire; it is typically the Perl C<Str> value C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a Perl C<Str> formatted as per
-C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.124.0>.
+C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.125.0>.
 
 =item C<ln_dialect>
 
@@ -158,12 +158,12 @@ each of the value's elements must be one of these 0 Perl C<Str> values.
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '0.124.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.125.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended'
     } ]
 
-    [ 'Muldis_D', 'http://muldis.com', '0.124.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.125.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended',
         standard_syntax_extensions => Set.new()
@@ -198,7 +198,7 @@ intended to actually be used.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.124.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.125.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'the_floor',
             op_char_repertoire => 'basic'
         } ],
@@ -258,7 +258,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.124.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.125.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'code_as_data',
             op_char_repertoire => 'basic'
         } ],
@@ -269,7 +269,7 @@ Examples:
     ]
 
     [
-       [ 'Muldis_D', 'http://muldis.com', '0.124.0', 'HDMD_Perl6_STD', {
+       [ 'Muldis_D', 'http://muldis.com', '0.125.0', 'HDMD_Perl6_STD', {
           catalog_abstraction_level => 'code_as_data',
           op_char_repertoire => 'basic'
        } ],
@@ -317,7 +317,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.124.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.125.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'plain_rtn_inv',
             op_char_repertoire => 'basic'
         } ],
@@ -342,7 +342,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.124.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.125.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'rtn_inv_alt_syn',
             op_char_repertoire => 'basic'
         } ],
@@ -1259,7 +1259,7 @@ a recipe is that a recipe has global parameters and an updater doesn't.
 Examples:
 
     [ 'updater', 'make_coprime', {a=>['&','NNInt'],b=>['&','NNInt']} => [
-        'with' => [ 'function', 'gcd',
+        :with[ 'function', 'gcd',
             [ 'NNInt', { a => 'NNInt', b => 'NNInt' } ]
             => [
                 [ '??!!', [ [ 'op', '=', [ ['$','b'], 0 ] ]
@@ -1353,7 +1353,7 @@ Examples:
 
     [ 'recipe', 'count_heads', { count => ['&','NNInt'], search => 'Text',
             people => ['::=','fed.data.db1.people'] } => [
-        'with' => [ 'value-filter', 'filt', [
+        :with[ 'value-filter', 'filt', [
             [ 'Bool', { topic => 'Tuple', search => 'Text' } ]
             => [
                 [ 'op', 'like', [ ['$.','topic.name'],
@@ -1386,10 +1386,10 @@ parameters and an procedure doesn't; another exception is that a procedure
 may have zero parameters while a recipe must have more.
 
 A C<procedure_body> must be either the Perl C<Str> value C<...>, in which
-case it is an C<empty_routine_body>, or it must be a Perl C<Seq|Array>,
-having at least one element which is a C<proc_stmt>, and each other element
-of said Perl C<Seq|Array> must be either a C<with_clause> or a C<proc_var>
-or a C<proc_stmt>.
+case it is an C<empty_routine_body>, or it must be a Perl C<Seq|Array>
+having zero or more elements where each element must be either a
+C<with_clause> or a C<proc_var> or a C<proc_stmt>; zero elements means that
+the procedure is an unconditional no-op.
 
 A C<with_clause> of a C<procedure_body> is structurally identical to one of
 a C<recipe_body>.
@@ -1403,19 +1403,14 @@ Examples:
     [ 'procedure', 'print_curr_time', {} => [
         [ 'var', 'now', 'Instant' ],
         [ 'iproc-imp-invo', 'fetch_curr_instant', [ ['&',['$','now']] ] ],
-        'with' => [ 'updater', 'compose_message', [
-            { message => ['&','Text'], now => 'Instant' }
-            => [
-                [ 'op', ':=', [ ['$','message'], [ 'op', '~', [
-                    'The current time is: ',
-                    [ 'func-invo', 'nlx.par.lib.utils.time_as_text',
-                        { time => ['$','now'] } ]
-                ] ] ] ]
-            ]
-        ] ],
         [ 'var', 'message', 'Text' ],
-        [ 'iproc-imp-invo', 'nlx.lib.compose_message',
-            { message => ['&',['$','message']], now => ['$','now'] } ],
+        :atomic-stmt[
+            [ 'op', ':=', [ ['$','message'], [ 'op', '~', [
+                'The current time is: ',
+                [ 'func-invo', 'nlx.par.lib.utils.time_as_text',
+                    { time => ['$','now'] } ]
+            ] ] ] ]
+        ]
         [ 'iproc-imp-invo', 'write_Text_line', [ ['$','message'] ] ],
     ] ]
 
@@ -1666,6 +1661,36 @@ Examples:
     [ '|::=', 'bar_stmt', [ 'iproc-imp-invo', 'nlx.lib.swap',
         {first => ['&',['$','first']], second => ['&',['$','second']]} ] ]
 
+=head2 Generic Compound Statements
+
+A C<compound_stmt> node has 2 ordered elements:  The first element is the
+Perl C<Str> value C<compound-stmt>.  The second element is a Perl
+C<Seq|Array> having zero or more elements where each element must be either
+a C<with_clause> or a C<proc_var> or a C<proc_stmt>; it is interpreted as
+per a nonempty procedure body, which has exactly the same format.
+
+Examples:
+
+    :compound-stmt[
+        [ 'var', 'message', 'Text' ],
+        [ 'iproc-imp-invo', 'read_Text_line', [ ['&',['$','message']] ] ],
+        [ 'iproc-imp-invo', 'write_Text_line', [ ['$','message'] ] ],
+    ]
+
+=head2 Procedure Atomic Statements
+
+An C<atomic_stmt> node has 2 ordered elements:  The first element is the
+Perl C<Str> value C<atomic-stmt>.  The second element is a Perl
+C<Seq|Array>; it is interpreted as per a nonempty updater body, which has
+exactly the same format.
+
+Examples:
+
+    :atomic-stmt[
+        [ 'op', ':=', [ ['$','x'], ['$','y'] ] ],
+        [ 'op', ':=', [ ['$','y'], ['$','x'] ] ],
+    ]
+
 =head2 Procedure Value Expressions
 
 A C<var_name> node has 2 ordered elements:  The first element is the Perl
@@ -1707,6 +1732,100 @@ Examples:
 
     [ 'iproc-imp-invo', 'Integer.fetch_random',
         [ ['&',['$','rand']], ['$','interval'] ] ]
+
+=head2 Generic Try-Catch Statements
+
+A C<try_catch_stmt> node has 2-3 ordered elements:  The first element is
+the Perl C<Str> value C<try-catch>.  The second element is a
+C<proc_stmt> node having the I<try> routine to unconditionally invoke
+first.  The optional third element is a C<proc_stmt> node having the
+I<catch> routine to execute iff I<try> throws an exception.
+
+Examples:
+
+    [ 'try-catch',
+        :iproc-imp-invo<nlx.lib.attempt_the_work>,
+        :iproc-imp-invo<nlx.lib.deal_with_failure>
+    ]
+
+=head2 Generic If-Else Statements
+
+An C<if_else_stmt> node has 2-3 ordered elements:  The first element is the
+2 Perl C<Str> value C<if-else-stmt>.  The optional second element is
+I<if_then>, a Perl C<Seq|Array> with 0..N elements, each of those being a
+2-element Perl C<Seq|Array> or a Perl Pair; the first element / key is an
+I<if> condition statement (a C<proc_expr> node), and the second element /
+value is the associated I<then> result statement (a C<proc_stmt> node).
+The optional 3rd/last element of an C<if_else_stmt> node is I<else>
+statement, which is a C<proc_stmt> node.
+
+Examples:
+
+    [ 'if-else-stmt',
+        [
+            ['$','out_of_options'] => :iproc-imp-invo<nlx.lib.give_up>,
+        ],
+        :iproc-imp-invo<nlx.lib.keep_going>
+    ]
+
+=head2 Generic Given-When-Default Statements
+
+A C<given_when_def_stmt> node has 3-4 ordered elements:  The first element
+is the Perl C<Str> value C<given-when-def-stmt>.  The second element is
+a C<proc_expr> node which is the I<given> common comparand.  The optional
+third element is I<proc_when_then>, a Perl C<Seq|Array> with 0..N elements,
+each of those being a 2-element Perl C<Seq|Array> or a Perl Pair; the first
+element / key is a I<when> comparand (a C<proc_expr> node), and the second
+element / value is the associated I<then> result statement (a C<proc_stmt>
+node).  The optional 4th/last element of a C<given_when_def_stmt> node is
+I<default_stmt> statement, which is a C<proc_stmt> node.
+
+Examples:
+
+    [ 'given-when-def-stmt',
+        ['$','picked_menu_item'],
+        [
+            'v' => :iproc-imp-invo<nlx.lib.screen_view_record>,
+            'a' => :iproc-imp-invo<nlx.lib.screen_add_record>,
+            'd' => :iproc-imp-invo<nlx.lib.screen_delete_record>
+        ],
+        :iproc-imp-invo<nlx.lib.display_bad_choice_error>,
+    ]
+
+=head2 Procedure Leave, Iterate, and Loop Statements
+
+A C<leave_stmt> node has 1-2 ordered elements:  The first element is the
+Perl C<Str> value C<leave>.  The optional second element is a
+C<Name_payload> which names the parent statement node to abort; it defaults
+to the empty string if not specified.
+
+An C<iterate_stmt> node has 1-2 ordered elements:  The first element is the
+Perl C<Str> value C<iterate>.  The optional second element is a
+C<Name_payload> which names the parent statement node to redo; it defaults
+to the empty string if not specified.
+
+A C<loop_stmt> node has 2 ordered elements:  The first element is the Perl
+C<Str> value C<loop>.  The second element is a C<proc_stmt> node having
+the statement to repeatedly execute.
+
+Examples:
+
+    [ '|::=', 'lookup_person', loop => :compound-stmt[
+        [ 'iproc-imp-invo', 'prompt_Text_line',
+            [ ['&',['$','name']], 'Enter a name to search for: ' ] ],
+        [ 'given-when-def-stmt', ['$','name'],
+            [ '' => :leave<lookup_person> ] ],
+        [ 'iproc-imp-invo', 'nlx.lib.do_search', {
+            name => ['$','name'],
+            not_found => ['&',['$','not_found']],
+            report_text => ['&',['$','report_text']]
+        } ],
+        [ 'if-else-stmt', [ ['$','not_found'] => :compound-stmt[
+            [ 'iproc-imp-invo', 'write_Text_line', ['No person matched'] ],
+            :iterate<lookup_person>
+        ] ] ],
+        [ 'iproc-imp-invo', 'write_Text_line', [ ['$','report_text'] ] ],
+    ] ]
 
 =head1 FUNCTION INVOCATION ALTERNATE SYNTAX EXPRESSIONS
 

@@ -9,7 +9,7 @@ Muldis D data definition routines
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Routines_Catalog version 0.124.0.
+This document is Muldis::D::Core::Routines_Catalog version 0.125.0.
 
 =head1 PREFACE
 
@@ -147,11 +147,11 @@ C<procedure sys.std.Core.Cat.proc_invo ($procedure : APImperativeNC,
 This procedure is the same as C<sys.std.Core.Cat.rcp_invo> but that it
 invokes a procedure rather than an recipe.
 
-=head1 RECIPES FOR WORKING WITH EXCEPTIONS
+=head1 PROCEDURES FOR WORKING WITH EXCEPTIONS
 
 =head2 sys.std.Core.Cat.fail
 
-C<procedure sys.std.Core.Cat.fail ($topic : Exception) {...}>
+C<procedure sys.std.Core.Cat.fail ($topic? : Exception) {...}>
 
 This procedure will throw the exception given as its argument; this results
 in the call stack unwinding, and transaction rollbacks, until it is caught.
@@ -186,12 +186,6 @@ $v2 : Universal) {...} >>
 
 This C<value-reduction> function unconditionally results in its C<v1>
 argument regardless of the values of its arguments.
-
-=head2 sys.std.Core.Cat.noop
-
-C<procedure sys.std.Core.Cat.noop () {...}>
-
-This procedure has no parameters and doesn't do anything at all.
 
 =head1 RECIPES FOR BOOTSTRAPPING A MULDIS D PROGRAM OR DATABASE
 

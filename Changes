@@ -1,6 +1,115 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-05-05  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.125.0 is released on CPAN as
+    Muldis-D-0.125.0.tar.gz.
+
+    * This release features computational and Turing completeness; the
+    Muldis D language spec is now complete enough, both in system-catalog
+    and concrete grammars, that Muldis D can simulate any computer.  Muldis
+    D code can now be a "main program" (run automatically at system
+    startup), can do user I/O, can read from and write to memory, can
+    contain conditionals, can contain repetition, can calculate any values
+    from single or multiple other values, and all this using only syntax
+    and features that are described in the current written spec.
+
+    * (PTMD_STD.pod, STDIO.pod, Integer.pod, Rational.pod, Temporal.pod)
+    In PTMD_STD.pod, updated the "Procedure Specification" pod sub-section
+    so that a procedure body now has a pair of square brackets delimiting
+    it rather than a pair of curly braces.  This further instills the
+    visual mnemonic that square brackets means that the relative order of
+    the elements inside them is significant, while the relative order of
+    elements in curly braces is not significant; as it is true for array
+    elements vs sets etc, it is true for proceure statements vs atomic
+    routines etc.  As part of this update, split the grammar node
+    "empty_routine_body" into the 2 "empty_[atomic|procedure]_body".  In
+    the other 4 files, updated all 10 system-service routine signatures to
+    use "[...]" to represent the routine body rather than "{...}".
+
+    * (Routines_Catalog.pod)  Removed the procedure "sys.std.Core.Cat.noop"
+    since, for any purpose it might have been used, better options exist.
+
+    * (Types_Catalog.pod)  Updated the "Procedure" catalog type to make it
+    more strict in that the root node of its "stmt" statement tree must
+    always be a compound statement node, not any other kind of stmt node.
+    As it is, the root would be a compound likely 99% of the time in real
+    procedures, and this restriction lets the concrete grammars be simpler.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Formalized the syntax for
+    compound statements in procedures, where each such statement is a
+    sequence of other statements that execute in order at different times,
+    which is the heart of what makes a procedure nonatomic.  Added the new
+    pod sub-section "Generic Compound Statements" in the main pod section
+    "GENERIC PROCEDURE STATEMENTS", including a code example.  In PTMD_STD,
+    this section introduced the main node kind "compound_stmt".  In all 3
+    files, updated the sub-section "Procedure Specification" such that a
+    nonempty procedure body may now have zero explicit statements rather
+    than requiring one, because the body now implicitly always has a
+    compound statement as its root statement.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Added new special shorthand
+    syntax for inlining an updater definition plus an invocation of said in
+    a procedure statement, as a concept called a "procedure atomic
+    statement".  Added th new pod sub-section "Procedure Atomic Statements"
+    in the main pod section "GENERIC PROCEDURE STATEMENTS", including a
+    code example.  In PTMD_STD, this section introduced the main node kind
+    "atomic_stmt", which looks similar to a "compound_stmt" but for having
+    curly brace delimiters rather than square brackets, and for appearing
+    as an updater body than as a procedure body.  In all 3 files, updated
+    code example in the sub-section "Procedure Specification" to make use
+    of the new shorthand syntax for its inner updater rather than a "with".
+
+    * (Types_Catalog.pod)  In a reversal of one aspect of release 0.29.0,
+    brought back and added a description for the "Exception" catalog type,
+    which is currently a singleton scalar type which can say that an
+    exception occurred but not any other metadata such as the kind of
+    exception.  The type was added in the new main pod section "TYPES FOR
+    DEFINING EXCEPTIONS".  Rewriting "Exception" to carry metadata is still
+    TODO, but in the meantime Muldis D code can at least throw and catch
+    exceptions and so use them for good program design.
+
+    * (Routines_Catalog.pod)  Updated the "sys.std.Core.Cat.fail" procedure
+    to make its "Exception"-typed parameter optional; it will now throw the
+    default "Exception" value if the user doesn't supply some other one.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Formalized the syntax for
+    try-catch exception handling in procedures, which takes the form of a
+    pair of imperative routines where the first is executed unconditionally
+    and the second optional one iff the first throws an exception, where
+    the first exception is caught but the second isn't.  Added the new pod
+    sub-section "Generic Try-Catch Statements" in the main pod section
+    "GENERIC PROCEDURE STATEMENTS", including a code example.  In PTMD_STD,
+    this section introduced the main node kind "try_catch_stmt".
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Formalized the syntax for
+    conditional statements in procedures, both the if-then-else and
+    given-when-then-default varieties.  Added the 2 new pod sub-sections
+    "Generic [If-Else|Given-When-Default] Statements" in the main pod
+    section "GENERIC PROCEDURE STATEMENTS", including a code example for
+    each.  In PTMD_STD, these sections introduced the 2 main node kinds
+    "if_else_stmt" and "given_when_def_stmt".  These additions are just
+    like the similar-named functional analogies, but for being imperative.
+
+    * (Types_Catalog.pod)  Updated the "LoopStmtNodeSet" catalog type to
+    rename its "do" attribute to "loop".  Also updated the descriptions of
+    the 2 catalog types "[Leave|Iterate]StmtNodeSet", to remove a comment
+    about the first being able to "leave" itself, and to add a comment
+    about the second also being able to serve as a non-loop "redo" stmt.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Formalized the syntax for
+    iteration statements in procedures, specifically in the ad-hoc manner
+    of the 3 distinct "leave", "iterate", "loop" statement kinds.  Added
+    the new pod sub-section "Procedure Leave, Iterate, and Loop Statements"
+    in the main pod section "GENERIC PROCEDURE STATEMENTS", including a
+    single code example for each file that combines the 3 node kinds (all
+    are also useable in isolation).  In PTMD_STD, these sections introduced
+    the 3 main node kinds "leave_stmt", "iterate_stmt", "loop_stmt".
+
+    * (Basics.pod, Types_Catalog.pod, PTMD_STD.pod)  Stimulus-response
+    rules.  Write change details here TODO.
+
 2010-05-01  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.124.0 is released on CPAN as

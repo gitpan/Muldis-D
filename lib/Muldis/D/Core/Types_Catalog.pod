@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.124.0.
+This document is Muldis::D::Core::Types_Catalog version 0.125.0.
 
 =head1 PREFACE
 
@@ -117,6 +117,8 @@ This graph slice shows all of the catalog scalar types:
                         sys.std.Core.Type.Cat."-Inf"
                         sys.std.Core.Type.Cat.Inf
 
+                    sys.std.Core.Type.Cat.Exception
+
 This graph slice shows all of the catalog nonscalar types:
 
     sys.std.Core.Type.Universal
@@ -148,6 +150,7 @@ This graph slice shows all of the catalog nonscalar types:
                 sys.std.Core.Type.Cat.DomainType
                 sys.std.Core.Type.Cat.SubsetType
                 sys.std.Core.Type.Cat.MixinType
+                sys.std.Core.Type.Cat.StimRespRule
                 sys.std.Core.Type.Cat.OrderByName
 
                 sys.std.Core.Type.Database
@@ -179,6 +182,7 @@ This graph slice shows all of the catalog nonscalar types:
                 sys.std.Core.Type.Cat.[Function|Updater|Recipe|Procedure]Set
                 sys.std.Core.Type.Cat.[Scalar|Tuple|Relation]TypeSet
                 sys.std.Core.Type.Cat.[Domain|Subset|Mixin]TypeSet
+                sys.std.Core.Type.Cat.StimRespRuleSet
                 sys.std.Core.Type.Cat.OVLScaValExprNodeSet
                 sys.std.Core.Type.Cat.ScaSelExprNodeSet
                 sys.std.Core.Type.Cat.TupSelExprNodeSet
@@ -1271,7 +1275,7 @@ subdepots, and any that exist are arranged in a hierarchy with the depot as
 the root.  The system catalog variable named C<nlx.cat> is of the C<Depot>
 type.
 
-A C<Depot> has these 13 attributes:
+A C<Depot> has these 14 attributes:
 
 =over
 
@@ -1296,6 +1300,11 @@ C<[Scalar|Tuple|Relation|Domain|Subset|Mixin]TypeSet>
 These are all the definitions that this [|sub]depot contains of scalar
 types with possreps, complete tuple and relation types, domain types, and
 subset types, and mixin types.
+
+=item C<stim_resp_rules> - C<StimRespRuleSet>
+
+These are all the definitions that this [|sub]depot contains of
+stimulus-response rules.
 
 =item C<data> - C<maybe_of.RPTypeNC>
 
@@ -1436,6 +1445,46 @@ its name.
 A C<[Scalar|Tuple|Relation|Domain|Subset|Mixin]TypeSet> has a binary
 primary key on the C<parent> plus C<name> attributes.  Its default value is
 empty.
+
+=head2 sys.std.Core.Type.Cat.StimRespRuleSet
+
+A C<StimRespRuleSet> is a C<DHRelation> that specifies a set of
+stimulus-response rules that a [|sub]depot might directly contain.
+
+A C<StimRespRuleSet> has these 5 attributes:
+
+=over
+
+=item C<parent> - C<NameChain>
+
+This is the fully-qualified name, in the C<nlx.[cat|lib|data]> namespace of
+any hypothetical immediate child namespace of the depot, of the
+stimulus-response rule's parent [|sub]depot.
+
+=item C<name> - C<Name>
+
+This is the declared name of the stimulus-response rule within the
+namespace defined by C<parent>; other Muldis D code would reference it with
+the combination of C<parent> and C<name>.
+
+=item C<scm_comment> - C<Comment>
+
+This is an optional programmer comment about the stimulus-response rule as
+a whole.
+
+=item C<scm_vis_ord> - C<NNInt>
+
+This is the visible order of this routine's declaration relative to all of
+the named entities directly within the namespace defined by C<parent>.
+
+=item C<material> - C<StimRespRule>
+
+This defines the entire stimulus-response rule sans its name.
+
+=back
+
+A C<StimRespRuleSet> has a binary primary key on the C<parent> plus C<name>
+attributes.  Its default value is empty.
 
 =head1 TYPES FOR DEFINING ROUTINES
 
@@ -2741,11 +2790,8 @@ This defines the statement tree that comprises the entire procedure body.
 
 Iff a C<Procedure> has no specified I<body>, then C<stmt> must have zero
 member nodes and C<vars> must have zero member tuples; otherwise, C<stmt>
-must have at least 1 member node.  (If you actually want to have a
-procedure with a specified body that is a no-op, there are a variety of
-single statement bodies that could do it, such as using a "leave" statement
-node as the root node, or such as by invoking the C<sys.std.Core.Cat.noop>
-procedure; the former is simpler.)
+must have at least 1 member node, which is a compound statement node
+(having just that 1 node means the procedure is an unconditional no-op).
 
 A C<Procedure> with a specified I<body>
 specifies a simple statement tree of named statement
@@ -2755,12 +2801,14 @@ all member nodes must define a simple statement node tree, such
 that every member except one (which is the root node) has one of its peers
 as a parent node, and no direct cycles between members are permitted (only
 indirect cycles based on procedure invocations are allowed); the
-name of the root node must be the empty string.  Note that the
-composed-into procedure's parameters are also implicitly tree
-nodes, and are referenced by name into the statement tree the same way as
-any other named statement node is.  The statement tree should reference all
-of the parameters and lexical variables that the procedure has,
-but this isn't a strict requirement.
+name of the root node must be the empty string.  The root node must also be
+a compound statement node, meaning a tuple of the procedure's
+C<stmt.compound_stmts> attribute; while making this requirement isn't
+strictly necessary in general, that requirement allows the corresponding
+concrete Muldis D grammars to be simpler, and a compound statement node
+would end up being the root anyway in 99% of likely real procedures.  The
+statement tree should reference all of the parameters and lexical variables
+that the procedure has, but this isn't a strict requirement.
 
 C<Procedure> has a distributed primary key over the C<name> attributes of
 C<upd_params> and C<ro_params> and C<vars> and the C<name> attributes of
@@ -2904,8 +2952,6 @@ represented, but "return" is still easy to recognize because the root node
 always has the empty string as its name.  If the parent node in question is
 an iterating or looping statement, then any remaining iterations it might
 have had are skipped, especially useful if it was an infinite loop.
-Alternately, a C<LeaveStmtNodeSet> node may name itself as the node to exit
-as a form of a no-op.
 
 A C<LeaveStmtNodeSet> has these 3 attributes:
 
@@ -3061,7 +3107,7 @@ argument.  Its default value has zero tuples.
 
 A C<TryCatchStmtNodeSet> is a C<DHRelation> that specifies a set of
 statement nodes where each node represents a try-catch control flow
-statement.  A C<TryCatchStmtNodeSet> is conceptually a wrapper over a pair
+statement.  A try-catch-stmt node is conceptually a wrapper over a pair
 of C<ImpInvoStmtNodeSet> named I<try> and I<catch>, where I<try> is
 unconditionally invoked first and then iff I<try> throws an exception then
 it will be caught and I<catch> will be invoked immediately after to handle
@@ -3228,7 +3274,8 @@ statement node, and then start at the beginning of the next iteration of
 that loop if there are any left ("normal" is to simply execute to the end
 of the block before starting the next iteration).  The same semantics apply
 for the beginning of the next loop as if the current block iteration had
-executed to the end before repeating.
+executed to the end before repeating.  In fact, a looping block isn't even
+required; an iterate node can also be used to "redo" any parent statement.
 
 An C<IterateStmtNodeSet> has these 3 attributes:
 
@@ -3274,7 +3321,7 @@ This is the declared name of the statement node.
 This is an optional programmer comment about either the statement node or
 the statement node (sub-)tree it is the root of.
 
-=item C<do> - C<Name>
+=item C<loop> - C<Name>
 
 This is the name of the local statement node that will get executed for
 each iteration of the loop; typically it has a sub-tree of statement nodes.
@@ -4458,6 +4505,32 @@ The default value of C<MixinType> defines a mixin type that is identical to
 C<Boolean>; its C<composed_mixins> is empty and its default value is
 the default value of C<Bool>.  I<This paragraph is subject to change.>
 
+=head1 TYPES FOR DEFINING STIMULUS-RESPONSE RULES
+
+=head2 sys.std.Core.Type.Cat.StimRespRule
+
+A C<StimRespRule> is a C<DHTuple>.  It defines a new stimulus-response rule
+which invokes a recipe or procedure automatically in response to some
+stimulus; for now just the act of a depot being mounted is supported.
+
+A C<StimRespRule> has these 3 attributes:
+
+=over
+
+=item C<scm_comment> - C<Comment>
+
+This is an optional programmer comment about the rule as a whole.
+
+=item C<stimulus> - C<Name>
+
+This is always the value C<after-mount> for now.
+
+=item C<response> - C<MaterialNC>
+
+This is the name of the recipe or procedure being invoked.
+
+=back
+
 =head1 SIMPLE GENERIC NONSCALAR TYPES
 
 =head2 sys.std.Core.Type.Cat.NameTypeMap
@@ -4560,6 +4633,22 @@ This type is conceptually intended for use as the declared type of a
 routine parameter that would take the name of an C<order-determination>
 function, but that parameter is optional and should default to the
 system-defined scalar ordering function when no argument is given to it.
+
+=head1 TYPES FOR DEFINING EXCEPTIONS
+
+=head2 sys.std.Core.Type.Cat.Exception
+
+C<Exception> is a singleton scalar type whose only value represents a
+generic thrown exception.  This type doesn't provide any means for a
+I<catch> routine to introspect details about the exception, such as what
+kind of exception it was, but rather simply says that something happened
+which resulted in a Muldis D routine abnormally exiting.  Therefore, the
+C<Exception> type is subject to be rewritten so it can carry the various
+metadata that exceptions of typical programming languages can.  But in the
+meantime, this singleton type affords Muldis D with completely functional
+basic exception handling in that exceptions can be thrown and can be
+caught, so that good program design involving the use of exceptions to draw
+immediate attention to problems can be supported now.
 
 =head1 SEE ALSO
 

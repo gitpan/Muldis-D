@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.124.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.125.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.124.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.125.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -248,7 +248,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.124.0>.
+C<ln_base_authority>; it is typically a character string like C<0.125.0>.
 
 =item C<ln_dialect>
 
@@ -269,12 +269,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.125.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.125.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -357,7 +357,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.125.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -439,7 +439,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.125.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -448,7 +448,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.125.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -545,7 +545,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.125.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -610,7 +610,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.124.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.125.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -2546,6 +2546,7 @@ Grammar:
         | <domain_type>
         | <subset_type>
         | <mixin_type>
+        | <stim_resp_rule>
 
 A C<material> node specifies a new material (routine or type) that lives in
 a depot or subdepot.
@@ -2651,6 +2652,7 @@ Every material has 2-3 elements, illustrated by this grammar:
         | 'domain-type'
         | 'subset-type'
         | 'mixin-type'
+        | 'stimulus-response-rule'
 
     <material_declared_name> ::=
         <Name_payload>
@@ -2666,6 +2668,7 @@ Every material has 2-3 elements, illustrated by this grammar:
         | <domain_type_payload>
         | <subset_type_payload>
         | <mixin_type_payload>
+        | <stim_resp_rule_payload>
 
 So a C<x_material>|C<material> node has 2-3 elements in general:
 
@@ -2737,7 +2740,7 @@ Grammar:
         <ro_reg_param>
 
     <function_body> ::=
-        <nonempty_function_body> | <empty_routine_body>
+        <nonempty_function_body> | <empty_atomic_body>
 
     <nonempty_function_body> ::=
         '{' <ws>?
@@ -2794,7 +2797,7 @@ Any of these kinds of components of a C<function> node are interpreted in
 exactly the same manner as for an C<updater> node, as a C<Function> is to
 an C<Updater>: C<ro_reg_param> (but that the C<Function> attribute is named
 C<params> rather than C<ro_params>), C<implements_clause>,
-C<empty_routine_body>, C<with_clause>, C<named_expr>.
+C<empty_atomic_body>, C<with_clause>, C<named_expr>.
 
 A C<nonempty_function_body> must have at least one C<expr>, because a
 function must by definition result in a value, and that C<expr> says what
@@ -2835,7 +2838,7 @@ Grammar:
         <upd_reg_param> | <ro_reg_param>
 
     <updater_body> ::=
-        <nonempty_updater_or_recipe_body> | <empty_routine_body>
+        <nonempty_updater_or_recipe_body> | <empty_atomic_body>
 
 An C<updater> node specifies a new updater that lives in a depot or
 subdepot.  An C<updater> node in the PTMD_STD grammar corresponds directly
@@ -2857,7 +2860,7 @@ C<exprs> and C<stmt> of the new C<Updater>.
 Any of these kinds of components of an C<updater> node are interpreted in
 exactly the same manner as for a C<recipe> node, as an C<Updater> is to a
 C<Recipe>: C<upd_reg_param>, C<ro_reg_param>, C<implements_clause>,
-C<empty_routine_body>, C<with_clause>, C<update_stmt>, C<named_expr>,
+C<empty_atomic_body>, C<with_clause>, C<update_stmt>, C<named_expr>,
 C<expr>.  In fact, the only structural difference between an updater and a
 recipe is that a recipe has global parameters and an updater doesn't.
 
@@ -2944,7 +2947,7 @@ Grammar:
         <PNSQNameChain_payload>
 
     <recipe_body> ::=
-        <nonempty_updater_or_recipe_body> | <empty_routine_body>
+        <nonempty_updater_or_recipe_body> | <empty_atomic_body>
 
     <nonempty_updater_or_recipe_body> ::=
         '{' <ws>?
@@ -2955,7 +2958,7 @@ Grammar:
     <with_clause> ::=
         with <ws> <named_material>
 
-    <empty_routine_body> ::=
+    <empty_atomic_body> ::=
         '{' <ws>? '...' <ws>? '}'
 
 A C<recipe> node specifies a new recipe that lives in a depot or subdepot.
@@ -2991,7 +2994,7 @@ for; for each parameter with an C<opt_param_flag>, the C<Recipe>'s
 C<opt_params> attribute has a tuple with the parameter's C<param_name>.
 Iff any of the parameters have a C<dispatch_param_flag>, then the recipe is
 being explicitly declared to be a virtual recipe, and so the C<recipe_body>
-must be C<empty_routine_body>; for each parameter with a
+must be C<empty_atomic_body>; for each parameter with a
 C<dispatch_param_flag>, the C<Recipe>'s C<dispatch_params> attribute has a
 tuple with the parameter's C<param_name>.
 
@@ -3012,7 +3015,7 @@ recipe, one being named by each C<implements_clause>.  Each
 C<implements_clause> is interpreted as a tuple of the C<Recipe>'s
 C<implements> attribute.
 
-Iff the C<recipe_body> is an C<empty_routine_body>, then the C<Recipe>'s
+Iff the C<recipe_body> is an C<empty_atomic_body>, then the C<Recipe>'s
 C<exprs> and C<stmt> attributes are both empty.
 
 Iff the C<recipe_body> has at least one C<with_clause>, then the recipe is
@@ -3077,16 +3080,21 @@ Grammar:
         <upd_reg_param> | <ro_reg_param>
 
     <procedure_body> ::=
-        <nonempty_procedure_body> | <empty_routine_body>
+        <nonempty_procedure_body> | <empty_procedure_body>
 
     <nonempty_procedure_body> ::=
-        '{' <ws>?
+        <nonempty_procedure_body_or_compound_stmt>
+
+    <nonempty_procedure_body_or_compound_stmt> ::=
+        '[' <ws>?
             [[<with_clause> | <proc_var> | <proc_stmt>] <ws>]*
-            <proc_stmt>
-        <ws>? '}'
+        <ws>? ']'
 
     <proc_var> ::=
         var <ws> <var_name> <ws>? ':' <ws>? <type_name>
+
+    <empty_procedure_body> ::=
+        '[' <ws>? '...' <ws>? ']'
 
 A C<procedure> node specifies a new procedure that lives in a depot or
 subdepot.  A C<procedure> node in the PTMD_STD grammar corresponds directly
@@ -3124,7 +3132,7 @@ as follows:
 Any of these kinds of components of a C<procedure> node are interpreted in
 exactly the same manner as for an C<updater> node, as a C<Procedure> is to
 an C<Updater>: C<upd_reg_param>, C<ro_reg_param>, C<implements_clause>,
-C<empty_routine_body>, C<with_clause>.
+C<empty_procedure_body> (as per C<empty_atomic_body>), C<with_clause>.
 
 Iff the C<procedure_body> has at least one C<proc_var>, then the procedure
 has one or more regular lexical variables, whose names are explicitly
@@ -3136,27 +3144,30 @@ tuple of the C<Procedure>'s C<vars> attribute; for each tuple, the
 C<var_name> and C<type_name>, respectively, of the C<proc_var> provide the
 tuple's C<name> and C<type> attribute.
 
-A C<nonempty_procedure_body> must have at least one C<proc_stmt>, although
-that C<proc_stmt> can simply cause the procedure to exit, making the
-procedure a no-op.  Each C<proc_stmt> is interpreted as a tuple of an
-attribute of the the C<Procedure>'s C<stmt> attribute.  A C<proc_stmt> may
-also, and typically does, also have nested C<proc_stmt>, thereby forming a
-tree, and that tree is flattened with each nested C<proc_stmt> becoming its
-own tuple under C<stmt> like with the first.
+Each C<proc_stmt> of a C<nonempty_procedure_body> is interpreted as a tuple
+of an attribute of the the C<Procedure>'s C<stmt> attribute.  A
+C<proc_stmt> may also, and typically does, also have nested C<proc_stmt>,
+thereby forming a tree, and that tree is flattened with each nested
+C<proc_stmt> becoming its own tuple under C<stmt> like with the first.  In
+fact, all of a procedure's statements form a single statement tree, and the
+root node of this tree is an implicit compound statement node (whose name
+is the empty string) whose direct child statements are all of the direct
+child C<proc_stmt> elements of the C<nonempty_procedure_body>, in order.
+Iff a C<nonempty_procedure_body> has no C<proc_stmt> member elements, then
+the procedure has a defined body that is an unconditional no-op.
 
 Examples:
 
-    procedure print_curr_time () {
+    procedure print_curr_time () [
         var $now : Instant
         fetch_curr_instant( &$now )
-        with updater compose_message (&$message : Text, $now : Instant) {
+        var $message : Text
+        {
             $message := 'The current time is: '
                 ~ nlx.par.lib.utils.time_as_text( time => $now )
         }
-        var $message : Text
-        nlx.lib.compose_message( &$>message, $>now )
         write_Text_line( $message )
-    }
+    ]
 
 =head2 Scalar Type Specification
 
@@ -3181,6 +3192,44 @@ I<TODO.>
 =head2 Mixin Type Specification
 
 I<TODO.>
+
+=head2 Stimulus-Response Rule Specification
+
+Grammar:
+
+    <stim_resp_rule> ::=
+        'stimulus-response-rule'
+        <ws> <material_declared_name>
+        <ws> <stim_resp_rule_payload>
+
+    <stim_resp_rule_payload> ::=
+        when <ws> <stimulus> <ws> invoke <ws> <response>
+
+    <stimulus> ::=
+        'after-mount'
+
+    <response> ::=
+        <routine_name>
+
+A C<stim_resp_rule> node specifies a new stimulus-response rule that lives
+in a depot or subdepot.  A C<stim_resp_rule> node in the PTMD_STD grammar
+corresponds directly to a tuple of the C<stim_resp_rules> attribute of a
+value of the catalog data type C<sys.std.Core.Type.Cat.Depot>, which is how
+a stimulus-response rule specification is actually represented in Muldis
+D's nonsugared form, which is as a component of the system catalog.  The
+C<stim_resp_rules> tuple has 2 primary attributes, C<name> and C<material>,
+which are valued from the C<stim_resp_rule> node's
+C<material_declared_name> and C<stim_resp_rule_payload> elements,
+respectively.
+
+I<TODO.>
+
+Examples:
+
+    stimulus-response-rule myonmount {
+        when after-mount
+        invoke mymain
+    }
 
 =head1 GENERIC VALUE EXPRESSIONS
 
@@ -3689,14 +3738,13 @@ Grammar:
     <proc_stmt__plain_rtn_inv> ::=
           <stmt_name>
         | <named_stmt>
+        | <compound_stmt>
+        | <atomic_stmt>
         | <iproc_imp_invo>
         | <try_catch_stmt>
         | <if_else_stmt>
         | <given_when_def_stmt>
-        | <compound_stmt>
-        | <leave_stmt>
-        | <iterate_stmt>
-        | <loop_stmt>
+        | <leave_or_iterate_or_loop_stmt>
 
     <proc_stmt__rtn_inv_alt_syn> ::=
           <proc_stmt__plain_rtn_inv>
@@ -3738,6 +3786,11 @@ explicit name rather than inline, same as the corresponding system catalog
 entry would do, and then the C<stmt_name> is the invocation name of that
 child.
 
+Note that, regarding Muldis D's feature of a statement node having an
+explicit name that can be referenced by "leave" and "iterate" control
+flow statements to leave or re-iterate the corresponding block, both SQL
+and Perl have native counterpart features in the form of block labels.
+
 Examples:
 
     # a stmt_name node #
@@ -3745,6 +3798,75 @@ Examples:
 
     # a named_stmt node #
     |bar_stmt ::= nlx.lib.swap( &$>first, &$>second )
+
+=head2 Generic Compound Statements
+
+Grammar:
+
+    <compound_stmt> ::=
+        <nonempty_procedure_body_or_compound_stmt>
+
+A C<compound_stmt> node specifies a procedure compound statement composed
+of a sequence of 0..N other statements such that those other statements
+execute in this given sequence; it lies at the heart of what makes a
+procedure nonatomic, because each statement of the sequence conceptually
+executes at a different time.  It is interpreted as a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.CompoundStmtNodeSet> value.  Each C<proc_stmt>
+element of a C<compound_statement> is a nested statement that is
+interpreted as its own tuple of an attribute of the C<stmt> attribute of
+the host C<Procedure>; for each said tuple, there exists an element of the
+C<CompoundStmtNodeSet>'s C<stmts> attribute which matches the C<name>
+attribute of the tuple.  Any C<with_clause> or C<proc_var> direct elements
+of a C<compound_stmt> are interpreted as if they were directly in the
+C<nonempty_procedure_body> that the C<compound_stmt> is under.
+
+Examples:
+
+    [
+        var $message : Text
+        read_Text_line( &$message )
+        write_Text_line( $message )
+    ]
+
+=head2 Procedure Atomic Statements
+
+Grammar:
+
+    <atomic_stmt> ::=
+        <nonempty_updater_or_recipe_body>
+
+An C<atomic_stmt> node is a special shorthand syntax that is equivalent to
+the combination of a C<with_clause> node that defines an inner updater of a
+procedure plus an C<iproc_imp_invo> node that is a procedure statement
+invoking said updater.  It entirely takes the form of an updater body
+specification, which is delimited by a pair of curly braces; conceptually
+an C<atomic_stmt> is analogous to a C<compound_stmt>, the latter entirely
+taking the form of a procedure body; these are distinguished from each
+other primarily by the different delimiter characters they use.  The inner
+updater derived from a C<atomic_stmt> has an entirely parser-generated
+updater heading, which is derived from information gleaned from both the
+C<atomic_stmt> node and from other parts of the procedure specification in
+which the latter is embedded.  The inner updater has a regular parameter
+for every distinct C<expr_name> node in the C<atomic_stmt> which matches
+the unqualified name of either a parameter or a lexical variable of the
+procedure, meaning that the C<expr_name> refers to an updater parameter
+rather than some updater body expression node, and the updater invocation
+is passing an argument to each parameter from a same-named C<var_name>.
+For each updater parameter, the declared type of that parameter is
+identical to the declared type of the corresponding procedure parameter or
+lexical variable.  For each updater parameter, that parameter is declared
+subject-to-update iff the updater uses it as an argument to a
+subject-to-update parameter in one of its C<update_stmt> nodes; otherwise
+that parameter is declared read-only.  No parameters are optional nor
+dispatch, and the updater doesn't implement a virtual.  The unqualified
+name of the updater is parser-generated; see L</MATERIAL SPECIFICATION>.
+
+Examples:
+
+    {
+        $x := $y
+        $y := $x
+    }
 
 =head2 Procedure Value Expressions
 
@@ -3896,6 +4018,215 @@ Examples:
     prompt_Text_line( &$name, 'Enter a person\as name: ' )
 
     Integer.fetch_random( &$rand, $interval )
+
+=head2 Generic Try-Catch Statements
+
+Grammar:
+
+    <try_catch_stmt> ::=
+        try <ws> <try_stmt>
+        [<ws> catch <ws> <catch_stmt>]?
+
+    <try_stmt> ::=
+        <proc_stmt>
+
+    <catch_stmt> ::=
+        <proc_stmt>
+
+A C<try_catch_stmt> node represents a try-catch control flow statement.  It
+is interpreted as a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.TryCatchStmtNodeSet> value.  The C<try_stmt> and
+C<catch_stmt> elements specify the C<try> and C<catch> attributes,
+respectively, of the new C<TryCatchStmtNodeSet>, which are the names or
+definitions of statements that represent the invocation of named imperative
+routines.  The C<try> routine is unconditionally invoked first and then iff
+C<try> throws an exception then it will be caught and the C<catch> routine,
+if any, will be invoked immediately after to handle it; if C<catch> also
+throws an exception then it will not be caught.  It is invalid for
+C<try_stmt> or C<catch_stmt> to name or define a procedure statement that
+isn't just a routine invocation, though the grammar itself doesn't say so;
+mainly the valid options are: C<iproc_imp_invo>, C<atomic_stmt>,
+C<imp_invo_alt_syntax>, and C<stmt_name> or C<named_stmt> for the first 3.
+
+Examples:
+
+    try
+        nlx.lib.attempt_the_work()
+    catch
+        nlx.lib.deal_with_failure()
+
+=head2 Generic If-Else Statements
+
+Grammar:
+
+    <if_else_stmt> ::=
+        if <ws> <if_proc_expr> <ws> then <ws> <then_stmt>
+        [<ws> else <ws> if <ws> <if_proc_expr> <ws> then <ws> <then_stmt>]*
+        [<ws> else <ws> <else_stmt>]?
+
+    <if_proc_expr> ::=
+        <proc_expr>
+
+    <then_stmt> ::=
+        <proc_stmt>
+
+    <else_stmt> ::=
+        <proc_stmt>
+
+An C<if_else_stmt> node represents an N-way if-else control flow statement.
+It is interpreted as a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.IfElseStmtNodeSet> value.  The whole collection of
+sequential 1..N C<if_proc_expr> + C<then_stmt> elements specifies the
+C<if_then> attribute of the new C<IfElseStmtNodeSet>, which is a sequence
+of arbitrary but C<Bool>-valued I<if> lexical variables (possibly
+sugar-coated with static-value expressions), and for just the first one of
+those in the sequence that at runtime is valued with C<Bool:True>, its
+associated I<then> statement is executed as if it were the whole
+C<if_else_stmt>.  The C<else_stmt> element, if it is provided, specifies
+the C<else> attribute, which determines the statement to execute as if it
+were the whole C<if_else_stmt> at runtime if either C<if_then> is an empty
+sequence or all of its conditionals are valued with C<Bool:False>.  (Note
+that while an C<IfElseStmtNodeSet> tuple can represent zero C<if_proc_expr>
++ C<then_stmt> elements, that isn't an option in this concrete grammar
+because such an C<if_else_stmt> is indistinguishable from the generic
+C<proc_stmt> that C<else_stmt> is.)
+
+Examples:
+
+    if $out_of_options then
+        nlx.lib.give_up()
+    else
+        nlx.lib.keep_going()
+
+=head2 Generic Given-When-Default Statements
+
+Grammar:
+
+    <given_when_def_stmt> ::=
+        given <ws> <given_proc_expr> <ws>
+        [when <ws> <when_proc_expr> <ws> then <ws> <then_stmt> <ws>]*
+        [default <ws> <default_stmt>]?
+
+    <given_proc_expr> ::=
+        <proc_expr>
+
+    <when_proc_expr> ::=
+        <proc_expr>
+
+    <then_stmt> ::=
+        <proc_stmt>
+
+    <default_stmt> ::=
+        <proc_stmt>
+
+A C<given_when_def_stmt> node represents an N-way given-when-default switch
+control flow statement that dispatches based on matching a single value
+with several options.  It is interpreted as a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.GivenWhenDefStmtNodeSet> value.  The
+C<given_proc_expr> element specifies the C<given> attribute of the new
+C<GivenWhenDefStmtNodeSet>, which is the control value for the statement.
+The whole collection of nonordered 0..N C<when_proc_expr> + C<then_stmt>
+elements specifies the C<when_then> attribute, which is a set of I<when>
+comparands; if any of these I<when> values matches the value of C<given>,
+its associated I<then> statement is executed as if it were the whole
+C<given_when_def_stmt>.  The C<default_stmt> element specifies the
+C<default> attribute, which determines the statement that is executed at
+runtime as if it were the whole C<given_when_def_stmt> if either
+C<proc_when_then> is an empty set or none of its comparands match C<given>.
+
+Examples:
+
+    given $picked_menu_item
+        when 'v' then
+            nlx.lib.screen_view_record()
+        when 'a' then
+            nlx.lib.screen_add_record()
+        when 'd' then
+            nlx.lib.screen_delete_record()
+        default
+            nlx.lib.display_bad_choice_error()
+
+=head2 Procedure Leave, Iterate, and Loop Statements
+
+Grammar:
+
+    <leave_or_iterate_or_loop_stmt> ::=
+          <leave_stmt>
+        | <iterate_stmt>
+        | <loop_stmt>
+
+    <leave_stmt> ::=
+        leave [<ws> <stmt_name>]?
+
+    <iterate_stmt> ::=
+        iterate [<ws> <stmt_name>]?
+
+    <loop_stmt> ::=
+        loop <ws> <proc_stmt>
+
+The 3 node kinds C<leave_stmt>, C<iterate_stmt>, C<loop_stmt> are all very
+useable independently and are also commonly used together.
+
+A C<leave_stmt> node represents an instruction to abnormally exit the block
+defined by a parent statement node (a normal exit is to simply execute to
+the end of the block).  If the parent node in question is the root
+(compound) statement node for the host procedure, that is, if the parent
+node has the empty string as its name, then the latter will be exited; this
+is how a "return" statement is represented.  If the parent node in question
+is an iterating or looping statement, then any remaining iterations it
+might have had are skipped, especially useful if it was an infinite loop.
+A C<leave_stmt> node is interpreted as a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.LeaveStmtNodeSet> value.  The optional C<stmt_name>
+element specifies the name of the parent statement node to completely
+abort; that name becomes the C<iterate> attribute of the new
+C<LeaveStmtNodeSet> tuple.  Iff the C<leave_stmt> has no C<stmt_name>
+element then the parser will automatically generate said element with a
+value of the empty string, meaning it is a "return" statement.
+
+An C<iterate_stmt> node represents an instruction to abnormally end the
+current iteration of a looping block defined by a parent statement node,
+and then start at the beginning of the next iteration of that loop if there
+are any left; or, it can also be used to "redo" any non-looping parent
+statement.  It is interpreted as a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.IterateStmtNodeSet> value.  The optional
+C<stmt_name> element specifies the name of the parent statement node to
+continue execution at the beginning of; that name becomes the C<iterate>
+attribute of the new C<IterateStmtNodeSet> tuple.  Iff the C<iterate_stmt>
+has no C<stmt_name> element then the parser will automatically generate
+said element with a value of the empty string.  Having the C<stmt_name>
+value of the empty string means that the root (compound) statement of the
+host procedure is being referenced, in which case the C<iterate_stmt> is
+saying to redo the whole procedure.
+
+A C<loop_stmt> node represents a generic looping statement block which
+iterates until a child "leave" statement executes.  It is interpreted as a
+tuple of a Muldis D C<sys.std.Core.Type.Cat.LoopStmtNodeSet> value.  The
+C<proc_stmt> element specifies the name or definition of the child
+statement node to be repeatedly executed; the name of that statement
+becomes the C<loop> attribute of the new C<LoopStmtNodeSet> tuple.
+
+A C<loop_stmt> node in combination with C<leave_stmt> or C<iterate_stmt>
+nodes is useful for a more ad-hoc means of performing nonatomic iteration
+as well as for effectively simulating the syntax of common "while" or "for
+i" loops, so Muldis D doesn't include special "while" or "for i" syntax.
+A C<loop_stmt> is I<not> an effective "for each item in list" replacement,
+however; Muldis D currently doesn't provide a nonatomic "foreach", but
+typically any tasks for such can effectively be performed in atomic code
+using various list-processing relational routines; if a case can be made
+for nonatomic "foreach" then Muldis D may gain this feature in the future.
+
+Examples:
+
+    |lookup_person ::= loop [
+        prompt_Text_line( &$name, 'Enter a name to search for: ' )
+        given $name when '' leave |lookup_person
+        nlx.lib.do_search( $>name, &$>not_found, &$>report_text )
+        if $not_found then [
+            write_Text_line( 'No person matched' )
+            iterate |lookup_person
+        ]
+        write_Text_line( $report_text )
+    ]
 
 =head1 FUNCTION INVOCATION ALTERNATE SYNTAX EXPRESSIONS
 
