@@ -9,7 +9,7 @@ Muldis D catalog-defining data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types_Catalog version 0.125.0.
+This document is Muldis::D::Core::Types_Catalog version 0.126.0.
 
 =head1 PREFACE
 
@@ -163,6 +163,7 @@ This graph slice shows all of the catalog nonscalar types:
                     sys.std.Core.Type.Cat.Depot
                     sys.std.Core.Type.Cat.ExprNodeSet
                     sys.std.Core.Type.Cat.StmtNodeSet
+                    sys.std.Core.Type.Cat.D0
 
         sys.std.Core.Type.Relation
             sys.std.Core.Type.DHRelation
@@ -1474,7 +1475,7 @@ a whole.
 
 =item C<scm_vis_ord> - C<NNInt>
 
-This is the visible order of this routine's declaration relative to all of
+This is the visible order of this rule's declaration relative to all of
 the named entities directly within the namespace defined by C<parent>.
 
 =item C<material> - C<StimRespRule>
@@ -3398,7 +3399,7 @@ A C<ScalarType> has these 7 attributes:
 This is an optional programmer comment about the scalar
 [|sub]type as a whole.
 
-=item C<composed_mixins> - C<set_of.RPTypeNC>
+=item C<composed_mixins> - C<ComposedMixinSet>
 
 These are the names of the 0..N mixin types, if any, that the new scalar
 type composes, and therefore the new type is a subtype of all of them.
@@ -3495,7 +3496,7 @@ it is a singleton type, whose default value is its only value.
 A C<PossrepSet> is a C<DHRelation> that specifies a set of possreps that
 a scalar [|sub]type might consist primarily of.
 
-A C<PossrepSet> has these 6 attributes:
+A C<PossrepSet> has these 5 attributes:
 
 =over
 
@@ -3512,33 +3513,26 @@ This is an optional programmer comment about the possrep as a whole.
 This is the visible order of this possrep's declaration relative to all of
 the other possreps of this scalar type declaration.
 
-=item C<attrs> - C<NameTypeMap>
+=item C<tuple_type> - C<RPTypeNC>
 
-This defines the 0..N attributes of the possrep.
-
-=item C<constraint> - C<maybe_of.RPFunctionNC>
-
-Iff it is a C<Single>, then C<constraint>
-matches the invocation name of a C<type-constraint> function that
-determines what combinations of possrep attribute values denote values of
-the [|sub]type, besides the restrictions imposed by the declared types of
-the attributes individually.  The function that this names
-must have a single C<topic> parameter whose declared type is a tuple whose
-attributes match those declared by C<attrs> and whose argument denotes the
-value to test; the function's result type must be C<Bool>.  If the
-function unconditionally results in C<Bool:True>, then all possible
-combinations of attribute-allowable values are collectively allowed.  Note
-that, strictly speaking, any constraint defined as part of a possrep (where
+This is the name of the tuple type from which the possrep being defined
+composes its list of attributes (C<attrs>) and the basic constraints on
+those as a collection (C<constraints>).  Said tuple type will most likely,
+but isn't constrained to, not include any of the more complicated
+specifications that typically are just used by tuples of relations or
+tuples that are databases, such as virtual attribute maps or subset
+constraints.  Note that, strictly speaking, any
+constraint defined as part of (the tuple type defining) a possrep (where
 there are multiple possreps) may actually be less restrictive than the
-total constraint of [|sub]type as a whole, because the total constraint is
+total constraint of the possreps' host
+scalar [|sub]type as a whole, because the total constraint is
 defined by I<and>-ing the constraints of all the possreps of the
 [|sub]type (and, in the case of defining a subtype, with the
 C<subtype_constraint> of the subtype and all base type constraints);
 therefore, mainly any given possrep's constraints need to be just
 restricting enough so that the inter-possrep mapping functions can handle
 the arguments that it accepts, so it is possible to apply the other
-possreps' constraints.  Iff C<constraint> is C<Nothing>, then semantics are
-as if it were a defined name that unconditionally resulted in C<Bool:True>.
+possreps' constraints.
 
 =item C<is_base> - C<Bool>
 
@@ -3556,8 +3550,8 @@ tie-breaker if applicable.
 
 A C<PossrepSet> has a unary primary key on the C<name> attribute.  Its
 default value is empty.  The default value of a tuple of C<PossrepSet>
-has a C<name> that is the empty string, its C<attrs> is empty, and its
-C<constraint> is C<Nothing>.
+has a C<name> that is the empty string and its C<tuple_type> is C<D0>; and
+so the default is suitable for declaring a singleton scalar type.
 
 =head2 sys.std.Core.Type.Cat.PossrepMapSet
 
@@ -3588,10 +3582,11 @@ constraint defines a C<PossrepMapSet>'s canonical form.
 
 This matches the invocation name of a C<possrep-map> function that
 derives the representation of the possrep named by C<p2> from that of the
-possrep named by C<p1>.  The function that this names must
-have a single C<topic> parameter whose declared type is a tuple whose
-attributes match those of C<p1>; the function's result type must be a
-tuple whose attributes match those of C<p2>.  Note that every distinct
+possrep named by C<p1>.  The function that this names must have a single
+C<topic> parameter whose declared type is the tuple type named by the
+C<tuple_type> attribute of the possrep named by C<p1>; the function's
+declared result type must be the tuple type named by the C<tuple_type>
+attribute of the possrep named by C<p2>.  Note that every distinct
 argument (domain) value of this function must have a distinct result
 (range) value.
 
@@ -3632,7 +3627,7 @@ A C<TupleType> has these 10 attributes:
 This is an optional programmer comment about the tuple
 [|sub]type as a whole.
 
-=item C<composed_mixins> - C<set_of.RPTypeNC>
+=item C<composed_mixins> - C<ComposedMixinSet>
 
 These are the names of the 0..N mixin types, if any, that the new tuple
 type composes, and therefore the new type is a subtype of all of them.
@@ -3777,7 +3772,7 @@ A C<RelationType> has these 7 attributes:
 This is an optional programmer comment about the relation
 [|sub]type as a whole.
 
-=item C<composed_mixins> - C<set_of.RPTypeNC>
+=item C<composed_mixins> - C<ComposedMixinSet>
 
 These are the names of the 0..N mixin types, if any, that the new relation
 type composes, and therefore the new type is a subtype of all of them.
@@ -4326,7 +4321,7 @@ A C<DomainType> has these 8 attributes:
 
 This is an optional programmer comment about the domain type as a whole.
 
-=item C<composed_mixins> - C<set_of.RPTypeNC>
+=item C<composed_mixins> - C<ComposedMixinSet>
 
 These are the names of the 0..N mixin types, if any, that the new domain
 type composes, and therefore the new type is a subtype of all of them.
@@ -4414,7 +4409,7 @@ A C<SubsetType> has these 5 attributes:
 
 This is an optional programmer comment about the subset type as a whole.
 
-=item C<composed_mixins> - C<set_of.RPTypeNC>
+=item C<composed_mixins> - C<ComposedMixinSet>
 
 These are the names of the 0..N mixin types, if any, that the new subset
 type composes, and therefore the new type is a subtype of all of them.
@@ -4458,7 +4453,7 @@ type being mandatory.
 =head2 sys.std.Core.Type.Cat.MixinType
 
 A C<MixinType> is a C<DHTuple>.  It defines a new data type whose values
-are a union of those from the one or more other not-C<Empty> types that
+are a union of those from the zero or more other not-C<Empty> types that
 specify themselves to be part of that union.  For all practical purposes, a
 C<MixinType> declares a I<mixin> or I<interface> or I<role> (the last as
 Perl 6 uses the term) which is meant to be composed into other types, such
@@ -4476,7 +4471,7 @@ system-defined domain-type (such as C<Bool>).  A data type defined by a
 C<MixinType> is typically not considered to exist when the system wants to
 determine the MST (most specific type) of one of its values.
 
-A C<MixinType> has these 3 attributes:
+A C<MixinType> has these 2 attributes:
 
 =over
 
@@ -4484,7 +4479,7 @@ A C<MixinType> has these 3 attributes:
 
 This is an optional programmer comment about the mixin type as a whole.
 
-=item C<composed_mixins> - C<set_of.RPTypeNC>
+=item C<composed_mixins> - C<ComposedMixinSet>
 
 These are the names of the 0..N other mixin types, if any, that the new
 mixin type composes.  Any other type that explicitly composes the new mixin
@@ -4492,18 +4487,37 @@ type will also implicitly compose all of the other mixin types that the new
 mixin type composes, recursively; note that a mixin type is forbidden from
 composing itself, directly or indirectly.
 
-=item C<default> - C<RPFunctionNC>
-
-This matches the invocation name of a C<named-value> function that results
-in the default value of the mixin type; it has zero parameters and its
-result type is the same as one of the other types that, directly or
-indirectly, composes the mixin type.
-
 =back
 
-The default value of C<MixinType> defines a mixin type that is identical to
-C<Boolean>; its C<composed_mixins> is empty and its default value is
-the default value of C<Bool>.  I<This paragraph is subject to change.>
+The default value of C<MixinType> defines a mixin type has no comment and
+composes no other mixins and that in isolation has no default value.
+
+=head2 sys.std.Core.Type.Cat.ComposedMixinSet
+
+A C<ComposedMixinSet> is a C<DHRelation>.  It defines a set of names of
+declared mixin data types which are being composed by another type, and for
+each it indicates whether the composing type is asserting that it will
+provide the default value of the mixin type.  A C<ComposedMixinSet> has 4
+attributes, C<type> (a C<RPTypeNC>), C<provides_its_default> (a C<Bool>),
+C<scm_comment> (a C<Comment>), and C<scm_vis_ord> (a C<NNInt>); the C<type>
+is the declared name of the mixin type being composed, and comprises a
+unary key.  Its default value has zero tuples.
+
+A providing composing type always gives its own default value for the
+mixin's default; they can't be different; if you want different, declare a
+subtype of the value provider to be what composes the mixin.  No more than
+one visible type may declare provision of the default value for a mixin.
+If a system-defined type claims to provide a default for a mixin, no
+user-defined type ever can (see C<Ordered>, C<Ordinal>, C<Numeric>,
+C<Stringy>).  If a system-defined mixin exists that no system-defined type
+composes (see C<Instant>, C<Duration>) then exactly one user-defined type
+in a mounted depot may claim to provide its default, and that only affects
+code in that depot which asks for the default value of said types.  A
+user-defined mixin type can only be composed by user-defined types in the
+same depot.  Asking a mixin type for its default will fail unless a visible
+type claims its default.  Iff exactly one visible type composes a mixin,
+that one will provide the mixin's default value implicitly if it doesn't
+explicitly claim to.
 
 =head1 TYPES FOR DEFINING STIMULUS-RESPONSE RULES
 
@@ -4531,7 +4545,19 @@ This is the name of the recipe or procedure being invoked.
 
 =back
 
+The default value of C<StimRespRule> defines a stimulus-response rule whose
+stimulus is C<after-mount> and whose response is an invocation of the
+procedure C<sys.std.Core.Cat.fail>.
+
 =head1 SIMPLE GENERIC NONSCALAR TYPES
+
+=head2 sys.std.Core.Type.Cat.D0
+
+A C<D0> is a C<Database>.  It has exactly zero attributes; it is a
+singleton type whose only value is also known as C<Tuple:D0>.  This exists
+as a data type as a convenience for the definition of scalar singleton
+types, which would typically use this as the tuple type which their possrep
+is defined partially in terms of.
 
 =head2 sys.std.Core.Type.Cat.NameTypeMap
 
