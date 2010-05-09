@@ -1,6 +1,61 @@
                                  Muldis::D
 ---------------------------------------------------------------------------
 
+2010-05-08  Darren Duncan <darren@DarrenDuncan.net>
+
+    * Muldis::D version 0.127.0 is released on CPAN as
+    Muldis-D-0.127.0.tar.gz.
+
+    * (Routines_Catalog.pod)  Updated these all 12 "create_\w+" recipes,
+    with a "comment" parameter, to rename said to "scm_comment", and for
+    all but one of those, also added a "scm_vis_ord" parameter, this all
+    corresponding to the catalog types they work with.
+
+    * (Routines_Catalog.pod)  Added 2 new recipes
+    "sys.std.Core.Cat.[create|drop]_stim_resp_rule", which should have been
+    done as part of the prior 2 releases' addition of basic
+    stimulus-response rules support, but wasn't.  They are analogous to SQL
+    [CREATE|DROP] TRIGGER statements.  Also renamed the pod sub-section
+    "Recipes For Defining Depot Routines and Data Types" to "Recipes For
+    Defining Depot Materials".
+
+    * (Types_Catalog.pod)  Removed the catalog type "APNonTypeNC" which is
+    now considered superfluous; its 2 ex-proper-subtypes now cite
+    "AbsPathMaterialNC" as their proper supertype instead.
+
+    * (Types_Catalog.pod)  Renamed the 2 catalog types "[|Distrib]KeySet"
+    to "[|Distrib]KeyConstrSet".  Also updated the catalog type
+    "RelationType" to rename its "keys" attribute to "key_constraints", and
+    "TupleType" to rename its "distrib_keys" attribute to
+    "distrib_key_constraints".
+
+    * (Types_Catalog.pod)  Moved the declarations of the 3 catalog types
+    "[DKMemRel|DKRelAttrKey|SCChildAttrParent]AttrMap" downwards to just
+    after "ComposedMixinSet".
+
+    * (Types_Catalog.pod)  Split each of the 4 catalog types
+    "[|Distrib][Key|Subset]ConstrSet" 2 ways, into itself plus the
+    same-name without the "Set", where the no-"Set" version is a tuple type
+    having all the main attributes and the "Set" version is a relation type
+    composing an attribute of the no-"Set" type.  For each of the 4 type
+    pairs, both members have the 1 "scm_comment" old attribute, and only
+    the relation type has the 2 old "name", "scm_vis_ord" attributes.  For
+    each of the 4 type pairs, the relation type has the 1 new "material"
+    attribute whose type is the tuple type.  With the "KeyConstr" type
+    pair, only the tuple type has the 2 "attrs", "is_primary" attributes;
+    with "DistribKeyConstr", the 3 "attrs", "relations", "is_primary"; with
+    "SubsetConstr", the 4 "parent", "parent_key", "child", "attr_map"; with
+    "DistribSubsetConstr", the 3 "parent_distrib_key", "child", "attr_map".
+
+    * (Types_Catalog.pod)  Changed "[|Distrib][Key|Subset]ConstrSet" types
+    to full-fledged materials, and tuple/relation types now just refer to
+    them by name rather than embedding them.  TODO, flesh this change desc.
+
+    * (Routines_Catalog.pod)  Added 8 create/drop routines re the above.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Added 4 initially empty
+    sections ... todo finish change item.
+
 2010-05-07  Darren Duncan <darren@DarrenDuncan.net>
 
     * Muldis::D version 0.126.0 is released on CPAN as
