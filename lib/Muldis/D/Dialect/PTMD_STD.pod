@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.127.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.128.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.127.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.128.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -248,7 +248,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.127.0>.
+C<ln_base_authority>; it is typically a character string like C<0.128.0>.
 
 =item C<ln_dialect>
 
@@ -269,12 +269,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.127.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.127.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -357,7 +357,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.127.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -439,7 +439,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.127.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -448,7 +448,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.127.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -545,7 +545,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.127.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -610,7 +610,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.127.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -2546,6 +2546,10 @@ Grammar:
         | <domain_type>
         | <subset_type>
         | <mixin_type>
+        | <key_constr>
+        | <distrib_key_constr>
+        | <subset_constr>
+        | <distrib_subset_constr>
         | <stim_resp_rule>
 
 A C<material> node specifies a new material (routine or type) that lives in
@@ -2652,6 +2656,12 @@ Every material has 2-3 elements, illustrated by this grammar:
         | 'domain-type'
         | 'subset-type'
         | 'mixin-type'
+        | 'key-constraint'
+            | 'primary-key'
+        | 'distrib-key-constraint'
+            | 'distrib-primary-key'
+        | 'subset-constraint'
+        | 'distrib-subset-constraint'
         | 'stimulus-response-rule'
 
     <material_declared_name> ::=
@@ -2668,6 +2678,10 @@ Every material has 2-3 elements, illustrated by this grammar:
         | <domain_type_payload>
         | <subset_type_payload>
         | <mixin_type_payload>
+        | <key_constr_payload>
+        | <distrib_key_constr_payload>
+        | <subset_constr_payload>
+        | <distrib_subset_constr_payload>
         | <stim_resp_rule_payload>
 
 So a C<x_material>|C<material> node has 2-3 elements in general:
@@ -3171,31 +3185,266 @@ Examples:
 
 =head2 Scalar Type Specification
 
-I<TODO.>
+Grammar:
+
+    <scalar_type> ::=
+        'scalar-type'
+        <ws> <material_declared_name>
+        <ws> <scalar_type_payload>
+
+    <scalar_type_payload> ::=
+        '{' <ws>?
+            [
+                  <with_clause>
+                | <composes_clause>
+                | <base_type_clause>
+                | <subtype_constr_clause>
+                | <possrep>
+                | <possrep_map>
+                | <default_clause>
+            ] ** <ws>
+        <ws>? '}'
+
+    <subtype_constr_clause> ::=
+        'subtype-constraint' <ws> <routine_name>
+
+    <possrep> ::=
+        possrep <ws>
+        <possrep_name> <ws>
+        '{' <ws>?
+            <tuple_type_clause>
+            [<ws> <is_base_clause>]?
+        <ws>? '}'
+
+    <is_base_clause> ::=
+        'is-base'
+
+    <possrep_map> ::=
+        'possrep-map' <ws>
+        '{' <ws>?
+            <p2> <ws> from <ws> <p1> <ws> using <ws> <routine_name>
+            <ws>
+            <p1> <ws> from <ws> <p2> <ws> using <ws> <routine_name>
+        <ws>? '}'
+
+    <p1> ::=
+        <possrep_name>
+
+    <p2> ::=
+        <possrep_name>
+
+I<TODO: Description and Examples.>
 
 =head2 Tuple Type Specification
 
-I<TODO.>
+Grammar:
+
+    <tuple_type> ::=
+        <tuple_type_kind>
+        <ws> <material_declared_name>
+        <ws> <tuple_type_payload>
+
+    <tuple_type_kind> ::=
+        'tuple-type' | 'database-type'
+
+    <tuple_type_payload> ::=
+        '{' <ws>?
+            [
+                  <with_clause>
+                | <composes_clause>
+                | <base_type_clause>
+                | <tuple_attr>
+                | <virtual_attr_map>
+                | <constraint_clause>
+                | <default_clause>
+            ] ** <ws>
+        <ws>? '}'
+
+    <tuple_attr> ::=
+        attr <ws> <attr_name_lex> <ws>? ':' <ws>? <type_name>
+
+    <attr_name_lex> ::=
+        <lex_entity_name>
+
+    <virtual_attr_map> ::=
+        !!TODO!!
+
+I<TODO: Description and Examples.>
 
 =head2 Relation Type Specification
 
-I<TODO.>
+Grammar:
+
+    <relation_type> ::=
+        'relation-type'
+        <ws> <material_declared_name>
+        <ws> <relation_type_payload>
+
+    <relation_type_payload> ::=
+        '{' <ws>?
+            [
+                  <with_clause>
+                | <composes_clause>
+                | <base_type_clause>
+                | <tuple_type_clause>
+                | <constraint_clause>
+                | <default_clause>
+            ] ** <ws>
+        <ws>? '}'
+
+    <tuple_type_clause> ::=
+        tuple-type <ws> <type_name>
+
+I<TODO: Description and Examples.>
 
 =head2 Domain Type Specification
 
-I<TODO.>
+Grammar:
+
+    <domain_type> ::=
+        'domain-type'
+        <ws> <material_declared_name>
+        <ws> <domain_type_payload>
+
+    <domain_type_payload> ::=
+        '{' <ws>?
+            [
+                  <with_clause>
+                | <composes_clause>
+                | <domain_sources>
+                | <domain_filters>
+                | <constraint_clause>
+                | <default_clause>
+            ] ** <ws>
+        <ws>? '}'
+
+    <domain_sources> ::=
+        ['source-union' | 'source-intersection'] <ws>
+        '{' <ws>?
+            <type_name> ** [<ws>? ',' <ws>?]
+        <ws>? '}'
+
+    <domain_filters> ::=
+        ['filter-union' | 'filter-intersection'] <ws>
+        '{' <ws>?
+            [<type_name> ** [<ws>? ',' <ws>?]]?
+        <ws>? '}'
+
+I<TODO: Description and Examples.>
 
 =head2 Subset Type Specification
 
-I<TODO.>
+Grammar:
+
+    <subset_type> ::=
+        'subset-type'
+        <ws> <material_declared_name>
+        <ws> <subset_type_payload>
+
+    <subset_type_payload> ::=
+        <subset_type_pl_long> | <subset_type_pl_short>
+
+    <subset_type_pl_long> ::=
+        '{' <ws>?
+            [
+                  <with_clause>
+                | <composes_clause>
+                | <base_type_clause>
+                | <constraint_clause>
+                | <default_clause>
+            ] ** <ws>
+        <ws>? '}'
+
+    <base_type_clause> ::=
+        ['base-type' | of] <ws> <type_name>
+
+    <constraint_clause> ::=
+        [constraint | where] <ws> <routine_name>
+
+    <default_clause> ::=
+        default <ws> <routine_name>
+
+    <subset_type_pl_short> ::=
+        <base_type_clause>
+        [<ws> <constraint_clause>]?
+        [<ws> <default_clause>]?
+
+I<TODO: Description and Examples.>
 
 =head2 Mixin Type Specification
 
-I<TODO.>
+Grammar:
+
+    <mixin_type> ::=
+        'mixin-type'
+        <ws> <material_declared_name>
+        <ws> <mixin_type_payload>
+
+    <mixin_type_payload> ::=
+        '{' <ws>?
+            [[
+                  <with_clause>
+                | <composes_clause>
+            ] ** <ws>]?
+        <ws>? '}'
+
+    <composes_clause> ::=
+        composes <ws> <type_name> [<ws> <prov_def_clause>]?
+
+    <prov_def_clause> ::=
+        'and-provides-its-default'
+
+I<TODO: Description and Examples.>
 
 =head2 Key Constraint Specification
 
-I<TODO.>
+Grammar:
+
+    <key_constr> ::=
+        <key_constr_kind>
+        <ws> <material_declared_name>
+        <ws> <key_constr_payload>
+
+    <key_constr_kind> ::=
+        'key-constraint' | 'primary-key'
+
+    <key_constr_payload> ::=
+        '{' <ws>?
+            [<attr_name_lex> ** [<ws>? ',' <ws>?]]?
+        <ws>? '}'
+
+A C<key_constr> node specifies a new unique key constraint or candidate
+key, for a relation type, that lives in a depot or subdepot.  A
+C<key_constr> node in the PTMD_STD grammar corresponds directly to a tuple
+of the C<key_constrs> attribute of a value of the catalog data type
+C<sys.std.Core.Type.Cat.Depot>, which is how a unique key constraint
+specification is actually represented in Muldis D's nonsugared form, which
+is as a component of the system catalog.  The C<key_constrs> tuple has 2
+primary attributes, C<name> and C<material>, which are valued from the
+C<key_constr> node's C<material_declared_name> and C<key_constr_payload>
+elements, respectively.
+
+A C<key_constr_payload> specifies an entire unique key constraint or
+candidate key, for a relation type, besides its name.  It is interpreted as
+a Muldis D C<sys.std.Core.Type.Cat.KeyConstr> value.  Each C<attr_name_lex>
+element of a C<key_constr_payload> is interpreted as a tuple of the
+C<KeyConstr>'s C<attrs> attribute.  Iff there are no C<attr_name_lex>, then
+we have a nullary key which restricts the relation to have a maximum of 1
+tuple.  The C<key_constr_kind> element of a C<key_constr> node is the sole
+determinant of the value of the C<is_primary> attribute of the resulting
+C<KeyConstr>; C<primary-key> means C<Bool:True>, while C<key-constraint>
+means C<Bool:False>.
+
+Examples:
+
+    # at most one tuple allowed #
+    key-constraint maybe_one {}
+
+    # relation type's $artist_id attr is its primary key #
+    primary-key pk_artist_id { $artist_id }
+
+    # relation type has surrogate key over both name attrs #
+    key-constraint sk_name { $last_name, $first_name }
 
 =head2 Distributed Key Constraint Specification
 
