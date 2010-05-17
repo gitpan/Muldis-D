@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.128.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.129.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.128.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.129.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -248,7 +248,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.128.0>.
+C<ln_base_authority>; it is typically a character string like C<0.129.0>.
 
 =item C<ln_dialect>
 
@@ -269,12 +269,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.129.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.129.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -357,7 +357,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.129.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -439,7 +439,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.129.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -448,7 +448,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.129.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -545,7 +545,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.129.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -610,7 +610,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.128.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.129.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -978,6 +978,20 @@ where both C<value> is an C<opaque_value_literal> and C<type_name> refers
 to a system-defined type, then the C<type_name> assertion is done at
 compile time, and then the C<type_name> element is simply eliminated, so
 the C<value> ends up simply as itself with no new C<func_invo> parent.
+
+In another common special case, iff a C<value> node with a C<type_name>
+element is a C<coll_value_selector> and its C<type_name> names a
+system-defined tuple type or relation type with a specified set of
+attributes, then the parser will automatically generate any missing
+attribute values of the C<value> node, where each has the default value of
+its declared type as per C<type_name>.  This will be done prior to the
+other use of C<type_name> which applies a constraint, so the latter acts as
+if the original code had specified the missing attributes.  In the case of
+the type being a relation type, the relation value literal doesn't even
+need to be well-formed (have the attributes per tuple) in the code, as the
+attribute generation is done per tuple.  Since it only works for
+system-defined types, this special case is primarily useful for code
+involving values that represent code.
 
 =item C<value_payload>
 
@@ -3198,14 +3212,14 @@ Grammar:
                   <with_clause>
                 | <composes_clause>
                 | <base_type_clause>
-                | <subtype_constr_clause>
+                | <subtype_constraint_clause>
                 | <possrep>
                 | <possrep_map>
                 | <default_clause>
             ] ** <ws>
         <ws>? '}'
 
-    <subtype_constr_clause> ::=
+    <subtype_constraint_clause> ::=
         'subtype-constraint' <ws> <routine_name>
 
     <possrep> ::=
@@ -3222,9 +3236,9 @@ Grammar:
     <possrep_map> ::=
         'possrep-map' <ws>
         '{' <ws>?
-            <p2> <ws> from <ws> <p1> <ws> using <ws> <routine_name>
-            <ws>
-            <p1> <ws> from <ws> <p2> <ws> using <ws> <routine_name>
+            <p2> <ws> from <ws> <p1>
+            <ws> using <ws> <routine_name>
+            <ws> 'reverse-using' <ws> <routine_name>
         <ws>? '}'
 
     <p1> ::=
@@ -3233,7 +3247,22 @@ Grammar:
     <p2> ::=
         <possrep_name>
 
-I<TODO: Description and Examples.>
+A C<scalar_type> node specifies a new scalar type that lives in a depot or
+subdepot.  A C<scalar_type> node in the PTMD_STD grammar corresponds
+directly to a tuple of the C<scalar_types> attribute of a value of the
+catalog data type C<sys.std.Core.Type.Cat.Depot>, which is how a scalar
+type specification is actually represented in Muldis D's nonsugared form,
+which is as a component of the system catalog.  The C<scalar_types> tuple
+has 2 primary attributes, C<name> and C<material>, which are valued from
+the C<scalar_type> node's C<material_declared_name> and
+C<scalar_type_payload> elements, respectively.
+
+A C<scalar_type_payload> specifies an entire scalar type besides its name.
+It is interpreted as a Muldis D C<sys.std.Core.Type.Cat.ScalarType> value.
+
+I<TODO: The remaining description.>
+
+I<TODO: Examples.>
 
 =head2 Tuple Type Specification
 
@@ -3267,9 +3296,100 @@ Grammar:
         <lex_entity_name>
 
     <virtual_attr_map> ::=
-        !!TODO!!
+        'virtual-attr-map' <ws>
+        '{' <ws>?
+            'determinant-attrs' <ws> <aliased_attr_list>
+            <ws> 'dependent-attrs' <ws> <aliased_attr_list>
+            <ws> 'map-function' <ws> <routine_name>
+            [<ws> <is_updateable_clause>]?
+        <ws>? '}'
 
-I<TODO: Description and Examples.>
+    <aliased_attr_list> ::=
+        '{' <ws>?
+            [[<aliased_attr_pair> | <same_named_nonord_atvl>]
+                ** [<ws>? ',' <ws>?]]?
+        <ws>? '}'
+
+    <aliased_attr_pair> ::=
+        <attr_name_lex> <ws>? '=>' <ws>? <attr_nc_lex>
+
+    <is_updateable_clause> ::=
+        'is-updateable'
+
+A C<tuple_type> node specifies a new tuple type that lives in a depot or
+subdepot.  A C<tuple_type> node in the PTMD_STD grammar corresponds
+directly to a tuple of the C<tuple_types> attribute of a value of the
+catalog data type C<sys.std.Core.Type.Cat.Depot>, which is how a tuple
+type specification is actually represented in Muldis D's nonsugared form,
+which is as a component of the system catalog.  The C<tuple_types> tuple
+has 2 primary attributes, C<name> and C<material>, which are valued from
+the C<tuple_type> node's C<material_declared_name> and
+C<tuple_type_payload> elements, respectively.
+
+A C<tuple_type_payload> specifies an entire tuple type besides its name.
+It is interpreted as a Muldis D C<sys.std.Core.Type.Cat.TupleType> value.
+
+The C<tuple_type_kind> has no impact at all on the interpretation of a
+C<tuple_type>.  However, it can serve to apply additional constraints on
+the allowed values of the resulting C<TupleType>, in the manner of simple
+subset-type constraints, and similarly it can serve to add
+self-documentation to the intended purpose or use of the tuple type.  Iff
+C<tuple_type_kind> is C<tuple-type> then there are no such subset-type
+constraints applied, as the node is simply denoting a generic tuple type;
+iff C<tuple_type_kind> is C<database-type> then there is a constraint
+applied such that the node is denoting a database type.
+
+I<TODO: The remaining description.>
+
+Examples:
+
+    # db schema with 3 relvars, 2 subset constrs, the 5 def separately #
+    database-type CD_DB {
+        attr $artists : nlx.lib.Artists
+        attr $cds     : nlx.lib.CDs
+        attr $tracks  : nlx.lib.Tracks
+        constraint nlx.lib.sc_artist_has_cds
+        constraint nlx.lib.sc_cd_has_tracks
+    }
+
+    # relation type using tuple virtual-attr-map for case-insen key attr #
+    # where primary text data is case-sensitive, case-preserving #
+    relation-type Locations {
+        tuple-type nlx.lib.Location
+        with tuple-type Location {
+            attr $loc_name    : Text
+            attr $loc_name_uc : Text
+            virtual-attr-map {
+                determinant-attrs { $>loc_name }
+                dependent-attrs { $>loc_name_uc }
+                map-function nlx.lib.uc_loc_name
+            }
+            with value-map-unary uc_loc_name (Tuple <-- $topic : Tuple) {
+                Tuple:{ loc_name_uc => upper( $.loc_name ) }
+            }
+        }
+        constraint nlx.lib.sk_loc_name_uc
+        with key-constraint sk_loc_name_uc { $loc_name_uc }
+    }
+
+    # db schema with 2 real relvars, 1 virtual relvar; all are updateable #
+    # real $products has attrs { product_id, name } #
+    # real $sales has attrs { product_id, qty } #
+    # virtual $combines has attrs { product_id, name, qty } #
+    database-type DB {
+        attr $products : nlx.lib.Products
+        attr $sales    : nlx.lib.Sales
+        attr $combines : nlx.lib.Combines
+        virtual-attr-map {
+            determinant-attrs { $>products, $>sales }
+            dependent-attrs { $>combines }
+            map-function nlx.lib.combine_p_s
+            is-updateable
+        }
+        with value-map-unary combine_p_s (Database <-- $topic : Database) {
+            Database:{ combines => $.products join $.sales }
+        }
+    }
 
 =head2 Relation Type Specification
 
@@ -3295,7 +3415,48 @@ Grammar:
     <tuple_type_clause> ::=
         tuple-type <ws> <type_name>
 
-I<TODO: Description and Examples.>
+A C<relation_type> node specifies a new relation type that lives in a depot
+or subdepot.  A C<relation_type> node in the PTMD_STD grammar corresponds
+directly to a tuple of the C<relation_types> attribute of a value of the
+catalog data type C<sys.std.Core.Type.Cat.Depot>, which is how a relation
+type specification is actually represented in Muldis D's nonsugared form,
+which is as a component of the system catalog.  The C<relation_types> tuple
+has 2 primary attributes, C<name> and C<material>, which are valued from
+the C<relation_type> node's C<material_declared_name> and
+C<relation_type_payload> elements, respectively.
+
+A C<relation_type_payload> specifies an entire relation type besides its
+name.  It is interpreted as a Muldis D
+C<sys.std.Core.Type.Cat.RelationType> value.
+
+I<TODO: The remaining description.>
+
+Examples:
+
+    relation-type Artists {
+        with tuple-type Artist {
+            attr $artist_id   : Int
+            attr $artist_name : Text
+        }
+        with primary-key pk_artist_id { $artist_id }
+        with key-constraint sk_artist_name { $artist_name }
+        tuple-type nlx.lib.Artist
+        constraint nlx.lib.pk_artist_id
+        constraint nlx.lib.sk_artist_name
+    }
+
+    relation-type CDs {
+        with tuple-type CD {
+            attr $cd_id     : Int
+            attr $artist_id : Int
+            attr $cd_title  : Text
+        }
+        with primary-key pk_cd_id { $cd_id }
+        with key-constraint sk_cd_title { $cd_title }
+        tuple-type nlx.lib.CD
+        constraint nlx.lib.pk_cd_id
+        constraint nlx.lib.sk_cd_title
+    }
 
 =head2 Domain Type Specification
 
@@ -3330,7 +3491,22 @@ Grammar:
             [<type_name> ** [<ws>? ',' <ws>?]]?
         <ws>? '}'
 
-I<TODO: Description and Examples.>
+A C<domain_type> node specifies a new domain type that lives in a depot or
+subdepot.  A C<domain_type> node in the PTMD_STD grammar corresponds
+directly to a tuple of the C<domain_types> attribute of a value of the
+catalog data type C<sys.std.Core.Type.Cat.Depot>, which is how a domain
+type specification is actually represented in Muldis D's nonsugared form,
+which is as a component of the system catalog.  The C<domain_types> tuple
+has 2 primary attributes, C<name> and C<material>, which are valued from
+the C<domain_type> node's C<material_declared_name> and
+C<domain_type_payload> elements, respectively.
+
+A C<domain_type_payload> specifies an entire domain type besides its name.
+It is interpreted as a Muldis D C<sys.std.Core.Type.Cat.DomainType> value.
+
+I<TODO: The remaining description.>
+
+I<TODO: Examples.>
 
 =head2 Subset Type Specification
 
@@ -3359,7 +3535,10 @@ Grammar:
         ['base-type' | of] <ws> <type_name>
 
     <constraint_clause> ::=
-        [constraint | where] <ws> <routine_name>
+        [constraint | where] <ws> <constraint_name>
+
+    <constraint_name> ::=
+        <PNSQNameChain_payload>
 
     <default_clause> ::=
         default <ws> <routine_name>
@@ -3369,7 +3548,22 @@ Grammar:
         [<ws> <constraint_clause>]?
         [<ws> <default_clause>]?
 
-I<TODO: Description and Examples.>
+A C<subset_type> node specifies a new subset type that lives in a depot or
+subdepot.  A C<subset_type> node in the PTMD_STD grammar corresponds
+directly to a tuple of the C<subset_types> attribute of a value of the
+catalog data type C<sys.std.Core.Type.Cat.Depot>, which is how a subset
+type specification is actually represented in Muldis D's nonsugared form,
+which is as a component of the system catalog.  The C<subset_types> tuple
+has 2 primary attributes, C<name> and C<material>, which are valued from
+the C<subset_type> node's C<material_declared_name> and
+C<subset_type_payload> elements, respectively.
+
+A C<subset_type_payload> specifies an entire subset type besides its name.
+It is interpreted as a Muldis D C<sys.std.Core.Type.Cat.SubsetType> value.
+
+I<TODO: The remaining description.>
+
+I<TODO: Examples.>
 
 =head2 Mixin Type Specification
 
@@ -3394,7 +3588,22 @@ Grammar:
     <prov_def_clause> ::=
         'and-provides-its-default'
 
-I<TODO: Description and Examples.>
+A C<mixin_type> node specifies a new mixin type that lives in a depot or
+subdepot.  A C<mixin_type> node in the PTMD_STD grammar corresponds
+directly to a tuple of the C<mixin_types> attribute of a value of the
+catalog data type C<sys.std.Core.Type.Cat.Depot>, which is how a mixin
+type specification is actually represented in Muldis D's nonsugared form,
+which is as a component of the system catalog.  The C<mixin_types> tuple
+has 2 primary attributes, C<name> and C<material>, which are valued from
+the C<mixin_type> node's C<material_declared_name> and
+C<mixin_type_payload> elements, respectively.
+
+A C<mixin_type_payload> specifies an entire mixin type besides its name.
+It is interpreted as a Muldis D C<sys.std.Core.Type.Cat.MixinType> value.
+
+I<TODO: The remaining description.>
+
+I<TODO: Examples.>
 
 =head2 Key Constraint Specification
 
@@ -3452,7 +3661,79 @@ I<TODO.>
 
 =head2 Subset Constraint Specification
 
-I<TODO.>
+Grammar:
+
+    <subset_constr> ::=
+        'subset-constraint'
+        <ws> <material_declared_name>
+        <ws> <subset_constr_payload>
+
+    <subset_constr_payload> ::=
+        '{' <ws>?
+            parent <ws> <parent> <ws> 'using-key' <ws> <parent_key>
+            <ws> child <ws> <child> <ws> 'using-attrs' <ws> <sc_attr_map>
+        <ws>? '}'
+
+    <parent> ::=
+        <attr_nc_lex>
+
+    <attr_nc_lex> ::=
+        <lex_entity_nc>
+
+    <lex_entity_nc> ::=
+        <data_sigil> <NameChain_payload>
+
+    <parent_key> ::=
+        <constraint_name>
+
+    <child> ::=
+        <attr_nc_lex>
+
+    <sc_attr_map> ::=
+        '{' <ws>?
+            [[<sc_attr_pair> | <same_named_nonord_atvl>]
+                ** [<ws>? ',' <ws>?]]?
+        <ws>? '}'
+
+    <sc_attr_pair> ::=
+        <child_attr> <ws>? '=>' <ws>? <parent_attr>
+
+    <child_attr> ::=
+        <attr_name_lex>
+
+    <parent_attr> ::=
+        <attr_name_lex>
+
+A C<subset_constr> node specifies a (non-distributed) subset constraint
+(foreign key constraint) over relation-valued attributes, for a tuple type,
+that lives in a depot or subdepot.  A C<subset_constr> node in the PTMD_STD
+grammar corresponds directly to a tuple of the C<subset_constrs> attribute
+of a value of the catalog data type C<sys.std.Core.Type.Cat.Depot>, which
+is how a (non-distributed) subset constraint
+specification is actually represented in Muldis D's nonsugared form,
+which is as a component of the system catalog.  The C<subset_constrs> tuple
+has 2 primary attributes, C<name> and C<material>, which are valued from
+the C<subset_constr> node's C<material_declared_name> and
+C<subset_constr_payload> elements, respectively.
+
+A C<subset_constr_payload> specifies an entire (non-distributed) subset
+constraint, for a relation type, besides its name.  It is interpreted
+as a Muldis D C<sys.std.Core.Type.Cat.SubsetConstr> value.
+
+I<TODO: The remaining description.>
+
+Examples:
+
+    # relation $foo must have exactly 1 tuple when $bar has at least 1 #
+    subset-constraint sc_mutual_inclusion {
+        parent $foo using-key nlx.lib.maybe_one
+        child $bar using-attrs {}
+    }
+
+    subset-constraint sc_artist_has_cds {
+        parent $artists using-key nlx.lib.Artists.pk_artist_id
+        child $cds using-attrs { $>artist_id }
+    }
 
 =head2 Distributed Subset Constraint Specification
 
@@ -3498,9 +3779,9 @@ defined in the future.
 
 Examples:
 
-    stimulus-response-rule myonmount {
+    stimulus-response-rule bootstrap {
         when after-mount
-        invoke mymain
+        invoke main
     }
 
 =head1 GENERIC VALUE EXPRESSIONS
@@ -3600,7 +3881,7 @@ Grammar:
         <acc_via_named> | <acc_via_topic> | <acc_via_anon>
 
     <acc_via_named> ::=
-        <data_sigil> <NameChain_payload>
+        <lex_entity_nc>
 
     <acc_via_topic> ::=
         <data_sigil> '.' <NameChain_payload>
@@ -4704,6 +4985,7 @@ Grammar:
           '=' | '!='
         | nand | nor
         | '|-|'
+        | compose
 
     <sym_dyadic_infix_op__op_cr_extended> ::=
           <sym_dyadic_infix_op__op_cr_basic>
@@ -4730,11 +5012,12 @@ Some of the keywords are aliases for each other:
 
 This table indicates which function is invoked by each keyword:
 
-    =    -> Core.Universal.is_identical( $expr[0], $expr[1] )
-    !=   -> Core.Universal.is_not_identical( $expr[0], $expr[1] )
-    nand -> Core.Boolean.nand( $expr[0], $expr[1] )
-    nor  -> Core.Boolean.nor( $expr[0], $expr[1] )
-    |-|  -> Core.Numeric.abs_diff( $expr[0], $expr[1] )
+    =       -> Core.Universal.is_identical( $expr[0], $expr[1] )
+    !=      -> Core.Universal.is_not_identical( $expr[0], $expr[1] )
+    nand    -> Core.Boolean.nand( $expr[0], $expr[1] )
+    nor     -> Core.Boolean.nor( $expr[0], $expr[1] )
+    |-|     -> Core.Numeric.abs_diff( $expr[0], $expr[1] )
+    compose -> Core.Relation.composition( $expr[0], $expr[1] )
 
 Examples:
 

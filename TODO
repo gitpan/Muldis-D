@@ -29,7 +29,7 @@ being when the spec has all of its major parts specified and it is
 reasonably possible for other people besides the principal author to be
 involved in its further development.  The development status of the spec
 will remain unchanged at "pre-alpha" and its version will stay at 0.Y.Z.
-This announcement should follow release 0.128.0 or so, circa 2010 May 10.
+This announcement should follow release 0.129.0 or so, circa 2010 May 10.
 
 * Update the development status of the Muldis D language spec to "alpha"
 from "pre-alpha" (but don't set the version
@@ -566,8 +566,8 @@ appropriate replacement is, for pattern matching and transliteration of
 Text values.  This and "Perl6Rules" may or may not be sufficiently similar
 to combine into one extension.
 
-* Add functions for splitting strings on delimiters or catenating them with
-such to above extensions or to Text.pod as appropriate.
+* Add functions for splitting strings on separators or catenating them with
+such to above extensions or to Text.pod as appropriate.  Text has one now.
 
 * Update or supplement the order-determination function for Text so that it
 compares whole graphemes (1 grapheme = sequence starting with a base

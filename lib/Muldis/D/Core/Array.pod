@@ -9,7 +9,7 @@ Muldis D Array specific operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Array version 0.128.0.
+This document is Muldis::D::Core::Array version 0.129.0.
 
 =head1 PREFACE
 
@@ -274,6 +274,15 @@ same as C<sys.std.Core.Array.Array_from_wrap>.  Each of the C<ord_func> and
 C<is_reverse_order> parameters is optional and defaults
 to C<sys.std.Core.Ordered.order> or
 C<Bool:False>, respectively, if no explicit argument is given to it.
+
+=head2 sys.std.Core.Array.Array_from_Set
+
+C<< function sys.std.Core.Array.Array_from_Set (Array <-- $topic : Set,
+$ord_func? : OrdDetCFuncNC, $is_reverse_order? : Bool) {...} >>
+
+This function results in an C<Array> consisting of all the values of
+C<topic>.  It is a short-hand for a C<sys.std.Core.Array.Array_from_attr>
+invocation with a C<name> argument of C<value>, and C<topic> is a C<Set>.
 
 =head1 SEE ALSO
 
