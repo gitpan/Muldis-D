@@ -12,7 +12,7 @@ sub OPTIONAL {
 
 WriteMakefile(
    NAME => 'Muldis::D',
-   VERSION => '0.129.0',
+   VERSION => '0.129.1',
    ABSTRACT => 'Formal spec of Muldis D relational DBMS lang',
    AUTHOR => 'Darren Duncan <darren@DarrenDuncan.net>',
    PREREQ_PM => {},
@@ -30,7 +30,7 @@ WriteMakefile(
          resources => {
             homepage => 'http://www.muldis.com/',
             license => 'http://www.fsf.org/licensing/licenses/gpl.html',
-            MailingList => 'http://mm.DarrenDuncan.net/mailman/listinfo',
+            MailingList => 'http://mm.darrenduncan.net/mailman/listinfo',
             repository => 'http://github.com/muldis/Muldis-D',
          },
       },

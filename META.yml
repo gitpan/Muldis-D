@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Muldis-D
-version:            0.129.0
+version:            0.129.1
 abstract:           Formal spec of Muldis D relational DBMS lang
 author:
     - Darren Duncan <darren@DarrenDuncan.net>
@@ -15,7 +15,7 @@ requires:
 resources:
     homepage:     http://www.muldis.com/
     license:      http://www.fsf.org/licensing/licenses/gpl.html
-    MailingList:  http://mm.DarrenDuncan.net/mailman/listinfo
+    MailingList:  http://mm.darrenduncan.net/mailman/listinfo
     repository:   http://github.com/muldis/Muldis-D
 no_index:
     directory:
