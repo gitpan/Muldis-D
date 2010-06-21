@@ -9,7 +9,7 @@ Muldis D extension for temporal data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Temporal version 0.129.1.
+This document is Muldis::D::Ext::Temporal version 0.130.0.
 
 =head1 PREFACE
 
@@ -100,8 +100,8 @@ implementation-defined.
 
 =head2 sys.std.Temporal.Instant.diff
 
-C<< function sys.std.Temporal.Instant.diff (Duration <--
-$minuend@ : Instant, $subtrahend@ : Instant) {...} >>
+C<< function diff (Duration <--
+minuend@ : Instant, subtrahend@ : Instant) {...} >>
 
 This virtual function results in the duration-typed difference when its
 instant-typed C<subtrahend> argument is subtracted from its instant-typed
@@ -111,8 +111,8 @@ was earlier.
 
 =head2 sys.std.Temporal.Instant.abs_diff
 
-C<< function sys.std.Temporal.Instant.abs_diff (Duration <--
-$topic@ : Instant, $other@ : Instant) {...} >>
+C<< function abs_diff (Duration <--
+topic@ : Instant, other@ : Instant) {...} >>
 
 This virtual symmetric function results in the absolute difference between
 its 2 arguments.  The result is the amount of time between the 2 arguments,
@@ -120,16 +120,16 @@ which is always non-negative.
 
 =head2 sys.std.Temporal.Instant.later
 
-C<< function sys.std.Temporal.Instant.later (Instant <--
-$instant@ : Instant, $duration@ : Duration) {...} >>
+C<< function later (Instant <--
+instant@ : Instant, duration@ : Duration) {...} >>
 
 This virtual function results in the instant that is later than its
 C<instant> argument by the amount of time in the C<duration> argument.
 
 =head2 sys.std.Temporal.Instant.earlier
 
-C<< function sys.std.Temporal.Instant.earlier (Instant <--
-$instant@ : Instant, $duration@ : Duration) {...} >>
+C<< function earlier (Instant <--
+instant@ : Instant, duration@ : Duration) {...} >>
 
 This virtual function results in the instant that is earlier than its
 C<instant> argument by the amount of time in the C<duration> argument.
@@ -138,15 +138,15 @@ C<instant> argument by the amount of time in the C<duration> argument.
 
 =head2 sys.std.Temporal.Duration.abs
 
-C<< function sys.std.Temporal.Duration.abs (Duration <--
-$topic@ : Duration) {...} >>
+C<< function abs (Duration <--
+topic@ : Duration) {...} >>
 
 This virtual function results in the absolute value of its argument.
 
 =head2 sys.std.Temporal.Duration.sum
 
-C<< function sys.std.Temporal.Duration.sum (Duration <--
-$topic@ : bag_of.Duration) {...} >>
+C<< function sum (Duration <--
+topic@ : bag_of.Duration) {...} >>
 
 This virtual function results in the sum of the N element values of its
 argument; it is a reduction operator that recursively takes each pair of
@@ -161,16 +161,16 @@ which type-specific implementing function to dispatch to.
 
 =head2 sys.std.Temporal.Duration.diff
 
-C<< function sys.std.Temporal.Duration.diff (Duration <--
-$minuend@ : Duration, $subtrahend@ : Duration) {...} >>
+C<< function diff (Duration <--
+minuend@ : Duration, subtrahend@ : Duration) {...} >>
 
 This virtual function results in the difference when its C<subtrahend>
 argument is subtracted from its C<minuend> argument.
 
 =head2 sys.std.Temporal.Duration.abs_diff
 
-C<< function sys.std.Temporal.Duration.abs_diff (Duration <--
-$topic@ : Duration, $other@ : Duration) {...} >>
+C<< function abs_diff (Duration <--
+topic@ : Duration, other@ : Duration) {...} >>
 
 This virtual symmetric function results in the absolute difference between
 its 2 arguments.
@@ -179,8 +179,8 @@ its 2 arguments.
 
 =head2 sys.std.Temporal.Instant.fetch_curr_instant
 
-C<system-service sys.std.Temporal.Instant.fetch_curr_instant
-(&$target@ : Instant) [...]>
+C<system-service fetch_curr_instant
+(&target@ : Instant) [...]>
 
 This virtual system-service routine will update the variable supplied as
 its C<target> argument so that it holds the value of the current instant as

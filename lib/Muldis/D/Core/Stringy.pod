@@ -9,7 +9,7 @@ Muldis D generic stringy operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Stringy version 0.129.1.
+This document is Muldis::D::Core::Stringy version 0.130.0.
 
 =head1 PREFACE
 
@@ -31,8 +31,8 @@ I<This documentation is pending.>
 
 =head2 sys.std.Core.Stringy.catenation
 
-C<< function sys.std.Core.Stringy.catenation (Stringy <--
-$topic@ : array_of.Stringy) {...} >>
+C<< function catenation (Stringy <--
+topic@ : array_of.Stringy) {...} >>
 
 This virtual function results in the catenation of the N element values of
 its argument; it is a reduction operator that recursively takes each
@@ -49,11 +49,11 @@ operation is also known as C<~>.
 
 =head2 sys.std.Core.Stringy.replication
 
-C<< function sys.std.Core.Stringy.replication (Stringy <--
-$topic@ : Stringy, $count : NNInt) {...} >>
+C<< function replication (Stringy <--
+topic@ : Stringy, count : NNInt) {...} >>
 
 This virtual function results in the catenation of C<count> instances of
-C<topic>.  Note that this operation is also known as C<x>.
+C<topic>.  Note that this operation is also known as C<~#>.
 
 =head1 SEE ALSO
 
