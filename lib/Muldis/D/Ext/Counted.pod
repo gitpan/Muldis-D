@@ -9,7 +9,7 @@ Muldis D extension for count-sensitive relational operators
 
 =head1 VERSION
 
-This document is Muldis::D::Ext::Counted version 0.130.0.
+This document is Muldis::D::Ext::Counted version 0.131.0.
 
 =head1 PREFACE
 
@@ -163,9 +163,8 @@ named by C<attr_names> including the C<tcount> attribute.
 
 =head2 sys.std.Counted.counted_reduction
 
-C<< function counted_reduction (Tuple <--
-topic : Relation, func : ValRedCFuncNC, identity : Tuple,
-count_attr_name : Name) {...} >>
+C<< function counted_reduction (Tuple <-- topic : Relation,
+func : ValRedCFuncNC, identity : Tuple, count_attr_name : Name) {...} >>
 
 This function is the same as C<sys.std.Core.Relation.reduction> except that
 C<func> is invoked extra times, where both its C<v1> and C<v2> arguments

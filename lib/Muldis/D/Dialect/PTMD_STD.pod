@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.130.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.131.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.130.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.131.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -248,7 +248,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.130.0>.
+C<ln_base_authority>; it is typically a character string like C<0.131.0>.
 
 =item C<ln_dialect>
 
@@ -269,12 +269,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.130.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.130.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -357,7 +357,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.130.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -439,7 +439,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.130.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -448,7 +448,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.130.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -545,7 +545,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.130.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -610,7 +610,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.130.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -893,7 +893,7 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | Database
         | DH? Relation
         | DH? Set
-        | DH? [Maybe | Single]
+        | DH? [Maybe | Just]
         | DH? Array
         | DH? Bag
         | DH? SPInterval
@@ -1612,7 +1612,7 @@ referenced using the C<type> namespace prefix feature described in
 L<Muldis::D::Basics/Referencing Data Types>.  In such a context, when the
 namespace prefix contains either of the optional chain elements
 C<[|dh_]tuple_from> or
-C<[|dh_][set|maybe|single|array|bag|[s|m]p_interval]_of>, programmers may
+C<[|dh_][set|maybe|just|array|bag|[s|m]p_interval]_of>, programmers may
 omit the single prefix-leading C<type> chain element.  So for example, one
 can just write C<array_of.Rat> rather than C<type.array_of.Rat>, or
 C<tuple_from.var.nlx.myrelvar> rather than
@@ -2109,7 +2109,7 @@ Examples:
 Grammar:
 
     <Maybe> ::=
-        DH? [Maybe | Single] ':' <unspace>
+        DH? [Maybe | Just] ':' <unspace>
         [<type_name> ':' <unspace>]?
         <Maybe_payload>
 
@@ -2134,7 +2134,7 @@ Iff the C<Maybe_payload> is a C<maybe_list> then it defines either zero or
 one C<expr>; in the case of one, the C<expr> defines the unary tuple of the
 new maybe, which is a 'single'; the C<expr> defines the C<value> attribute
 of the tuple.  If the C<value_kind> of a C<value> node is C<DHMaybe> or
-C<[|DH]Single> rather than C<Maybe>, then the C<value> node is further
+C<[|DH]Just> rather than C<Maybe>, then the C<value> node is further
 restricted, either to having only deeply homogeneous resulting C<expr> or
 to having exactly one C<expr>, as appropriate.
 
@@ -4072,7 +4072,7 @@ Examples:
 
     if is_empty(ary) then empty_result else ary.[0]
 
-    if x = ∅ or y = ∅ then ∅ else Maybe:{x.{} + y.{} exp 3}
+    if x = ∅ or y = ∅ then ∅ else Just:{x.{} + y.{} exp 3}
 
     if val isa <Int> then val exp 3
         else if val isa <Text> then val ~# 5
@@ -5896,7 +5896,7 @@ invocation alternate syntax), then the parser must always resolve it to the
 keyword.  In these contexts, you must format a user-defined entity name as
 a C<quoted_name_str> in order for it to be interpreted correctly.
 
-Similarly, a user-defined entity name in C<nonquoted_name_str> format is
+Similarly, a user-defined entity name in C<quoted_name_str> format is
 guaranteed to never be confused with a language keyword.
 
 =head1 NESTING PRECEDENCE RULES
