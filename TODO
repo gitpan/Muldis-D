@@ -127,6 +127,10 @@ kind of exception occurred, not just that an exception occurred.
 * Also study SQL concept of conditions and handlers, looks sort of like
 something between exception handling, signals; or it is their exceptions.
 
+* Also adapt something like Postgres' LISTEN/NOTIFY/UNLISTEN feature, which
+is an effective way for DB clients to be sent signals, such as when a
+database relvar has changed.
+
 * Use a conceptual framework for database transactions that is strongly
 inspired by how distributed source-code version control systems (VCSs)
 work, in particular drawing on GIT specifically.  The fundamental feature
@@ -318,6 +322,11 @@ attributes from every input relation; so this means, as with join(), that
 the input relations don't need to have the same headings.
 
 ----------
+
+* In PTMD_STD, consider further changes to how character escape sequences
+in strings/etc are done.  For example, whether the simple escape sequence
+for each string delimiter char may be used in all kinds of strings (as they
+are now) or just in strings having the same delim char as is being escaped.
 
 * Consider updating PTMD_STD only to add more precedence levels.  For
 example by splitting math into exponentiative, multiplicative, additive,

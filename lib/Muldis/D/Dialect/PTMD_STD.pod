@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.131.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.132.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.131.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.132.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -131,7 +131,8 @@ grammar itself; rather, whitespace rules in the grammar are spelled out
 explicitly such as with C<< <ws>? >> (optional whitespace) and C<< <ws> >>
 (mandatory whitespace) and C<< <unspace> >> (nothing at all may go here
 except a pair of backslashes (C<\>) surrounding an optional run of
-whitespace, which would be stripped).  4. The meanings
+whitespace, which would be stripped) and C<< <splitter> >> (same as C<<
+<unspace> >> but that surrounded whitespace is mandatory.  4. The meanings
 of C<< <ws> >> and C<< <unspace> >> are explicitly defined in this file's
 grammar and do not match the C<< <ws> >> and C<< <unspace> >> that are
 defined by Perl 6; this file's versions are simpler for one thing.
@@ -194,7 +195,9 @@ Grammar:
 
     <quoted_ln_elem_str> ::=
         '"'
-            [<[\ ..~]-[\\"]> | '\b'|'\a'|'\q'|'\g'|'\h'|'\s' | <unspace>]+
+              [<[\ ..~]-[\\"]>
+            | '\\\\' | '\\\'' | '\\"' | '\\`' | '\\#'
+            | <splitter>]+
         '"'
 
     <ln_extensions> ::=
@@ -248,7 +251,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.131.0>.
+C<ln_base_authority>; it is typically a character string like C<0.132.0>.
 
 =item C<ln_dialect>
 
@@ -269,12 +272,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -357,7 +360,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -439,7 +442,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -448,7 +451,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -545,7 +548,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -610,7 +613,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.131.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -1166,7 +1169,7 @@ Grammar:
         <[ 1..9 A..Z ]>
 
     <pint_tail> ::=
-        [[_?<[ 0..9 A..Z ]>+]+] ** <unspace>
+        [[_?<[ 0..9 A..Z ]>+]+] ** <splitter>
 
     <d_int_body> ::=
         0 | '-'?<d_pint_body>
@@ -1181,7 +1184,7 @@ Grammar:
         <[ 1..9 ]>
 
     <d_pint_tail> ::=
-        [[_?<[ 0..9 ]>+]+] ** <unspace>
+        [[_?<[ 0..9 ]>+]+] ** <splitter>
 
 An C<Int> node represents an integer numeric value.  It is interpreted as a
 Muldis D C<sys.std.Core.Type.Int> value as follows:
@@ -1203,11 +1206,11 @@ number in [10..35].  A I<body> may optionally contain underscore characters
 (C<_>), which exist just to help with visual formatting, such as for
 C<10_000_000>, and these are ignored/stripped by the parser.  A I<body> may
 optionally be split into 1..N segments where each pair of consecutive
-segments is separated by an I<unspace> token, which is a
+segments is separated by a I<splitter> token, which is a
 pair of backslashes (C<\>) surrounding
-an optional run of whitespace; this segmenting ability is provided to
+a run of whitespace; this segmenting ability is provided to
 support code that contains very long numeric literals while still being
-well formatted (no extra long lines); the I<unspace> tokens are also
+well formatted (no extra long lines); the I<splitter> tokens are also
 ignored/stripped by the parser, and the I<body> is interpreted as if all
 its alphanumeric characters were contiguous.
 
@@ -1332,7 +1335,7 @@ Grammar:
 
     <blob_body> ::=
         '\''
-            [<[ 0..9 A..F ]> | <unspace>]*
+            [<[ 0..9 A..F ]> | <splitter>]*
         '\''
 
 A C<Blob> node represents a general purpose bit string.  It is interpreted
@@ -1372,20 +1375,22 @@ Grammar:
 
     <Text_payload> ::=
         '\''
-            [<-[\\\'\t\n\f\r]> | <escaped_char> | <unspace>]*
+            [<-[\\\'\t\n\f\r]> | <escaped_char> | <splitter>]*
         '\''
 
     <escaped_char> ::=
-          '\b' | '\a' | '\q' | '\g' | '\h'
-        | '\s'
-        | '\t' | '\n' | '\f' | '\r'
-        | '\c<' [
+          '\\\\' | '\\\'' | '\\"' | '\\`' | '\\#'
+        | '\\t' | '\\n' | '\\f' | '\\r'
+        | '\\c<' [
               [<[ A..Z ]>+] ** ' '
             | [0 | <[ 1..9 ]> <[ 0..9 ]>*]
             | <[ 1..9 A..Z ]> ';' [0 | <[ 1..9 A..Z ]> <[ 0..9 A..Z ]>*]
           ] '>'
 
     <unspace> ::=
+        '\\' <ws>? '\\'
+
+    <splitter> ::=
         '\\' <ws> '\\'
 
     <ws> ::=
@@ -1398,11 +1403,11 @@ The C<Text_payload> is interpreted generally as is usual for a programming
 language with such a delimited character string literal.
 
 A C<Text_payload> may optionally be split into 1..N segments where each
-pair of consecutive segments is separated by an I<unspace> token, which is
-a pair of backslashes (C<\>) surrounding an optional run of whitespace;
-this segmenting
-ability is provided to support code that contains long value literals while
-still being well formatted (no extra long lines); the I<unspace> tokens are
+pair of consecutive segments is separated by a I<splitter> token, which is
+a pair of backslashes (C<\>) surrounding a run of whitespace; this
+segmenting ability is provided to support code that contains long value
+literals while still being well formatted (no extra long lines); the
+I<splitter> tokens are
 ignored/stripped by the parser, and the C<Text_payload> is interpreted as
 if it just consisted of the rest of the delimited string contiguously.
 
@@ -1418,33 +1423,20 @@ The meanings of the simple escape sequences are:
     Esc | Unicode   | Unicode         | Chr | Literal character used
     Seq | Codepoint | Character Name  | Lit | for when not escaped
     ----+-----------+-----------------+-----+------------------------------
-    \b  | F;5C      | REVERSE SOLIDUS | \   | esc seq lead (aka backslash)
-    \a  | F;27      | APOSTROPHE      | '   | delim Text literals
-    \q  | F;22      | QUOTATION MARK  | "   | delim quoted Name literals
-    \g  | F;60      | GRAVE ACCENT    | `   | delim as-val Comment literals
-    \h  | F;23      | NUMBER SIGN     | #   | dlm no-val Comment (aka hash)
-    \s  | F;20      | SPACE           |     | space char
+    \\  | F;5C      | REVERSE SOLIDUS | \   | esc seq lead (aka backslash)
+    \'  | F;27      | APOSTROPHE      | '   | delim Text literals
+    \"  | F;22      | QUOTATION MARK  | "   | delim quoted Name literals
+    \`  | F;60      | GRAVE ACCENT    | `   | delim as-val Comment literals
+    \#  | F;23      | NUMBER SIGN     | #   | delim no-val Comment literals
     \t  | F;9       | CHAR... TAB...  |     | control char horizontal tab
     \n  | F;A       | LINE FEED (LF)  |     | ctrl char line feed / newline
     \f  | F;C       | FORM FEED (FF)  |     | control char form feed
     \r  | F;D       | CARR. RET. (CR) |     | control char carriage return
 
-One design decision of PTMD_STD that is distinct from typical other
-languages is that an escape sequence for any character used as a delimiter
-I<never> contains that literal character.  For example, while in SQL or
-Perl character strings delimited by C<'>, they typically escape literal
-apostrophes/single-quotes as C<''> or C<\'>; while this is unambiguous, the
-task of parsing such code is considerably more difficult than it could be.
-In contrast, while in PTMD_STD character strings delimited by C<'>, a
-literal of the same is escaped with C<\a>; so parsing such code is an order
-of magnitude easier because the parser doesn't have to understand the
-internals of any character string literal in order to separate out the
-character string from its surrounding code.
-
-Another design decision of PTMD_STD that is distinct at least from Perl is
+A design decision of PTMD_STD that is distinct at least from Perl is
 that non-"space" whitespace characters in character string literals must
-never appear literally (except within an
-I<unspace> token), but must instead be denoted with escape sequences.
+never appear literally (except within a
+I<splitter> token), but must instead be denoted with escape sequences.
 The main reason for this is to ensure that the actual values being selected
 by the string literals were not variable per the kind of linebreaks used to
 format the Muldis D source code itself.
@@ -1489,7 +1481,7 @@ Grammar:
 
     <quoted_name_str> ::=
         '"'
-            [<-[\\\"\t\n\f\r]> | <escaped_char> | <unspace>]*
+            [<-[\\\"\t\n\f\r]> | <escaped_char> | <splitter>]*
         '"'
 
     <NameChain> ::=
@@ -1650,14 +1642,14 @@ Grammar:
 
     <Comment_payload> ::=
         '`'
-            [<-[\\\`\t\n\f\r]> | <escaped_char> | <unspace>]*
+            [<-[\\\`\t\n\f\r]> | <escaped_char> | <splitter>]*
         '`'
 
     <non_value_comment> ::=
         [
             '#' ** 2..*
           | '#' ' '*
-                [<-[\\\#\t\n\f\r]> | <escaped_char> | <unspace>]*
+                [<-[\\\#\t\n\f\r]> | <escaped_char> | <splitter>]*
             ' '* '#'
         ] ** <ws>
 
@@ -1700,7 +1692,7 @@ Note that any leading or trailing space (F;20) characters inside the C<#>
 delimiters of a C<non_value_comment> are also part of the delimiters, and
 are not part of the selected C<Comment> value; if you want to denote a
 C<Comment> value with leading or trailing space chars, you must write those
-space chars in an escaped form such as with C<\s>.
+space chars in an escaped form such as with C<< \c<F;20> >>.
 
 Note that a run of 3+ C<#> is equivalent to exactly 2 adjacent ones, which
 denotes an empty comment segment.  This feature exists to empower things
@@ -4558,7 +4550,7 @@ Examples:
 
     fetch_curr_instant( &now )
 
-    prompt_Text_line( &name, 'Enter a person\as name: ' )
+    prompt_Text_line( &name, 'Enter a person\'s name: ' )
 
     Integer.fetch_random( &rand, interval )
 

@@ -2,6 +2,33 @@
                                   Changes
 ---------------------------------------------------------------------------
 
+2010-07-07
+
+    * Muldis::D version 0.132.0 is released on CPAN as
+    Muldis-D-0.132.0.tar.gz.
+
+    * This release features some reworking of char escape sequences.  The
+    prior way of doing this could give the false impression that PTMD_STD
+    couldn't be single-pass parsed; the new way should avoid that problem,
+    and also result in string literals that are easier for people to read.
+
+    * (PTMD_STD.pod)  A backslash pair used inside a long string/etc
+    literal, to support splitting the literal over multiple code lines, now
+    surrounds mandatory whitespace rather than optional whitespace.  In the
+    grammar, this pair is now called a "splitter" rather than an "unspace".
+    (Another backslash pair, outside strings/etc, is still an "unspace".)
+
+    * (PTMD_STD.pod)  Removed the simple char escape seq for "space" char,
+    which had limited utility; instead of "\s", one can say "\c<F;20>".
+
+    * (PTMD_STD.pod)  Updated any of the simple char escape sequences that
+    differed from those of typical other languages so that they are the
+    same instead.  The escape sequences for the 5 characters [\,',",`,#]
+    are now simply the same characters with a leading backslash, instead of
+    a backslash+alpha; they used to be [\b,\a,\q,\g,\h].  A consequence
+    is that a string may now contain the same literal char as is used to
+    delimit that string, like typ langs, where this used to be disallowed.
+
 2010-06-23
 
     * Muldis::D version 0.131.0 is released on CPAN as
