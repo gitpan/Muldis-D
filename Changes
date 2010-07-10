@@ -2,6 +2,30 @@
                                   Changes
 ---------------------------------------------------------------------------
 
+2010-07-09
+
+    * Muldis::D version 0.133.0 is released on CPAN as
+    Muldis-D-0.133.0.tar.gz.
+
+    * This release features some concrete syntax additions to make Muldis D
+    code easier to write, to be more terse while still readable.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  For all 3 STD, updated the
+    formats of generic scalar or tuple or relation value literals so that
+    they may be written more tersely.  Now, one may substitute "$","%","@"
+    respectively for "Scalar","Tuple","Relation" as the "value_kind"
+    leading part of a "value" node.  That is, for example, in PTMD_STD,
+    the 3 ["Scalar:MyType:{...}", "Tuple:{...}", "Relation:{...}"] may now
+    alternately be spelled ["$:MyType:{...}", "%:{...}", "@:{...}"].
+
+    * (PTMD_STD.pod)  For just PTMD_STD, updated the formats specific to
+    set, array, bag, and interval value literals so that they may be
+    written more tersely.  Now, one may omit the "value_kind" leading part
+    of a "value" node when writing most of these.  For examples:
+    a Set: "{25,43,6}"; an Array: "['here','there','everywhere']";
+    a Bag: "{'Plum' => 200, 'Cherry' => 100, 'Apricot' => 300}";
+    an SPInterval: "{21..30}"; an MPInterval: "{-Inf..3,14,266..Inf}".
+
 2010-07-07
 
     * Muldis::D version 0.132.0 is released on CPAN as

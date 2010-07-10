@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.132.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.133.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Hosted Data Muldis D> standard
 dialect named C<HDMD_Perl6_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.132.0',
+standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.133.0',
 'HDMD_Perl6_STD' ]>.
 
 The C<HDMD_Perl6_STD> dialect is defined to be hosted in Perl 6, and is
@@ -125,7 +125,7 @@ repertoire; it is typically the Perl C<Str> value C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a Perl C<Str> formatted as per
-C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.132.0>.
+C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.133.0>.
 
 =item C<ln_dialect>
 
@@ -158,12 +158,12 @@ each of the value's elements must be one of these 0 Perl C<Str> values.
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '0.132.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.133.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended'
     } ]
 
-    [ 'Muldis_D', 'http://muldis.com', '0.132.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.133.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended',
         standard_syntax_extensions => Set.new()
@@ -198,7 +198,7 @@ intended to actually be used.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.132.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.133.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'the_floor',
             op_char_repertoire => 'basic'
         } ],
@@ -258,48 +258,48 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.132.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.133.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'code_as_data',
             op_char_repertoire => 'basic'
         } ],
-        :Relation( Set.new(
+        '@' => Set.new(
             { food => 'Carrots', qty => 100 },
             { food => 'Kiwis', qty => 30 }
-        ) )
+        )
     ]
 
     [
-       [ 'Muldis_D', 'http://muldis.com', '0.132.0', 'HDMD_Perl6_STD', {
+       [ 'Muldis_D', 'http://muldis.com', '0.133.0', 'HDMD_Perl6_STD', {
           catalog_abstraction_level => 'code_as_data',
           op_char_repertoire => 'basic'
        } ],
        [ 'depot', :depot-catalog[ 'Database', 'Depot', {
-          functions => :Relation( Set.new(
+          functions => '@' => Set.new(
              {
                 name => :Name<cube>,
-                material => [ 'Tuple', 'Function', {
+                material => [ '%', 'Function', {
                    result_type => :PNSQNameChain<Int>,
-                   params => [ 'Relation', 'NameTypeMap', Set.new(
+                   params => [ '@', 'NameTypeMap', Set.new(
                       { name => :Name<topic>, type => :PNSQNameChain<Int> }
                    ) ],
                    expr => [ 'Database', 'ExprNodeSet', {
-                      sca_val_exprs => :Relation( Set.new(
+                      sca_val_exprs => '@' => Set.new(
                          { name => :Name<INT_3>, value => 3 }
-                      ) ),
-                      func_invo_exprs => :Relation( Set.new(
+                      ),
+                      func_invo_exprs => '@' => Set.new(
                          {
                             name => :Name(''),
                             function => :PNSQNameChain<Integer.power>,
-                            args => [ 'Relation', 'NameExprMap', [
+                            args => [ '@', 'NameExprMap', [
                                {name=>:Name<radix>, expr=>:Name<topic>},
                                {name=>:Name<exponent>, expr=>:Name<INT_3>}
                             ] ]
                          }
-                      ) )
+                      )
                    } ]
                 } ]
              }
-          ) )
+          )
        } ] ]
     ]
 
@@ -317,7 +317,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.132.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.133.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'plain_rtn_inv',
             op_char_repertoire => 'basic'
         } ],
@@ -342,7 +342,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.132.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.133.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'rtn_inv_alt_syn',
             op_char_repertoire => 'basic'
         } ],
@@ -443,17 +443,18 @@ Every GCVL has 1-3 ordered elements:
 
 =item C<value_kind>
 
-This is a Perl C<Str> value of the format C<< <[A..Z]> <[ a..z A..Z ]>+ >>;
+This is a Perl C<Str> value of the format
+C<< <[A..Z]> <[ a..z A..Z ]>+ | '$'|'%'|'@' >>;
 it identifies the data type of the value literal in broad terms and is the
 only external metadata of C<value_payload> generally necessary to
 interpret the latter; what grammars are valid for C<value_payload> depend
 just on C<value_kind>.
 
-Between the various kinds of C<value> node, these 40 values are allowed for
+Between the various kinds of C<value> node, these 43 values are allowed for
 C<value_kind>:  C<Singleton>, C<Bool>, C<Order>, C<RoundMeth>,
 C<[|NN|P]Int>, C<[|NN|P]Rat>, C<[|Octet]Blob>, C<Text>, C<Name>,
-C<NameChain>, C<PNSQNameChain>, C<Comment>, C<RatRoundRule>,
-C<[|DH]Scalar>, C<[|DH]Tuple>, C<Database>, C<[|DH]Relation>, C<[|DH]Set>,
+C<[|PNSQ]NameChain>, C<Comment>, C<RatRoundRule>, C<[|DH]Scalar|$>,
+C<[|DH]Tuple|%>, C<Database>, C<[|DH]Relation|@>, C<[|DH]Set>,
 C<[|DH][Maybe|Just]>, C<[|DH]Array>, C<[|DH]Bag>, C<[|DH][S|M]PInterval>,
 C<List>.
 
@@ -779,13 +780,13 @@ Examples:
 
     [ 'Scalar', 'Name', { '' => 'the_thing' } ]
 
-    [ 'Scalar', 'Rat', float => {
+    [ '$', 'Rat', float => {
         mantissa => 45207196,
         radix    => 10,
         exponent => 37,
     } ]
 
-    [ 'Scalar', 'fed.lib.the_db.UTCDateTime', datetime => {
+    [ '$', 'fed.lib.the_db.UTCDateTime', datetime => {
         year   => 2003,
         month  => 10,
         day    => 26,
@@ -794,11 +795,11 @@ Examples:
         second => 0.0,
     } ]
 
-    [ 'Scalar', 'fed.lib.the_db.WeekDay', name => {
+    [ '$', 'fed.lib.the_db.WeekDay', name => {
         '' => 'monday',
     } ]
 
-    [ 'Scalar', 'fed.lib.the_db.WeekDay', number => {
+    [ '$', 'fed.lib.the_db.WeekDay', number => {
         '' => 5,
     } ]
 
@@ -816,13 +817,13 @@ Examples:
 
     :Tuple{}
 
-    [ 'Tuple', 'type.tuple_from.var.fed.data.the_db.account.users', {
+    [ '%', 'type.tuple_from.var.fed.data.the_db.account.users', {
         login_name => 'hartmark',
         login_pass => 'letmein',
         is_special => Bool::True,
     } ]
 
-    :Tuple{
+    '%' => {
         name => 'Michelle',
         age  => 17,
     }
@@ -889,19 +890,19 @@ Examples I<TODO: What is the actual syntax for the P6 Set type?>:
 
     :Relation( Set.new() )  # zero attrs + zero tuples #
 
-    :Relation( Set.new(<x y z>) )  # 3 attrs + zero tuples #
+    '@' => Set.new(<x y z>)  # 3 attrs + zero tuples #
 
-    :Relation( Set.new( {} ) )  # zero attrs + 1 tuple #
+    '@' => Set.new( {} )  # zero attrs + 1 tuple #
 
-    :Relation( Set.new(
+    '@' => Set.new(
         {
             login_name => 'hartmark',
             login_pass => 'letmein',
             is_special => Bool::True,
         },
-    ) )  # 3 attrs + 1 tuple #
+    )  # 3 attrs + 1 tuple #
 
-    [ 'Relation', 'fed.lib.the_db.gene.Person', <name age> => Set.new(
+    [ '@', 'fed.lib.the_db.gene.Person', <name age> => Set.new(
         [ 'Michelle', 17 ],
     ) ]  # 2 attrs + 1 tuple #
 
@@ -1066,13 +1067,13 @@ Examples:
     # UCPString : Unicode abstract codepoints = 'Perl' #
     :List[1,-4,:List[80,101,114,109]]
 
-    # Tuple:{} #
+    # %:{} #
     :List[2,:List[],:List[]]
 
-    # Relation:{} #
+    # @:{} #
     :List[3,:List[],:List[]]
 
-    # Set:{17,42,5} #
+    # Set : {17,42,5} #
     :List[3,
         :List[:List[1,-4,:List[118,97,108,117,101]]],
         :List[
@@ -1100,7 +1101,7 @@ Examples:
         ],
         # possrep name : 'nfd_codes' #
         :List[1,-4,:List[110,102,100,95,99,111,100,101,115]],
-        # possrep attributes : Tuple:{""=>"Perl"} #
+        # possrep attributes : %:{""=>"Perl"} #
         :List[2,
             :List[:List[1,-4,:List[]]],
             :List[:List[1,-4,:List[80,101,114,109]]]
@@ -1463,7 +1464,7 @@ Examples:
             :with[ 'value-map-unary', 'uc_loc_name',
                 [ 'Tuple', { topic => 'Tuple' } ]
                 => [
-                    [ 'Tuple', { loc_name_uc => [ 'func-invo', 'upper',
+                    [ '%', { loc_name_uc => [ 'func-invo', 'upper',
                         [ :acc<topic.loc_name> ] ] } ]
                 ]
             ],
@@ -2145,8 +2146,8 @@ Examples:
 
     [ 'op', '∖', [:Set(Set.new( 8, 4, 6, 7 )), :Set(Set.new( 9, 0, 7 ))] ]
 
-    [ 'op', '÷', [ :Relation( <x y> => Set.new( [ 5, 6 ], [ 3, 6 ] ) ),
-        :Relation( Set.new( { y => 6 } ) ) ] ]
+    [ 'op', '÷', [ '@' => <x y> => Set.new( [ 5, 6 ], [ 3, 6 ] ),
+        '@' => Set.new( { y => 6 } ) ] ]
 
 =head2 Simple Monadic Prefix Operators
 
@@ -2346,7 +2347,7 @@ Examples:
 
     # delete every person in people whose age is either 10 or 20 #
     [ 'op', ':=!matching', [ :d<people>,
-        :Relation( Set.new( { age => 10 }, { age => 20 } ) ) ] ]
+        '@' => Set.new( { age => 10 }, { age => 20 } ) ] ]
 
 =head1 SEE ALSO
 

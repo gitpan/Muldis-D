@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.132.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.133.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.132.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.133.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -251,7 +251,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.132.0>.
+C<ln_base_authority>; it is typically a character string like C<0.133.0>.
 
 =item C<ln_dialect>
 
@@ -272,12 +272,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.133.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.133.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -360,7 +360,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.133.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -442,37 +442,37 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.133.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
-    Relation:{
+    @:{
         { food => 'Carrots', qty => 100 },
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.133.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
     depot-catalog Database:Depot:{
-       functions => Relation:{
+       functions => @:{
           {
              name => Name:cube,
-             material => Tuple:Function:{
+             material => %:Function:{
                 result_type => PNSQNameChain:Int,
-                params => Relation:NameTypeMap:{
+                params => @:NameTypeMap:{
                    { name => Name:topic, type => PNSQNameChain:Int }
                 },
                 expr => Database:ExprNodeSet:{
-                   sca_val_exprs => Relation:{
+                   sca_val_exprs => @:{
                       { name => Name:INT_3, value => 3 }
                    },
-                   func_invo_exprs => Relation:{
+                   func_invo_exprs => @:{
                       {
                          name => Name:"",
                          function => PNSQNameChain:Integer.power,
-                         args => Relation:NameExprMap:{
+                         args => @:NameExprMap:{
                             { name => Name:radix, expr => Name:topic },
                             { name => Name:exponent, expr => Name:INT_3 }
                          }
@@ -548,7 +548,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.133.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -613,7 +613,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.132.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.133.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -891,10 +891,10 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | PNSQNameChain
         | Comment
         | RatRoundRule
-        | DH? Scalar
-        | DH? Tuple
+        | DH? Scalar | '$'
+        | DH? Tuple | '%'
         | Database
-        | DH? Relation
+        | DH? Relation | '@'
         | DH? Set
         | DH? [Maybe | Just]
         | DH? Array
@@ -944,18 +944,36 @@ only external metadata of C<value_payload> generally necessary to
 interpret the latter; what grammars are valid for C<value_payload> depend
 just on C<value_kind>.
 
-For all values of just the 9 data types [C<Singleton>, C<Bool>, C<Order>,
-C<RoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>, C<Comment>], the
-C<value_kind> portion of a GCVL may be omitted for brevity, but the code
-parser should still be able to infer it easily by examining the first few
-characters of the C<value_payload>, which for each of said 9 data types has
-a mutually uniquely identifying format, which is also distinct from all
-possible C<value_kind>.  Note that omission of C<value_kind> is only
-allowed when the GCVL doesn't include a C<type_name> element.
+For all values of just the 11 data types [C<Singleton>, C<Bool>, C<Order>,
+C<RoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>, C<Comment>, C<Set>,
+C<Array>], the C<value_kind> portion of a GCVL may be omitted for brevity,
+but the code parser should still be able to infer it easily by examining
+the first few characters of the C<value_payload>, which for each of said 11
+data types has a mutually uniquely identifying format, which is also
+distinct from all possible C<value_kind>.  Note that, for the purposes of
+this discussion, the C<Maybe> type is subsumed into the C<Set> type.
+
+For many values of the 3 data types [C<Bag>, C<[S|M]PInterval>], the
+C<value_kind> portion of a GCVL may be omitted for brevity; specifically,
+this may be done just for the [C<Bag>, C<[S|M]PInterval>] GCVL whose
+C<value_payload> are not valid C<value_payload> of a C<Set> GCVL.  For a
+C<Bag> GCVL, all of those formatted as C<< => >> separated pairs may have
+their C<value_kind> omitted, while all of those that are not formatted as
+pairs may not.  For a C<SPInterval> GCVL, all of those that are formatted
+as a range pair with C<..>/etc may have their C<value_kind> omitted, while
+all of those formatted using the single value shorthand with no C<..>/etc
+may not.  For a C<MPInterval> GCVL, all of those that are formatted as a
+comma-delimited list with at least 2 list elements, where at least one of
+those elements is formatted as a range pair with C<..>/etc, may have their
+C<value_kind> omitted, while all of those either having 0..1 list elements
+or having just single value shorthand elements with no C<..>/etc may not.
+
+Note that omission of C<value_kind> is only allowed when the GCVL doesn't
+include a C<type_name> element.
 
 For just these certain special values of other data types, the same option
 of omitting the C<value_kind> (and C<type_name>) applies: C<Tuple:D0>,
-C<Relation:D0C0>, C<Relation:D0C1>, C<Maybe:Nothing>.
+C<Relation:D0C0>, C<Relation:D0C1>.
 
 =item C<type_name>
 
@@ -1766,7 +1784,7 @@ options exist are only valid within a C<depot> node.
 Grammar:
 
     <Scalar> ::=
-        DH? Scalar ':' <unspace>
+        [DH? Scalar | '$'] ':' <unspace>
         <type_name> ':' <unspace>
         <Scalar_payload>
 
@@ -1795,7 +1813,8 @@ and the possrep attribute value.  If the C<value_kind> of a C<value> node
 is C<DHScalar> rather than C<Scalar>, then the C<value> node is interpreted
 simply as a C<Scalar> node that is appropriately further restricted; the
 C<type_name> must name a C<DHScalar> subtype, and the C<possrep_attrs> must
-specify only deeply homogeneous typed attribute values.
+specify only deeply homogeneous typed attribute values.  If the
+C<value_kind> is C<$> then this is just an alias for C<Scalar>.
 
 See also the definition of the catalog data type
 C<sys.std.Core.Type.Cat.ScaSelExprNodeSet>, a tuple of which is what
@@ -1806,13 +1825,13 @@ Examples:
 
     Scalar:Name:{ "" => 'the_thing' }
 
-    Scalar:Rat:float;{
+    $:Rat:float;{
         mantissa => 45207196,
         radix    => 10,
         exponent => 37
     }
 
-    Scalar:fed.lib.the_db.UTCDateTime:datetime;{
+    $:fed.lib.the_db.UTCDateTime:datetime;{
         year   => 2003,
         month  => 10,
         day    => 26,
@@ -1821,11 +1840,11 @@ Examples:
         second => 0.0
     }
 
-    Scalar:fed.lib.the_db.WeekDay:name;{
+    $:fed.lib.the_db.WeekDay:name;{
         "" => "monday"
     }
 
-    Scalar:fed.lib.the_db.WeekDay:number;{
+    $:fed.lib.the_db.WeekDay:number;{
         "" => 5
     }
 
@@ -1834,7 +1853,7 @@ Examples:
 Grammar:
 
     <Tuple> ::=
-        DH? Tuple ':' <unspace>
+        [DH? Tuple | '%'] ':' <unspace>
         [<type_name> ':' <unspace>]?
         <Tuple_payload>
 
@@ -1870,7 +1889,8 @@ name and expr specify, respectively, the attribute name, and the attribute
 value.  If the C<value_kind> of a C<value> node is C<DHTuple> rather than
 C<Tuple>, then the C<value> node is interpreted simply as a C<Tuple> node
 that is appropriately further restricted; the C<Tuple_payload> must specify
-only deeply homogeneous typed attribute values.
+only deeply homogeneous typed attribute values.  If the
+C<value_kind> is C<%> then this is just an alias for C<Tuple>.
 
 Iff the C<Tuple_payload> is a C<tuple_D0> then the C<Tuple> node is
 interpreted as the special value C<Tuple:D0> aka C<D0>, which is the only
@@ -1895,24 +1915,24 @@ C<depot> node, as it describes some semantics.
 
 Examples:
 
-    Tuple:{}
+    %:{}
 
     Tuple:D0  # same as previous #
 
     D0  # same as previous #
 
-    Tuple:type.tuple_from.var.fed.data.the_db.account.users:{
+    %:type.tuple_from.var.fed.data.the_db.account.users:{
         login_name => 'hartmark',
         login_pass => 'letmein',
         is_special => True
     }
 
-    Tuple:{
+    %:{
         name => 'Michelle',
         age  => 17
     }
 
-    Tuple:{ w => 'foo', =>x, y => 4, =>z }
+    %:{ w => 'foo', =>x, y => 4, =>z }
 
 =head2 Database Selectors
 
@@ -1945,7 +1965,7 @@ a C<Database> node distills to same as when C<Tuple> does.
 Grammar:
 
     <Relation> ::=
-        DH? Relation ':' <unspace>
+        [DH? Relation | '@'] ':' <unspace>
         [<type_name> ':' <unspace>]?
         <Relation_payload>
 
@@ -2024,6 +2044,7 @@ If the C<value_kind> of a C<value> node is C<DHRelation> rather than
 C<Relation>, then the C<value> node is interpreted simply as a
 C<Relation> node that is appropriately further restricted; the
 C<Relation_payload> specify only deeply homogeneous typed attribute values.
+If the C<value_kind> is C<@> then this is just an alias for C<Relation>.
 
 See also the definition of the catalog data type
 C<sys.std.Core.Type.Cat.RelSelExprNodeSet>, a tuple of which is what
@@ -2032,17 +2053,17 @@ C<depot> node, as it describes some semantics.
 
 Examples:
 
-    Relation:{}  # zero attrs + zero tuples #
+    @:{}  # zero attrs + zero tuples #
 
     Relation:D0C0  # same as previous #
 
-    Relation:{ x, y, z }  # 3 attrs + zero tuples #
+    @:{ x, y, z }  # 3 attrs + zero tuples #
 
-    Relation:{ {} }  # zero attrs + 1 tuple #
+    @:{ {} }  # zero attrs + 1 tuple #
 
     D0C1  # same as previous #
 
-    Relation:{
+    @:{
         {
             login_name => 'hartmark',
             login_pass => 'letmein',
@@ -2050,7 +2071,7 @@ Examples:
         }
     }  # 3 attrs + 1 tuple #
 
-    Relation:fed.lib.the_db.gene.Person:[ name, age ];{
+    @:fed.lib.the_db.gene.Person:[ name, age ];{
         [ 'Michelle', 17 ]
     }  # 2 attrs + 1 tuple #
 
@@ -2059,8 +2080,10 @@ Examples:
 Grammar:
 
     <Set> ::=
-        DH? Set ':' <unspace>
-        [<type_name> ':' <unspace>]?
+        [
+            DH? Set ':' <unspace>
+            [<type_name> ':' <unspace>]?
+        ]?
         <Set_payload>
 
     <Set_payload> ::=
@@ -2090,7 +2113,7 @@ Examples:
         'Thailand'
     }
 
-    Set:{
+    {
         3,
         16,
         85
@@ -2101,8 +2124,10 @@ Examples:
 Grammar:
 
     <Maybe> ::=
-        DH? [Maybe | Just] ':' <unspace>
-        [<type_name> ':' <unspace>]?
+        [
+            DH? [Maybe | Just] ':' <unspace>
+            [<type_name> ':' <unspace>]?
+        ]?
         <Maybe_payload>
 
     <Maybe_payload> ::=
@@ -2159,8 +2184,10 @@ Examples:
 Grammar:
 
     <Array> ::=
-        DH? Array ':' <unspace>
-        [<type_name> ':' <unspace>]?
+        [
+            DH? Array ':' <unspace>
+            [<type_name> ':' <unspace>]?
+        ]?
         <Array_payload>
 
     <Array_payload> ::=
@@ -2186,7 +2213,7 @@ C<depot> node, as it describes some semantics.
 
 Examples:
 
-    Array:[
+    [
         'Alphonse',
         'Edward',
         'Winry'
@@ -2204,8 +2231,10 @@ Examples:
 Grammar:
 
     <Bag> ::=
-        DH? Bag ':' <unspace>
-        [<type_name> ':' <unspace>]?
+        [
+            DH? Bag ':' <unspace>
+            [<type_name> ':' <unspace>]?
+        ]?
         <Bag_payload>
 
     <Bag_payload> ::=
@@ -2263,7 +2292,7 @@ values, then you must use a C<Relation> node rather than a C<Bag> node.
 
 Examples:
 
-    Bag:fed.lib.the_db.inventory.Fruit:{
+    {
         'Apple'  => 500,
         'Orange' => 300,
         'Banana' => 400
@@ -2283,8 +2312,10 @@ Examples:
 Grammar:
 
     <SPInterval> ::=
-        DH? SPInterval ':' <unspace>
-        [<type_name> ':' <unspace>]?
+        [
+            DH? SPInterval ':' <unspace>
+            [<type_name> ':' <unspace>]?
+        ]?
         <SPInterval_payload>
 
     <SPInterval_payload> ::=
@@ -2311,8 +2342,10 @@ Grammar:
         <expr>
 
     <MPInterval> ::=
-        DH? MPInterval ':' <unspace>
-        [<type_name> ':' <unspace>]?
+        [
+            DH? MPInterval ':' <unspace>
+            [<type_name> ':' <unspace>]?
+        ]?
         <MPInterval_payload>
 
     <MPInterval_payload> ::=
@@ -2354,13 +2387,13 @@ context of a C<depot> node, as it describes some semantics.
 
 Examples:
 
-    SPInterval:{1..10}
+    {1..10}
 
-    SPInterval:{2.7..^9.3}
+    {2.7..^9.3}
 
-    SPInterval:{'a'^..'z'}
+    {'a'^..'z'}
 
-    SPInterval:{UTCInstant:[2002,12,6,,,] ^..^ UTCInstant:[2002,12,20,,,]}
+    {UTCInstant:[2002,12,6,,,] ^..^ UTCInstant:[2002,12,20,,,]}
 
     SPInterval:{'abc'}  # 1 element #
 
@@ -2368,9 +2401,9 @@ Examples:
 
     MPInterval:{1..10}  # 10 elements #
 
-    MPInterval:{1..3,6,8..9}  # 6 elements #
+    {1..3,6,8..9}  # 6 elements #
 
-    MPInterval:{-Inf..3,14..21,29..Inf}  # all Int besides {4..13,22..28} #
+    {-Inf..3,14..21,29..Inf}  # all Int besides {4..13,22..28} #
 
 =head2 Low Level List Selectors
 
@@ -2405,13 +2438,13 @@ Examples:
     # UCPString : Unicode abstract codepoints = 'Perl' #
     List:[1,-4,List:[80,101,114,109]]
 
-    # Tuple:{} #
+    # %:{} #
     List:[2,List:[],List:[]]
 
-    # Relation:{} #
+    # @:{} #
     List:[3,List:[],List:[]]
 
-    # Set:{17,42,5} #
+    # Set : {17,42,5} #
     List:[3,
         List:[List:[1,-4,List:[118,97,108,117,101]]],
         List:[
@@ -2439,7 +2472,7 @@ Examples:
         ],
         # possrep name : 'nfd_codes' #
         List:[1,-4,List:[110,102,100,95,99,111,100,101,115]],
-        # possrep attributes : Tuple:{""=>"Perl"} #
+        # possrep attributes : %:{""=>"Perl"} #
         List:[2,
             List:[List:[1,-4,List:[]]],
             List:[List:[1,-4,List:[80,101,114,109]]]
@@ -3351,7 +3384,7 @@ Examples:
                 map-function nlx.lib.uc_loc_name
             }
             with value-map-unary uc_loc_name (Tuple <-- topic : Tuple) {
-                Tuple:{ loc_name_uc => upper( .loc_name ) }
+                %:{ loc_name_uc => upper( .loc_name ) }
             }
         }
         constraint nlx.lib.sk_loc_name_uc
@@ -4868,19 +4901,18 @@ Some of the keywords are aliases for each other:
 
 This table indicates which function is invoked by each keyword:
 
-    and  -> Core.Boolean.and( Set:{ expr[0], ..., expr[n] } )
-    or   -> Core.Boolean.or( Set:{ expr[0], ..., expr[n] } )
-    xnor -> Core.Boolean.xnor( Bag:{ expr[0], ..., expr[n] } )
-    xor  -> Core.Boolean.xor( Bag:{ expr[0], ..., expr[n] } )
-    +    -> Core.Numeric.sum( Bag:{ expr[0], ..., expr[n] } )
-    *    -> Core.Numeric.product( Bag:{ expr[0], ..., expr[n] } )
+    and  -> Core.Boolean.and( { expr.[0], ..., expr.[n] } )
+    or   -> Core.Boolean.or( { expr.[0], ..., expr.[n] } )
+    xnor -> Core.Boolean.xnor( Bag:{ expr.[0], ..., expr.[n] } )
+    xor  -> Core.Boolean.xor( Bag:{ expr.[0], ..., expr.[n] } )
+    +    -> Core.Numeric.sum( Bag:{ expr.[0], ..., expr.[n] } )
+    *    -> Core.Numeric.product( Bag:{ expr.[0], ..., expr.[n] } )
 
-    union     -> Core.Relation.union( Set:{ expr[0], ..., expr[n] } )
-    intersect -> Core.Relation.intersection(
-                    Set:{ expr[0], ..., expr[n] } )
-    exclude   -> Core.Relation.exclusion( Bag:{ expr[0], ..., expr[n] } )
-    join      -> Core.Relation.join( Set:{ expr[0], ..., expr[n] } )
-    times     -> Core.Relation.product( Set:{ expr[0], ..., expr[n] } )
+    union     -> Core.Relation.union( { expr.[0], ..., expr.[n] } )
+    intersect -> Core.Relation.intersection( { expr.[0], ..., expr.[n] } )
+    exclude   -> Core.Relation.exclusion( Bag:{ expr.[0], ..., expr.[n] } )
+    join      -> Core.Relation.join( { expr.[0], ..., expr.[n] } )
+    times     -> Core.Relation.product( { expr.[0], ..., expr.[n] } )
 
 Examples:
 
@@ -4898,9 +4930,9 @@ Examples:
 
     69.3 * 15*2^6 * 49/23
 
-    Set:{ 1, 3, 5 } ∪ Set:{ 4, 5, 6 } ∪ Set:{ 0, 9 }
+    { 1, 3, 5 } ∪ { 4, 5, 6 } ∪ { 0, 9 }
 
-    Set:{ 1, 3, 5, 7, 9 } ∩ Set:{ 3, 4, 5, 6, 7, 8 } ∩ Set:{ 2, 5, 9 }
+    { 1, 3, 5, 7, 9 } ∩ { 3, 4, 5, 6, 7, 8 } ∩ { 2, 5, 9 }
 
 =head2 Simple Non-commutative N-adic Infix Reduction Operators
 
@@ -4935,10 +4967,10 @@ different type of value, from the last op input list element.
 
 This table indicates which function is invoked by each keyword:
 
-    [<=>] -> Core.Cat.Order.reduction( Array:{ expr[0], ..., expr[n] } )
-    ~     -> Core.Stringy.catenation( Array:{ expr[0], ..., expr[n] } )
+    [<=>] -> Core.Cat.Order.reduction( [ expr.[0], ..., expr.[n] ] )
+    ~     -> Core.Stringy.catenation( [ expr.[0], ..., expr.[n] ] )
     //    -> Core.Set.Maybe.attr_or_value(
-                Array:{ expr[0], ..., expr[n-1] }, value => expr[n] )
+                [ expr.[0], ..., expr.[n-1] ], value => expr.[n] )
 
 Examples:
 
@@ -4948,7 +4980,7 @@ Examples:
 
     'hello' ~ ' ' ~ 'world'
 
-    Array:[ 24, 52 ] ~ Array:[ -9 ] ~ Array:[ 0, 11, 24, 7 ]
+    [ 24, 52 ] ~ [ -9 ] ~ [ 0, 11, 24, 7 ]
 
     a // b // 42
 
@@ -4990,12 +5022,12 @@ Some of the keywords are aliases for each other:
 
 This table indicates which function is invoked by each keyword:
 
-    =       -> Core.Universal.is_identical( expr[0], expr[1] )
-    !=      -> Core.Universal.is_not_identical( expr[0], expr[1] )
-    nand    -> Core.Boolean.nand( expr[0], expr[1] )
-    nor     -> Core.Boolean.nor( expr[0], expr[1] )
-    |-|     -> Core.Numeric.abs_diff( expr[0], expr[1] )
-    compose -> Core.Relation.composition( expr[0], expr[1] )
+    =       -> Core.Universal.is_identical( expr.[0], expr.[1] )
+    !=      -> Core.Universal.is_not_identical( expr.[0], expr.[1] )
+    nand    -> Core.Boolean.nand( expr.[0], expr.[1] )
+    nor     -> Core.Boolean.nor( expr.[0], expr.[1] )
+    |-|     -> Core.Numeric.abs_diff( expr.[0], expr.[1] )
+    compose -> Core.Relation.composition( expr.[0], expr.[1] )
 
 Examples:
 
@@ -5174,9 +5206,9 @@ Examples:
 
     '-' ~# 80
 
-    Set:{ 8, 4, 6, 7 } ∖ Set:{ 9, 0, 7 }
+    { 8, 4, 6, 7 } ∖ { 9, 0, 7 }
 
-    Relation:[ x, y ];{ [ 5, 6 ], [ 3, 6 ] } ÷ Relation:{ { y => 6 } }
+    @:[ x, y ];{ [ 5, 6 ], [ 3, 6 ] } ÷ @:{ { y => 6 } }
 
 =head2 Simple Monadic Prefix Operators
 
@@ -5221,7 +5253,7 @@ Examples:
 
     || -4.59
 
-    r# Set:{ 5, -1, 2 }
+    r# { 5, -1, 2 }
 
     % relvar
 
@@ -5405,62 +5437,62 @@ This table indicates which function is invoked by each format-keyword:
     .%{} -> Core.Tuple.attr( expr, name => attr_name )
 
     %{<-} -> Core.Tuple.rename( expr,
-                map => Relation:{
-                    { after => atnm_after[0], before => atnm_before[0] },
+                map => @:{
+                    { after => atnm_after.[0], before => atnm_before.[0] },
                     ...,
-                    { after => atnm_after[n], before => atnm_before[n] },
+                    { after => atnm_after.[n], before => atnm_before.[n] },
                 } )
     @{<-} -> Core.Relation.rename( expr,
-                map => Relation:{
-                    { after => atnm_after[0], before => atnm_before[0] },
+                map => @:{
+                    { after => atnm_after.[0], before => atnm_before.[0] },
                     ...,
-                    { after => atnm_after[n], before => atnm_before[n] },
+                    { after => atnm_after.[n], before => atnm_before.[n] },
                 } )
 
     ${}  -> Core.Scalar.projection( expr, possrep => possrep_name,
-                attr_names => Set:{ pcf_atnms[0], ..., pcf_atnms[n] } )
+                attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
     %{}  -> Core.Tuple.projection( expr,
-                attr_names => Set:{ pcf_atnms[0], ..., pcf_atnms[n] } )
+                attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
     @{}  -> Core.Relation.projection( expr,
-                attr_names => Set:{ pcf_atnms[0], ..., pcf_atnms[n] } )
+                attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
     ${!} -> Core.Scalar.cmpl_proj( expr, possrep => possrep_name,
-                attr_names => Set:{ pcf_atnms[0], ..., pcf_atnms[n] } )
+                attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
     %{!} -> Core.Tuple.cmpl_proj( expr,
-                attr_names => Set:{ pcf_atnms[0], ..., pcf_atnms[n] } )
+                attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
     @{!} -> Core.Relation.cmpl_proj( expr,
-                attr_names => Set:{ pcf_atnms[0], ..., pcf_atnms[n] } )
+                attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
 
     %{%<-}  -> Core.Tuple.wrap( expr, outer => outer_atnm,
-                   inner => Set:{ inner_atnms[0], ..., inner_atnms[n] } )
+                   inner => { inner_atnms.[0], ..., inner_atnms.[n] } )
     @{%<-}  -> Core.Relation.wrap( expr, outer => outer_atnm,
-                   inner => Set:{ inner_atnms[0], ..., inner_atnms[n] } )
+                   inner => { inner_atnms.[0], ..., inner_atnms.[n] } )
     %{%<-!} -> Core.Tuple.cmpl_wrap( expr, outer => outer_atnm,
-                   cmpl_inner => Set:{ cmpl_inner_atnms[0], ... } )
+                   cmpl_inner => { cmpl_inner_atnms.[0], ... } )
     @{%<-!} -> Core.Relation.cmpl_wrap( expr, outer => outer_atnm,
-                   cmpl_inner => Set:{ cmpl_inner_atnms[0], ... } )
+                   cmpl_inner => { cmpl_inner_atnms.[0], ... } )
     %{<-%}  -> Core.Tuple.unwrap( expr,
-                   inner => Set:{ inner_atnms[0], ..., inner_atnms[n] },
+                   inner => { inner_atnms.[0], ..., inner_atnms.[n] },
                    outer => outer_atnm )
     @{<-%}  -> Core.Relation.unwrap( expr,
-                   inner => Set:{ inner_atnms[0], ..., inner_atnms[n] },
+                   inner => { inner_atnms.[0], ..., inner_atnms.[n] },
                    outer => outer_atnm )
 
     @{@<-}  -> Core.Relation.group( expr, outer => outer_atnm,
-                   inner => Set:{ inner_atnms[0], ..., inner_atnms[n] } )
+                   inner => { inner_atnms.[0], ..., inner_atnms.[n] } )
     @{@<-!} -> Core.Relation.cmpl_group( expr, outer => outer_atnm,
-                   group_per => Set:{ cmpl_inner_atnms[0], ... } )
+                   group_per => { cmpl_inner_atnms.[0], ... } )
     @{<-@}  -> Core.Relation.ungroup( expr,
-                   inner => Set:{ inner_atnms[0], ..., inner_atnms[n] },
+                   inner => { inner_atnms.[0], ..., inner_atnms.[n] },
                    outer => outer_atnm )
 
     @{#@<-!} -> Core.Relation.cardinality_per_group( expr,
                    count_attr_name => count_atnm,
-                   group_per => Set:{ cmpl_inner_atnms[0], ... } )
+                   group_per => { cmpl_inner_atnms.[0], ... } )
 
     .{} -> Core.Set.Maybe.attr( expr )
 
     .[] -> Core.Array.value( expr, =>index )
-    []  -> Core.Array.slice( expr, index_interval => SPInterval:{
+    []  -> Core.Array.slice( expr, index_interval => {
                 min_index interval_boundary_kind max_index } )
 
 Examples:
@@ -5673,8 +5705,8 @@ This table indicates which function is invoked by each keyword:
 
     <=> -> Core.Ordered.order( lhs, rhs )
 
-    min -> Core.Ordered.min( Set:{ expr[0], ..., expr[n] } )
-    max -> Core.Ordered.max( Set:{ expr[0], ..., expr[n] } )
+    min -> Core.Ordered.min( { expr.[0], ..., expr.[n] } )
+    max -> Core.Ordered.max( { expr.[0], ..., expr.[n] } )
 
     <      -> Core.Ordered.is_before( lhs, rhs )
     >      -> Core.Ordered.is_after( lhs, rhs )
@@ -5685,8 +5717,7 @@ This table indicates which function is invoked by each keyword:
     !in-i  -> Core.Interval.value_is_not_member( value => lhs,
                 interval => rhs )
     i-has  -> Core.Interval.has_member( interval => lhs, value => rhs )
-    i-!has -> Core.Interval.has_not_member( interval => lhs,
-                value => rhs )
+    i-!has -> Core.Interval.has_not_member( interval => lhs, value => rhs )
 
 Details regarding the extra op args is pending.  But most of the time you
 wouldn't be using them, so just the main args represents typical usage.
@@ -5707,9 +5738,9 @@ Examples (for now sans any use of extra op args, which are atypical):
 
     foo ≥ bar
 
-    a ∈i SPInterval:{1..5}
+    a ∈i {1..5}
 
-    foo ∉i SPInterval:{min..^max}
+    foo ∉i {"min"..^"max"}
 
 =head1 IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS
 
@@ -5871,7 +5902,7 @@ Examples:
     foo := 3
 
     # delete every person in people whose age is either 10 or 20 #
-    people :=!matching Relation:{ { age => 10 }, { age => 20 } }
+    people :=!matching @:{ { age => 10 }, { age => 20 } }
 
 =head1 RESOLVING AMBIGUITY
 
