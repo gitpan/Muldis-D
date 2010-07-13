@@ -2,6 +2,36 @@
                                   Changes
 ---------------------------------------------------------------------------
 
+2010-07-13
+
+    * Muldis::D version 0.134.0 is released on CPAN as
+    Muldis-D-0.134.0.tar.gz.
+
+    * (PTMD_STD.pod, HDMD_Perl[5|6]_STD.pod, Basics.pod, Types_Catalog.pod)
+    For PTMD_STD and HDMD_Perl5_STD, updated the formats of numeric and
+    blob literals, and of character escape sequences that spell Unicode
+    codepoints, so that it is easier to write numbers in a radix other than
+    10.  Still unchanged is that you can write numbers either in a general
+    form of "M;NNN" for bases 2..35 or in just base-10 as "NNN".  Now, the
+    general form adds aliases for the common bases of 2,8,10,16 such that
+    the "M" may alternately be spelled "b","o","d","x".  For bases 2,8,16
+    this new form is now the recommended one.  PTMD_STD Int example:
+    "o;5703"; Blob example: "b;110010010"; Text example: "'\c<x;2A1D>'".
+
+    * (HDMD_Perl6_STD.pod)  Updated the code examples for Int and Rat
+    literals using bases 2,8,16 to use Perl 6's 0bN,0oN,0xN numeric formats
+    rather than its :M<N> format.
+
+    * (HDMD_Perl5_STD.pod)  Updated the code examples for Int literals
+    using bases 2,8,16 to use Perl 5's 0bN,0N,0xN numeric formats rather
+    than Perl5-STD's single-elem-hash-ref format.  The code examples for
+    Rat literals had no corresponding update as Perl 5 doesn't support it.
+
+    * (HDMD_Perl6_STD.pod)  Now that the Perl 6 spec (S02) finally (as of a
+    2010.07.12 update) says what a Perl 6 Blob literal looks like
+    (":2{NNN}", ":8{NNN}", ":16{NNN}"), updated the Perl6-STD example code
+    denoting Perl 6 Blob lits to that from temp stand-in "Blob.new(...)".
+
 2010-07-09
 
     * Muldis::D version 0.133.0 is released on CPAN as
