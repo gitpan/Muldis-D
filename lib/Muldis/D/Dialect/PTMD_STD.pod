@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.135.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.136.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.135.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.136.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -128,14 +128,9 @@ definition body, is formatted like EBNF, as C<< <footok> ::= ... >> rather
 than the Perl 6 way like C<token footok { ... }> or C<rule footok { ... }>.
 3. All non-quoted whitespace is not significant and just is formatting the
 grammar itself; rather, whitespace rules in the grammar are spelled out
-explicitly such as with C<< <ws>? >> (optional whitespace) and C<< <ws> >>
-(mandatory whitespace) and C<< <unspace> >> (nothing at all may go here
-except a pair of backslashes (C<\>) surrounding an optional run of
-whitespace, which would be stripped) and C<< <splitter> >> (same as C<<
-<unspace> >> but that surrounded whitespace is mandatory.  4. The meanings
-of C<< <ws> >> and C<< <unspace> >> are explicitly defined in this file's
-grammar and do not match the C<< <ws> >> and C<< <unspace> >> that are
-defined by Perl 6; this file's versions are simpler for one thing.
+explicitly.  4. The meanings of any tokens with the same names as ones
+built-in to Perl 6 but that are explicitly defined in this grammar may have
+different definitions.
 
 The root grammar token for the entire dialect is C<Muldis_D>.
 
@@ -195,9 +190,7 @@ Grammar:
 
     <quoted_ln_elem_str> ::=
         '"'
-              [<[\ ..~]-[\\"]>
-            | '\\\\' | '\\\'' | '\\"' | '\\`' | '\\#'
-            | <splitter>]+
+            [<[\ ..~]-["]> | '\\"']+
         '"'
 
     <ln_extensions> ::=
@@ -251,7 +244,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.135.0>.
+C<ln_base_authority>; it is typically a character string like C<0.136.0>.
 
 =item C<ln_dialect>
 
@@ -272,12 +265,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.135.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.136.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.135.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.136.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -360,7 +353,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.135.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.136.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -442,7 +435,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.135.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.136.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -451,7 +444,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.135.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.136.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -548,7 +541,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.135.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.136.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -613,7 +606,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.135.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.136.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -1240,23 +1233,23 @@ appropriately further restricted.
 
 Examples:
 
-    Int:b;11001001 # binary #
+    Int:b;11001001 #`binary`#
 
-    o;0 # octal #
+    o;0 #`octal`#
 
-    o;644 # octal #
+    o;644 #`octal`#
 
-    -34 # decimal #
+    -34 #`decimal`#
 
-    42 # decimal #
+    42 #`decimal`#
 
-    x;DEADBEEF # hexadecimal #
+    x;DEADBEEF #`hexadecimal`#
 
-    Z;-HELLOWORLD # base-36 #
+    Z;-HELLOWORLD #`base-36`#
 
-    3;301 # base-4 #
+    3;301 #`base-4`#
 
-    B;A09B # base-12 #
+    B;A09B #`base-12`#
 
 =head2 General Purpose Rational Numeric Literals
 
@@ -1313,7 +1306,7 @@ Examples:
 
     Rat:b;-1.1
 
-    -1.5 # same val as prev #
+    -1.5 #`same val as prev`#
 
     3.14159
 
@@ -1354,7 +1347,7 @@ Grammar:
 
     <blob_body> ::=
         '\''
-            [<[ 0..9 A..F ]> | <splitter>]*
+            <[ 0..9 A..F _ \s ]>*
         '\''
 
 A C<Blob> node represents a general purpose bit string.  It is interpreted
@@ -1366,19 +1359,22 @@ represents its own number and each letter (C<A..F>) represents a number in
 (C<[137Fbox]>), similarly to how an C<int_body> is qualified by a
 C<num_max_col_val>.  Each character of the delimited string specifies a
 sequence of one of [1,2,3,4] bits, depending on whether C<blob_max_col_val>
-is [1|b,3,7|o,F|x].  If the C<value_kind> of a C<value> node is
-C<OctetBlob>
+is [1|b,3,7|o,F|x].  The I<body> may also contain underscore or whitespace
+characters between the delimiters, to aid formatting; these are
+ignored/stripped by the parser, and the I<body> is interpreted as if it
+just consisted of the rest of the delimited string contiguously.  If the
+C<value_kind> of a C<value> node is C<OctetBlob>
 rather than C<Blob>, then the C<value> node is interpreted simply as a
 C<Blob> node whose C<type_name> is C<OctetBlob>, and the delimited string
 is appropriately further restricted.
 
 Examples:
 
-    Blob:b;'00101110100010' # binary #
+    Blob:b;'00101110100010' #`binary`#
 
     3;''
 
-    x;'A705E' # hexadecimal #
+    x;'A705E' #`hexadecimal`#
 
     o;'523504376'
 
@@ -1395,11 +1391,11 @@ Grammar:
 
     <Text_payload> ::=
         '\''
-            [<-[\\\'\t\n\f\r]> | <escaped_char> | <splitter>]*
+            [<-[\']> | <escaped_char>]*
         '\''
 
     <escaped_char> ::=
-          '\\\\' | '\\\'' | '\\"' | '\\`' | '\\#'
+          '\\\\' | '\\\'' | '\\"' | '\\`'
         | '\\t' | '\\n' | '\\f' | '\\r'
         | '\\c<' [
               [<[ A..Z ]>+] ** ' '
@@ -1412,10 +1408,10 @@ Grammar:
         '\\' <ws>? '\\'
 
     <splitter> ::=
-        '\\' <ws> '\\'
+        '\\' \s* '\\'
 
     <ws> ::=
-        <[\ \t\n\f\r]>+
+        \s+ [[<non_value_comment> | <visual_dividing_line>] \s+]*
 
 A C<Text> node represents a general purpose character string.  It is
 interpreted as a Muldis D C<sys.std.Core.Type.Text> value as follows:
@@ -1423,14 +1419,20 @@ interpreted as a Muldis D C<sys.std.Core.Type.Text> value as follows:
 The C<Text_payload> is interpreted generally as is usual for a programming
 language with such a delimited character string literal.
 
-A C<Text_payload> may optionally be split into 1..N segments where each
-pair of consecutive segments is separated by a I<splitter> token, which is
-a pair of backslashes (C<\>) surrounding a run of whitespace; this
-segmenting ability is provided to support code that contains long value
-literals while still being well formatted (no extra long lines); the
-I<splitter> tokens are
+A C<Text_payload> may contain any literal characters at all, except that
+any literal occurrences of a backslash (C<\>) or single-quote (C<'>) must
+have a leading backslash.  All literal characters that are whitespace or
+control characters, except for the C<SPACE> char (C<x;20>), are
 ignored/stripped by the parser, and the C<Text_payload> is interpreted as
 if it just consisted of the rest of the delimited string contiguously.
+
+The main reason for this stripping feature is to ensure that the actual
+values being selected by string literals are not variable per the kind of
+linebreaks used to format the Muldis D source code itself.  The feature is
+provided to support code that contains long value literals while still
+being well formatted (no extra-long lines).  If you want to have actual
+non-C<SPACE> whitespace or control characters in your strings, then they
+must be formatted as escape sequences such as C<\n>.
 
 All Muldis D delimited character string literals (generally the 3 C<Text>,
 C<Name>, C<Comment>) may contain some characters denoted with escape
@@ -1447,20 +1449,11 @@ The meanings of the simple escape sequences are:
     \\  | x;5C      | REVERSE SOLIDUS | \   | esc seq lead (aka backslash)
     \'  | x;27      | APOSTROPHE      | '   | delim Text literals
     \"  | x;22      | QUOTATION MARK  | "   | delim quoted Name literals
-    \`  | x;60      | GRAVE ACCENT    | `   | delim as-val Comment literals
-    \#  | x;23      | NUMBER SIGN     | #   | delim no-val Comment literals
+    \`  | x;60      | GRAVE ACCENT    | `   | delim Comment literals
     \t  | x;9       | CHAR... TAB...  |     | control char horizontal tab
     \n  | x;A       | LINE FEED (LF)  |     | ctrl char line feed / newline
     \f  | x;C       | FORM FEED (FF)  |     | control char form feed
     \r  | x;D       | CARR. RET. (CR) |     | control char carriage return
-
-A design decision of PTMD_STD that is distinct at least from Perl is
-that non-"space" whitespace characters in character string literals must
-never appear literally (except within a
-I<splitter> token), but must instead be denoted with escape sequences.
-The main reason for this is to ensure that the actual values being selected
-by the string literals were not variable per the kind of linebreaks used to
-format the Muldis D source code itself.
 
 There is currently just one complex escape sequence, of the format C<<
 \c<...> >>, that supports specifying characters in terms of their Unicode
@@ -1502,7 +1495,7 @@ Grammar:
 
     <quoted_name_str> ::=
         '"'
-            [<-[\\\"\t\n\f\r]> | <escaped_char> | <splitter>]*
+            [<-[\"]> | <escaped_char>]*
         '"'
 
     <NameChain> ::=
@@ -1538,7 +1531,8 @@ C<Text_payload> literal which must always be delimited, a C<Name_payload>
 has 2 variants, one delimited (C<quoted_name_str>) and one not
 (C<nonquoted_name_str>).  The delimited C<Name_payload> form differs from
 C<Text_payload> only in that the string is delimited by
-double-quotes rather than apostrophes/single-quotes.
+double-quotes rather than apostrophes/single-quotes, meaning also that
+literal double-quotes instead of apostrophes must be escaped.
 
 A C<nonquoted_name_str> is composed of a single alphabetic or underscore
 character followed by zero or more characters that are each alphanumeric or
@@ -1663,16 +1657,16 @@ Grammar:
 
     <Comment_payload> ::=
         '`'
-            [<-[\\\`\t\n\f\r]> | <escaped_char> | <splitter>]*
+            [<-[\`]> | <escaped_char>]*
         '`'
 
     <non_value_comment> ::=
-        [
-            '#' ** 2..*
-          | '#' ' '*
-                [<-[\\\#\t\n\f\r]> | <escaped_char> | <splitter>]*
-            ' '* '#'
-        ] ** <ws>
+        '#' <ws>?
+            <Comment_payload>
+        <ws>? '#'
+
+    <visual_dividing_line> ::=
+        '#' ** 2..*
 
 A C<Comment> node represents the text of a Muldis D code comment; it is a
 character string type, that is disjoint from both C<Text> and C<Name>.  It
@@ -1682,7 +1676,8 @@ follows:
 Fundamentally a C<Comment> node is formatted and interpreted like a C<Text>
 node, and any similarities won't be repeated here.  The C<Comment_payload>
 differs from C<Text_payload> only in that the string is delimited
-by backticks/grave-accents (C<`>) rather than apostrophes/single-quotes.
+by backticks/grave-accents (C<`>) rather than apostrophes/single-quotes,
+meaning also that literal backticks instead of apostrophes must be escaped.
 
 A C<non_value_comment> node is I<also> interpreted as a Muldis D
 C<sys.std.Core.Type.Cat.Comment> value in essentially the same way as a
@@ -1706,25 +1701,15 @@ C<scm_comment> attribute.  I<Details of determining the contextually
 nearest place for these comments to go is pending.>
 
 Syntactically, a C<non_value_comment> node differs from C<Comment_payload>
-only in that each string segment is delimited by number-signs/hash-marks
-rather than backticks/grave-accents, and also that:
+only in that it is delimited by number-signs/hash-marks in addition to
+backticks/grave-accents, such that the latter is nested inside the former,
+and optional insignificant whitespace is allowed between the two.
 
-Note that any leading or trailing space (x;20) characters inside the C<#>
-delimiters of a C<non_value_comment> are also part of the delimiters, and
-are not part of the selected C<Comment> value; if you want to denote a
-C<Comment> value with leading or trailing space chars, you must write those
-space chars in an escaped form such as with C<< \c<x;20> >>.
-
-Note that a run of 3+ C<#> is equivalent to exactly 2 adjacent ones, which
-denotes an empty comment segment.  This feature exists to empower things
-like making visual dividing lines in the code just out of hash-marks.
-
-Note that the hash-mark does have other uses in PTMD_STD code besides
-delimiting comments, so since C<non_value_comment> may conceptually be
-placed almost anywhere in code, the other parts of the grammar that
-specifically enable this need to ensure appropriate measures are taken to
-avoid ambiguity, for example mandating that the comments are bounded by
-whitespace.
+A C<visual_dividing_line> is a run of 2+ C<#> that may be used in all of
+the same places as a C<non_value_comment> but it does I<not> denote a
+comment and will be stripped out by the parser as if it was insignificant
+whitespace.  This feature exists to empower things like making visual
+dividing lines in the code just out of hash-marks.
 
 Examples (the first 2 are as values, the third is not as a value):
 
@@ -1732,7 +1717,7 @@ Examples (the first 2 are as values, the third is not as a value):
 
     `So does this.`
 
-    # And also this. #
+    #`And also this.`#
 
 =head2 Rational Rounding Rule Literals
 
@@ -1920,9 +1905,9 @@ Examples:
 
     %:{}
 
-    Tuple:D0  # same as previous #
+    Tuple:D0  #`same as previous`#
 
-    D0  # same as previous #
+    D0  #`same as previous`#
 
     %:type.tuple_from.var.fed.data.the_db.account.users:{
         login_name => 'hartmark',
@@ -2056,15 +2041,15 @@ C<depot> node, as it describes some semantics.
 
 Examples:
 
-    @:{}  # zero attrs + zero tuples #
+    @:{}  #`zero attrs + zero tuples`#
 
-    Relation:D0C0  # same as previous #
+    Relation:D0C0  #`same as previous`#
 
-    @:{ x, y, z }  # 3 attrs + zero tuples #
+    @:{ x, y, z }  #`3 attrs + zero tuples`#
 
-    @:{ {} }  # zero attrs + 1 tuple #
+    @:{ {} }  #`zero attrs + 1 tuple`#
 
-    D0C1  # same as previous #
+    D0C1  #`same as previous`#
 
     @:{
         {
@@ -2072,11 +2057,11 @@ Examples:
             login_pass => 'letmein',
             is_special => True
         }
-    }  # 3 attrs + 1 tuple #
+    }  #`3 attrs + 1 tuple`#
 
     @:fed.lib.the_db.gene.Person:[ name, age ];{
         [ 'Michelle', 17 ]
-    }  # 2 attrs + 1 tuple #
+    }  #`2 attrs + 1 tuple`#
 
 =head2 Set Selectors
 
@@ -2398,15 +2383,15 @@ Examples:
 
     {UTCInstant:[2002,12,6,,,] ^..^ UTCInstant:[2002,12,20,,,]}
 
-    SPInterval:{'abc'}  # 1 element #
+    SPInterval:{'abc'}  #`1 element`#
 
-    MPInterval:{}  # zero elements #
+    MPInterval:{}  #`zero elements`#
 
-    MPInterval:{1..10}  # 10 elements #
+    MPInterval:{1..10}  #`10 elements`#
 
-    {1..3,6,8..9}  # 6 elements #
+    {1..3,6,8..9}  #`6 elements`#
 
-    {-Inf..3,14..21,29..Inf}  # all Int besides {4..13,22..28} #
+    {-Inf..3,14..21,29..Inf}  #`all Int besides {4..13,22..28}`#
 
 =head2 Low Level List Selectors
 
@@ -2435,19 +2420,19 @@ C<depot> node, as it describes some semantics.
 
 Examples:
 
-    # Nonstructure : Unicode abstract codepoints = 'Perl' #
+    #`Nonstructure : Unicode abstract codepoints = 'Perl'`#
     List:[80,101,114,109]
 
-    # UCPString : Unicode abstract codepoints = 'Perl' #
+    #`UCPString : Unicode abstract codepoints = 'Perl'`#
     List:[1,-4,List:[80,101,114,109]]
 
-    # %:{} #
+    #`%:{}`#
     List:[2,List:[],List:[]]
 
-    # @:{} #
+    #`@:{}`#
     List:[3,List:[],List:[]]
 
-    # Set : {17,42,5} #
+    #`Set : {17,42,5}`#
     List:[3,
         List:[List:[1,-4,List:[118,97,108,117,101]]],
         List:[
@@ -2457,15 +2442,15 @@ Examples:
         ]
     ]
 
-    # Nothing #
+    #`Nothing`#
     List:[3,
         List:[List:[1,-4,List:[118,97,108,117,101]]],
         List:[]
     ]
 
-    # Text : 'Perl' #
+    #`Text : 'Perl'`#
     List:[4,
-        # type name : 'sys.std.Core.Type.Text' #
+        #`type name : 'sys.std.Core.Type.Text'`#
         List:[
             List:[1,-4,List:[115,121,115]],
             List:[1,-4,List:[115,116,100]],
@@ -2473,9 +2458,9 @@ Examples:
             List:[1,-4,List:[84,121,112,101]],
             List:[1,-4,List:[84,101,120,116]],
         ],
-        # possrep name : 'nfd_codes' #
+        #`possrep name : 'nfd_codes'`#
         List:[1,-4,List:[110,102,100,95,99,111,100,101,115]],
-        # possrep attributes : %:{""=>"Perl"} #
+        #`possrep attributes : %:{""=>"Perl"}`#
         List:[2,
             List:[List:[1,-4,List:[]]],
             List:[List:[1,-4,List:[80,101,114,109]]]
@@ -2554,16 +2539,16 @@ C<depot_catalog_payload> may have at most 1 C<self_local_dbvar_type>.
 
 Examples:
 
-    # A completely empty depot that doesn't have a self-local dbvar. #
+    #`A completely empty depot that doesn't have a self-local dbvar.`#
     depot-catalog {}
 
-    # Empty depot with self-local dbvar with unrestricted allowed values. #
+    #`Empty depot with self-local dbvar with unrestricted allowed values.`#
     depot-catalog {
         self-local-dbvar-type Database
     }
     depot-data Database:{}
 
-    # A depot having just one function and no dbvar. #
+    #`A depot having just one function and no dbvar.`#
     depot-catalog {
         function cube (Int <-- topic : Int) {
             topic exp 3
@@ -3100,7 +3085,7 @@ Examples:
         with value-filter filt (Bool <-- topic : Tuple, search : Text) {
             .name like ('%' ~ search ~ '%')
         }
-        count := r# (people where <nlx.lib.filt>( =>search ))
+        count := # (people where <nlx.lib.filt>( =>search ))
     }
 
 =head2 Procedure Specification
@@ -3365,7 +3350,7 @@ I<TODO: The remaining description.>
 
 Examples:
 
-    # db schema with 3 relvars, 2 subset constrs, the 5 def separately #
+    #`db schema with 3 relvars, 2 subset constrs, the 5 def separately`#
     database-type CD_DB {
         attr artists : nlx.lib.Artists
         attr cds     : nlx.lib.CDs
@@ -3374,8 +3359,8 @@ Examples:
         constraint nlx.lib.sc_cd_has_tracks
     }
 
-    # relation type using tuple virtual-attr-map for case-insen key attr #
-    # where primary text data is case-sensitive, case-preserving #
+    #`relation type using tuple virtual-attr-map for case-insen key attr
+      where primary text data is case-sensitive, case-preserving`#
     relation-type Locations {
         tuple-type nlx.lib.Location
         with tuple-type Location {
@@ -3394,10 +3379,10 @@ Examples:
         with key-constraint sk_loc_name_uc { loc_name_uc }
     }
 
-    # db schema with 2 real relvars, 1 virtual relvar; all are updateable #
-    # real products has attrs { product_id, name } #
-    # real sales has attrs { product_id, qty } #
-    # virtual combines has attrs { product_id, name, qty } #
+    #`db schema with 2 real relvars, 1 virtual relvar; all are updateable
+      real products has attrs { product_id, name }
+      real sales has attrs { product_id, qty }
+      virtual combines has attrs { product_id, name, qty }`#
     database-type DB {
         attr products : nlx.lib.Products
         attr sales    : nlx.lib.Sales
@@ -3668,13 +3653,13 @@ means C<Bool:False>.
 
 Examples:
 
-    # at most one tuple allowed #
+    #`at most one tuple allowed`#
     key-constraint maybe_one {}
 
-    # relation type's artist_id attr is its primary key #
+    #`relation type's artist_id attr is its primary key`#
     primary-key pk_artist_id { artist_id }
 
-    # relation type has surrogate key over both name attrs #
+    #`relation type has surrogate key over both name attrs`#
     key-constraint sk_name { last_name, first_name }
 
 =head2 Distributed Key Constraint Specification
@@ -3746,7 +3731,7 @@ I<TODO: The remaining description.>
 
 Examples:
 
-    # relation foo must have exactly 1 tuple when bar has at least 1 #
+    #`relation foo must have exactly 1 tuple when bar has at least 1`#
     subset-constraint sc_mutual_inclusion {
         parent foo using-key nlx.lib.maybe_one
         child bar using-attrs {}
@@ -3889,10 +3874,10 @@ declaring an alias for another node, namely the C<expr> element.
 
 Examples:
 
-    # an expr_name node #
+    #`an expr_name node`#
     foo_expr
 
-    # a named_expr node #
+    #`a named_expr node`#
     bar_expr ::= factorial( foo_expr )
 
 =head2 Generic Expression Attribute Accessors
@@ -3928,13 +3913,13 @@ C<acc_via_named>, and vice-versa.
 
 Examples:
 
-    # an accessor node of a named tuple-valued node #
+    #`an accessor node of a named tuple-valued node`#
     foo_t.bar_attr
 
-    # an accessor node of a tuple-valued node named "topic" #
-    .attr  # same as topic.attr #
+    #`an accessor node of a tuple-valued node named "topic"`#
+    .attr  #`same as topic.attr`#
 
-    # an accessor node of an anonymous tuple-valued node #
+    #`an accessor node of an anonymous tuple-valued node`#
     nlx.lib.tuple_res_func( arg ).quux_attr
 
 =head2 Generic Function Invocation Expressions
@@ -4025,37 +4010,37 @@ parameters and arguments are simply being passed through.
 
 Examples:
 
-    # zero params #
+    #`zero params`#
     Nothing()
 
-    # single mandatory param #
+    #`single mandatory param`#
     median( Bag:{ 22, 20, 21, 20, 21, 21, 23 } )
 
-    # single mandatory param #
+    #`single mandatory param`#
     factorial( topic => 5 )
 
-    # two mandatory params #
+    #`two mandatory params`#
     frac_quotient( dividend => 43.7, divisor => 16.9 )
 
-    # same as previous #
+    #`same as previous`#
     frac_quotient( divisor => 16.9, dividend => 43.7 )
 
-    # one mandatory 'topic' param, two optional #
+    #`one mandatory 'topic' param, two optional`#
     nlx.lib.barfunc( mand_arg, oa1 => opt_arg1, oa2 => opt_arg2 )
 
-    # same as previous #
+    #`same as previous`#
     nlx.lib.barfunc( oa2 => opt_arg2, mand_arg, oa1 => opt_arg1 )
 
-    # a user-defined function #
+    #`a user-defined function`#
     nlx.lib.foodb.bazfunc( a1 => 52, a2 => 'hello world' )
 
-    # two params named 'topic' and 'other' #
+    #`two params named 'topic' and 'other'`#
     is_identical( foo, bar )
 
-    # invoke the lexically innermost routine with 2 args #
+    #`invoke the lexically innermost routine with 2 args`#
     rtn( x, y )
 
-    # three named params taking 2 same-named args, 1 diff-named arg #
+    #`three named params taking 2 same-named args, 1 diff-named arg`#
     nlx.lib.passed_thru( =>a, b => 5, =>c )
 
 =head2 Generic If-Else Expressions
@@ -4199,13 +4184,13 @@ argument list.
 
 Examples:
 
-    # a higher-order function curried with 1 argument #
+    #`a higher-order function curried with 1 argument`#
     <nlx.lib.filter>( =>search_term )
 
-    # a reference to an updater #
+    #`a reference to an updater`#
     <nlx.lib.swap>
 
-    # a reference to a data type #
+    #`a reference to a data type`#
     <nlx.lib.foo_type>
 
 =head1 GENERIC UPDATER OR RECIPE STATEMENTS
@@ -4293,16 +4278,16 @@ C<imus_imp_invo>'s version also works with subject-to-update arguments.
 
 Examples:
 
-    # two mandatory params, one s-t-u, one r-o #
+    #`two mandatory params, one s-t-u, one r-o`#
     assign( &foo, 3 )
 
-    # same as previous #
+    #`same as previous`#
     assign( 3, &foo )
 
-    # still same as previous but with all-named syntax #
+    #`still same as previous but with all-named syntax`#
     assign( &target => foo, v => 3 )
 
-    # three mandatory params #
+    #`three mandatory params`#
     nlx.lib.lookup( &=>addr, =>people, =>name )
 
 =head1 GENERIC PROCEDURE STATEMENTS
@@ -4364,10 +4349,10 @@ and Perl have native counterpart features in the form of block labels.
 
 Examples:
 
-    # a stmt_name node #
+    #`a stmt_name node`#
     foo_stmt
 
-    # a named_stmt node #
+    #`a named_stmt node`#
     bar_stmt ::= nlx.lib.swap( &=>first, &=>second )
 
 =head2 Generic Compound Statements
@@ -4863,12 +4848,14 @@ Grammar:
         | '+' | '*'
         | union | intersect | exclude | symdiff
         | join | times | 'cross-join'
+        | 'union+' | 'union++' | 'intersect+'
 
     <comm_infix_reduce_op__op_cr_extended> ::=
           <comm_infix_reduce_op__op_cr_basic>
         | '∧' | '∨' | '↔' | '⊻' | '↮'
         | '∪' | '∩' | '∆'
         | '⋈' | '×'
+        | '∪+' | '∪++' | '∩+'
 
 A C<comm_infix_reduce_op_invo> node is for using infix notation to invoke a
 (homogeneous) commutative N-adic reduction operator function.  Such a
@@ -4890,17 +4877,20 @@ matches must be identical / the same operator.
 
 Some of the keywords are aliases for each other:
 
-    keyword   | aliases
-    ----------+--------
-    and       | ∧
-    or        | ∨
-    xnor      | ↔ iff
-    xor       | ⊻ ↮
-    union     | ∪
-    intersect | ∩
-    exclude   | ∆ symdiff
-    join      | ⋈
-    times     | × cross-join
+    keyword    | aliases
+    -----------+--------
+    and        | ∧
+    or         | ∨
+    xnor       | ↔ iff
+    xor        | ⊻ ↮
+    union      | ∪
+    intersect  | ∩
+    exclude    | ∆ symdiff
+    join       | ⋈
+    times      | × cross-join
+    union+     | ∪+
+    union++    | ∪++
+    intersect+ | ∩+
 
 This table indicates which function is invoked by each keyword:
 
@@ -4916,6 +4906,10 @@ This table indicates which function is invoked by each keyword:
     exclude   -> Core.Relation.exclusion( Bag:{ expr.[0], ..., expr.[n] } )
     join      -> Core.Relation.join( { expr.[0], ..., expr.[n] } )
     times     -> Core.Relation.product( { expr.[0], ..., expr.[n] } )
+
+    union+     -> Core.Bag.union( { expr.[0], ..., expr.[n] } )
+    union++    -> Core.Bag.union_sum( Bag:{ expr.[0], ..., expr.[n] } )
+    intersect+ -> Core.Bag.intersection( { expr.[0], ..., expr.[n] } )
 
 Examples:
 
@@ -5068,10 +5062,13 @@ Grammar:
         | in-b | '!in-b' | 'not-in-b' | b-has | 'b-!has' | 'b-not-has'
         | '{<=}' | '{!<=}' | '{>=}' | '{!>=}'
         | '{<}'  | '{!<}'  | '{>}'  | '{!>}'
+        | '{<=}+' | '{!<=}+' | '{>=}+' | '{!>=}+'
+        | '{<}+'  | '{!<}+'  | '{>}+'  | '{!>}+'
         | minus | except
         | '!matching' | 'not-matching' | antijoin | semiminus
         | matching | semijoin
         | divideby
+        | 'minus+' | 'except+'
         | like | '!like' | 'not-like'
 
     <nonsym_dyadic_infix_op__op_cr_extended> ::=
@@ -5082,7 +5079,10 @@ Grammar:
         | '∈b' | '∉b' | 'b∋' | 'b∌'
         | '⊆' | '⊈' | '⊇' | '⊉'
         | '⊂' | '⊄' | '⊃' | '⊅'
+        | '⊆+' | '⊈+' | '⊇+' | '⊉+'
+        | '⊂+' | '⊄+' | '⊃+' | '⊅+'
         | '∖' | '⊿' | '⋉' | '÷'
+        | '∖+'
 
 A C<nonsym_dyadic_infix_op_invo> node is for using infix notation to
 invoke a non-symmetric dyadic operator function.  Such a function takes
@@ -5124,10 +5124,19 @@ Some of the keywords are aliases for each other:
     {!<}      | ⊄
     {>}       | ⊃
     {!>}      | ⊅
+    {<=}+     | ⊆+
+    {!<=}+    | ⊈+
+    {>=}+     | ⊇+
+    {!>=}+    | ⊉+
+    {<}+      | ⊂+
+    {!<}+     | ⊄+
+    {>}+      | ⊃+
+    {!>}+     | ⊅+
     minus     | ∖ except
     !matching | ⊿ not-matching antijoin semiminus
     matching  | ⋉ semijoin
     divideby  | ÷
+    minus+    | ∖+ except+
     !like     | not-like
 
 This table indicates which function is invoked by each keyword:
@@ -5174,10 +5183,21 @@ This table indicates which function is invoked by each keyword:
     {>}   -> Core.Relation.is_proper_superset( lhs, rhs )
     {!>}  -> Core.Relation.is_not_proper_superset( lhs, rhs )
 
+    {<=}+  -> Core.Bag.is_subset( lhs, rhs )
+    {!<=}+ -> Core.Bag.is_not_subset( lhs, rhs )
+    {>=}+  -> Core.Bag.is_superset( lhs, rhs )
+    {!>=}+ -> Core.Bag.is_not_superset( lhs, rhs )
+    {<}+   -> Core.Bag.is_proper_subset( lhs, rhs )
+    {!<}+  -> Core.Bag.is_not_proper_subset( lhs, rhs )
+    {>}+   -> Core.Bag.is_proper_superset( lhs, rhs )
+    {!>}+  -> Core.Bag.is_not_proper_superset( lhs, rhs )
+
     minus    -> Core.Relation.diff( source => lhs, filter => rhs )
     !matching -> Core.Relation.semidiff( source => lhs, filter => rhs )
     matching -> Core.Relation.semijoin( source => lhs, filter => rhs )
     divideby -> Core.Relation.quotient( dividend => lhs, divisor => rhs )
+
+    minus+ -> Core.Bag.diff( source => lhs, filter => rhs )
 
     like  -> Core.Text.is_like( look_in => lhs, look_for => rhs )
     !like -> Core.Text.is_not_like( look_in => lhs, look_for => rhs )
@@ -5221,7 +5241,7 @@ Grammar:
         <monadic_prefix_op> <ws> <expr>
 
     <monadic_prefix_op__op_cr_basic> ::=
-        not | '!' | '||' | 'r#' | '%' | '@'
+        not | '!' | '||' | '#' | '#+' | '%' | '@'
 
     <monadic_prefix_op__op_cr_extended> ::=
           <monadic_prefix_op__op_cr_basic>
@@ -5244,7 +5264,8 @@ This table indicates which function is invoked by each keyword:
 
     not -> Core.Boolean.not( expr )
     ||  -> Core.Numeric.abs( expr )
-    r#  -> Core.Relation.cardinality( expr )
+    #   -> Core.Relation.cardinality( expr )
+    #+  -> Core.Bag.cardinality( expr )
     %   -> Core.Cast.Tuple_from_Relation( expr )
     @   -> Core.Cast.Relation_from_Tuple( expr )
 
@@ -5256,7 +5277,7 @@ Examples:
 
     || -4.59
 
-    r# { 5, -1, 2 }
+    # { 5, -1, 2 }
 
     % relvar
 
@@ -5493,11 +5514,11 @@ Examples:
 
     pr{color,city}
 
-    pt{}  # null projection #
+    pt{}  #`null projection`#
 
-    pr{}  # null projection #
+    pr{}  #`null projection`#
 
-    rnd_rule{;!round_meth}  # radix,min_exp #
+    rnd_rule{;!round_meth}  #`radix,min_exp`#
 
     pt{!pno,pname,weight}
 
@@ -5880,10 +5901,10 @@ This table indicates which imperative routine is invoked by each keyword:
 
 Examples:
 
-    # assign 3 to foo #
+    #`assign 3 to foo`#
     foo := 3
 
-    # delete every person in people whose age is either 10 or 20 #
+    #`delete every person in people whose age is either 10 or 20`#
     people :=!matching @:{ { age => 10 }, { age => 20 } }
 
 =head1 RESOLVING AMBIGUITY
