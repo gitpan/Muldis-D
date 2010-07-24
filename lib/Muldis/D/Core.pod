@@ -9,7 +9,7 @@ Muldis D core data types and operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core version 0.136.0.
+This document is Muldis::D::Core version 0.137.0.
 
 =head1 PREFACE
 
@@ -28,7 +28,7 @@ L<Muldis::D::Core::Rational>, L<Muldis::D::Core::Stringy>,
 L<Muldis::D::Core::Blob>, L<Muldis::D::Core::Text>,
 L<Muldis::D::Core::Cast>, L<Muldis::D::Core::Attributive>,
 L<Muldis::D::Core::Tuple>, L<Muldis::D::Core::Relation>,
-L<Muldis::D::Core::Set>,
+L<Muldis::D::Core::Collective>, L<Muldis::D::Core::Set>,
 L<Muldis::D::Core::Array>, L<Muldis::D::Core::Bag>,
 L<Muldis::D::Core::Interval>, L<Muldis::D::Core::STDIO>,
 L<Muldis::D::Core::Routines_Catalog>.
@@ -63,7 +63,7 @@ L<Muldis::D::Core::Rational>, L<Muldis::D::Core::Stringy>,
 L<Muldis::D::Core::Blob>, L<Muldis::D::Core::Text>,
 L<Muldis::D::Core::Cast>, L<Muldis::D::Core::Attributive>,
 L<Muldis::D::Core::Tuple>, L<Muldis::D::Core::Relation>,
-L<Muldis::D::Core::Set>,
+L<Muldis::D::Core::Collective>, L<Muldis::D::Core::Set>,
 L<Muldis::D::Core::Array>, L<Muldis::D::Core::Bag>,
 L<Muldis::D::Core::Interval>, L<Muldis::D::Core::STDIO>,
 L<Muldis::D::Core::Routines_Catalog>.

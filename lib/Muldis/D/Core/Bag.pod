@@ -9,7 +9,7 @@ Muldis D Bag specific operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Bag version 0.136.0.
+This document is Muldis::D::Core::Bag version 0.137.0.
 
 =head1 PREFACE
 
@@ -27,6 +27,46 @@ are short-hands for more generic relational operators.
 
 I<This documentation is pending.>
 
+=head1 FUNCTIONS IMPLEMENTING VIRTUAL COLLECTIVE FUNCTIONS
+
+=head2 sys.std.Core.Bag.has_member
+
+C<< function has_member (Bool <-- coll : Bag, value : Universal)
+implements sys.std.Core.Collective.has_member {...} >>
+
+This function is the same as C<sys.std.Core.Set.has_member>, including that
+matching of C<value> is done against the C<value> attribute, except that it
+works with a C<Bag> rather than a C<Set>.
+
+=head2 sys.std.Core.Bag.has_not_member
+
+C<< function has_not_member (Bool <-- coll : Bag, value : Universal)
+implements sys.std.Core.Collective.has_not_member {...} >>
+
+This function is exactly the same as C<sys.std.Core.Bag.has_member> except
+that it results in the opposite boolean value when given the same
+arguments.
+
+=head2 sys.std.Core.Bag.value_is_member
+
+C<< function value_is_member (Bool <-- value : Universal, coll : Bag)
+implements sys.std.Core.Collective.value_is_member {...} >>
+
+This function is an alias for C<sys.std.Core.Bag.has_member>.  This
+function is the same as C<sys.std.Core.Set.value_is_member>, including that
+matching of C<value> is done against the C<value> attribute, except that it
+works with a C<Bag> rather than a C<Set>.
+
+=head2 sys.std.Core.Bag.value_is_not_member
+
+C<< function value_is_not_member (Bool <-- value : Universal, coll : Bag)
+implements sys.std.Core.Collective.value_is_not_member {...} >>
+
+This function is an alias for C<sys.std.Core.Bag.has_not_member>.  This
+function
+is exactly the same as C<sys.std.Core.Bag.value_is_member> except that it
+results in the opposite boolean value when given the same arguments.
+
 =head1 GENERIC RELATIONAL FUNCTIONS FOR BAGS
 
 =head2 sys.std.Core.Bag.cardinality
@@ -37,47 +77,6 @@ This function is like C<sys.std.Core.Relation.cardinality> but that it
 accounts for the greater-than-one multiplicity of values in its argument;
 it results in the sum of the C<count> attribute of its argument.  Note that
 this operation is also known as C<#+>.
-
-=head2 sys.std.Core.Bag.has_member
-
-C<< function has_member (Bool <-- bag : Bag, value : Universal) {...} >>
-
-This function is the same as C<sys.std.Core.Set.has_member>, including that
-matching of C<value> is done against the C<value> attribute, except that it
-works with a C<Bag> rather than a C<Set>.  Note that this operation is also
-known as C<b∋> or C<b-has>.
-
-=head2 sys.std.Core.Bag.has_not_member
-
-C<< function has_not_member (Bool <-- bag : Bag,
-value : Universal) {...} >>
-
-This function is exactly the same as C<sys.std.Core.Bag.has_member> except
-that it results in the opposite boolean value when given the same
-arguments.  Note that this operation is also known as C<b∌> or C<b-!has> or
-C<b-not-has>.
-
-=head2 sys.std.Core.Bag.value_is_member
-
-C<< function value_is_member (Bool <-- value : Universal,
-bag : Bag) {...} >>
-
-This function is an alias for C<sys.std.Core.Bag.has_member>.  This
-function is the same as C<sys.std.Core.Set.value_is_member>, including that
-matching of C<value> is done against the C<value> attribute, except that it
-works with a C<Bag> rather than a C<Set>.  Note that this operation is also
-known as C<∈b> or C<in-b>.
-
-=head2 sys.std.Core.Bag.value_is_not_member
-
-C<< function value_is_not_member (Bool <--
-value : Universal, bag : Bag) {...} >>
-
-This function is an alias for C<sys.std.Core.Bag.has_not_member>.  This
-function
-is exactly the same as C<sys.std.Core.Bag.value_is_member> except that it
-results in the opposite boolean value when given the same arguments.  Note
-that this operation is also known as C<∉b> or C<!in-b> or C<not-in-b>.
 
 =head2 sys.std.Core.Bag.count
 

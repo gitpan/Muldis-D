@@ -9,7 +9,7 @@ Muldis D generic interval operators
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Interval version 0.136.0.
+This document is Muldis::D::Core::Interval version 0.137.0.
 
 =head1 PREFACE
 
@@ -32,15 +32,10 @@ I<This documentation is pending.>
 
 I<Most functions that should be in this document are pending.>
 
-=head1 GENERIC RELATIONAL FUNCTIONS FOR INTERVALS
-
-Each of these functions which has the parameter named C<func> is a wrapper
-over the C<order-determination> function named in its C<func> argument when
-the latter function is curried by an C<is_reverse_order> argument of
-C<Bool:False>.  For any scalar root type's type-default order function, the
-argument for C<func> is C<sys.std.Core.Ordered.order>.  Each C<func>
-parameter is optional and defaults to C<sys.std.Core.Ordered.order> if no
-explicit argument is given to it.
+Each of these functions is a wrapper over the C<order-determination>
+function named C<sys.std.Core.Ordered.order> when the latter function is
+curried by a C<misc_args> argument of C<Tuple:D0> and by
+an C<is_reverse_order> argument of C<Bool:False>.
 
 These functions' C<SPInterval>-typed arguments' C<min> and C<max> attribute
 values must be of compatible declared types with the wrapped functions'
@@ -50,50 +45,89 @@ be compared to an interval's endpoints must be compatible with them.
 Likewise, said attributes of any multiplicity of C<SPInterval>-typed
 arguments must be mutually compatible.
 
-=head2 sys.std.Core.Interval.has_member
+=head1 FUNCTIONS IMPLEMENTING VIRTUAL COLLECTIVE FUNCTIONS
 
-C<< function has_member (Bool <--
-interval : SPInterval, value : Universal, func? : OrdDetCFuncNC) {...} >>
+=head2 sys.std.Core.Interval.SP.has_member
+
+C<< function has_member (Bool <-- coll : SPInterval, value : Ordered)
+implements sys.std.Core.Collective.has_member {...} >>
 
 This function results in C<Bool:True> iff its C<value> argument is included
-within the interval defined by its C<interval> argument, and C<Bool:False>
+within the interval defined by its C<coll> argument, and C<Bool:False>
 otherwise.  That is, if conceptually the interval represents a set of
-values, this function tests if C<value> is a member of C<interval>.  Note
-that this operation is also known as C<i∋> or C<i-has>.
+values, this function tests if C<value> is a member of C<coll>.
 
-=head2 sys.std.Core.Interval.has_not_member
+=head2 sys.std.Core.Interval.SP.has_not_member
 
-C<< function has_not_member (Bool <--
-interval : SPInterval, value : Universal, func? : OrdDetCFuncNC) {...} >>
+C<< function has_not_member (Bool <-- coll : SPInterval, value : Ordered)
+implements sys.std.Core.Collective.has_not_member {...} >>
 
 This function is exactly the same as C<sys.std.Core.Interval.has_member>
 except that it results in the opposite boolean value when given the same
-arguments.  Note that this operation is also known as C<i∌> or C<i-!has> or
-C<i-not-has>.
+arguments.
 
-=head2 sys.std.Core.Interval.value_is_member
+=head2 sys.std.Core.Interval.SP.value_is_member
 
-C<< function value_is_member (Bool <--
-value : Universal, interval : SPInterval, func? : OrdDetCFuncNC) {...} >>
+C<< function value_is_member (Bool <-- value : Ordered, coll : SPInterval)
+implements sys.std.Core.Collective.value_is_member {...} >>
 
-This function is an alias for C<sys.std.Core.Interval.has_member>.  This
+This function is an alias for C<sys.std.Core.Interval.SP.has_member>.  This
 function results in C<Bool:True> iff its C<value> argument is included
-within the interval defined by its C<interval> argument, and C<Bool:False>
+within the interval defined by its C<coll> argument, and C<Bool:False>
 otherwise.  That is, if conceptually the interval represents a set of
-values, this function tests if C<value> is a member of C<interval>.  Note
-that this operation is also known as C<∈i> or C<in-i> or C<between>.
+values, this function tests if C<value> is a member of C<coll>.
 
-=head2 sys.std.Core.Interval.value_is_not_member
+=head2 sys.std.Core.Interval.SP.value_is_not_member
 
 C<< function value_is_not_member (Bool <--
-value : Universal, interval : SPInterval, func? : OrdDetCFuncNC) {...} >>
+value : Ordered, coll : SPInterval)
+implements sys.std.Core.Collective.value_is_not_member {...} >>
 
-This function is an alias for C<sys.std.Core.Interval.has_not_member>.
+This function is an alias for C<sys.std.Core.Interval.SP.has_not_member>.
 This function is exactly the same as
-C<sys.std.Core.Interval.value_is_member> except that it
-results in the opposite boolean value when given the same arguments.  Note
-that this operation is also known as C<∉i> or C<!in-i> or C<not-in-i>
-or C<!between> or C<not-between>.
+C<sys.std.Core.Interval.SP.value_is_member> except that it
+results in the opposite boolean value when given the same arguments.
+
+=head2 sys.std.Core.Interval.MP.has_member
+
+C<< function has_member (Bool <-- coll : MPInterval, value : Ordered)
+implements sys.std.Core.Collective.has_member {...} >>
+
+This function results in C<Bool:True> iff its C<value> argument is included
+within the interval defined by its C<coll> argument, and C<Bool:False>
+otherwise.  That is, if conceptually the interval represents a set of
+values, this function tests if C<value> is a member of C<coll>.
+
+=head2 sys.std.Core.Interval.MP.has_not_member
+
+C<< function has_not_member (Bool <-- coll : MPInterval, value : Ordered)
+implements sys.std.Core.Collective.has_not_member {...} >>
+
+This function is exactly the same as C<sys.std.Core.Interval.has_member>
+except that it results in the opposite boolean value when given the same
+arguments.
+
+=head2 sys.std.Core.Interval.MP.value_is_member
+
+C<< function value_is_member (Bool <-- value : Ordered, coll : MPInterval)
+implements sys.std.Core.Collective.value_is_member {...} >>
+
+This function is an alias for C<sys.std.Core.Interval.MP.has_member>.  This
+function results in C<Bool:True> iff its C<value> argument is included
+within the interval defined by its C<coll> argument, and C<Bool:False>
+otherwise.  That is, if conceptually the interval represents a set of
+values, this function tests if C<value> is a member of C<coll>.
+
+=head2 sys.std.Core.Interval.MP.value_is_not_member
+
+C<< function value_is_not_member (Bool <--
+value : Ordered, coll : MPInterval)
+implements sys.std.Core.Collective.value_is_not_member {...} >>
+
+This function is an alias for C<sys.std.Core.Interval.MP.has_not_member>.
+This function is exactly the same as
+C<sys.std.Core.Interval.MP.value_is_member> except that it
+results in the opposite boolean value when given the same arguments.
 
 =head1 SEE ALSO
 

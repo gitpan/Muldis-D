@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.136.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.137.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Hosted Data Muldis D> standard
 dialect named C<HDMD_Perl6_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.136.0',
+standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.137.0',
 'HDMD_Perl6_STD' ]>.
 
 The C<HDMD_Perl6_STD> dialect is defined to be hosted in Perl 6, and is
@@ -125,7 +125,7 @@ repertoire; it is typically the Perl C<Str> value C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a Perl C<Str> formatted as per
-C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.136.0>.
+C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.137.0>.
 
 =item C<ln_dialect>
 
@@ -158,12 +158,12 @@ each of the value's elements must be one of these 0 Perl C<Str> values.
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '0.136.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.137.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended'
     } ]
 
-    [ 'Muldis_D', 'http://muldis.com', '0.136.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.137.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended',
         standard_syntax_extensions => Set.new()
@@ -198,7 +198,7 @@ intended to actually be used.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.136.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.137.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'the_floor',
             op_char_repertoire => 'basic'
         } ],
@@ -258,7 +258,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.136.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.137.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'code_as_data',
             op_char_repertoire => 'basic'
         } ],
@@ -269,7 +269,7 @@ Examples:
     ]
 
     [
-       [ 'Muldis_D', 'http://muldis.com', '0.136.0', 'HDMD_Perl6_STD', {
+       [ 'Muldis_D', 'http://muldis.com', '0.137.0', 'HDMD_Perl6_STD', {
           catalog_abstraction_level => 'code_as_data',
           op_char_repertoire => 'basic'
        } ],
@@ -317,7 +317,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.136.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.137.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'plain_rtn_inv',
             op_char_repertoire => 'basic'
         } ],
@@ -342,7 +342,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.136.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.137.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'rtn_inv_alt_syn',
             op_char_repertoire => 'basic'
         } ],
@@ -2060,6 +2060,10 @@ a Perl C<Bag|KeyBag|Set|KeySet> rather than a Perl C<Seq|Array>.
 
 Examples:
 
+    [ 'op', 'min', [ :d<a>, :d<b>, :d<c> ] ]
+
+    [ 'op', 'max', [ :d<a>, :d<b>, :d<c> ] ]
+
     [ 'op', 'and', [ Bool::True, Bool::False, Bool::True ] ]
 
     [ 'op', 'or', [ Bool::True, Bool::False, Bool::True ] ]
@@ -2133,6 +2137,14 @@ Examples:
 
     [ 'op', 'implies', [ Bool::True, Bool::False ] ]
 
+    [ 'op', '<', [ :d<foo>, :d<bar> ] ]
+
+    [ 'op', '>', [ :d<foo>, :d<bar> ] ]
+
+    [ 'op', '≤', [ :d<foo>, :d<bar> ] ]
+
+    [ 'op', '≥', [ :d<foo>, :d<bar> ] ]
+
     [ 'op', '-', [ 34, 21 ] ]
 
     [ 'op', 'exp', [ 2, 63 ] ]
@@ -2142,6 +2154,10 @@ Examples:
     [ 'op', '/', [ 0b101.01, 0b11.0 ] ]
 
     [ 'op', '~#', [ '-', 80 ] ]
+
+    [ 'op', '∈', [ :d<a>, 1..5 ] ]
+
+    [ 'op', '∉', [ :d<foo>, :d<min>..^:d<max> ] ]
 
     [ 'op', '∖', [:Set(Set.new( 8, 4, 6, 7 )), :Set(Set.new( 9, 0, 7 ))] ]
 
@@ -2270,34 +2286,13 @@ Examples:
 
 =head2 Order Comparison Operators
 
-An C<ord_compare_op_invo> node has exactly 2 or 2-N main op args,
-depending on the op, each of which is an C<expr> node.  When the op
-requires exactly 2 main op args, the first and second args are C<lhs> and
-C<rhs>, respectively.
-When the op is N-adic, requiring 2-N main op args, then the order of the
-main op args isn't significant.  Note that for an N-adic op, the I<main op
-args> may alternately be given as a Perl C<Set|KeySet> rather than a Perl
-C<Seq|Array>.  I<Details on the extra op args are pending.>
+An C<ord_compare_op_invo> node has exactly 2 main op args,
+each of which is an C<expr> node.  The first and second args are C<lhs> and
+C<rhs>, respectively.  I<Details on the extra op args are pending.>
 
-Examples (for now sans any use of extra op args, which are atypical):
+Examples:
 
     [ 'op', '<=>', [ :d<foo>, :d<bar> ] ]
-
-    [ 'op', 'min', [ :d<a>, :d<b>, :d<c> ] ]
-
-    [ 'op', 'max', [ :d<a>, :d<b>, :d<c> ] ]
-
-    [ 'op', '<', [ :d<foo>, :d<bar> ] ]
-
-    [ 'op', '>', [ :d<foo>, :d<bar> ] ]
-
-    [ 'op', '≤', [ :d<foo>, :d<bar> ] ]
-
-    [ 'op', '≥', [ :d<foo>, :d<bar> ] ]
-
-    [ 'op', '∈i', [ :d<a>, 1..5 ] ]
-
-    [ 'op', '∉i', [ :d<foo>, :d<min>..^:d<max> ] ]
 
 =head1 IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS
 

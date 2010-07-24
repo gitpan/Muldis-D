@@ -2,6 +2,105 @@
                                   Changes
 ---------------------------------------------------------------------------
 
+2010-07-24
+
+    * Muldis::D version 0.137.0 is released on CPAN as
+    Muldis-D-0.137.0.tar.gz.
+
+    * This release features a cleanup/consolidation of the operators for
+    testing the membership of values in collections, or of tuples in
+    relations, and a simplification of the basic order-comparison ops.
+
+    * (PTMD_STD.pod, Interval.pod)  Remove the "between" aliases for the
+    interval membership test infix ops; now just the "in" spellings remain.
+
+    * (Ordered.pod, Interval.pod)  Updated each of the 11 functions
+    "is_[before|after][|_or_same]", "min", "max", "minmax",
+    "Interval.[has|value_is]_[|not_]member" to remove its optional "func"
+    parameter; so now each of the 11 just has 2 or N mandatory inputs, and
+    the declared type of those is now "Ordered" rather than "Universal".
+    These 11 functions now unconditionally wrap the virtual
+    "sys.std.Core.Ordered.order" function rather than wrapping an
+    order-determination function given as an argument (or said virtual by
+    default).  This change results in a simplification for 99% of likely
+    use cases; for the remaining 1% which the 11 funcs have dropped support
+    for, users can write their own equivalents of the 11 easily enough.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Updated the grammar and
+    examples of the infix special syntax of the above 11 functions to
+    reflect their just being plain dyadic or commutative infix ops without
+    optional parts now.  Reorganized so that the 11 are no longer in the
+    separate "Order Comparison Operators" pod sub-section but rather are in
+    the "Simple Commutative N-adic Infix Reduction Operators" or "Simple
+    Non-symmetric Dyadic Infix Operators" pod sub-sections as appropriate.
+    The "Order..." section now just has the 1 op "<=>" for "Ordered.order".
+
+    * (PTMD_STD.pod, Relation.pod)  Renamed all 10 variants of all 4 dyadic
+    infix operators for testing the membership of a generic tuple in a
+    generic relation.  With the 4 Unicode variants, replaced any "r" with
+    "@"; with the 6 ASCII variants, renamed any "*in-r" to "*inside" and
+    any "r-*has" to "*holds".  For examples, "Relation.has_member" is now
+    spelled "holds" or "@∋" rather than "r-has" or "r∋", and
+    "tuple_is_member" is "inside" or "∈@", not "in-r" or "∈r".
+
+    * (Types.pod)  Added new mixin type "Collective" that is intended to be
+    explicitly composed by other types that are effectively simple
+    homogeneous collections of values, and something more specific than
+    relations in general.  Also updated the 5 types C<Set>, C<Array>,
+    C<Bag>, C<[S|M]PInterval> to compose "Collective".
+
+    * Added new initially empty file lib/Muldis/D/Core/Collective.pod
+    which will hold virtual routines for types composing the "Collective"
+    type.  Also updated the README file, Core.pod to mention the new file.
+
+    * (Set.pod, Array.pod, Bag.pod, Interval.pod, PTMD_STD.pod)  In each of
+    the 3 files [Set.pod, Bag.pod, Interval.pod], for each of the 4
+    functions "[has|value_is]_[|not_]member", renamed its primary parameter
+    to "coll" from "set|bag|interval".  In Array.pod, for each of the 2
+    funcs "has_[|not_]elem", renamed its primary to "coll" from "topic".
+
+    * (Collective.pod, Set.pod, Bag.pod, Interval.pod)  In Collective.pod,
+    added the 4 new virtual functions "[has|value_is]_[|not_]member".  Then
+    in each of [Set.pod, Bag.pod, Interval.pod], updated the 4 same-named
+    functions so that they explicitly implement the same-named new
+    virtuals; also consolidated the updated routines.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, Collective.pod, Set.pod,
+    Bag.pod, Interval.pod)  For each of the 4 functions
+    "[has|value_is]_[|not_]member", merged the triples of
+    set|bag|interval-specific spellings of its dyadic infix syntax into a
+    single spelling that works for all 3 types; the dyadic infix syntax
+    will now invoke the 4 virtual funcs rather than their 12 implementers.
+    For example, we used to have "in-s","in-b","in-i" and now
+    we have "in"; or, we used to have "s∌","b∌","i∌" and now we have "∌".
+
+    * (Interval.pod)  For each of the 4 functions
+    "[has|value_is]_[|not_]member", renamed it into an additional level of
+    namespace, "SP"; for example "sys.std.Core.Interval.SP.has_member".
+    Then added 4 new funcs that are the same as the first 4 but that they
+    work on "MPInterval" rather than "SPInterval", live in "MP" namespace.
+
+    * (Array.pod)  Added the 2 new functions "value_is_[|not_]elem" which
+    are aliases for the 2 existing "has_[|not_]elem".  Then updated all 4
+    so that they implement the 4 virtual "Collective" functions having the
+    same names but for "elem" vs "member"; also consolidated the 4 funcs.
+
+    * (PTMD_STD.pod)  Updated the semantics of parsing string literals
+    having literal non-SPACE whitespace chars so that they are more
+    flexible or DWIMmy.  Previously, said chars were simply stripped, and
+    now they plus adjoining runs of spaces are now replaced with a single
+    space, or if escaped ws precedes said literal ws, then the ws+space
+    runs are just stripped instead.  The new behaviour should make the
+    selected string values invariant with both the code's linebreak chars
+    and with the code's indenting style, while saving useful formatting.
+
+    * (PTMD_STD.pod)  Updated all the simple monadic prefix operators that
+    are symbolic (all but 'not') so that whitespace between each operator
+    and its argument is now optional.  So, for examples, you can now say
+    "!is_foo" or "#people" or "%relvar" and not have to be "# people"/etc.
+    This change is a stopgap measure and later a more generic solution
+    should be found for making whitespace optional around operators.
+
 2010-07-17
 
     * Muldis::D version 0.136.0 is released on CPAN as
