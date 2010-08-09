@@ -9,7 +9,7 @@ Muldis D generic operators for all data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Universal version 0.137.0.
+This document is Muldis::D::Core::Universal version 0.138.0.
 
 =head1 PREFACE
 
@@ -131,8 +131,7 @@ These update operators are applicable to values of any data type at all.
 
 =head2 sys.std.Core.Universal.assign
 
-C<updater assign (&target : Universal,
-v : Universal) {...}>
+C<updater assign (&target : Universal, v : Universal) {...}>
 
 This update operator will update the variable supplied as its C<target>
 argument so that it holds the value supplied as its C<v> argument.  This

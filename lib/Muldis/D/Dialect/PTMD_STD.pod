@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.137.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.138.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.137.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.138.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -139,7 +139,10 @@ The root grammar token for the entire dialect is C<Muldis_D>.
 Grammar:
 
     <Muldis_D> ::=
-        <language_name> <ws> [<value> | <depot>]
+        ^ <ws>?
+            <language_name> <ws>
+            [<value> | <depot>]
+        <ws>? $
 
 A C<Muldis_D> node has 2 ordered elements where the first element is a
 C<language_name> node and the second element is either a C<value> node or a
@@ -244,7 +247,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.137.0>.
+C<ln_base_authority>; it is typically a character string like C<0.138.0>.
 
 =item C<ln_dialect>
 
@@ -265,12 +268,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.137.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.137.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -353,7 +356,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.137.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -435,7 +438,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.137.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -444,7 +447,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.137.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -541,7 +544,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.137.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -606,7 +609,7 @@ EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.137.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -4086,7 +4089,7 @@ Examples:
 
     if is_empty(ary) then empty_result else ary.[0]
 
-    if x = ∅ or y = ∅ then ∅ else Just:{x.{*} + y.{*} exp 3}
+    if x = ∅ or y = ∅ then ∅ else Just:{x.{*} + (y.{*} exp 3)}
 
     if val isa <Int> then val exp 3
         else if val isa <Text> then val ~# 5
@@ -5868,76 +5871,63 @@ precedence rules, meaning how it accepts Muldis D code lacking explicit
 expression delimiters and implicitly delimits the expressions therein, in a
 fully deterministic manner.
 
-Unlike many languages which can have over a dozen precedence levels, such
-as Perl (about 24) or C, PTMD_STD only has about 7 precedence levels in the
-interest of simplicity, and so you will likely have to use more explicit
-expression delimiters to force the nesting precedence you want.  That 7
-figure assumes the C<catalog_abstraction_level> pragma is
-C<rtn_inv_alt_syn>; if it is C<plain_rtn_inv> instead, then 3 of the levels
-can be eliminated, so then PTMD_STD has just 4; if it is C<code_as_data>
-instead, then 3 more can be eliminated, leaving just 1.
+PTMD_STD has 10 precedence levels when the C<catalog_abstraction_level>
+pragma is C<rtn_inv_alt_syn>; if it is C<plain_rtn_inv> instead, then 6.5
+of the levels can be eliminated, so then PTMD_STD has just 3.5; if it is
+C<code_as_data> instead, then 2.5 more can be eliminated, leaving just 1.
 
-Here we list the 7 levels from "tightest" to "loosest":
+Here we list the levels from "tightest" to "loosest", along with a few
+examples of each level:
 
-=over
-
-=item B<Terms>
-
-The I<terms> and I<delimited expressions> and I<tagged delimiteds>, which
-includes every kind of C<< <expr> >> that is also a C<< <value> >> (meaning
-any C<< <opaque_value_literal> >> and C<< <coll_value_selector> >>), as
-well as any C<< <non_value_comment> >> and
-C<< <delim_expr> >> and C<< <expr_name> >> and C<< <func_invo>
->> and C<< <material_ref_sel_expr> >>.  In general these are very simple
-or are entirely or mostly surrounded by some kind of delimiters.  These are
-non-associative or associativity is not applicable.
-
-=item B<Postfix>
-
-The I<accessors> and I<postcircumfix operators> and I<postfix operators>,
-which includes every kind of C<< <accessor> >> and C<<
-<postcircumfix_op_invo> >> and C<< <monadic_postfix_op_invo> >> and C<<
-<postfix_num_op_invo> >> and C<< <num_op_invo> <ws>
-<rounded_with_rule_clause> >>.  These are left-associative.
-
-=item B<Prefix>
-
-The I<prefix operators>, which includes every kind of
-C<< <monadic_prefix_op_invo> >> and C<< <prefix_num_op_invo> >>.  These are
-right-associative.
-
-=item B<Dyadic Infix>
-
-The I<dyadic infix operators>, which includes every kind of C<<
-<sym_dyadic_infix_op_invo> >> and C<< <nonsym_dyadic_infix_op_invo> >> and
-C<< <infix_num_op_invo> >> and every C<< <ord_compare_op_invo> >>.
-These are left-associative.
-
-=item B<Reducing Infix>
-
-The I<infix reduction operators>, which includes every kind of C<<
-<comm_infix_reduce_op_invo> >> and C<< <noncomm_infix_reduce_op_invo> >>.
-These are left-associative.
-
-=item B<Conditional>
-
-Every C<< <if_else_expr> >> and C<< <given_when_def_expr> >>.  The C<??!!>
-form is right-associative, meaning that C<a ?? b !! c ?? d !! e> will
-parse as C<a ?? b !! (c ?? d !! e)> (like most languages) and not as
-C<(a ?? b !! c) ?? d !! e> (like PHP).  The C<if-then-else> and
-C<given-when-default> forms are unambiguous for associativity.
-
-=item B<Naming>
-
-Every C<< <named_expr> >>, that is, associating an explicit name with an
-expression node/tree.  These are right-associative, meaning that given a
-C<a ::= b ::= 5>, the expression node of value C<5> has the name C<b> and
-another, alias node for C<b> has the name C<a>.
-
-=back
+    Level            | Assoc | Examples
+    -----------------+-------+---------------------------------------------
+    Terms            | N/A   | Inf True Order:Same Down 42 3.14 -5/7 3*2^8
+                     |       | F;'27E04' 'eek' foo "x" #`comment!`#
+                     |       | {43,9,5} [1,2,3] {'Carrots'=>42} {11..20}
+                     |       | $:{...} %:{...} @:{...} nlx.lib.MyType
+                     |       | (1+2) myfunc(...) <Int> nlx.data.quux .age
+    -----------------+-------+---------------------------------------------
+    Postfix          | N/A   | func().attr p.{...} r{...} x.[...] y[...]
+                     |       | ++ -- i! log-e
+    -----------------+-------+---------------------------------------------
+    Generic Prefix   | N/A   | || # #+ % @ e**
+    Generic Infix    | left  | assuming
+                     |       | ^ exp ** log
+                     |       | * / div mod intersect join times divideby
+                     |       | where !where matching !matching compose
+                     |       | intersect+
+                     |       | + - |-| ~ ~# union exclude minus
+                     |       | union+ union++ minus+ round
+                     |       | as asserting min max //
+    -----------------+-------+---------------------------------------------
+    Comparison       | left  | <=> = != < > <= >= isa !isa like !like
+                     |       | inside !inside holds !holds in !in has !has
+                     |       | {<=} {!<=} {>=} {!>=} {<} {!<} {>} {!>}
+                     |       | {<=}+ {!<=}+ {>=}+ {!>=}+ {<}+ {!<}+ {>}+ {!>}+
+    -----------------+-------+---------------------------------------------
+    Logical Prefix   | N/A   | not ! ¬
+    Logical Infix    | left  | and ∧ [<=>]
+                     |       | or ∨ xor ⊻ ↮
+                     |       | imp → nimp ↛ if ← nif ↚ nand ⊼ ↑ nor ⊽ ↓
+                     |       | xnor ↔
+    -----------------+-------+---------------------------------------------
+    Shorting Infix   | right | ??!! if-else-expr given-when-def-expr
+    Binding Infix    | right | ::=
+    -----------------+-------+---------------------------------------------
+    Assignment       | non   | := :=++ :=-- :=foo
 
 Any imperative code that embeds a value expression has looser precedence
 than all value expressions.
+
+Using two C<!> symbols below generically to represent any pair of operators
+that have the same precedence, the associativities specified above
+for binary, ternary, or N-ary operators are interpreted as follows:
+
+    Assoc | Meaning of $a ! $b ! $c
+    ------+------------------------
+    left  | ($a ! $b) ! $c
+    right | $a ! ($b ! $c)
+    non   | ILLEGAL
 
 =head1 SEE ALSO
 
