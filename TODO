@@ -30,7 +30,7 @@ core, or a significant and computationally complete working subset thereof,
 and so the language spec is then considered sufficiently complete with
 corner cases exposed; Muldis Rosetta would also be updated to "alpha"
 status et al simultaneously.  There are no other preconditions to consider
-either project "alpha" status.  Curr est circa Aug..Sep of 2010 for this.
+either project "alpha" status.  Curr est circa Nov..Dec of 2010 for this.
 
 * Preconditions for considering the Muldis D language spec to be either
 "beta" or "released" status or "1.0" incl:  A significant, computationally
@@ -38,6 +38,51 @@ complete working core or subset thereof as a Parrot hosted language, a
 TAP speaking test suite with significant feature coverage, a serious level
 of post-alpha-status design input solicited of other interested parties,
 implementations over multiple SQL DBMSs.  Curr est end 2010 or early 2011.
+
+----------
+
+* Create a branch of the Muldis D spec (and of the Muldis D
+Manual) which retains all of the current spec features, and subsequently
+strip out the whole rtn_inv_alt_syn catalog abstraction level in trunk so
+that we can more radically evolve the language design at the more
+fundamental level which plain_rtn_inv has access to, without worrying about
+clashes or the complexity of a dozen-plus-precedence-level grammar.
+Ideally the more fundamental level can evolve to the point that a
+lot of what rtn_inv_alt_syn offers is no longer necessary in practice
+with regards to making the code more terse.  The branch would merge in the
+more fundamental changes with the old retained rtn_inv_alt_syn to see how
+they might look together, or show how the new is absorbing the old; ideally
+their differences would reduce over time without th branch losing features.
+In the interest of marketing, the reduced trunk would retain all or much of
+the example code using the then-removed features, as well as gain ones
+using not yet specced features.  Each examples section would potentially be
+split in 2, with the normal "Examples" just using the reduced spec features
+and a new "Potential Future Examples" having anything not yet specced.
+Also, the 3 Dialect files wouldn't actually lose the rtn_inv_alt_syn
+precedence level but rather it would be made impotent as the grammar would
+just define it as a non-proper superset of plain_rtn_inv for now; mainly
+the change is that the 2 main pod sections "FUNCTION INVOCATION ALTERNATE
+SYNTAX EXPRESSIONS" and "IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS"
+would be removed, or alternately stripped down to collection of "Potential
+Future Examples" sections with a bit of commentary to explain if needed.
+
+* The new version may be a lot easier to learn, considering that SQL + many
+other C-like languages actually don't have too many non "f()" format ops.
+Perhaps the main use of rtn_inv_alt_syn later is for people that want their
+code to look like math/logic/etc exprs rather than named function calls.
+IDEA:  Split rtn_inv_alt_syn into 2 abstraction levels where the lower one
+has just 1-2 dozen or so plain prefix/infix ops such as
+[:=, =,≠,!=, <,>,≤,<=,≥,>=,--,++, not,!,and,or,xor, +,-,|-|,*,/, ~, @,%,#]
+and few are allowed having modifiers or that aren't in most languages.
+Likely disallowed in lower level are [<=>,abs,div,mod,exp,^,**,log], the
+other math ops, all other or Unicode variants of logic ops, all hyper-ops
+including hypers of := or !, practically all relational/set/array/etc ops
+including membership or sub/super tests.  As a middle-ground, for which we
+could probably have a middle-third level from the split, are all the
+postcircumfix ops that do restricted-to-constants shorthands of the likes
+of array element access, projection, rename, un/group, un/wrap etc.
+Things like the full set of infix logic ops are reserved for highest level,
+and likewise for majority of Unicode ops and their ASCII-symbolic versions.
 
 ----------
 
@@ -54,6 +99,24 @@ material kinds, to provide concrete grammar, description text, and code
 examples: distrib-key-constraint, distrib-subset-constraint.
 
 ----------
+
+* Eliminate the simple monadic postfix special syntax category.  Convert ++
+and -- into simple prefix ops, which carries a number of benefits, such as
+that whitespace is no longer necessary because leading dashes would never
+be parsed as within an entity name, and such as that an expression with
+that in it is no longer end-weighted, and it would be less likely to
+confuse people into thinking the op is variable increment rather than just
+returning a result.  Removing the category also simplifies the parser as
+there are no longer pre vs post precedence conflicts, and helps open the
+door to the parser being more generic.  Simply eliminate postfix "!"
+factorial or change it to prefix "fact".
+
+* Update Basics.pod or other places to distinguish between the 2 main ways
+that a type can be infinite, such as with "outwardly infinite" and
+"inwardly infinite"; the later is when any 2 values have an infinite number
+of others between them, so eg a time-of-day type could be infinite in the
+inward sense but not in th outward sense; th result type of sin() likewise.
+Also, the singleton types -Inf, Inf only refer to outwardly infinite types.
 
 * Change the basic exception throwing mechanism from a function/procedure
 to its own expression/statement node kind.  Call the new node kind "fail"
@@ -79,6 +142,74 @@ which maps to the "fail" statement node.
     - raised <expr>
     - fail
     - raise <var>
+- Maybe alternatively, make an assertion into a lexical entity that is like
+an expr node but doesn't have its own node name, and so is always used
+either inline or offside, the main point being that users don't have to
+come up with another node name when the node represents the same value as
+another node and should naturally just have the same name.
+Example:
+    foo ::= ...
+    asserts bar( foo )
+    baz( foo )
+... here, the assertion only happens when baz() is going to be evaluated;
+the spelling is "asserts" since it should be an adjective.
+There also needs to be a version that can assert multiple exprs.
+Or actually, the ??!! version may still be better?
+
+* Change generic assertion mechanism from a function/procedure to its own
+
+* Add support for materials to have aliases.  But this kind of alias would
+be simple, just an alternate unqualified name that exists in the same
+namespace and is for the same material.  Aliases would be declared with an
+"aliases" attribute, typed set-of-Name, held directly in the same catalog
+types that have "name" attributes; for example, add it to the "FunctionSet"
+type.  So, R.count becomes a simple alias for R.cardinality, and we can add
+a whole bunch more aliases, so to make it friendlier for people who prefer
+to call routines with foo(x,y) syntax rather than alternate symbols.  A
+common use could be to provide both "prefix" and "infix" reading names,
+such as both "product" and "multiply", and especially to give shorthands.
+Example: "function product|multiply|mul (Int <-- x : Int, y : Int) {...}".
+The first one in the list is the primary name, remainder are the aliases.
+Or actually, it would probably be better for FunctionSet et al to *not*
+internalize aliases, but rather have each alias exist as a separate
+material which cites what it aliases.  And then that version could exist in
+any public namespace (usually nlx), and not just the same subdepot as what
+is being aliased.
+The SYNONYM schema object of Oracle and other dbs corresponds to this, and
+maybe "synonym" is what I should call mine too, being what the specific
+material kind is called, leaving "alias" as a more generic term.
+Even if we have separate synonym materials for routines/etc, one can still
+declare them bundled into their originals like in the above foo|bar example
+as that would just be a dialect shorthand but produce separate materials.
+Also useful in support of users having their own home subdepots which have
+aliases to the things they use, without them having to know where they are.
+Add alias for every 'op' node 2nd element for a routine, meaning eg add
+"+" and "⋈" as aliases, and so then a Muldis D parser can then produce
+calls to those, as if one said `"+"(4,5)` or `"⋈"(foo,bar)`, and so we can
+better remember the individual syntactic choices that the users made.
+But then, how do we deal with the idea of making logical-not into a meta-op
+so that there is no actual is_not_identical|"≠" function etc; how do we
+preserve user's individual syntactic choices then?  So think about that.
+While SQL synonyms can also be used for relvars, mine would probably only
+be used for materials - types, routines, stim-resp-rules, themselves, etc;
+perhaps leave relvar aliases to be handled by virtual attributes.
+
+* With the improvements from having aliases or supporting "+"(x,y) etc, and
+other language improvements, it becomes a lot more feasible for users to
+settle for users to be satisfied with "plain_rtn_inv", that being
+sufficiently terse, and so there is less need for "rtn_inv_alt_syn" to be
+implemented or available.
+
+* Maybe also treat material names like `function "infix<+>" (...) {...}` as
+special such that if a parser encounters a random "foo + bar" then it would
+parse it as if it were `"infix<+>"(foo,bar)` maybe I guess.  But if this is
+going to work in a general sense, including for user-defined things, then
+general format rules have to be set out for the parser so that if it sees
+anything like X, without knowing what ops are declared, then it treats it
+as an operator rather than some other construct.  On the other hand, we're
+sure to run into trouble in trying to support non foo(x,y) syntax for
+user-defined operators (besides those overloading system-defined virtuals),
+and so better off just not doing this period; "infix<+>" is not special.
 
 * Add support for routine parameters to have aliases, that is, for a named
 parameter to be able to bind with a named argument where the argument may
@@ -189,6 +320,13 @@ it works well with both symbolic and wordy or inline-defined operators:
     []join {order,inventory}
     []* {1..5}
     []<nlx.lib.myfunc>(a=>3) {...}
+Another consideration is that, when combined with routine synonyms that are
+symbolic, the plain_rtn_inv alone would let you do this:
+    reduce( <"+">(), {5,23,5} )
+    reduce( <"~">(), ['hello', 'world'] )
+    reduce( <join>(), {order,inventory} )
+    reduce( <"*">(), {1..5} )
+    reduce( <nlx.lib.myfunc>(a=>3), {...} )
 
 * Furthering the above, add somewhat generalized support for what Perl 6
 calls "meta" operators, at least in that we define and exploit several.

@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.138.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.139.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.138.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.139.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -247,7 +247,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.138.0>.
+C<ln_base_authority>; it is typically a character string like C<0.139.0>.
 
 =item C<ln_dialect>
 
@@ -268,12 +268,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -356,7 +356,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -438,7 +438,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -447,7 +447,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -544,7 +544,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -554,7 +554,14 @@ Examples:
         }
     }
 
-=head2 rtn_inv_alt_syn
+=head2 DEPRECATED - rtn_inv_alt_syn
+
+B<The C<rtn_inv_alt_syn> catalog abstraction level as it currently exists
+is deprecated and will disappear in the near future.  Other pending
+enhancements to the language in both the system catalog itself and in the
+C<plain_rtn_inv> level will make the latter more capable and suitable by
+itself for normal use.  A new highest level or 3 will probably appear in
+place of C<rtn_inv_alt_syn> later for their still-unique useful features.>
 
 When the C<catalog_abstraction_level> pragma is C<rtn_inv_alt_syn>, then
 the following grammar definitions are in effect:
@@ -604,12 +611,12 @@ parse grammar than SQL in its general case.
 
 Code written to the C<rtn_inv_alt_syn> level can employ all of the language
 grammar constructs that C<plain_rtn_inv> can, plus all of those described
-in these main pod sections: L</FUNCTION INVOCATION ALTERNATE SYNTAX
-EXPRESSIONS>, L</IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
+in these main pod sections: L</DEPRECATED - FUNCTION INVOCATION ALTERNATE SYNTAX
+EXPRESSIONS>, L</DEPRECATED - IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.138.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -4788,7 +4795,7 @@ Examples:
         write_Text_line( report_text )
     ]
 
-=head1 FUNCTION INVOCATION ALTERNATE SYNTAX EXPRESSIONS
+=head1 DEPRECATED - FUNCTION INVOCATION ALTERNATE SYNTAX EXPRESSIONS
 
 Grammar:
 
@@ -5266,13 +5273,13 @@ Grammar:
         <monadic_prefix_op_alpha> <ws> <expr>
 
     <monadic_prefix_op_alpha> ::=
-        not
+        not abs
 
     <monadic_prefix_op_invo_sym> ::=
         <monadic_prefix_op> <ws>? <expr>
 
     <monadic_prefix_op__op_cr_basic> ::=
-        '!' | '||' | '#' | '#+' | '%' | '@'
+        '!' | '#' | '#+' | '%' | '@'
 
     <monadic_prefix_op__op_cr_extended> ::=
           <monadic_prefix_op__op_cr_basic>
@@ -5294,7 +5301,7 @@ Some of the keywords are aliases for each other:
 This table indicates which function is invoked by each keyword:
 
     not -> Core.Boolean.not( expr )
-    ||  -> Core.Numeric.abs( expr )
+    abs -> Core.Numeric.abs( expr )
     #   -> Core.Relation.cardinality( expr )
     #+  -> Core.Bag.cardinality( expr )
     %   -> Core.Cast.Tuple_from_Relation( expr )
@@ -5304,9 +5311,9 @@ Examples:
 
     not True
 
-    ||-23
+    abs -23
 
-    ||-4.59
+    abs -4.59
 
     #{ 5, -1, 2 }
 
@@ -5319,10 +5326,10 @@ Examples:
 Grammar:
 
     <monadic_postfix_op_invo> ::=
-        <expr> <ws> <monadic_postfix_op>
+        <expr> <ws>? <monadic_postfix_op>
 
     <monadic_postfix_op> ::=
-        '++' | '--' | 'i!'
+        '++' | '--' | '!'
 
 A C<monadic_postfix_op_invo> node is for using prefix notation to invoke a
 monadic operator function.  Such a function takes exactly 1 argument, which
@@ -5335,15 +5342,15 @@ This table indicates which function is invoked by each keyword:
 
     ++ -> Core.Ordered.Ordinal.succ( expr )
     -- -> Core.Ordered.Ordinal.pred( expr )
-    i! -> Core.Integer.factorial( expr )
+    !  -> Core.Integer.factorial( expr )
 
 Examples:
 
-    13 ++
+    13++
 
-    4 --
+    4--
 
-    5 i!
+    5!
 
 =head2 Simple Postcircumfix Operators
 
@@ -5684,7 +5691,7 @@ Examples:
 
     foo <=> bar
 
-=head1 IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS
+=head1 DEPRECATED - IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS
 
 Grammar:
 
@@ -5888,9 +5895,9 @@ examples of each level:
                      |       | (1+2) myfunc(...) <Int> nlx.data.quux .age
     -----------------+-------+---------------------------------------------
     Postfix          | N/A   | func().attr p.{...} r{...} x.[...] y[...]
-                     |       | ++ -- i! log-e
+                     |       | ++ -- ! log-e
     -----------------+-------+---------------------------------------------
-    Generic Prefix   | N/A   | || # #+ % @ e**
+    Generic Prefix   | N/A   | abs # #+ % @ e**
     Generic Infix    | left  | assuming
                      |       | ^ exp ** log
                      |       | * / div mod intersect join times divideby

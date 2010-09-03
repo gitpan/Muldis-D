@@ -2,6 +2,44 @@
                                   Changes
 ---------------------------------------------------------------------------
 
+2010-09-03
+
+    * Muldis::D version 0.139.0 is released on CPAN as
+    Muldis-D-0.139.0.tar.gz.
+
+    * (HDMD_Perl[6|5]_STD.pod)  Updated all routine invocation alternate
+    syntax expressions so that the first node element is no longer just
+    "op" but rather is one of the 3 ["i-op", "pre-op", "post-op"] depending
+    on whether it represents infix, prefix, or postfix syntax.  Besides
+    making the Perl-STD code better self-documenting, this also means that
+    we now have 3 separate namespaces for the operators, and so for example
+    we can now have "!" as both prefix and postfix without confusion.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, Integer.pod, Boolean.pod)
+    Renamed the special postfix syntax for the factorial op from "i!" to
+    "!", which then looks exactly like it does in maths.
+
+    * (PTMD_STD.pod)  Updated all the simple monadic postfix operators that
+    are symbolic (++,--,!) so that whitespace between each operator and its
+    argument is now optional.  So, for examples, you can now say "13++" or
+    "4--" or "5!" and not "5 !"/etc.  This is a stopgap pending better ws.
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod, Numeric.pod, Basics.pod)
+    Renamed the special prefix syntax for the absolute-value op from "||"
+    to "abs", as people would incorrectly think "or" on seeing the old one
+    while it doesn't look enough like "|x|",
+    and most languages use "abs" already.  However, "|-|" is still used for
+    the absolute-difference op, which has no precedent, looks like "|a-b|".
+
+    * (PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  Prefixed a few pod section
+    headings and added notices that:  The "rtn_inv_alt_syn" catalog
+    abstraction level as it currently exists is deprecated and will
+    disappear in the near future.  Other pending enhancements to the
+    language in both the system catalog itself and in the "plain_rtn_inv"
+    level will make the latter more capable and suitable by itself for
+    normal use.  A new highest level or 3 will probably appear in place of
+    "rtn_inv_alt_syn" later for their still-unique useful features.
+
 2010-08-09
 
     * Muldis::D version 0.138.0 is released on CPAN as
