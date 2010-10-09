@@ -9,7 +9,7 @@ Muldis D general purpose data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types version 0.139.0.
+This document is Muldis::D::Core::Types version 0.140.0.
 
 =head1 PREFACE
 
@@ -331,8 +331,8 @@ explicitly composed by all other types that are considered I<stringy>,
 which for the moment also includes any types whose values are an ordered
 collection of elements, such as arrays.  A stringy type is a type with
 whose values it would be reasonable to apply all of the common string or
-array operators like C<~> or C<x>.  Just a few primary system-defined types
-are stringy types, including C<Blob>, C<Text>, and C<Array>.  The
+array operators like C<~> or C<~#>.  Just a few primary system-defined
+types are stringy types, including C<Blob>, C<Text>, and C<Array>.  The
 cardinality of C<Stringy> is infinity.  The default value of C<Stringy> is
 the C<Text> value empty string.  The C<Stringy> type is not itself ordered,
 but often a type which is stringy is also ordered.
@@ -408,7 +408,7 @@ The C<Bool> type is explicitly defined
 as a union type over just these 2 singleton types having
 C<sys.std.Core.Type.Bool.*>-format names:
 C<False> and C<True>.  A C<Bool> represents a truth value, and is the
-result type of any C<is_identical> or C<is_not_identical> routine; it is
+result type of any C<is_same> or C<is_not_same> routine; it is
 the only essential general-purpose scalar data type of a generic B<D>
 language, although not the only essential one in Muldis D.
 The default and minimum value of C<Bool> is
@@ -587,6 +587,13 @@ Collation Algorithm (UCA) also works this way, assuming it is totally
 ordered, but that's unsure.  I<TODO: Support customization parameters for
 default text sorting.>
 
+A C<Text> is also used as the text of a Muldis D code comment, which
+programmers can populate as an attribute of several catalog data types,
+such as whole routines or statements or expression nodes.  One main
+intended use of this type is to help preserve comments in code translated
+to or from other languages; though only a subset of those (FoxPro?) keep
+comments in the AST rather than discarding them.
+
 =head1 GENERIC NONSCALAR DATA TYPES
 
 These core nonscalar data types permit transparent/user-visible
@@ -733,7 +740,7 @@ its C<max> I<and> at least one of C<excludes_min> or C<excludes_max> is
 true.  3. Both C<excludes_min> and C<excludes_max> are true I<and> C<min>
 and C<max> are consecutive values.  And so, there are many distinct
 C<SPInterval> values that are conceptually empty intervals, and the
-C<is_identical> function should not be used to test an C<SPInterval> for
+C<is_same> function should not be used to test an C<SPInterval> for
 being empty or not.
 
 The C<SPInterval> type supports I<unbounded>/I<infinite> or I<half-bounded>

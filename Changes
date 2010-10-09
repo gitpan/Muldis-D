@@ -2,6 +2,128 @@
                                   Changes
 ---------------------------------------------------------------------------
 
+2010-10-08
+
+    * Muldis::D version 0.140.0 is released on CPAN as
+    Muldis-D-0.140.0.tar.gz.
+
+    * This release features a consolidation of the system catalog and
+    associated revised conceptions of Muldis D's language structure, such
+    that all the system defined materials plus all non-special
+    system-defined namespaces are now organized in the same way as
+    user-defined materials, which is into "packages"; a "depot" is a pure
+    Muldis D package loaded by the DBMS in user space while a "module" is a
+    typically mixed-language package loaded by the DBMS readonly in system
+    space.  So "Core" and each official or unofficial Muldis D language
+    extension is now a named module and it is now normal for all entities
+    within each such system module to reference each other in the "nlx"
+    relative path namespace rather than "sys", and so "sys" is now more
+    like "fed", mainly just used to reference entities outside the
+    referencer's own package using an absolute path.  This also means it is
+    now more or less official that one can define a system package using
+    exactly the same Muldis D dialects/syntaxes as to define user packages.
+    (This release didn't actually tweak the dialects themselves, but that
+    could be done later, and they're still correct as is regarding depots.)
+
+    * (Basics.pod)  In the "NOTES ON TERMINOLOGY" main pod section, added
+    definitions of the 2 terms "module" and "package".  In the "ENTITY
+    NAMES" main pod section, updated the namespace hierarchy diagram to
+    simplify the "sys" portion and clarify the "nlx" portion.  Also split
+    the "User-Defined Entities" sub-section into itself and "Non-Lexical
+    Entities" and updated those plus various other "ENTITY NAMES"
+    sub-sections plus a few other bits in the file.
+
+    * (Types_Catalog.pod)  Renamed the main POD section "TYPES FOR DEFINING
+    DEPOTS AND SUBDEPOTS" to substitute "PACKAGE" for each "DEPOT".  Split
+    the catalog type "Depot" into itself plus the 2 new "Package" and
+    "Module" such that "Package" is initially identical to the old "Depot"
+    but for the name and the new "Depot" plus "Module" are defined as
+    initially non-proper subtypes of "Package".  Renamed but otherwise
+    initially left unchanged the 3 catalog types "SubdepotSet",
+    "SysSpecTypeSet", "SysNspSet" to "SubpackageSet", "SpecialTypeSet,
+    "SpecialNspSet" respectively.  Renamed the "Package" attribute
+    "subdepots" to "subpackages" and the "System" catalog type attribute
+    "namespaces" to "special_namespaces".  Then added new catalog type
+    "ModuleSet" and updated the "System" type to add a new "modules"
+    attribute of that type; the new type/attribute is structured like the
+    many other types/attributes of "System" that embed materials but that
+    they instead embed "Module".  Then eliminated the 14 catalog types
+    "Sys[Function|Updater|Recipe|Procedure]Set",
+    "Sys[Scalar|Tuple|Relation|Domain|Subset|Mixin]TypeSet",
+    "Sys[|Distrib][Key|Subset]ConstrSet" and updated the "System" catalog
+    type to eliminate its 14 attributes of those same types, since the 1
+    new "modules" attribute and all the corresponding types that are used
+    for defining "Depot" attributes can now be used as is for all
+    system-defined namespaces and materials that are defined in the catalog
+    as a user material would be defined.  Also updated the description of
+    the "System" attribute "special_namespaces" to reflect that it no
+    longer defines most namespaces, such as "Core" or "Core.Type" etc,
+    since "materials" now takes over that role more elegantly, and now
+    "special_namespaces" just declares the 15 special ones like "sys.std".
+    Then moved the "special_types" attribute from "System" to "Package" and
+    updated the "Depot" subtype to require that attribute be empty.  Also
+    the "Module" subtype was updated to require the "Package" attributes
+    "stim_resp_rules", "data" to be empty, but those may be relaxed later.
+    Updated a few other related bits of documentation in the file.
+
+    * (Basics.pod, Types_Catalog.pod, PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)
+    Muldis D no longer has the core concept of a "transition constraint",
+    which was an assertion on whether a variable is allowed (according to
+    current business rules) to transition directly from one state to
+    another.  So the routine kind "transition-constraint", its associated
+    syntaxes, and the catalog data type "TransConstrFunc" were all removed.
+    The rationale for this change is that transition constraints would be
+    better off as a user-definable concept (that could also be provided as
+    a Muldis D language extension) which is defined instead as a "state
+    constraint" associated with a database schema that explicitly stores
+    multiple versions of data in an auditing fashion, such as
+    "temporal/historical databases" do.  These matters may be arbitrarily
+    complex and seem best suited to be user-definable rather than in core.
+    At the very least, the previous "transition constraint" concept was
+    flawed in significant ways, such as that: 1. It couldn't take any other
+    states into account other than the immediately last and next one, where
+    in real life what is a valid transition can depend on multiple prior
+    states; 2. When what looks like multiple successive distinct
+    transactions to one user would look like a single larger transaction to
+    another user due to how the MVCC or serializability etc works, what are
+    the consistent semantics for a constraint saying a status must go
+    A->B->C and not A->C?; 3. Reverting certain user mistakes could require
+    circumventing / temporarily disabling a direction-enforcing constraint.
+
+    * (Universal.pod, Basics.pod, Types.pod, Types_Catalog.pod,
+    Boolean.pod, Relation.pod, Array.pod, Text.pod, PTMD_STD.pod,
+    HDMD_Perl[6|5]_STD.pod, Conventions.pod)  Renamed the 2 functions
+    "is[|_not]_identical" to "is[|_not]_same"; also updated the first one's
+    description to focus on mutual substitutability being the key in
+    considering their arguments to be "same".  The term "same" is better
+    by being a little more abstract in its meaning and should be
+    interpreted as any or all of ["same", "equal", "identical",
+    "substitutable", etc]; moreover, "same" is better by being terser and
+    by being more like related functions "before" and "after_or_same" etc.
+
+    * (PTMD_STD.pod)  Made nonquoted DBMS entity names subject to the
+    "op_char_repertoire" pragma such that the old limited-to-ASCII format
+    of such names is now just the case when the pragma is "basic"; now when
+    the pragma is "extended", such names may include any characters that
+    Unicode considers alphabetic or alphanumeric.  Also restricted both
+    formats of nonquoted entity names to require each hyphen to be followed
+    by an alphabetic character.  And so, extended names are now exactly the
+    same as Perl 6 identifiers except for not also allowing apostrophes.
+
+    * (Types_Catalog.pod, Routines_Catalog.pod, Basics.pod, Types.pod,
+    PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)  In Types_Catalog.pod, eliminated
+    the catalog data type "Comment" and changed the declared types of all
+    "scm_comment" attributes to "Text" (or "just_of.Text").  In
+    Routines_Catalog.pod, likewise changed the declared types of all
+    "scm_comment" parameters.  In all 3 STD, eliminated the as-value
+    "Comment" value literal syntax; now just PTMD_STD has the more typical
+    "non value comment" syntax, and that syntax is unchanged from before.
+    In all files, updated any other refs to aforementioned as appropriate.
+
+    * (D.pod, SeeAlso.pod)  Now spell author personal names
+    as "Edgar Codd (E.F. Codd)" and "Chris Date (C.J. Date)" rather than
+    as "Edgar F. Codd" and "Christopher J. Date", respectively.
+
 2010-09-03
 
     * Muldis::D version 0.139.0 is released on CPAN as
@@ -1018,7 +1140,7 @@
     * David said that Darren's expressed thought, that compound data types
     in table fields was a violation of first normal form, was in fact a
     misconception about the relational model.  David then referenced a
-    recent interview with C. J. Date.
+    recent interview with C.J. Date.
 
     * This set off a chain of events which was the largest paradigm shift
     to ever affect the Rosetta project.  While the continuing goal of

@@ -41,7 +41,12 @@ implementations over multiple SQL DBMSs.  Curr est end 2010 or early 2011.
 
 ----------
 
-* Create a branch of the Muldis D spec (and of the Muldis D
+* Define how one can split a PTMD_STD depot into multiple text files since
+you would conceptually put an entire potentially large program in one.
+
+* Tweak the STD dialects to account for defining system modules with them.
+
+* Consider creating a branch of the Muldis D spec (and of the Muldis D
 Manual) which retains all of the current spec features, and subsequently
 strip out the whole rtn_inv_alt_syn catalog abstraction level in trunk so
 that we can more radically evolve the language design at the more
@@ -83,6 +88,18 @@ postcircumfix ops that do restricted-to-constants shorthands of the likes
 of array element access, projection, rename, un/group, un/wrap etc.
 Things like the full set of infix logic ops are reserved for highest level,
 and likewise for majority of Unicode ops and their ASCII-symbolic versions.
+Now assuming we get generic <sym-op>(...) in plain-rtn-inv, and so
+"+(foo,bar)" etc is an option, then we should reprioritize the above 3
+post-split levels so that a level adding just postcircumfix syntax for
+project/group/ary-acc/rename/etc should be the lowest additional level, so
+one can be able to say "foo{...}" without also needing support for foo+bar.
+Maybe call that new lowest "rtn_inv_pcfx_alt_syn".  Making postcircumfix
+the lowest alt syn is also fitting because just it is like some of the
+lower levels such as code-as-data where using some syntaxes make certain
+inputs hard-coded, such as the attr names or interval-endpoint-flags,
+versus those taking variables in the the more verbose generic syntaxes.
+Presumably all levels higher than rtn_inv_pcfx_alt_syn are plain infix
+or paren-less prefix with fully-variable arguments like generic functions.
 
 ----------
 
@@ -101,9 +118,7 @@ examples: distrib-key-constraint, distrib-subset-constraint.
 ----------
 
 * Eliminate the simple monadic postfix special syntax category.  Convert ++
-and -- into simple prefix ops, which carries a number of benefits, such as
-that whitespace is no longer necessary because leading dashes would never
-be parsed as within an entity name, and such as that an expression with
+and -- into simple prefix ops, because an expression with
 that in it is no longer end-weighted, and it would be less likely to
 confuse people into thinking the op is variable increment rather than just
 returning a result.  Removing the category also simplifies the parser as
@@ -153,8 +168,16 @@ Example:
     baz( foo )
 ... here, the assertion only happens when baz() is going to be evaluated;
 the spelling is "asserts" since it should be an adjective.
-There also needs to be a version that can assert multiple exprs.
-Or actually, the ??!! version may still be better?
+- There also needs to be a version that can assert multiple exprs.
+- Or actually, the ??!! version may still be better?
+- Naming the "duplicate" isn't actually that hard; just use a leading
+underscore, eg:
+    _foo ::= foo asserting bar
+    _foo ::= bar ?? foo !! failure
+... so maybe that's best?
+- A BIG THING TO CONSIDER HERE IS, HOW DO FUNCTIONAL LANGUAGES MAKE
+ASSERTIONS ON COMBINATIONS OF ARGUMENTS ... OR IS THE ANSWER THAT ALL
+FUNCTIONS HAVE EXACTLY ONE ARGUMENT?  SEE WHAT HASKELL/ETC DOES.
 
 * Change generic assertion mechanism from a function/procedure to its own
 
@@ -188,7 +211,7 @@ Add alias for every 'op' node 2nd element for a routine, meaning eg add
 calls to those, as if one said `"+"(4,5)` or `"⋈"(foo,bar)`, and so we can
 better remember the individual syntactic choices that the users made.
 But then, how do we deal with the idea of making logical-not into a meta-op
-so that there is no actual is_not_identical|"≠" function etc; how do we
+so that there is no actual is_not_same|"≠" function etc; how do we
 preserve user's individual syntactic choices then?  So think about that.
 While SQL synonyms can also be used for relvars, mine would probably only
 be used for materials - types, routines, stim-resp-rules, themselves, etc;
@@ -334,7 +357,7 @@ The general reducer above would be one of these.  Another is the negated
 relational, whose syntax is putting ! or not- in front of any Bool-resu op.
 Another is the assignment, putting := in front of any function.
 For !, we can then eliminate all the "not" variants of any Bool-resulting
-functions, so eg "x != y" parses into "not(is_identical(x,y))", same as if
+functions, so eg "x != y" parses into "not(is_same(x,y))", same as if
 they had said "!(x = y)".  As for the old intended purpose of all the not-
 variants, which is to preserve the user's intent of how code should look,
 we could simply have an alias for the not() function which is what is
@@ -377,12 +400,6 @@ operations, separately for insert/substitute/delete.
 
 * Add new "material" kinds that define state constraints (address as simple
 nlx.*.data.*), like type constraints but ref in reverse.
-
-* Add new "material" kinds that define
-transition constraints.  The initial version would simply take a
-'before' and an 'after' state argument.  But it may be good to provide an
-alternative where arguments show the delta since often that is what
-constraint writers want to know anyway.
 
 * Update the "material" kinds that def stimulus-response rules / triggered
 routines so that they work for more kinds of stimuli, and maybe change the
@@ -684,15 +701,15 @@ consortium to use canonical for general data but to use compatibility for
 things like identifiers or to avoid some kinds of security problems; see
 http://www.unicode.org/faq/normalization.html.  Note that compatibility is
 a smaller repertoire than canonical, so converting from the latter to the
-former will lose information.  The text|name|cmnt affect how delimited char
-strs that are Text|Name|Comment are interpreted, and the effects are
+former will lose information.  The text|name affect how delimited char
+strs that are Text|Name are interpreted, and the effects are
 orthogonal to whether characters are specified literally or in escaped
 (eg "\c<...>" form); canonical will preserve exactly what is stated (but
 for normalization to NFD) and compatibility will take what is stated and
 fold it so semantically same characters become the same codepoints (like as
 normalizing to NFKD).  The suggested usage is compatibility for Name to
 help avoid security or other problems, and canonical for Text; as for
-Comment, I currently don't know which is better.  If ASCII is chosen, the
+comments, I currently don't know which is better.  If ASCII is chosen, the
 semantics are different; with both Unicode any input is accepted but folded
 if needed; for ASCII, it is more likely an exception would be raised if
 there are any codepoints outside the 0..127 range in character strings.
@@ -737,13 +754,7 @@ resolve into multiple single-attr accessors when app in system catalog.
 * In PTMD_STD, consider loosening the grammar regarding some of the normal
 prefix or postfix or infix operators so that rather than mandating
 whitespace be present between the operators and their arguments, the
-whitespace is optional where it wouldn't cause a problem.  On the other
-hand, is "! foo" really such a problem?  People might often write "not
-foo" there anyway as that is a preferred form for boolean ops.  In
-particular, while someone may want to write say "foo++" or "foo--", the
-latter is problematic since "-" are allowed in bareword identifiers and
-that could mis-parse, and someone would probably prefer to then write
-[foo --] rather than ["foo"--] anyway.
+whitespace is optional where it wouldn't cause a problem.
 
 ----------
 
@@ -791,7 +802,7 @@ all foreign values are treated as black boxes by Muldis D, it is assumed
 that the Muldis D implementation's bindings to the peer/host language will
 be providing something akin to a simple pointer value, and that it would
 provide the means to know what foreign values are mutually distinct or
-implement is_identical for them.  One thing for certain is that every
+implement is_same for them.  One thing for certain is that every
 foreign value is disjoint from every Muldis D value, and by default every
 foreign value is mutually distinct from every other foreign too, unless
 identity is overloaded by the foreign, like how Perl 6's .WHICH works.
@@ -812,7 +823,7 @@ this seems to be the safest bet); otherwise ('ref obj' is false) then the
 value's result in a string context, "obj", is used as the identity; the
 mem addr and stringification would both be prefixed with some constant to
 distinguish the 2 that might stringify the same.  By default, an
-External supports no operators but is/not_identical.
+External supports no operators but is/not_same.
 
 ----------
 

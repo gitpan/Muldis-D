@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.139.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.140.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.139.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.140.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -247,7 +247,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.139.0>.
+C<ln_base_authority>; it is typically a character string like C<0.140.0>.
 
 =item C<ln_dialect>
 
@@ -268,12 +268,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.140.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.140.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -356,7 +356,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.140.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -438,7 +438,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.140.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -447,7 +447,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.140.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -544,7 +544,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.140.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -616,7 +616,7 @@ EXPRESSIONS>, L</DEPRECATED - IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.139.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.140.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -634,6 +634,10 @@ may be composed of only ASCII characters or also other Unicode characters,
 and this pragma determines secondarily whether or not a few special value
 literals (effectively nullary operators) composed of non-ASCII Unicode
 characters may exist.
+
+The pragma also determines whether or not any nonquoted DBMS entity names
+in the general case may contain non-ASCII Unicode alphanumeric characters.
+I<TODO:  Consider renaming this pragma.>
 
 There are currently 2 specified operator character repertoires: C<basic>,
 C<extended>.  The latter is a proper superset of the former.
@@ -671,6 +675,9 @@ following grammar definitions are in effect:
 
     <Bool_payload> ::=
         <Bool_payload__op_cr_basic>
+
+    <nonquoted_name_str> ::=
+        <nonquoted_name_str__op_cr_basic>
 
     <maybe_Nothing> ::=
         <maybe_Nothing__op_cr_basic>
@@ -722,6 +729,9 @@ following grammar definitions are in effect:
 
     <Bool_payload> ::=
         <Bool_payload__op_cr_extended>
+
+    <nonquoted_name_str> ::=
+        <nonquoted_name_str__op_cr_extended>
 
     <maybe_Nothing> ::=
         <maybe_Nothing__op_cr_extended>
@@ -791,7 +801,6 @@ Grammar:
         | <Name>
         | <NameChain>
         | <PNSQNameChain>
-        | <Comment>
         | <RatRoundRule>
 
     <coll_value_selector> ::=
@@ -886,7 +895,6 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | Name
         | NameChain
         | PNSQNameChain
-        | Comment
         | RatRoundRule
         | DH? Scalar | '$'
         | DH? Tuple | '%'
@@ -915,7 +923,6 @@ Every GCVL has 1-3 elements, illustrated by this grammar:
         | <Name_payload>
         | <NameChain_payload>
         | <PNSQNameChain_payload>
-        | <Comment_payload>
         | <RatRoundRule_payload>
         | <Scalar_payload>
         | <Tuple_payload>
@@ -941,8 +948,8 @@ only external metadata of C<value_payload> generally necessary to
 interpret the latter; what grammars are valid for C<value_payload> depend
 just on C<value_kind>.
 
-For all values of just the 11 data types [C<Singleton>, C<Bool>, C<Order>,
-C<RoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>, C<Comment>, C<Set>,
+For all values of just the 10 data types [C<Singleton>, C<Bool>, C<Order>,
+C<RoundMeth>, C<Int>, C<Rat>, C<Blob>, C<Text>, C<Set>,
 C<Array>], the C<value_kind> portion of a GCVL may be omitted for brevity,
 but the code parser should still be able to infer it easily by examining
 the first few characters of the C<value_payload>, which for each of said 11
@@ -1417,6 +1424,16 @@ Grammar:
     <ws> ::=
         \s+ [[<non_value_comment> | <visual_dividing_line>] \s+]*
 
+    <non_value_comment> ::=
+        '#' \s*
+            '`' \s*
+                [<-[\`]> | <escaped_char>]*
+            \s* '`'
+        \s* '#'
+
+    <visual_dividing_line> ::=
+        '#' ** 2..*
+
 A C<Text> node represents a general purpose character string.  It is
 interpreted as a Muldis D C<sys.std.Core.Type.Text> value as follows:
 
@@ -1446,7 +1463,7 @@ to end up with no C<SPACE> at all where a line is broken, then you'll have
 to employ some other workaround, such as catenating several quoted strings.
 
 All Muldis D delimited character string literals (generally the 3 C<Text>,
-C<Name>, C<Comment>) may contain some characters denoted with escape
+C<Name>, code comments) may contain some characters denoted with escape
 sequences rather than literally.  The Muldis D parser would substitute the
 escape sequences with the characters they represent, so the resulting
 character string values don't contain those escape sequences.  Currently
@@ -1460,7 +1477,7 @@ The meanings of the simple escape sequences are:
     \\  | x;5C      | REVERSE SOLIDUS | \   | esc seq lead (aka backslash)
     \'  | x;27      | APOSTROPHE      | '   | delim Text literals
     \"  | x;22      | QUOTATION MARK  | "   | delim quoted Name literals
-    \`  | x;60      | GRAVE ACCENT    | `   | delim Comment literals
+    \`  | x;60      | GRAVE ACCENT    | `   | delim for code comments
     \t  | x;9       | CHAR... TAB...  |     | control char horizontal tab
     \n  | x;A       | LINE FEED (LF)  |     | ctrl char line feed / newline
     \f  | x;C       | FORM FEED (FF)  |     | control char form feed
@@ -1489,6 +1506,29 @@ Examples:
 
     '\c<LATIN SMALL LETTER OU>\c<x;263A>\c<65>'
 
+A C<non_value_comment> node is strictly not part of the code
+proper; Muldis D code can contain these almost anywhere as metadata for
+the code, and in large part it is treated as if it were part of the
+insignificant whitespace; that all being said, generally speaking any
+C<non_value_comment> is retained in the parse tree adjusted to live in the
+contextually nearest place where a resulting system catalog node has a
+C<scm_comment> attribute.  I<Details of determining the contextually
+nearest place for these comments to go is pending.>
+
+Syntactically, a C<non_value_comment> node differs from C<Text_payload>
+only in that it is delimited by number-signs/hash-marks in addition to
+backticks/grave-accents.
+
+A C<visual_dividing_line> is a run of 2+ C<#> that may be used in all of
+the same places as a C<non_value_comment> but it does I<not> denote a
+comment and will be stripped out by the parser as if it was insignificant
+whitespace.  This feature exists to empower things like making visual
+dividing lines in the code just out of hash-marks.
+
+Examples:
+
+    #`This does something.`#
+
 =head2 DBMS Entity Name Literals
 
 Grammar:
@@ -1501,8 +1541,11 @@ Grammar:
     <Name_payload> ::=
         <nonquoted_name_str> | <quoted_name_str>
 
-    <nonquoted_name_str> ::=
-        <[ a..z A..Z _ ]><[ a..z A..Z 0..9 _ - ]>*
+    <nonquoted_name_str__op_cr_basic> ::=
+        [<[ a..z A..Z _ ]> <[ a..z A..Z 0..9 _ ]>*] ** '-'
+
+    <nonquoted_name_str__op_cr_extended> ::=
+        [<alpha> \w*] ** '-'
 
     <quoted_name_str> ::=
         '"'
@@ -1545,14 +1588,15 @@ C<Text_payload> only in that the string is delimited by
 double-quotes rather than apostrophes/single-quotes, meaning also that
 literal double-quotes instead of apostrophes must be escaped.
 
-A C<nonquoted_name_str> is composed of a single alphabetic or underscore
-character followed by zero or more characters that are each alphanumeric or
-underscore or hyphen.  It can not be segmented, so you will have to use the
-C<quoted_name_str> equivalent if you want a segmented string.  The
-definitions of alphabetic and numeric in this context are expressly limited
-to the ASCII repertoire, for various reasons including simplicity and a
-better degree of security; if you want to include any other Unicode
-alphanumeric characters, you will have to use a C<quoted_name_str>.
+A C<nonquoted_name_str> is composed of an alphabetic character followed by
+any sequence of alphanumeric characters.  It can not be segmented, so you
+will have to use the C<quoted_name_str> equivalent if you want a segmented
+string.  The definitions of alphabetic and alphanumeric in this context
+include appropriate Unicode characters, iff the C<op_char_repertoire> is
+C<extended>; for C<basic>, they are expressly limited to the ASCII
+repertoire.  An underscore is always considered alphabetic.  A
+C<nonquoted_name_str> may also contain isolated hyphens provided the next
+character is alphabetic.
 
 A C<NameChain> node represents a canonical long name for invoking a DBMS
 entity in some contexts; it is conceptually a sequence of entity short
@@ -1618,8 +1662,8 @@ then the parser will assume it is an unqualified chain in the C<sys>
 namespace and lookup the best / only match from the known C<sys.std> DBMS
 entities, to resolve to.  So for example, one can just write C<Int> rather
 than C<sys.std.Core.Type.Int>, C<Array> rather than
-C<sys.std.Core.Type.Array."">, C<is_identical> rather than
-C<sys.std.Core.Universal.is_identical>, C<Tuple.attr> rather than
+C<sys.std.Core.Type.Array."">, C<is_same> rather than
+C<sys.std.Core.Universal.is_same>, C<Tuple.attr> rather than
 C<sys.std.Core.Tuple.attr>, C<fetch_curr_instant> rather than
 C<sys.std.Temporal.Instant.fetch_curr_instant>,
 C<array_of.Rat> rather than C<array_of.sys.std.Core.Type.Rat>, and so on.
@@ -1654,81 +1698,6 @@ Examples:
     PNSQNameChain:fed.data.the_db.gene.sorted_person_names
 
     PNSQNameChain:fed.data.the_db.stats."samples by order"
-
-=head2 Code Comment Literals
-
-Grammar:
-
-    <Comment> ::=
-        [
-            Comment ':' <unspace>
-            [<type_name> ':' <unspace>]?
-        ]?
-        <Comment_payload>
-
-    <Comment_payload> ::=
-        '`'
-            [<-[\`]> | <escaped_char>]*
-        '`'
-
-    <non_value_comment> ::=
-        '#' \s*
-            <Comment_payload>
-        \s* '#'
-
-    <visual_dividing_line> ::=
-        '#' ** 2..*
-
-A C<Comment> node represents the text of a Muldis D code comment; it is a
-character string type, that is disjoint from both C<Text> and C<Name>.  It
-is interpreted as a Muldis D C<sys.std.Core.Type.Cat.Comment> value as
-follows:
-
-Fundamentally a C<Comment> node is formatted and interpreted like a C<Text>
-node, and any similarities won't be repeated here.  The C<Comment_payload>
-differs from C<Text_payload> only in that the string is delimited
-by backticks/grave-accents (C<`>) rather than apostrophes/single-quotes,
-meaning also that literal backticks instead of apostrophes must be escaped.
-
-A C<non_value_comment> node is I<also> interpreted as a Muldis D
-C<sys.std.Core.Type.Cat.Comment> value in essentially the same way as a
-C<Comment>, but for a few formatting differences described further below.
-The primary reason for both C<Comment> and C<non_value_comment> to exist is
-so that code comments can be placed in Muldis D code in very different ways
-without there being any confusion on interpretation.
-
-A C<Comment> node is used when the comment is normal data that is an
-integral part of the Muldis D code proper, same as every part of the code
-that isn't a comment, such as when the comment I<is> an C<expr> or C<value>
-node.
-
-A C<non_value_comment> node, in contrast, is strictly not part of the code
-proper; Muldis D code can contain these almost anywhere as metadata for
-the code, and in large part it is treated as if it were part of the
-insignificant whitespace; that all being said, generally speaking any
-C<non_value_comment> is retained in the parse tree adjusted to live in the
-contextually nearest place where a resulting system catalog node has a
-C<scm_comment> attribute.  I<Details of determining the contextually
-nearest place for these comments to go is pending.>
-
-Syntactically, a C<non_value_comment> node differs from C<Comment_payload>
-only in that it is delimited by number-signs/hash-marks in addition to
-backticks/grave-accents, such that the latter is nested inside the former,
-and optional insignificant whitespace is allowed between the two.
-
-A C<visual_dividing_line> is a run of 2+ C<#> that may be used in all of
-the same places as a C<non_value_comment> but it does I<not> denote a
-comment and will be stripped out by the parser as if it was insignificant
-whitespace.  This feature exists to empower things like making visual
-dividing lines in the code just out of hash-marks.
-
-Examples (the first 2 are as values, the third is not as a value):
-
-    Comment:`This does something.`
-
-    `So does this.`
-
-    #`And also this.`#
 
 =head2 Rational Rounding Rule Literals
 
@@ -2676,7 +2645,6 @@ Every material has 2-3 elements, illustrated by this grammar:
             | 'value-map-unary'
             | 'value-filter'
             | 'value-constraint'
-            | 'transition-constraint'
             | 'value-reduction'
             | 'order-determination'
         | updater
@@ -2766,7 +2734,6 @@ Grammar:
         | 'value-map-unary'
         | 'value-filter'
         | 'value-constraint'
-        | 'transition-constraint'
         | 'value-reduction'
         | 'order-determination'
 
@@ -2835,7 +2802,6 @@ C<function_kind> map to C<Function> subtypes as follows:
     value-map-unary       | ValMapUFunc
     value-filter          | ValFiltFunc
     value-constraint      | ValConstrFunc
-    transition-constraint | TransConstrFunc
     value-reduction       | ValRedFunc
     order-determination   | OrdDetFunc
 
@@ -4046,7 +4012,7 @@ Examples:
     nlx.lib.foodb.bazfunc( a1 => 52, a2 => 'hello world' )
 
     #`two params named 'topic' and 'other'`#
-    is_identical( foo, bar )
+    is_same( foo, bar )
 
     #`invoke the lexically innermost routine with 2 args`#
     rtn( x, y )
@@ -5038,8 +5004,8 @@ Some of the keywords are aliases for each other:
 
 This table indicates which function is invoked by each keyword:
 
-    =       -> Core.Universal.is_identical( expr.[0], expr.[1] )
-    !=      -> Core.Universal.is_not_identical( expr.[0], expr.[1] )
+    =       -> Core.Universal.is_same( expr.[0], expr.[1] )
+    !=      -> Core.Universal.is_not_same( expr.[0], expr.[1] )
     nand    -> Core.Boolean.nand( expr.[0], expr.[1] )
     nor     -> Core.Boolean.nor( expr.[0], expr.[1] )
     |-|     -> Core.Numeric.abs_diff( expr.[0], expr.[1] )
