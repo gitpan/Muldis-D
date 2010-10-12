@@ -9,7 +9,7 @@ Muldis::D::Basics -
 
 =head1 VERSION
 
-This document is Muldis::D::Basics version 0.140.0.
+This document is Muldis::D::Basics version 0.141.0.
 
 =head1 PREFACE
 
@@ -1711,6 +1711,7 @@ This table says how to interpret a C<String> based on its repertoire:
     -3    | text with 7-bit ASCII char repertoire; each elem in 0..127
     -4    | text w Unicode 5.2.0 canonical reper; each elem a codepoint
     -5    | text w Unicode 5.2.0 compatibility repertoire
+    -6    | text w Muldis D proprietary minimal repertoire like base64url
 
 Two C<String> are only considered identical if they have the same I<element
 repertoire> value, and for two C<String> with the same repertoire, the
@@ -3666,7 +3667,7 @@ code comments and code element ordinal positions.
 =head2 Code Comments
 
 Many tuple and relation catalog data types have a special extra attribute
-named C<scm_comment>, a C<Text> (a character string), which may
+named C<scm_comment>, a C<Comment> (a character string), which may
 optionally be used to associate an arbitrary piece of human-readable
 descriptive text with a code element represented by a given tuple.  For
 example, the C<Function> catalog type has it, meaning that a general
