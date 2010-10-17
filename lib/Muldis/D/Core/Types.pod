@@ -9,7 +9,7 @@ Muldis D general purpose data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types version 0.141.0.
+This document is Muldis::D::Core::Types version 0.142.0.
 
 =head1 PREFACE
 
@@ -46,8 +46,8 @@ user's point of view:
                 sys.std.Core.Type.Int
                 sys.std.Core.Type.Rat
                 sys.std.Core.Type.Blob
-                sys.std.Core.Type.Minimal_Text
-                sys.std.Core.Type.Unicode_Text
+                sys.std.Core.Type.CoreText
+                sys.std.Core.Type.Text.Unicode
         sys.std.Core.Type.Tuple
             sys.std.Core.Type.DHTuple
                 sys.std.Core.Type.Database
@@ -82,8 +82,8 @@ as is relevant from the implementer's point of view:
                         sys.std.Core.Type.Bool
                         sys.std.Core.Type.Rat
                         sys.std.Core.Type.Blob
-                        sys.std.Core.Type.Minimal_Text
-                        sys.std.Core.Type.Unicode_Text
+                        sys.std.Core.Type.CoreText
+                        sys.std.Core.Type.Text.Unicode
                 sys.std.Core.Type.External
             sys.std.Core.Type.Cat.Nonstructure
 
@@ -116,8 +116,10 @@ types:
                             sys.std.Core.Type.PRat
                     sys.std.Core.Type.Blob
                         sys.std.Core.Type.OctetBlob
-                    sys.std.Core.Type.Minimal_Text
-                    sys.std.Core.Type.Unicode_Text
+                    sys.std.Core.Type.CoreText
+                    sys.std.Core.Type.Text.Unicode
+                        sys.std.Core.Type.Text.ASCII
+                        sys.std.Core.Type.Text.Latin1
 
 To be clear, C<ScalarWP> is the intersection type of C<List> and C<Scalar>,
 and C<DHScalarWP> is the intersection type of C<ScalarWP> and C<DHScalar>;
@@ -207,8 +209,8 @@ compose:
 
             sys.std.Core.Type.Rat
             sys.std.Core.Type.Blob
-            sys.std.Core.Type.Minimal_Text
-            sys.std.Core.Type.Unicode_Text
+            sys.std.Core.Type.CoreText
+            sys.std.Core.Type.Text.Unicode
 
             sys.std.Core.Type.Ordinal
 
@@ -227,8 +229,8 @@ compose:
 
             sys.std.Core.Type.Text
 
-                sys.std.Core.Type.Minimal_Text
-                sys.std.Core.Type.Unicode_Text
+                sys.std.Core.Type.CoreText
+                sys.std.Core.Type.Text.Unicode
 
         sys.std.Core.Type.Attributive
 
@@ -282,7 +284,7 @@ them on a line such that each value is definatively considered I<before>
 all of the values one one side and I<after> all of the values on the other
 side.  A typical ordered type is a scalar type, but not-scalar types can
 also be ordered.  Almost all system-defined scalar types are also ordered
-types, including: C<Bool>, C<Int>, C<Rat>, C<Blob>, C<Minimal_Text>.  The
+types, including: C<Bool>, C<Int>, C<Rat>, C<Blob>, C<CoreText>.  The
 cardinality of C<Ordered> is infinity.  The default value of C<Ordered> is
 C<Bool:False>.  The minimum and maximum values of C<Ordered> are C<-Inf>
 and C<Inf>, respectively; these 2 values are special singleton scalar types
@@ -342,7 +344,7 @@ whose values it would be reasonable to apply all of the common string or
 array operators like C<~> or C<~#>.  Just a few primary system-defined
 types are stringy types, including C<Blob>, C<Text>, and C<Array>.  The
 cardinality of C<Stringy> is infinity.  The default value of C<Stringy> is
-the C<Minimal_Text> value empty string.  The C<Stringy> type is not itself
+the C<CoreText> value empty string.  The C<Stringy> type is not itself
 ordered, but often a type which is stringy is also ordered.
 
 =head2 sys.std.Core.Type.Text
@@ -360,9 +362,9 @@ types, but directly mappable.  The C<Text> type explicitly composes the
 C<Stringy> mixin type, and so every type which explicitly composes C<Text>
 also implicitly composes C<Stringy>.  Most existing or likely
 system-defined stringy types are also text types, including
-C<Minimal_Text>, C<Unicode_Text>.
+C<CoreText>, C<Text.Unicode>.
 The cardinality of C<Text> is infinity.  The default value of C<Text> is
-the C<Minimal_Text> value empty string.  The C<Text> type is not itself
+the C<CoreText> value empty string.  The C<Text> type is not itself
 ordered, but often a type which is a text type is also ordered.
 
 =head2 sys.std.Core.Type.Attributive
@@ -578,7 +580,7 @@ intended interpretation.
 
 C<OctetBlob> is a proper subtype of
 C<Blob> where all member values have a length in bits that is an even
-multiple of 8 (or is zero).  An C<OctetBlob> adds 1 system-defined possrep
+multiple of 8 (or is zero).  C<OctetBlob> adds 1 system-defined possrep
 named C<octets> which consists of 1 C<OString>-typed attribute whose name
 is the empty string.  The C<octets> and C<bits> possreps correspond as you
 might expect, such that each element of the sole attribute of C<octets>
@@ -592,74 +594,90 @@ for convenience of users since it is likely the vast majority of C<Blob>
 values consist of whole octets and users would want to work with them in
 those terms.
 
-=head2 sys.std.Core.Type.Minimal_Text
+=head2 sys.std.Core.Type.CoreText
 
-A C<Minimal_Text> is a string of abstract characters which is formatted as
-a sequence of abstract codepoints of a conceptually Muldis D proprietary
-I<minimal> character repertoire, which consists of exactly 64 characters.
-
-This table says what those 64 characters are and what codepoint numbers
-they have (the codepoints are expressed in base-10):
-
-     0..25 | 'A'..'Z' | LATIN CAPITAL LETTER A .. LATIN CAPITAL LETTER Z
-    26..51 | 'a'..'z' | LATIN SMALL LETTER A .. LATIN SMALL LETTER Z
-    52..61 | '0'..'9' | DIGIT ZERO .. DIGIT NINE
-        62 | '-'      | HYPHEN-MINUS
-        63 | '_'      | LOW LINE (underscore)
-
-The purpose of C<Minimal_Text> is to provide the absolute minimum of
-support for character strings such that one can write the least common
-denominator of identifier strings with them such as the names of types or
-routines or attributes or variables, these usually being comprised of Latin
-alphabetic and numeric characters plus underscore and hyphen for word
-separation.  C<Minimal_Text> could also be used for some user data, such as
-some basic alphanumeric codes, but use by the system catalog is its primary
-intended purpose.  The C<Minimal_Text> type explicitly composes the C<Text>
-mixin type, and by extension also implicitly composes the C<Stringy> mixin
-type.  C<Minimal_Text> is the only explicit composing type of C<Text> that
+A C<CoreText> is a string of abstract characters which is formatted as a
+sequence of abstract codepoints of a conceptually Muldis D proprietary
+minimal character repertoire.  The C<CoreText> type explicitly composes
+the C<Text> mixin type, and by extension also implicitly composes the
+C<Stringy> mixin type.  The purpose of C<CoreText> is to provide a
+reasonable minimum of support for character strings in the Muldis D
+language core, such that if this was the only character string support,
+users could still do the same things as are supported by least common
+denominator text data support in general purpose languages and DBMSs.
+The character repertoire of C<CoreText> is presently defined to be the
+same 128 7-bit ASCII characters, with codepoints in 0..127, which both
+ISO-8859-1/Latin1 and all versions of Unicode are proper supersets of.
+The detail of this might change in the future, but the spirit should stay.
+C<CoreText> is the only explicit composing type of C<Text> that
 is in the Muldis D language core; all others are provided by extensions.
 All system-defined entity names in the core use only this repertoire.
-
-The C<Minimal_Text> repertoire and codepoints also happen to exactly
-correspond to a Base64 flavor called "base64url encoding" or "Modified
-Base64 for URL applications".  I<TODO: Cite some official reference.>
-
-A C<Minimal_Text> has 1 system-defined possrep named C<mini_codes> which
-consists of 1 C<MCPString>-typed attribute whose name is the empty string;
-each element of C<mini_codes> represents a codepoint number.  The
-C<Minimal_Text> type explicitly composes the C<Ordered> mixin type.  A
-C<Minimal_Text> is a simple wrapper for a C<MCPString> and all of its other
+A C<CoreText> has 1 system-defined possrep named C<core_codes> which
+consists of 1 C<CCPString>-typed attribute whose name is the empty string;
+each element of C<core_codes> represents a codepoint number.  The
+C<CoreText> type explicitly composes the C<Ordered> mixin type.  A
+C<CoreText> is a simple wrapper for a C<CCPString> and all of its other
 details such as default and minimum and maximum values and cardinality and
 default ordering algorithm (sorting is numeric by abstract codepoint
-number) all correspond directly.  But C<Minimal_Text> is explicitly
-disjoint from C<MCPString> due to having a different intended
-interpretation.
+number) all correspond directly.  But C<CoreText> is explicitly disjoint
+from C<CCPString> due to having a different intended interpretation.
+C<CoreText> is mainly intended for use in the system catalog and should
+only be applied to user data on less capable Muldis D implementations that
+don't support C<Text.Unicode> and the latter's proper subtype
+C<Text.ASCII>; on more capable implementations that support C<Text.ASCII>,
+you should use that by default when you would otherwise use C<CoreText>.
 
-=head2 sys.std.Core.Type.Unicode_Text
+=head2 sys.std.Core.Type.Text.Unicode
 
-A C<Unicode_Text> is a string of Unicode abstract
+A C<Text.Unicode> is a string of Unicode abstract
 characters which is formatted as a sequence of Unicode abstract codepoints
-in canonical decomposed normal form (NFD).  The C<Unicode_Text> type
+in canonical decomposed normal form (NFD).  The C<Text.Unicode> type
 explicitly composes the C<Text> mixin type, and by extension also
-implicitly composes the C<Stringy> mixin type.  Two C<Unicode_Text> will
+implicitly composes the C<Stringy> mixin type.  Two C<Text.Unicode> will
 generally match at the grapheme abstraction level.  Of course, a Muldis D
 implementation doesn't actually have to store character data in NFD; but
-default matching semantics need to be as if it did.  A C<Unicode_Text> has
+default matching semantics need to be as if it did.  A C<Text.Unicode> has
 1 system-defined possrep named C<nfd_codes> which consists of 1
 C<UCPString>-typed attribute whose name is the empty string; each element
 of C<nfd_codes> represents a Unicode standard version 5.2.0 character
-abstract codepoint number.  The C<Unicode_Text> type explicitly composes
-the C<Ordered> mixin type.  A C<Unicode_Text> is a simple wrapper for a
+abstract codepoint number.  The C<Text.Unicode> type explicitly composes
+the C<Ordered> mixin type.  A C<Text.Unicode> is a simple wrapper for a
 C<UCPString> and all of its other details such as default and minimum and
 maximum values and cardinality and default ordering algorithm (sorting is
 numeric by abstract codepoint number) all correspond directly.  But
-C<Unicode_Text>
+C<Text.Unicode>
 is explicitly disjoint from C<UCPString> due to having a different intended
 interpretation.  In regards to ordering, possibly the standard Unicode
 Collation Algorithm (UCA) also works this way, assuming it is totally
 ordered, but that's unsure.  I<TODO: Support customization parameters for
-default text sorting, or make C<Unicode_Text> into a mixin type composing
+default text sorting, or make C<Text.Unicode> into a mixin type composing
 a multiplicity of other nationality-specific types perhaps.>
+
+=head2 sys.std.Core.Type.Text.ASCII
+
+C<Text.ASCII> is a proper subtype of C<Text.Unicode> where all member
+values have just the abstract characters in the 128-character repertoire of
+7-bit ASCII.  C<Text.ASCII> adds 1 system-defined
+possrep named C<ascii_codes> which consists of 1 C<String>-typed attribute
+whose name is the empty string and each of whose elements is a codepoint in
+the range 0..127 inclusive.  The C<ascii_codes> and C<nfd_codes> possreps
+correspond as you might expect, such that both represent the same abstract
+characters using the appropriate codepoints of their repertoires.
+C<Text.ASCII> has the same character repertoire as C<CoreText> but the
+former is comparable with C<Text.Unicode> while the latter isn't.
+C<Text.ASCII> is what you should be using by default on all Muldis D
+implementations that support it, when you would otherwise use C<CoreText>.
+
+=head2 sys.std.Core.Type.Text.Latin1
+
+C<Text.Latin1> is a proper subtype of C<Text.Unicode> where all member
+values have just the abstract characters in the 256-character repertoire of
+8-bit ISO Latin 1 / ISO-8859-1.  C<Text.Latin1> adds 1 system-defined
+possrep named C<latin1_codes> which consists of 1 C<String>-typed attribute
+whose name is the empty string and each of whose elements is a codepoint in
+the range 0..255 inclusive.  The C<latin1_codes> and C<nfd_codes> possreps
+correspond as you might expect, such that both represent the same abstract
+characters using the appropriate codepoints of their repertoires.
 
 =head1 GENERIC NONSCALAR DATA TYPES
 
@@ -775,7 +793,7 @@ An C<SPInterval> has these 4 attributes:
 These are the interval endpoint values; C<min> defines the
 I<left|start|from> endpoint and C<max> defines the I<right|end|to>
 endpoint.  The endpoint values conceptually must be of the same,
-totally-ordered type (typically one of C<Int>, C<Rat>, C<Unicode_Text>,
+totally-ordered type (typically one of C<Int>, C<Rat>, C<Text.Unicode>,
 C<TAIInstant>, etc), although strictly speaking they may be of any types at
 all; in the latter case, to actually make practical use of such intervals,
 an C<order-determination> function must explicitly be employed.

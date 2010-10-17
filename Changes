@@ -2,6 +2,48 @@
                                   Changes
 ---------------------------------------------------------------------------
 
+2010-10-16
+
+    * Muldis::D version 0.142.0 is released on CPAN as
+    Muldis-D-0.142.0.tar.gz.
+
+    * This release is another snapshot in the process of externalizing the
+    complexities of character strings, particularly those brought on by the
+    likes of Unicode, from the core.  A larger one will follow soon.
+
+    * (Basics.pod, Types_Catalog.pod, PTMD_STD.pod, HDMD_Perl[6|5]_STD.pod)
+    Simplified the low-level type system such that "String" values are now
+    internally repertoire-agnostic, and they now rely on an external
+    context for the interpretation of their elements.  A "String" is now
+    primarily a "List" of 2 elements rather than 3; the middle "element
+    repertoire" element has been removed.  In Basics.pod, updated the "Low
+    Level Type System" pod sub-section with a new description for "String".
+    In Types_Catalog.pod, updated the descriptions of the 4 "String" proper
+    subtypes.  In all 3 STD.pod, updated the "List" literal code examples.
+
+    * (Types.pod, Types_Catalog.pod, Basics.pod)  Renamed the 3 core types
+    "Minimal_Text", "MCPString", "Unicode_Text to "CoreText", "CCPString",
+    "Text.Unicode" respectively.
+    Also redefined the "CoreText" type to match ASCII rather than Base64.
+
+    * (Types_Catalog.pod)  Updated the "Package" catalog type to add a
+    constraint that all of the "Name" and "Comment" typed components of a
+    "Package" value, respectively, must all have text of th same text type.
+
+    * (Types.pod)  Added new type "Text.ASCII" which is a proper
+    subtype of "Text.Unicode" and so the two are comparable, while
+    "CoreText", whose repertoire Text.ASCII shares, isn't comparable.  So
+    users should default to using ASCII over Core when former is supported.
+
+    * (Types.pod)  Added new type "Text.Latin1" which is a proper
+    subtype of "Text.Unicode" as per "Text.ASCII".
+
+    * (PTMD_STD.pod)  In a partial reversal of one aspect of release
+    0.49.0, updated the PTMD_STD grammar for all comma-separated lists so
+    that a trailing comma after the last list item of a nonempty list is
+    now permitted but optional.  This brings syntax parity with one aspect
+    of the Perl language and should make it easier to edit Muldis D code.
+
 2010-10-12
 
     * Muldis::D version 0.141.0 is released on CPAN as
