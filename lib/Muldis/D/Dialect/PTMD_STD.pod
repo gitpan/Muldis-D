@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.143.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.144.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.143.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.144.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -248,7 +248,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.143.0>.
+C<ln_base_authority>; it is typically a character string like C<0.144.0>.
 
 =item C<ln_dialect>
 
@@ -269,12 +269,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.143.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.144.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.143.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.144.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -357,7 +357,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.143.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.144.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -439,7 +439,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.143.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.144.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -448,7 +448,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.143.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.144.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -545,7 +545,7 @@ L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.143.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.144.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -617,7 +617,7 @@ EXPRESSIONS>, L</DEPRECATED - IMPERATIVE INVOCATION ALTERNATE SYNTAX STATEMENTS>
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.143.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.144.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -1174,10 +1174,14 @@ Grammar:
 
     <Int_payload> ::=
           <num_max_col_val> ';' <unspace> <int_body>
+        | <num_radix_mark> <unspace> <int_body>
         | <d_int_body>
 
     <num_max_col_val> ::=
-        <pint_head> | <[bodx]>
+        <pint_head>
+
+    <num_radix_mark> ::=
+        0<[bodx]>
 
     <int_body> ::=
         0 | '-'?<pint_body>
@@ -1189,10 +1193,10 @@ Grammar:
         <pint_head> <pint_tail>?
 
     <pint_head> ::=
-        <[ 1..9 A..Z ]>
+        <[ 1..9 A..Z a..z ]>
 
     <pint_tail> ::=
-        [[_?<[ 0..9 A..Z ]>+]+] ** <splitter>
+        [[_?<[ 0..9 A..Z a..z ]>+]+] ** <splitter>
 
     <d_int_body> ::=
         0 | '-'?<d_pint_body>
@@ -1218,13 +1222,17 @@ be between 2 and 36, and the C<num_max_col_val> says which possible value
 of I<N> to use.  Assuming all C<int_body> column values are between zero
 and I<N>-minus-one, the C<num_max_col_val> contains that I<N>-minus-one.
 So to specify, eg, bases [2,8,10,16], use C<num_max_col_val> of [1,7,9,F].
-Alternately (recommended), use [b,o,d,x] for the common bases [2,8,10,16].
+
+Using a C<num_radix_mark> is a recommended alternative for using a
+C<num_max_col_val> when the former can be used, which is when the
+C<num_max_col_val> would be one of [1,7,9,F]; in those cases, [0b,0o,0d,0x]
+correspond respectively, and the rules for the C<int_body> are the same.
 
 If the C<Int_payload> is a C<d_int_body>, then it is interpreted as a base
 10 integer.
 
 Fundamentally the I<body> part of an C<Int> node consists of a string of
-digits and uppercased (but not lowercased) letters, where each digit
+digits and plain uppercased or lowercased letters, where each digit
 (C<0..9>) represents its own number and each letter (C<A..Z>) represents a
 number in [10..35].  A I<body> may optionally contain underscore characters
 (C<_>), which exist just to help with visual formatting, such as for
@@ -1245,17 +1253,17 @@ appropriately further restricted.
 
 Examples:
 
-    Int:b;11001001 #`binary`#
+    Int:0b11001001 #`binary`#
 
-    o;0 #`octal`#
+    0o0 #`octal`#
 
-    o;644 #`octal`#
+    0o644 #`octal`#
 
     -34 #`decimal`#
 
     42 #`decimal`#
 
-    x;DEADBEEF #`hexadecimal`#
+    0xDEADBEEF #`hexadecimal`#
 
     Z;-HELLOWORLD #`base-36`#
 
@@ -1276,6 +1284,7 @@ Grammar:
 
     <Rat_payload> ::=
           <num_max_col_val> ';' <unspace> <rat_body>
+        | <num_radix_mark> <unspace> <rat_body>
         | <d_rat_body>
 
     <rat_body> ::=
@@ -1294,7 +1303,8 @@ Muldis D C<sys.std.Core.Type.Rat> value as follows:
 
 Fundamentally a C<Rat> node is formatted and interpreted like an C<Int>
 node, and any similarities won't be repeated here.  The differences of
-interpreting a C<Rat_payload> being composed of a C<num_max_col_val> plus
+interpreting a C<Rat_payload> being composed of a C<num_max_col_val>
+or C<num_radix_mark> plus
 C<rat_body> versus the C<Rat_payload> being a C<d_rat_body> are as per the
 corresponding differences of interpreting an C<Int_payload>.  Also
 interpreting a C<NNRat> or C<PRat> is as per a C<NNInt> or C<PInt>.
@@ -1316,7 +1326,7 @@ possrep of the C<Rat> type.
 
 Examples:
 
-    Rat:b;-1.1
+    Rat:0b-1.1
 
     -1.5 #`same val as prev`#
 
@@ -1324,7 +1334,7 @@ Examples:
 
     A;0.0
 
-    x;DEADBEEF.FACE
+    0xDEADBEEF.FACE
 
     Z;0.000AZE
 
@@ -1332,7 +1342,7 @@ Examples:
 
     B;A09B/A
 
-    Rat:b;1011101101*10^-11011
+    Rat:0b1011101101*10^-11011
 
     45207196*10^37
 
@@ -1352,27 +1362,32 @@ Grammar:
         <Blob_payload>
 
     <Blob_payload> ::=
-        <blob_max_col_val> ';' <unspace> <blob_body>
+          <blob_max_col_val> ';' <unspace> <blob_body>
+        | <blob_radix_mark> <unspace> <blob_body>
 
     <blob_max_col_val> ::=
-        <[137Fbox]>
+        <[137F]>
+
+    <blob_radix_mark> ::=
+        0<[box]>
 
     <blob_body> ::=
         '\''
-            <[ 0..9 A..F _ \s ]>*
+            <[ 0..9 A..F a..f _ \s ]>*
         '\''
 
 A C<Blob> node represents a general purpose bit string.  It is interpreted
 as a Muldis D C<sys.std.Core.Type.Blob> value as follows:  Fundamentally
 the I<body> part of a C<Blob> node consists of a delimited string of digits
-and uppercased (but not lowercased) letters, where each digit (C<0..9>)
+and plain uppercased or lowercased letters, where each digit (C<0..9>)
 represents its own number and each letter (C<A..F>) represents a number in
 [10..15]; this string is qualified with a C<blob_max_col_val> character
-(C<[137Fbox]>), similarly to how an C<int_body> is qualified by a
-C<num_max_col_val>.  Each character of the delimited string specifies a
+(C<[137F]>) or a C<blob_radix_mark> (C<[0b,0o,0x]>),
+similarly to how an C<int_body> is qualified by a C<num_max_col_val>
+or C<num_radix_mark>.  Each character of the delimited string specifies a
 sequence of one of [1,2,3,4] bits, depending on whether C<blob_max_col_val>
-is [1|b,3,7|o,F|x].  The I<body> may also contain underscore or whitespace
-characters between the delimiters, to aid formatting; these are
+is [1|0b,3,7|0o,F|0x].  The I<body> may also contain underscore or
+whitespace characters between the delimiters, to aid formatting; these are
 ignored/stripped by the parser, and the I<body> is interpreted as if it
 just consisted of the rest of the delimited string contiguously.  If the
 C<value_kind> of a C<value> node is C<OctetBlob>
@@ -1382,13 +1397,13 @@ is appropriately further restricted.
 
 Examples:
 
-    Blob:b;'00101110100010' #`binary`#
+    Blob:0b'00101110100010' #`binary`#
 
     3;''
 
-    x;'A705E' #`hexadecimal`#
+    0x'A705E' #`hexadecimal`#
 
-    o;'523504376'
+    0o'523504376'
 
 =head2 General Purpose Character String Literals
 
@@ -1412,8 +1427,9 @@ Grammar:
         | '\\c<' [
               [<[ A..Z ]>+] ** ' '
             | [0 | <[ 1..9 ]> <[ 0..9 ]>*]
-            | <[ 1..9 A..Z bodx ]> ';'
-                [0 | <[ 1..9 A..Z ]> <[ 0..9 A..Z ]>*]
+            | <[ 1..9 A..Z a..z ]> ';'
+                [0 | <[ 1..9 A..Z a..z ]> <[ 0..9 A..Z a..z ]>*]
+            | 0<[ bodx ]> [0 | <[ 1..9 A..F a..f ]> <[ 0..9 A..F a..f ]>*]
           ] '>'
 
     <unspace> ::=
@@ -1444,7 +1460,7 @@ language with such a delimited character string literal.
 A C<Text_payload> may contain any literal characters at all, except that
 any literal occurrences of a backslash (C<\>) or single-quote (C<'>) must
 have a leading backslash.  Every run of 1+ literal whitespace or control
-characters, that is not composed just of the C<SPACE> char (C<x;20>), is
+characters, that is not composed just of the C<SPACE> char (C<0x20>), is
 substituted for a single C<SPACE> character by the parser, and the
 C<Text_payload> is interpreted as if the post-substitution string had been
 the original string.  However, if said run of whitespace is immediately
@@ -1475,14 +1491,14 @@ The meanings of the simple escape sequences are:
     Esc | Unicode   | Unicode         | Chr | Literal character used
     Seq | Codepoint | Character Name  | Lit | for when not escaped
     ----+-----------+-----------------+-----+------------------------------
-    \\  | x;5C      | REVERSE SOLIDUS | \   | esc seq lead (aka backslash)
-    \'  | x;27      | APOSTROPHE      | '   | delim Text literals
-    \"  | x;22      | QUOTATION MARK  | "   | delim quoted Name literals
-    \`  | x;60      | GRAVE ACCENT    | `   | delim for code comments
-    \t  | x;9       | CHAR... TAB...  |     | control char horizontal tab
-    \n  | x;A       | LINE FEED (LF)  |     | ctrl char line feed / newline
-    \f  | x;C       | FORM FEED (FF)  |     | control char form feed
-    \r  | x;D       | CARR. RET. (CR) |     | control char carriage return
+    \\  | 0x5C      | REVERSE SOLIDUS | \   | esc seq lead (aka backslash)
+    \'  | 0x27      | APOSTROPHE      | '   | delim Text literals
+    \"  | 0x22      | QUOTATION MARK  | "   | delim quoted Name literals
+    \`  | 0x60      | GRAVE ACCENT    | `   | delim for code comments
+    \t  | 0x9       | CHAR... TAB...  |     | control char horizontal tab
+    \n  | 0xA       | LINE FEED (LF)  |     | ctrl char line feed / newline
+    \f  | 0xC       | FORM FEED (FF)  |     | control char form feed
+    \r  | 0xD       | CARR. RET. (CR) |     | control char carriage return
 
 There is currently just one complex escape sequence, of the format C<<
 \c<...> >>, that supports specifying characters in terms of their Unicode
@@ -1505,7 +1521,7 @@ Examples:
 
     'Perl'
 
-    '\c<LATIN SMALL LETTER OU>\c<x;263A>\c<65>'
+    '\c<LATIN SMALL LETTER OU>\c<0x263A>\c<65>'
 
 A C<non_value_comment> node is strictly not part of the code
 proper; Muldis D code can contain these almost anywhere as metadata for
@@ -1665,8 +1681,8 @@ entities, to resolve to.  So for example, one can just write C<Int> rather
 than C<sys.std.Core.Type.Int>, C<Array> rather than
 C<sys.std.Core.Type.Array."">, C<is_same> rather than
 C<sys.std.Core.Universal.is_same>, C<Tuple.attr> rather than
-C<sys.std.Core.Tuple.attr>, C<fetch_curr_instant> rather than
-C<sys.std.Temporal.Instant.fetch_curr_instant>,
+C<sys.std.Core.Tuple.attr>, C<fetch_trans_instant> rather than
+C<sys.std.Temporal.Instant.fetch_trans_instant>,
 C<array_of.Rat> rather than C<array_of.sys.std.Core.Type.Rat>, and so on.
 In fact, the Muldis D spec itself uses such abbreviations frequently.
 
@@ -2218,6 +2234,7 @@ Grammar:
 
     <count> ::=
           <num_max_col_val> ';' <unspace> <pint_body>
+        | <num_radix_mark> <unspace> <pint_body>
         | <d_pint_body>
 
     <bag_payload_repeated_values> ::=
@@ -2763,8 +2780,11 @@ Grammar:
     <nonempty_function_body> ::=
         '{' <ws>?
             [[<with_clause> | <named_expr>] <ws>]*
-            <expr>
+            <result_expr>
         <ws>? '}'
+
+    <result_expr> ::=
+        <expr>
 
 A C<function> node specifies a new function that lives in a depot or
 subdepot.  A C<function> node in the PTMD_STD grammar corresponds directly
@@ -2887,7 +2907,7 @@ Examples:
         with function gcd (NNInt <-- a : NNInt, b : NNInt) {
             b = 0 ?? a !! rtn( a => b, b => a mod b round Down )
         }
-        gcd ::= nlx.lib.gcd( =>a, =>b )
+        let gcd ::= nlx.lib.gcd( =>a, =>b )
         a := a div gcd round Down
         b := b div gcd round Down
     }
@@ -3174,7 +3194,7 @@ Examples:
 
     procedure print_curr_time () [
         var now : Instant
-        fetch_curr_instant( &now )
+        fetch_trans_instant( &now )
         var message : Text
         {
             message := 'The current time is: '
@@ -3767,7 +3787,7 @@ Examples:
 
     stimulus-response-rule bootstrap {
         when after-mount
-        invoke main
+        invoke nlx.lib.main
     }
 
 =head1 GENERIC VALUE EXPRESSIONS
@@ -3796,7 +3816,7 @@ Grammar:
         <lex_entity_name>
 
     <named_expr> ::=
-        <expr_name> <ws> <infix_bind_op> <ws> <expr>
+        [let <ws>]? <expr_name> <ws> <infix_bind_op> <ws> <expr>
 
 An C<expr> node is the general case of a Muldis D value expression tree
 (which normally denotes a Muldis D value selector), which must be composed
@@ -3857,7 +3877,7 @@ Examples:
     foo_expr
 
     #`a named_expr node`#
-    bar_expr ::= factorial( foo_expr )
+    let bar_expr ::= factorial( foo_expr )
 
 =head2 Generic Expression Attribute Accessors
 
@@ -4292,7 +4312,7 @@ Grammar:
         <Name_payload>
 
     <named_stmt> ::=
-        <stmt_name> <ws> <infix_bind_op> <ws> <proc_stmt>
+        [let <ws>]? <stmt_name> <ws> <infix_bind_op> <ws> <proc_stmt>
 
 A C<proc_stmt> node is the general case of a Muldis D statement tree, which
 must be composed beneath a C<depot>, or specifically into a procedure
@@ -4332,7 +4352,7 @@ Examples:
     foo_stmt
 
     #`a named_stmt node`#
-    bar_stmt ::= nlx.lib.swap( &=>first, &=>second )
+    let bar_stmt ::= nlx.lib.swap( &=>first, &=>second )
 
 =head2 Generic Compound Statements
 
@@ -4548,7 +4568,7 @@ is used to define tuples of 4 different C<StmtNodeSet> attributes.
 
 Examples:
 
-    fetch_curr_instant( &now )
+    fetch_trans_instant( &now )
 
     prompt_Text_line( &name, 'Enter a person\'s name: ' )
 
@@ -4752,7 +4772,7 @@ for nonatomic "foreach" then Muldis D may gain this feature in the future.
 
 Examples:
 
-    lookup_person ::= loop [
+    let lookup_person ::= loop [
         prompt_Text_line( &name, 'Enter a name to search for: ' )
         given name when '' leave lookup_person
         nlx.lib.do_search( =>name, &=>not_found, &=>report_text )
@@ -4960,7 +4980,7 @@ Examples:
 
     Same [<=>] Increase [<=>] Decrease
 
-    x;'DEAD' ~ b;'10001101' ~ x;'BEEF'
+    0x'DEAD' ~ 0b'10001101' ~ 0x'BEEF'
 
     'hello' ~ ' ' ~ 'world'
 
@@ -5218,7 +5238,7 @@ Examples:
 
     9.2 - 0.1
 
-    b;101.01 / b;11.0
+    0b101.01 / 0b11.0
 
     '-' ~# 80
 
@@ -5432,6 +5452,7 @@ Grammar:
 
     <index> ::=
           <num_max_col_val> ';' <unspace> <nnint_body>
+        | <num_radix_mark> <unspace> <nnint_body>
         | <d_nnint_body>
 
     <pcf_ary_slice_op_invo> ::=

@@ -9,7 +9,7 @@ Muldis D general purpose data types
 
 =head1 VERSION
 
-This document is Muldis::D::Core::Types version 0.143.0.
+This document is Muldis::D::Core::Types version 0.144.0.
 
 =head1 PREFACE
 
@@ -258,8 +258,9 @@ type of the entire Muldis D type system, and contains every value that can
 possibly exist.  Every other (non-aliased) type is implicitly a proper
 subtype of C<Universal>, and C<Universal> is implicitly a union type over
 all other types.  Its default value is C<Bool:False>.  The cardinality of
-this type is infinity.  Considering the low-level type system, C<Universal>
-is conceptually the union type of just the 2 types C<Int> and C<List>.
+this type is infinity.  C<Universal> is the nullary-domain-intersection
+type.  Considering the low-level type system, C<Universal> is the
+domain-union type of just the 2 types C<Int> and C<List>.
 
 =head2 sys.std.Core.Type.Empty
 
@@ -268,8 +269,9 @@ the entire Muldis D type system, and is the only type that contains exactly
 zero values.  Every other (non-aliased) type is implicitly a proper
 supertype of C<Empty> and C<Empty> is implicitly an intersection type over
 all other types.  It has no default value.  The cardinality of this type is
-zero.  Considering the low-level type system, C<Empty> is
-conceptually the intersection type of just the 2 types C<Int> and C<List>.
+zero.  C<Empty> is the nullary-domain-union type.  Considering the
+low-level type system, C<Empty> is the domain-intersection type of just the
+2 types C<Int> and C<List>.
 
 =head1 GENERIC MIXIN DATA TYPES
 
@@ -622,7 +624,7 @@ ordering of C<Text> is officially implementation-defined and unstable.  The
 official way to have character string types that naturally sort in a way
 that is correct for some particular nationality is by having a disjoint
 C<Textual>-composing type with a C<Text>-typed possrep attribute and the
-wrapper type would define the desired ordering algorithm itself. 
+wrapper type would define the desired ordering algorithm itself.
 Similarly, any concept of nationality-specific graphemes is best expressed
 in a wrapper.  C<Text> is more agnostic and generic in these matters.
 It is likely each implementation will make C<maximal_chars> resemble the
@@ -637,7 +639,7 @@ Maybe we need to formally define what higher ranges HKSCS/etc map to.>
 C<Text.Unicode> is a proper subtype of C<Text> where all member values have
 just the abstract characters in the character repertoire of the Unicode
 standard version 6.0.0; the integer codepoint space that Unicode reserves
-for itself is 0..x;10FFFF, of which it currently has about 10% allocated.
+for itself is 0..0x10FFFF, of which it currently has about 10% allocated.
 C<Text.Unicode> adds the 1 system-defined possrep named C<unicode_codes>
 which consists of 1 C<String>-typed attribute whose name is the empty
 string; each element of C<unicode_codes> represents a Unicode standard
@@ -648,7 +650,9 @@ strings with the same graphemes in different such formats will compare as
 unequal.  C<Text.Unicode> also adds the 1 system-defined possrep named
 C<unicode_utf8_octets> which consists of 1 C<OString>-typed attribute whose
 name is the empty string; C<unicode_utf8_octets> represents each codepoint
-as a sequence of 1..3 octets in the UTF-8 encoding.
+as a sequence of 1..4 octets in the UTF-8 encoding; the number of octets
+used varies by codepoint as follows: 1 for 0x0..0x7F, 2 for 0x80..0x7FF,
+3 for 0x800..0xFFFF, 4 for 0x10000..0x10FFFF.
 
 =head2 sys.std.Core.Type.Text.Unicode.Canon
 
