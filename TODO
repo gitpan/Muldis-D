@@ -41,6 +41,258 @@ implementations over multiple SQL DBMSs.  Curr est late 2011.
 
 ----------
 
+* Add references to or adoptions of ISO/IEC 11404:2007(E) "Information
+technology -- General-Purpose Datatypes (GPD)" which could be very useful.
+
+* ZEROTH PRIORITY...
+Make the system catalog into something much closer to a *concrete* syntax
+tree-like-thing.  See various following TODO items for details.
+Mostly do this as its own spec release with minimal dialect/etc/other chgs,
+that is, dialect changes to fill in new slots not needed, but anything the
+catalog would break could be altered.
+
+* FIRST PRIORITY...
+Reduce the general options for concrete value literals to have just the
+simple ones.  For any given "x:y:z", remove all "y" but for Scalar where it
+is necessary; people can wrap a literal in an explicit TREAT assertion/etc
+otherwise if they really want to.  Also remove all "x" where possible, so
+just the plain "z" is the only option, in general.  So then, to write an
+integer/rat/text literal, the only option then is to say "42/3.25/'hello'";
+you can't say "Int:42/Rat:3.25/Text:'hello'" any more.  So cascade these
+simplifications, and we also free up the ":" mostly for other uses.  This
+particularly applies to PTMD_STD, but we'll also simply the Perl-STDs where
+possible, which is easier in Perl 6.
+Unlike "[$|%|@]:..." for generic value literals, only %|@ without the colon
+are in use, I believe, as prefix operators, meaning cast-tuple-as-relation
+and vice-versa, but there is no colon-less $ prefix in use nor does it make
+sense for any similar purpose.
+So, use $ for name literals, that is, "$foo" means "Name:foo"
+and then say "$<>foo" means "NameChain:foo".
+And then we're a long way towards being able to ditch the postcircumfix
+syntaxes for eg projection since, say "r keep {$foo,$bar}" is terse enough.
+Then come up with something for rename, maybe a set of name-pair literals.
+After this, keep postcircumfixes rare and common, like for array elements.
+In fact, we could just say foo[x] and bar{x} are then array/dict lookups.
+Or the dotted forms are elem lookups and no dots are for slices, like Perl.
+And then "<expr>.attr" is then its own thing rather than being a shorthand
+for "<expr>.{attr}" although it may still be a function shorthand.
+
+* ALSO...
+Get rid of the Set.new() options in Perl 6 and generally update the
+Perl-STDs to use just Array/Seq/arrayref and mostly not set/bag/hash/etc,
+partly for code brevity but particularly to preserve the visual order of
+elements from source to catalog and back again.  Also add scm_vis_ord to
+the catalog or change some catalog types to record order.
+
+* Maybe also but probably not yet be concerned w comments in Perl-STD/etc.
+
+* NEXT PRIORITY...
+Reformat all declarations, materials/subdepots particularly, to be of the
+format "name ::= kind ..." rather than "kind name ...".  Similarly, we may
+be able to just nix the "subdepot" keyword so a subdepot is then declared
+as just "foo ::= {...}", and a material as "foo ::= kind ...".
+So the name on the left of the ::= is no longer part of the material node
+itself but rather is part of the larger thing into which the material node
+is composed; the material node is now just eg ['function', <payload>].
+Material nodes themselves just declare anonymous entities.
+
+* Example of function in Perl with context ...
+The FunctionSet tuple:
+    ['cube','opt comment of FunctionSet',<Function>]
+The Function tuple:
+    ['opt comment of Function',<heading>,<body>]
+... and so on.  The comments are first so they're like leading comments
+as is common with whole-routine definitions and such, and they tend to be
+terser besides.
+
+* ALSO...
+Change function bodies from {...} to (...).  And make "..." expr/stmt kind.
+
+* Likewise make a code comment a stmt/expr kind or otherwise provide for
+specifying where it goes visually in code in a statement position.
+Consider reworking scm_vis_ord to be external for some things it describes,
+eg mapping an order to a declared name.  In fact, if this is done, then it
+becomes much easier to add/remove/reorder code pieces because their
+sequence numbers are stored separately and so code diffs on the system
+catalog itself may not show much in the way of spurrious diffs, especially
+if the mapping is simply an array_of.Name.
+Consider pulling out code comments in a similar fashion, just putting them
+as their own named (as stmts/etc are named) code bits, which are then
+associated by name with other code bits, and are listed in the vis-ord too.
+In fact, then where comments are physically visible and what things they
+are semantically connected to are then not joined at the hip.
+The comment names are optionally user-specifiable too, like with statemnts.
+For example:
+    cmt_on_x ::= `This roxors!`;
+... or:
+    comment cmt_on_x ::= `This roxors!`;
+... and other details still to fill in like saying what it applies to.
+Maybe a new infix-op-bind-like syntax will fit the bill for association.
+Also make blank code lines or visual dividing lines recordable in syscat.
+
+* ALSO...
+Use colons to separate any kind of heading/body pairs, both materials and
+values.  Take Relation now "@:[...]:{...}" as example to follow.
+Also, routines now "function (...): (...)" or "updater (...): {...}" or
+"procedure (...): [...]"; this for routines is inspired by Python.  This
+then opens the door for routine body bounding chars to be opt sometimes,
+and makes clearer where a heading ends and a body starts when there are
+various extra heading clauses such as is-x or implements x.  Also consider
+using ":" in other places where pairs are, maybe freeing up => for
+something more specific; eg Python uses ":" in dicts rather than =>; or do
+the opposite; keep "=>" for named param/attr/etc lists and use the ":" for
+things like Bag literals or generic dicts that are binary relations ... use
+one for atvl:atvl (bags/dicts), other for atnm:atvl (tuples, arg-lists).
+Also consider using "::" for something, maybe type conversion, as Pg does.
+Keep "::=" as for explicitly associating names with what they are naming.
+
+* Have ";" as separator (opt lead or term) for both statements/vars/exprs
+etc as well as whole materials.  This also comes together nicely for the
+simpler routines that don't need to have bounders because they are just
+single statements or expressions, for example:
+    cube ::= function (Int <-- topic : Int) :
+        topic ^ 3;
+... and that's it.
+
+* Remove the "var" and "attr" keywords or make them optional noisewords.
+Simply having "foo : bar" in a procedure statement position should be
+enough to know it is a variable declaration.
+Likewise, "foo : bar" in a sca/tup/rel typedef can be known an attr def.
+Then, other things can gain optional noisewords, such as "result" before
+the type in function sigs, or "param" before a param in routine sigs,
+or "expr" or "stmt" optionally before those things in a routine, etc.
+
+* Update system catalog, if necessary, to support specifying where a named
+expression, or a variable declaration, lives visually in a statement list.
+
+* THIRD PRIORITY...
+Add support for material and parameter synonyms.  And change what params
+any positional arguments implicitly go with from topic|other to 0|1|...
+But don't actually change any routines/params until later, except adding
+0|1 to all topic|other.
+
+* Update the array-specific postcircumfix concrete syntaxes to make them
+more generic such that the array index/es (what's inside the "[]") may be
+any arbitrary value expression rather than having to be an integer or
+interval literal.  But if nothing else changes, this means the slice will
+have to be spelled like "ary[{x..y}]" rather than "ary[x..y]", but
+individual element access like "ary.[x]" will still work.  But now you can
+actually have the x,y variables rather than those having to be constants.
+
+* Consider taking a more Perl 6 like approach by turning ".." and its 3
+friends into infix dyadic functions that take endpoint values and result in
+interval values.  Then the surrounding curly braces are no longer needed,
+and you can once again say "ary[x..y]".  Note that if ppl still want/need
+delimiters for an interval, they can always use parens, like "(x..y)".
+If we also redefine an MPInterval to be a set_of.SPInterval, then any
+{x..y} would unambiguously mean either a set or MPInterval, but we may then
+lose the shorthand "x" meaning "x..x", but this could be ok tradeoff.
+
+* Consider also making the likes of "," and "=>" into dyadic functions
+along the lines of Perl 6, though this would have further consequences.
+
+* Demote the numeric operators that are more statistics-oriented from the
+language core into a new Statistics extension or some such.  Specifically
+this means these 5 in [Numeric|Rational|Integer]: range, frac_mean, median,
+frac_mean_of_median, mode; and these 2 in Integer: whole_mean,
+whole_mean_of_median.  Also, this "mean" is "arithmetic mean" (division of
+sum); there is also "geometric mean" (root of product), etc.  After the
+demotion, this set of ops can be changed or expanded to be something more
+appropriate for statistical applications; some yet-missing SQL-standard
+functions like pop-etc can then come in also.  Now these core-removed
+functions are just shorthands for not-too-complicated expressions that
+users can define for themselves with core ops, so they're not really
+missing anything important if they only get the core.
+For example, the current (arithmetic) mean is just:
+    arith_mean ::= function (Rat <-- topic : bag_of.Rat)
+        ([+]topic / #+topic)
+... and geometric mean is something like:
+    geom_mean ::= function (PRat <-- topic : bag_of.PRat)
+        ([*]topic ** (0 - #+topic))
+... but any vers in the dedic Statistics could be impl more efficiently.
+
+* Drop special entity name embedded support for inline type declarations
+like "foobag : bag_of.Foo"/etc; instead, this syntax is demoted to a
+dialect-specific thing that is just sugar for something like "foobag :
+relation-type Bar { attr value : Foo, attr count : PInt, primary-key {
+value } }".  That way, we can always point to a specific material that
+actually exists when asked what is the declared type of "foobag", and also
+we are psychologically more free to just declare things as relation types
+anyway, and the added flexibility that comes with that, such as in the
+definition of the system catalog itself, and also then the concept of an
+entity name chain is no longer overloaded.
+
+* Generalize the Set/Array/Bag/Maybe-specific operators so that: 1. the
+names of the value/index/count attributes can be specified with arguments
+(that are optional, and default to the current ones if not given); 2. they
+work with relations of arbitrary degree.  For example, merge the Counted
+extension into Bag and call it Counted, and generalize Array into Ranked
+("Ordered" is already taken and best left as is) which also absorbs the
+ranking and quota functions from Relation.pod, and generalize Set into
+Relation.  The Counted|Bag is then any 1+ degree relation with a
+positive-integer typed attribute C that has a key (or superkey) on all of
+the attributes except for C; it is treated as special by the functions,
+which are analogies to general relational functions that work as normal on
+all attributes but C and merge C.  The Array|Ranked is then any 1+ degree
+relation with a nonnegative-integer typed attribute I that has a key on I
+and is further constrained that "max(r{I})+1 = #r"; I is treated as special
+by the functions.  The Maybe is then any relation with a nullary key.  With
+these generalizations, some concrete syntax like .[N] will just compile
+into special cases such as assuming certain special attribute names, and
+you can use the foo() syntax when that isn't the case.  After these
+generalizations, some Counted|Array|Maybe|etc functions can be core and
+others can be pushed into extensions, as is appropriate.  After these
+generalizations, we may or may not still have named Array|Bag|etc types,
+which will probably keep their definitions, as special cases of the
+generalized where the attribute names match the canonical ones.  Also
+rename "index" to "rank" in Array perhaps.  After the
+generalizations, the distinct usefulness of Set would decrease somewhat.
+Note: For a generalization of Maybe, consider the Zoo name, inspired by
+Database Explorations that discusses MD's canonical missing info solution,
+or alternately call it C01 in the spirit of D0C0/D0C1/D0.
+Still in question is what if anything to change about [S|M]PInterval/etc.
+
+* Add official support for functions/expressions to be able to do some
+things that they otherwise couldn't, such as have side-effects or be
+quasi-non-deterministic.  To be specific, add support for side-effects that
+occur external to the current in-DBMS process, such as output via some
+side-channel like STDERR or a message queue, which can be used for
+debugging a function.  But any such functionality can't directly affect the
+current process, and in particular it can't affect the
+function/expression's result value.  On the other hand, it is acceptable
+for something to cause the function/expression to abort with a thrown
+exception, since this isn't changing the result value.  There should be
+metadata for any function which does or might do something like this, to
+declare the fact.  In addition, we could support a limited form of
+non-determinism, such as allowing a rand() or now() function that does
+affect the calling function/expression's result, but that this is
+constrained to be mutually deterministic within the whole of a single
+Muldis D multi-update-statement.  That is, given the same arguments (or
+none), now() would always return the same value within a
+multi-update-statement, and might only change between different
+multi-update-statements, and rand() likewise.  This might also give some
+support for partial-sort functions, as long as they are consistent within
+multiple calls in the same multi-update-statement.  Once again, such things
+would need to be tagged with metadata.  Normal deterministic functions
+always have the same result no matter how far apart.
+
+* Make autonomous transactions / in-DBMS processes not so much startable
+directly by a process but rather that the kernal/etc process always does it
+directly and any other process asks to have such done by sending a message
+to the kernal.  Similarly, DBMS-clients just become message passers, and
+they start a process the same way as internally, by sending a message to
+the kernal/etc to please call this procedure for me, and the result to the
+client is also a message.  This also generalizes the stateful/stateless
+thing and streaming/cursor or not thing.  Now also tied into this is
+stimulus-response-rules, in that all stimuli are messages.  The kernal can
+also initiate messages, such as this depot did mount, or whatever.
+
+* Consider relaxing the restriction of how much of a depot must be defined
+just in terms of itself.  So, for example, only a depot's data types (and
+dbvar) must be defined wholly internally to the depot.  But any routines in
+a depot may invoke routines outside of the depot if the former aren't used
+in the definition of a data type or dbvar.
+
 * Consider adding some way of generating a type specification from a value
 of that type and consider having something like a system catalog which
 describes the actual database value rather than a prescribed database type,
@@ -97,6 +349,147 @@ you would conceptually put an entire potentially large program in one.
 
 * Update STDIO.pod and Cast.pod concerning the Text types split.
 
+* PACKAGE:
+- Support variant of "<[ a..z A..Z _ ]><[ a..z A..Z 0..9 _ - ]>*" nonquoted
+name strs that's more liberal "<[ a..z A..Z 0..9 _ - ]>+" for just atnms,
+possrep names, param and arg names, so any of "-foo", "3", "-4" can be bw.
+- Update system catalog and grammars to add lightweight aliasing support
+for whole materials, as a new "synonym" (name?) material.  These have no
+mutual order but the actual non-synonym target is the "primary" name.
+Grammar can be "synonym foo of nlx.lib.bar" et al in general form, or
+"function foo|bar|baz (...) {...}" where original is the first one "foo"
+and the other synonyms all live in the same subdepot, and in particular the
+others are "not" inner materials of "foo".
+- Also add [Integer, Rational, Boolean], make [Int,Rat,Bool] into synonyms.
+- Likewise (and necessarily), subdepots themselves can have synonyms.
+- Also update tuple (and by extension) database types to add attribute
+synonyms which semantically are lightweight virtual attribute maps that
+simply make 2 attributes always-identical so only one ever needs storing
+and no map function is required.  Not the same as material/sdp synonyms.
+- Update system catalog and grammars to add support for routine parameter
+aliases, built-in to the definitions of the routines; all names for a param
+are defined in an array, that ordering being source-code-metadata, and the
+first item in the list being the "primary" name.
+Grammar can be "function foo (Int <-- topic|0 : Int, other|1 : Int) {...}".
+This is not supported for param names in generic expr context except for
+the shorthand "=>foo", so "=>1 is allowed".
+- Change grammar so any number positionals supported for both s-d and u-d,
+always map to "0","1".."N" and *not* "topic","other".
+Also, any ".foo" now is short for "0.foo" rather than "topic.foo".
+- Consider changing param names of special routines like value-filter etc,
+or at least change any "topic" to "0" (other "1") so it works with ".foo".
+- Update the documented signatures of all system-defined routines to use
+the updated grammars reflecting the above additions.  Add param aliases of
+"0" and "1" for every "topic" and "other" respectively, keeping said old
+names too, and add other aliases as appropriate.  Add routine synonyms for
+every distinct way of spelling a routine that rtn-invo-alt-syn provided, so
+one can then always use that spelling in "foo(...)" plain-rtn-inv syntax;
+update all routine docs so that the "also known as" comments no longer
+mention any declared synonyms, no longer mention anything as "C<foo>" but
+rather just anything as "I<foo>".
+- Just stick to that, basically, leave anything else such as Unicode or
+rtn-invo-alt-syn alone/not-removed for this release.
+
+* Make the fully qualified language names declarable by code to be more
+flexible than the names declared by the language spec itself, so that the
+ones in code can specify multiple language versions that they conform to,
+as if the code is declaring that it only uses the parts of the language
+spec that are unchanged or that intersect between all the specified
+versions.  For example, let one say:
+    Muldis_D:"http://muldis.com":{0.112..0.125,0.127..0.136}:PTMD_STD
+... and then any implementation which takes one of those versions will
+parse the code according to any of those same that it supports.  The idea
+is to make code more easily compatible with a wider range of interpreters,
+such as newer ones designed for version 25 who don't explicitly know how
+to emulate version 23 or know what its differences are, and are just
+trusting the code to be valid for version 25 even if declaring 23; by the
+code declaring a range, it is declaring it is willing to take its chances.
+- A multiplicity of stated authorities is also possible.
+- A number of consequences still have to be thought out here.
+- Specifying a closed range is the code saying it *knows* it is compatible
+with all those versions, specifying an open range says take chances or is
+not recommended and maybe won't be supported.
+
+* Consider adding a midweight version of virtual-attribute-maps which is
+like the fullweight version but that it expressly maps 1 attr to 1 attr; it
+still uses a map function but that is no longer Tuple<--Tuple.
+
+* Demote the "[array|set|etc]_of" types from a special concept knowable by
+the backend (and explained in Basics.pod), where you can essentially use
+some data types without them being declared as system catalog materials, so
+that instead actual s-c materials *are* required; this syntax will remain
+only as a dialect feature which is a shorthand for inline type definitions;
+eg, these are now all equivalent:
+    - param : set_of.Foo
+    - param : relation-type { over tuple-type T { value : Foo } }
+    - param : set-type over Foo
+... or we might consider more material kinds specif to [set|array|etc]-type
+so to help preserve the user's syntax and be more compact, maybe, but those
+6 or so could probably be repr by single m-k which has an enum type attr.
+Also thanks to the change about replacing N-adic with dyadic s-d routines,
+and its precedent, there is less need for "foo_of" shorthands anyway.
+
+* Externalize all the details of character string repertoires or encodings
+from the Muldis D core, such that say all the details of Unicode become
+part of a Muldis D extension instead, and maybe ASCII likewise.
+More plans pending.
+
+* Considering the following items where non-ASCII chars are much more
+pervasive (though strictly optional), replace the "op_char_repertoire"
+pragma with a pragma that affects all non-quoted code in general, including
+all nonquoted (but not quoted) entity names.  The options would be, at
+least, the 3: ASCII, Unicode_6.0.0_canon, Unicode_6.0.0_compat.  There
+would separately be options for each kind of quoted character string:
+quoted entity names, texts, comments; see later TODO item about this; as
+per that, all of these could be part of a single pragma.  A simpler
+implementation could support only ASCII across the board as literal
+characters, while non-ASCII data could be supported as escape sequences.
+
+* Enhance the cat-type/syntax for defining tuple types as attr lists (and
+by extension, relations and scalar possreps) to let users provide an
+optional hint for the order that tuple/sca-pr/etc attributes should be
+consulted when doing an equality test between 2 tuples/etc so to direct the
+DBMS to do the least expensive comparisons first, eg integer attributes,
+prior to more expensive ones, eg blob attributes; since the test
+short-circuits, and assuming the vast majority of compares would return
+false, this should aid performance in a clean way without users resorting
+to overload operators or something for performance reasons.  This is a
+separate hint from that garnered by marking relation attrs as key attrs,
+and could work within that eg to suggest order within multi-attr keys.
+Other areas in the language could probably be assisted by hints also.
+
+* Update the PTMD_STD grammar to split up the "Name_payload" or its parts
+further so that, rather than just the 2 "[|non]quoted_name_str", there is
+at least the additional "nonquoted_rtn_invo_name_str" which is only allowed
+to be used in a routine invocation context like <op><unspace>(...), with
+trailing parenthesis, and not in a context lacking trailing parenthesis.  A
+"nonquoted_rtn_invo_name_str" is a nonquoted string containing no
+whitespace and, in addition to all the chars nonquoted_name_str allows,
+also many other symbolic chars such that wouldn't confuse the parser, so
+bracketing chars would likely be disallowed, at least as leading or
+trailing characters in the string, and trailing colon could be disallowed,
+and leading comma or leading => etc.  The idea here is that people can then
+write "+(foo,bar)" for addition or "++(foo)" for increment, or "=(foo,bar)"
+for comparison, "@(t)" or "%(r)", or ":=(target,value)" for assign.
+In this case, if infix ops are allowed, they'd have to have mandatory
+surrounding whitespace.
+We also generally have to revisit Unicode for what is allowed in bareword
+variable/etc names such as non-Latin or accented letters in general.  The
+parser would have to use Unicode character classes in its definitions,
+then.  Look at what Perl 6 does for some guidance.
+As per another change, also assume that the idea of the internal catalog
+no longer using Unicode for sys-def entity names is no longer true.
+So Muldis D would then much more be Polish notation (with parens) by
+default, and it should be much easier to just use the whole language that
+way when it is more terse like this.  Supporting polish without parens
+would be up to rtn-inv-alt-syn replacemnts while above is in plain-rtn-inv.
+See also the 2nd(+?) next TODO item on splitting rtn-inv-alt-syn.
+Also add yet another nonquoted...name_str that is just for use with
+attribute/param/arg names and is only slightly less restrictive than the
+old nonquoted_name_str in that it also allows strings of just or leading
+digit chars; this is mainly so one can write positional params wo quotes.
+Maybe just this last one can be added ASAP, and the other wait longer.
+
 * Consider creating a branch of the Muldis D spec (and of the Muldis D
 Manual) which retains all of the current spec features, and subsequently
 strip out the whole rtn_inv_alt_syn catalog abstraction level in trunk so
@@ -151,6 +544,20 @@ inputs hard-coded, such as the attr names or interval-endpoint-flags,
 versus those taking variables in the the more verbose generic syntaxes.
 Presumably all levels higher than rtn_inv_pcfx_alt_syn are plain infix
 or paren-less prefix with fully-variable arguments like generic functions.
+
+* Maybe this isn't feasible, but ...
+Consider formally making every function map 1:1 from a tuple input to a
+tuple output; it declares exactly 1 parameter that is a tuple type and its
+result declared type is a tuple type.  Consider making every updater
+formally do something analogous, such as having exactly 2 tuple-typed
+parameters where only 1 is subject-to-update.  A recipe is like that but
+has 4 tuple-typed parameters, 2 like updater and 2 global alias analogies.
+A virtual attribute map kind of resembles this already.
+Doing this would require making tuple attribute accessors special, their
+own expression/etc node kind and not just a function ... though they kind
+of are already as an alternative; also, variable assignment would have to
+be a special node kind and not just an updater; in both cases, to save
+their definitions from being mutually recursive.
 
 ----------
 
@@ -440,6 +847,44 @@ As for ASCII vs Unicode etc, that preference is never encoded in the system
 catalog, so when code would be generated from the system catalog, it would
 be up to the generator's configuration for which versions are used.
 
+* Add hyper-meta in a more general fashion, as per the Ranked general type
+of which Array is a more specific kind.  The hyper-meta is fundamentally
+associated with the join operator, because it typically involves taking 2
+relations, joining them on one set of same-named attrs (exactly 1 usually),
+and then taking another set of *same-named* attrs and applying the hypered
+op pairwise and deriving a single replacement set of those attrs with the
+results.  The argument attrs would be renamed distinct first.  For example,
+given 2 relations A{key,value,x} and B{key,value,y}, where we assume that
+"key" is a unary key of each relation, the expression
+"A >>+<< B" is roughly like this code:
+  with (
+    a ::= A{%others_a<-!key,value}{value_a<-value}
+    b ::= B{%others_b<-!key,value}{value_b<-value}
+    ab ::= a join b
+    f ::= function (Tuple <-- t : Tuple) {
+      %{ value => t.value_a + t.value_b }
+    }
+    fr ::= extension( ab, <nlx.lib.f> ){!value_a,value_b}
+  )
+  fr{<-%others_a}{<-%others_b}
+And the result is a relation with heading {key,value,x,y} but of course
+with the more typical case the inputs and output are just {key,value}, in
+which case that simplifies to:
+  with (
+    a ::= A{value_a<-value}
+    b ::= B{value_b<-value}
+    ab ::= a join b
+    f ::= function (Tuple <-- t : Tuple) {
+      %{ value => t.value_a + t.value_b }
+    }
+    fr ::= extension( ab, <nlx.lib.f> ){!value_a,value_b}
+  )
+  fr
+A variant taking a relation and a tuple would be like the >>+>> /etc form.
+We might have variants for join vs union etc or generalize this further so
+that bag/counted variants of relational ops can be defined using this
+generalized hyper in combination with the regular relational ops, maybe.
+
 * About extra metadata in the system catalog for functions/etc, see
 http://www.postgresql.org/docs/9/static/extend.html for some ideas, such
 as 35.13.x on Pg's use of COMMUTATOR and NEGATOR where function pairs
@@ -448,6 +893,23 @@ declare their complement operator.  The first pairs up "<" and ">" say (and
 
 * Note that Pg exts are like Muldis D system modules in what they do, such
 as that they add types and routines etc to the language.
+
+* Change multi-update to be a sequence of statements rather than a set, and
+explicitly allow the same target to be used more than once ... this could
+be the case anyway thanks to virtual relvars etc.
+
+* Move or adapt more Text functions into Stringy.
+- Fundamentally all Stringy funcs work on Text in terms of the
+"maximal_chars" possrep; this will just work correctly for when all
+func args are of the same Text subtype, such as Canon etc.
+- The Stringy/Text ops are analogous to Rational ops such that it is like
+doing fraction math.  catenation() is like sum(), replication() is like
+multiply, a substring test is related to difference/subtract (maybe "?~"
+and "!~" might work as infix ops for something?).
+- Move cat_with_sep to Stringy; semantics are clear cut and generalizable.
+- has_substr ought to work with Stringy no problem from the Text and Array
+perspectives, but Blob presents an issue purely concerning bit alignment,
+such as whether we're searching on bits or on octet/etc alignments.
 
 ----------
 
@@ -653,6 +1115,18 @@ Maybe the type name 'Span' or 'SpanSet' can be used for something;
 there are Perl modules with those names concerning date ranges.
 Input is welcome as to what interval-savvy functions Muldis D should have.
 
+* Flesh out some window/partition funcs, which are kind of like a
+generalization of aggregation/reduction functions.  A window()/partition()
+wrapper func is like the summary() wrapper func but it has the same number
+of output tuples as input ones; when wrapping an agg/reduc func, all output
+tuples have the same value per tuple in the same group; when wrapping a
+window/partition-oriented func, such as rank(), each tuple in the group
+gets or can get a different value.
+See these:
+- http://www.postgresql.org/docs/9.0/interactive/tutorial-window.html
+- http://www.postgresql.org/docs/9.0/interactive/functions-window.html
+- http://www.postgresql.org/docs/9.0/interactive/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS
+
 * IN PROGRESS ...
 Add Bool-resulting relational operators EXISTS and FORALL, that provide
 "existential quantification" and "universal quantification" respectively,
@@ -810,6 +1284,23 @@ ident to single-attr accessors (having a ".") but that a list is in the
 braces/brackets; for example: "[x, y] ::= [3, 4]",
 "[a, b] ::= t.{a,b}", "[c, d] ::= ary.[3,5]".  This syntax would
 resolve into multiple single-attr accessors when app in system catalog.
+The assignment variants of the above would naturally fall out the ability
+to have arbitrary expressions on both sides of the ":=", so what you do is
+have an array-valued expression on both sides, eg "[x,y] := [y,x]" works
+because "[...]" is an array literal now.
+We can overload ".[]" for tuples in general so they extract like projection
+but return an array rather than a tuple, so we can then say
+"[a,b] ::= t.[a,b]" or even "t1.[x,y] := t2.[a,b]" to multi-substitute,
+that being a shorthand for "t1.x := t2.a, t1.y := t2.b".  We can't do that
+for general relations though since the array subtype of rel is using it.
+This mechanism also provides a general way for a function to have multiple
+ord retv; eg, "[x,y,z] := foo(...)"; like Perl's "($x,$y,$z) = foo(...)".
+A variable (or subject-to-update parameter), "bar", may be aliased using
+"foo ::= bar" such that "foo" is an expr node, but like all named exprs in
+procedures, "foo" is conceptually reevaluated per mu-statement.
+Ordered tuples can be used instead of arrays, and in fact might be a better
+solution for multiple reasons.  To do this, just say "%:{x,y,z}" rather
+than "[x,y,z]"; the former is shorthand for '%:{"0"=>x,"1"=>y,"2"=>z}'.
 
 * In PTMD_STD, consider loosening the grammar regarding some of the normal
 prefix or postfix or infix operators so that rather than mandating

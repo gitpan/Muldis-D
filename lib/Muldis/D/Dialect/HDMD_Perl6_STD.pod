@@ -9,7 +9,7 @@ How to format Perl 6 Hosted Data Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.147.0.
+This document is Muldis::D::Dialect::HDMD_Perl6_STD version 0.148.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Hosted Data Muldis D> standard
 dialect named C<HDMD_Perl6_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.147.0',
+standard dialect is C<[ 'Muldis_D', 'http://muldis.com', '0.148.0',
 'HDMD_Perl6_STD' ]>.
 
 The C<HDMD_Perl6_STD> dialect is defined to be hosted in Perl 6, and is
@@ -125,7 +125,7 @@ repertoire; it is typically the Perl C<Str> value C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a Perl C<Str> formatted as per
-C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.147.0>.
+C<ln_base_authority>; it is typically a Perl C<Str> value like C<0.148.0>.
 
 =item C<ln_dialect>
 
@@ -158,12 +158,12 @@ each of the value's elements must be one of these 0 Perl C<Str> values.
 
 Examples:
 
-    [ 'Muldis_D', 'http://muldis.com', '0.147.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.148.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended'
     } ]
 
-    [ 'Muldis_D', 'http://muldis.com', '0.147.0', 'HDMD_Perl6_STD', {
+    [ 'Muldis_D', 'http://muldis.com', '0.148.0', 'HDMD_Perl6_STD', {
         catalog_abstraction_level => 'rtn_inv_alt_syn',
         op_char_repertoire => 'extended',
         standard_syntax_extensions => Set.new()
@@ -198,7 +198,7 @@ intended to actually be used.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.147.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.148.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'the_floor',
             op_char_repertoire => 'basic'
         } ],
@@ -258,7 +258,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.147.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.148.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'code_as_data',
             op_char_repertoire => 'basic'
         } ],
@@ -269,7 +269,7 @@ Examples:
     ]
 
     [
-       [ 'Muldis_D', 'http://muldis.com', '0.147.0', 'HDMD_Perl6_STD', {
+       [ 'Muldis_D', 'http://muldis.com', '0.148.0', 'HDMD_Perl6_STD', {
           catalog_abstraction_level => 'code_as_data',
           op_char_repertoire => 'basic'
        } ],
@@ -316,7 +316,7 @@ L</GENERIC VALUE EXPRESSIONS>, L</GENERIC PROCEDURE STATEMENTS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.147.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.148.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'plain_rtn_inv',
             op_char_repertoire => 'basic'
         } ],
@@ -348,7 +348,7 @@ EXPRESSIONS>, L</DEPRECATED - PROCEDURE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 Examples:
 
     [
-        [ 'Muldis_D', 'http://muldis.com', '0.147.0', 'HDMD_Perl6_STD', {
+        [ 'Muldis_D', 'http://muldis.com', '0.148.0', 'HDMD_Perl6_STD', {
             catalog_abstraction_level => 'rtn_inv_alt_syn',
             op_char_repertoire => 'basic'
         } ],
@@ -1349,8 +1349,8 @@ Examples:
         :with[ 'function', 'gcd',
             [ 'NNInt', { a => 'NNInt', b => 'NNInt' } ]
             => [
-                [ '??!!', [ [ 'i-op', '=', [ :d<b>, 0 ] ]
-                    => :d<a> ],
+                [ '??!!', [ 'i-op', '=', [ :d<b>, 0 ] ],
+                    :d<a>,
                     [ 'func-invo', 'rtn', { a => :d<b>,
                         b => [ 'i-op', 'mod', [ :d<a>, :d<b>,
                             :RoundMeth<Down> ] ] } ]
@@ -1680,33 +1680,23 @@ Examples:
 
 =head2 Generic If-Else Expressions
 
-An C<if_else_expr> node has 2-3 ordered elements:  The first element is
+An C<if_else_expr> node has 4 ordered elements:  The first element is
 either of the 2 Perl C<Str> values C<if-else-expr> and C<??!!>.  The
-optional second element is I<if_then>, a Perl C<Seq|Array> with 0..N
-elements, each of those being a 2-element Perl C<Seq|Array> or a Perl Pair,
-where each element is an C<expr> node; the first element / key is an I<if>
-condition expression, and the second element / value is the associated
-I<then> result expression. The 3rd/last element of an C<if_else_expr> node
-is I<else> result expression, which is an C<expr> node.
+second element is the I<if> condition expression; the third and fourth
+elements are the I<then> and I<else> result expressions, respectively;
+every one of the last 3 elements is an C<expr> node.
 
 Examples:
 
-    [ 'if-else-expr',
-        [
-            [ 'i-op', '>', [:d<foo>, 5] ] => :d<bar>,
-        ],
-        :d<baz>
-    ]
+    [ 'if-else-expr', [ 'i-op', '>', [:d<foo>, 5] ], :d<bar>, :d<baz> ]
 
     [ 'if-else-expr',
-        [
-            ['func-invo','is_empty',[:d<ary>]] => :d<empty_result>,
-        ],
+        ['func-invo','is_empty',[:d<ary>]],
+        :d<empty_result>,
         [ 'post-op', '.[]', [:d<ary>, 0] ]
     ]
 
-    [ 'i-op', '~', ['My answer is: ',
-        [ '??!!', [ :d<maybe> => 'yes' ], 'no' ]] ]
+    [ 'i-op', '~', ['My answer is: ', [ '??!!', :d<maybe>, 'yes', 'no' ]] ]
 
 =head2 Generic Given-When-Default Expressions
 
@@ -1811,9 +1801,8 @@ Examples:
 
     :multi-upd-stmt[
         [ '::=', 'order_id', [ '??!!',
-            [
-                [ 'func-invo', 'is_empty', [:d<orders>] ] => 1,
-            ],
+            [ 'func-invo', 'is_empty', [:d<orders>] ],
+            1,
             [ 'post-op', '++', [[ 'func-invo', 'max', [
                 [ 'func-invo', 'Set_from_attr',
                     [:d<orders>], {name => :Name<order_id>} ]
@@ -1892,21 +1881,17 @@ Examples:
 
 =head2 Generic If-Else Statements
 
-An C<if_else_stmt> node has 2-3 ordered elements:  The first element is the
-2 Perl C<Str> value C<if-else-stmt>.  The optional second element is
-I<if_then>, a Perl C<Seq|Array> with 0..N elements, each of those being a
-2-element Perl C<Seq|Array> or a Perl Pair; the first element / key is an
-I<if> condition statement (an C<expr> node), and the second element /
-value is the associated I<then> result statement (a C<proc_stmt> node).
-The optional 3rd/last element of an C<if_else_stmt> node is I<else>
-statement, which is a C<proc_stmt> node.
+An C<if_else_stmt> node has 3-4 ordered elements:  The first element is the
+Perl C<Str> value C<if-else-stmt>.  The second element is the I<if>
+condition expression (an C<expr> node).  The third element is the I<then>
+statement (a C<proc_stmt> node).  The optional fourth/last element is the
+I<else> statement (a C<proc_stmt> node).
 
 Examples:
 
     [ 'if-else-stmt',
-        [
-            :d<out_of_options> => :proc-invo<nlx.lib.give_up>,
-        ],
+        :d<out_of_options>,
+        :proc-invo<nlx.lib.give_up>,
         :proc-invo<nlx.lib.keep_going>
     ]
 
@@ -1962,10 +1947,10 @@ Examples:
             not_found => ['&',:d<not_found>],
             report_text => ['&',:d<report_text>]
         } ],
-        [ 'if-else-stmt', [ :d<not_found> => :compound-stmt[
+        [ 'if-else-stmt', :d<not_found>, :compound-stmt[
             [ 'proc-invo', 'write_Text_line', ['No person matched'] ],
             :iterate<lookup_person>
-        ] ] ],
+        ] ],
         [ 'proc-invo', 'write_Text_line', [ :d<report_text> ] ],
     ] ]
 
@@ -2144,7 +2129,7 @@ node payload that defines an C<sp_interval_of.NNInt>.
 
 Examples:
 
-    [ 'post-op', '.{;}', [:d<birthday>, 'date', 'day'] ]
+    [ 'post-op', '.{:}', [:d<birthday>, 'date', 'day'] ]
 
     [ 'post-op', '.{}', [:d<pt>, 'city'] ]
 
@@ -2152,7 +2137,7 @@ Examples:
 
     [ 'post-op', '{<-}', [:d<pr>, {pnum=>'pno', locale=>'city'}] ]
 
-    [ 'post-op', '{;}', [:d<birthday>, 'date', ['year','month']] ]
+    [ 'post-op', '{:}', [:d<birthday>, 'date', ['year','month']] ]
 
     [ 'post-op', '{}', [:d<pt>, ['color','city']] ]
 
@@ -2162,7 +2147,7 @@ Examples:
 
     [ 'post-op', '{}', [:d<pr>, []] ]  # null projection #
 
-    [ 'post-op', '{;!}', [:d<rnd_rule>, ['round_meth']] ]  # radix,min_exp #
+    [ 'post-op', '{:!}', [:d<rnd_rule>, ['round_meth']] ]  # radix,min_exp #
 
     [ 'post-op', '{!}', [:d<pt>, ['pno','pname','weight']] ]
 

@@ -9,7 +9,7 @@ How to format Plain Text Muldis D
 
 =head1 VERSION
 
-This document is Muldis::D::Dialect::PTMD_STD version 0.147.0.
+This document is Muldis::D::Dialect::PTMD_STD version 0.148.0.
 
 =head1 PREFACE
 
@@ -21,7 +21,7 @@ before you read this one, which provides subservient details.
 
 This document outlines the grammar of the I<Plain Text Muldis D> standard
 dialect named C<PTMD_STD>.  The fully-qualified name of this Muldis D
-standard dialect is C<Muldis_D:"http://muldis.com":0.147.0:PTMD_STD>.
+standard dialect is C<Muldis_D:"http://muldis.com":0.148.0:PTMD_STD>.
 
 This dialect is designed to exactly match the Muldis D system catalog (the
 possible representation of Muldis D code that is visible to or updateable
@@ -249,7 +249,7 @@ it is typically the delimited character string C<http://muldis.com>.
 =item C<ln_base_version_number>
 
 This is the base version number; it is a character string formatted as per
-C<ln_base_authority>; it is typically a character string like C<0.147.0>.
+C<ln_base_authority>; it is typically a character string like C<0.148.0>.
 
 =item C<ln_dialect>
 
@@ -270,12 +270,12 @@ later, which would likely be optional.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.147.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.148.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended
     }
 
-    Muldis_D:"http://muldis.com":0.147.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.148.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => extended,
         standard_syntax_extensions => {}
@@ -358,7 +358,7 @@ any system-defined scalar types not in terms of possreps.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.147.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.148.0:PTMD_STD:{
         catalog_abstraction_level => the_floor,
         op_char_repertoire => basic
     }
@@ -440,7 +440,7 @@ AND SELECTORS>, L</OPAQUE VALUE LITERALS>, L</COLLECTION VALUE SELECTORS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.147.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.148.0:PTMD_STD:{
         catalog_abstraction_level => code_as_data,
         op_char_repertoire => basic
     }
@@ -449,7 +449,7 @@ Examples:
         { food => 'Kiwis', qty => 30 }
     }
 
-    Muldis_D:"http://muldis.com":0.147.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.148.0:PTMD_STD:{
        catalog_abstraction_level => code_as_data,
        op_char_repertoire => basic
     }
@@ -545,7 +545,7 @@ L</GENERIC VALUE EXPRESSIONS>, L</GENERIC PROCEDURE STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.147.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.148.0:PTMD_STD:{
         catalog_abstraction_level => plain_rtn_inv,
         op_char_repertoire => basic
     }
@@ -617,7 +617,7 @@ EXPRESSIONS>, L</DEPRECATED - PROCEDURE INVOCATION ALTERNATE SYNTAX STATEMENTS>.
 
 Examples:
 
-    Muldis_D:"http://muldis.com":0.147.0:PTMD_STD:{
+    Muldis_D:"http://muldis.com":0.148.0:PTMD_STD:{
         catalog_abstraction_level => rtn_inv_alt_syn,
         op_char_repertoire => basic
     }
@@ -1173,7 +1173,7 @@ Grammar:
         <Int_payload>
 
     <Int_payload> ::=
-          <num_max_col_val> ';' <unspace> <int_body>
+          <num_max_col_val> '#' <unspace> <int_body>
         | <num_radix_mark> <unspace> <int_body>
         | <d_int_body>
 
@@ -1265,11 +1265,11 @@ Examples:
 
     0xDEADBEEF #`hexadecimal`#
 
-    Z;-HELLOWORLD #`base-36`#
+    Z#-HELLOWORLD #`base-36`#
 
-    3;301 #`base-4`#
+    3#301 #`base-4`#
 
-    B;A09B #`base-12`#
+    B#A09B #`base-12`#
 
 =head2 General Purpose Rational Numeric Literals
 
@@ -1283,7 +1283,7 @@ Grammar:
         <Rat_payload>
 
     <Rat_payload> ::=
-          <num_max_col_val> ';' <unspace> <rat_body>
+          <num_max_col_val> '#' <unspace> <rat_body>
         | <num_radix_mark> <unspace> <rat_body>
         | <d_rat_body>
 
@@ -1332,15 +1332,15 @@ Examples:
 
     3.14159
 
-    A;0.0
+    A#0.0
 
     0xDEADBEEF.FACE
 
-    Z;0.000AZE
+    Z#0.000AZE
 
-    Rat:6;500001/1000
+    Rat:6#500001/1000
 
-    B;A09B/A
+    B#A09B/A
 
     Rat:0b1011101101*10^-11011
 
@@ -1362,7 +1362,7 @@ Grammar:
         <Blob_payload>
 
     <Blob_payload> ::=
-          <blob_max_col_val> ';' <unspace> <blob_body>
+          <blob_max_col_val> '#' <unspace> <blob_body>
         | <blob_radix_mark> <unspace> <blob_body>
 
     <blob_max_col_val> ::=
@@ -1399,7 +1399,7 @@ Examples:
 
     Blob:0b'00101110100010' #`binary`#
 
-    3;''
+    3#''
 
     0x'A705E' #`hexadecimal`#
 
@@ -1427,7 +1427,7 @@ Grammar:
         | '\\c<' [
               [<[ A..Z ]>+] ** ' '
             | [0 | <[ 1..9 ]> <[ 0..9 ]>*]
-            | <[ 1..9 A..Z a..z ]> ';'
+            | <[ 1..9 A..Z a..z ]> '#'
                 [0 | <[ 1..9 A..Z a..z ]> <[ 0..9 A..Z a..z ]>*]
             | 0<[ bodx ]> [0 | <[ 1..9 A..F a..f ]> <[ 0..9 A..F a..f ]>*]
           ] '>'
@@ -1774,7 +1774,7 @@ Grammar:
         <Scalar_payload>
 
     <Scalar_payload> ::=
-          <possrep_name> ';' <unspace> <possrep_attrs>
+          <possrep_name> ':' <unspace> <possrep_attrs>
         | <possrep_attrs>
 
     <possrep_name> ::=
@@ -1810,13 +1810,13 @@ Examples:
 
     Scalar:Name:{ "" => 'the_thing' }
 
-    $:Rat:float;{
+    $:Rat:float:{
         mantissa => 45207196,
         radix    => 10,
         exponent => 37,
     }
 
-    $:fed.lib.the_db.UTCDateTime:datetime;{
+    $:fed.lib.the_db.UTCDateTime:datetime:{
         year   => 2003,
         month  => 10,
         day    => 26,
@@ -1825,11 +1825,11 @@ Examples:
         second => 0.0,
     }
 
-    $:fed.lib.the_db.WeekDay:name;{
+    $:fed.lib.the_db.WeekDay:name:{
         "" => "monday",
     }
 
-    $:fed.lib.the_db.WeekDay:number;{
+    $:fed.lib.the_db.WeekDay:number:{
         "" => 5,
     }
 
@@ -1974,7 +1974,7 @@ Grammar:
         '[' <ws>?
             [<attr_name> ** [<ws>? ',' <ws>?] [<ws>? ',']?]?
         <ws>? ']'
-        ';' <unspace>
+        ':' <unspace>
         '{' <ws>?
             [<ordered_tuple_attrs> ** [<ws>? ',' <ws>?] [<ws>? ',']?]?
         <ws>? '}'
@@ -2056,7 +2056,7 @@ Examples:
         },
     }  #`3 attrs + 1 tuple`#
 
-    @:fed.lib.the_db.gene.Person:[ name, age ];{
+    @:fed.lib.the_db.gene.Person:[ name, age ]:{
         [ 'Michelle', 17 ],
     }  #`2 attrs + 1 tuple`#
 
@@ -2233,7 +2233,7 @@ Grammar:
         <ws>? '}'
 
     <count> ::=
-          <num_max_col_val> ';' <unspace> <pint_body>
+          <num_max_col_val> '#' <unspace> <pint_body>
         | <num_radix_mark> <unspace> <pint_body>
         | <d_pint_body>
 
@@ -3948,11 +3948,9 @@ Examples:
 Grammar:
 
     <if_else_expr> ::=
-        [
-             [if <ws> <if_expr> <ws> then <ws> <then_expr> <ws> else <ws>]+
-           | [<if_expr> <ws> '??' <ws> <then_expr> <ws> '!!' <ws>]+
-        ]
-        <else_expr>
+          if <ws> <if_expr> <ws> then <ws> <then_expr>
+            <ws> else <ws> <else_expr>
+        | <if_expr> <ws> '??' <ws> <then_expr> <ws> '!!' <ws> <else_expr>
 
     <if_expr> ::=
         <expr>
@@ -3963,21 +3961,16 @@ Grammar:
     <else_expr> ::=
         <expr>
 
-An C<if_else_expr> node represents an N-way if-else control flow
+An C<if_else_expr> node represents a ternary if-then-else control flow
 expression.  It is interpreted as a tuple of a Muldis D
-C<sys.std.Core.Type.Cat.IfElseExprNodeSet> value.  The whole collection of
-sequential 1..N C<if_expr> + C<then_expr> elements specifies the C<if_then>
-attribute of the new C<IfElseExprNodeSet>, which is a sequence of arbitrary
-but C<Bool>-resulting I<if> expressions, and for just the first one of
-those in the sequence that at runtime evaluates to C<Bool:True>, its
-associated I<then> result value is the result of the C<if_else_expr>.  The
-C<else_expr> element specifies the C<else> attribute, which determines the
-result value of the C<if_else_expr> at runtime if either C<if_then> is an
-empty sequence or all of its conditionals evaluate to C<Bool:False>.  (Note
-that while an C<IfElseExprNodeSet> tuple can represent zero C<if_expr> +
-C<then_expr> elements, that isn't an option in this concrete grammar
-because such an C<if_else_expr> is indistinguishable from the generic
-C<expr> that C<else_expr> is.)
+C<sys.std.Core.Type.Cat.IfElseExprNodeSet> value.  The C<if_expr>,
+C<then_expr>, and C<else_expr> elements specify the C<if>, C<then>, and
+C<else> attributes, respectively, of the new C<IfElseExprNodeSet>;
+C<if_expr> is the condition to evaluate at runtime and must result in a
+C<Bool>; iff the result of that condition is C<Bool:True> then the
+C<then_expr> is evaluated and its result is the result of the whole
+if-then-else expression at runtime; otherwise, the C<else_expr> is
+evaluated and its result is the whole if-then-else's result.
 
 Examples:
 
@@ -4228,7 +4221,7 @@ Examples:
         )
 
         assign_union( &order_details,
-            @:[ order_id, prod_code, qty ];{
+            @:[ order_id, prod_code, qty ]:{
                 [ order_id, 'COG' , 20, ],
                 [ order_id, 'CAM' , 10, ],
                 [ order_id, 'BOLT', 70, ],
@@ -4375,7 +4368,6 @@ Grammar:
 
     <if_else_stmt> ::=
         if <ws> <if_expr> <ws> then <ws> <then_stmt>
-        [<ws> else <ws> if <ws> <if_expr> <ws> then <ws> <then_stmt>]*
         [<ws> else <ws> <else_stmt>]?
 
     <then_stmt> ::=
@@ -4384,23 +4376,14 @@ Grammar:
     <else_stmt> ::=
         <proc_stmt>
 
-An C<if_else_stmt> node represents an N-way if-else control flow statement.
-It is interpreted as a tuple of a Muldis D
-C<sys.std.Core.Type.Cat.IfElseStmtNodeSet> value.  The whole collection of
-sequential 1..N C<if_expr> + C<then_stmt> elements specifies the
-C<if_then> attribute of the new C<IfElseStmtNodeSet>, which is a sequence
-of arbitrary but C<Bool>-valued I<if> lexical variables (possibly
-sugar-coated with static-value expressions), and for just the first one of
-those in the sequence that at runtime is valued with C<Bool:True>, its
-associated I<then> statement is executed as if it were the whole
-C<if_else_stmt>.  The C<else_stmt> element, if it is provided, specifies
-the C<else> attribute, which determines the statement to execute as if it
-were the whole C<if_else_stmt> at runtime if either C<if_then> is an empty
-sequence or all of its conditionals are valued with C<Bool:False>.  (Note
-that while an C<IfElseStmtNodeSet> tuple can represent zero C<if_expr>
-+ C<then_stmt> elements, that isn't an option in this concrete grammar
-because such an C<if_else_stmt> is indistinguishable from the generic
-C<proc_stmt> that C<else_stmt> is.)
+An C<if_else_stmt> node represents a ternary if-then-else control flow
+statement.  It is interpreted as a tuple of a Muldis D
+C<sys.std.Core.Type.Cat.IfElseStmtNodeSet> value.  The C<if_expr>,
+C<then_stmt>, and C<else_stmt> elements specify the C<if>, C<then>, and
+C<else> attributes, respectively, of the new C<IfElseStmtNodeSet>;
+C<if_expr> is the condition to evaluate at runtime and must result in a
+C<Bool>; iff the result of that condition is C<Bool:True> then C<else_stmt>
+is invoked; otherwise, C<then_stmt> is invoked.
 
 Examples:
 
@@ -4998,7 +4981,7 @@ Examples:
 
     { 8, 4, 6, 7 } ∖ { 9, 0, 7 }
 
-    @:[ x, y ];{ [ 5, 6 ], [ 3, 6 ] } ÷ @:{ { y => 6 } }
+    @:[ x, y ]:{ [ 5, 6 ], [ 3, 6 ] } ÷ @:{ { y => 6 } }
 
 =head2 Simple Monadic Prefix Operators
 
@@ -5103,7 +5086,7 @@ Grammar:
         <pcf_s_acc_op_invo> | <pcf_t_acc_op_invo>
 
     <pcf_s_acc_op_invo> ::=
-        <expr> <unspace> '.{' [<ws>? <possrep_name>]? ';' <ws>?
+        <expr> <unspace> '.{' [<ws>? <possrep_name>]? ':' <ws>?
             <attr_name>
         <ws>? '}'
 
@@ -5111,7 +5094,7 @@ Grammar:
         <expr> <unspace> '.{' <ws>? <attr_name> <ws>? '}'
 
     <s_pcf_op_invo> ::=
-        <expr> <unspace> '{' [<ws>? <possrep_name>]? ';' <ws>?
+        <expr> <unspace> '{' [<ws>? <possrep_name>]? ':' <ws>?
             [<pcf_projection> | <pcf_cmpl_proj>]
         <ws>? '}'
 
@@ -5201,7 +5184,7 @@ Grammar:
         <expr> <unspace> '.[' <ws>? <index> <ws>? ']'
 
     <index> ::=
-          <num_max_col_val> ';' <unspace> <nnint_body>
+          <num_max_col_val> '#' <unspace> <nnint_body>
         | <num_radix_mark> <unspace> <nnint_body>
         | <d_nnint_body>
 
@@ -5232,7 +5215,7 @@ arguments, which are associated in the appropriate sequence.
 
 This table indicates which function is invoked by each format-keyword:
 
-    .{;} -> Core.Scalar.attr( expr, possrep => possrep_name,
+    .{:} -> Core.Scalar.attr( expr, possrep => possrep_name,
                 name => attr_name )
     .{} -> Core.Tuple.attr( expr, name => attr_name )
 
@@ -5243,11 +5226,11 @@ This table indicates which function is invoked by each format-keyword:
                     { after => atnm_after.[n], before => atnm_before.[n] },
                 } )
 
-    {;}  -> Core.Scalar.projection( expr, possrep => possrep_name,
+    {:}  -> Core.Scalar.projection( expr, possrep => possrep_name,
                 attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
     {}  -> Core.Attributive.projection( expr,
                 attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
-    {;!} -> Core.Scalar.cmpl_proj( expr, possrep => possrep_name,
+    {:!} -> Core.Scalar.cmpl_proj( expr, possrep => possrep_name,
                 attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
     {!} -> Core.Attributive.cmpl_proj( expr,
                 attr_names => { pcf_atnms.[0], ..., pcf_atnms.[n] } )
@@ -5280,7 +5263,7 @@ This table indicates which function is invoked by each format-keyword:
 
 Examples:
 
-    birthday.{date;day}
+    birthday.{date:day}
 
     pt.{city}
 
@@ -5288,7 +5271,7 @@ Examples:
 
     pr{pnum<-pno, locale<-city}
 
-    birthday{date;year,month}
+    birthday{date:year,month}
 
     pt{color,city}
 
@@ -5298,7 +5281,7 @@ Examples:
 
     pr{}  #`null projection`#
 
-    rnd_rule{;!round_meth}  #`radix,min_exp`#
+    rnd_rule{:!round_meth}  #`radix,min_exp`#
 
     pt{!pno,pname,weight}
 
@@ -5577,6 +5560,103 @@ Examples:
     #`delete every person in people whose age is either 10 or 20`#
     people :=!matching @:{ { age => 10 }, { age => 20 } }
 
+=head1 LANGUAGE MNEMONICS
+
+PTMD_STD is designed to respect a variety of mnemonics that bring it some
+self-similarity and an association between syntax and semantics so that it
+is easier to read and write Muldis D code.  Some of these mnemonics are
+more about self-similarity and others are more about shared traits with
+other languages.
+
+I<Note that some of these details aren't yet otherwise specified and
+describe near-future planned changes.>
+
+=head2 Bareword Strings
+
+All barewords, meaning runs of non-quoted non-whitespace alphanumeric
+characters plus {C<_>,C<->,C<.>}, are generally either of these 3 things:
+language keywords, entity names (including declarations or invocations of
+routines/operators, types, variables), numeric literals (which may also
+contain {C<#>,C</>,C<*>,C<^>}).
+
+=head2 Quoted Strings
+
+All quoted strings, meaning runs of characters delimited with any of
+{C<'>,C<">,C<`>}, are generally either of these 3 things: entity names (iff
+C<">-quoted), value literals for general purpose string-like types (if
+C<'>-quoted), code comments (iff C<`>-quoted, and typically also
+C<#>-delimited forming double-character delimiters).
+
+=head2 C<#>
+
+The C<#> character is mainly associated with numbers in some way but is
+also associated with code comments, though in the latter case it always
+appears together with C<`>.  Iff C<#> appears as part of a numeric value
+literal, it is in a manner like and inspired by the "based" literals of the
+Ada language, and separates the radix specifier from the main part of the
+literal that it describes.  If C<#> appears other than for a code comment
+or numeric literal then it generally means "count" or "cardinality".
+
+=head2 {C<$>,C<%>,C<@>}
+
+The {C<$>,C<%>,C<@>} characters are mainly associated with scalars, tuples,
+and relations, respectively.  They are used both to distinguish value
+literals of those types as well as operators for those types.  In addition,
+the C<@> character is used to indicate routine "dispatch" parameters.
+
+=head2 Bracketing Characters
+
+Pairs of corresponding bracketing characters, meaning {C<()>,C<[]>,C<{}>},
+are generally associated with groupings or lists of various kinds and serve
+to delimit such.  The C<()> round-parenthesis pair is associated with
+routine signatures (parameter list or result declarations), routine
+invocations (argument list consisting of ordered or named arguments), and
+disambiguating any functional code or value expressions (any
+parenthesis-delimited routine body or code block therein is a function or a
+value expression).  The C<[]> square-bracket pair is associated with
+ordered lists and is used for: delimiting sequences of procedure
+statements, delimiting array value literals, and in array-subscripting
+operators, and for the reduction meta-operator.  The C<{}> pair is
+associated with unordered lists and is used for: delimiting multi-update
+statements, delimiting value literals of {tuples, relations,
+(component-wise) scalars, sets, bags}, and in postcircumfix operators for
+those same types.
+
+=head2 List-Separating Characters
+
+The C<,> and C<;> characters are mainly used to separate (or trail) each of
+the 0..N members of groupings or lists.  The C<,> comma is considered
+tighter and is used for most groupings or lists, including: routine
+signatures, routine invocations, collection value literals, postcircumfix
+operators.  The C<;> semicolon is considered looser and is used for such
+things as separating off-side-defined things like named value expressions
+or variables or statements or inner materials.
+
+=head2 C<::=>
+
+The C<::=> infix token is used for name binding; it declares that
+whatever is on the right-hand side is associated with the entity name given
+on the left-hand side.  The C<::=> is thusly used to explicitly name value
+expressions, procedure statements, library materials, and to associate
+global variables with lexical aliases.
+
+=head2 Pairs
+
+The infix tokens {C<:>,C<< => >>,C<< <- >>,C<< <-- >>} are mainly used
+between two items to designate that the they form a pair of some kind.  The
+C<:> is the most common and is used for any context where the left-hand
+side of the pair is always an entity name or heading, including: a
+variable/parameter/attribute-like typed entity declaration
+(var/param/attr-name : type-name), a named argument or tuple literal
+attribute (arg/attr-name : value-expr), and a routine heading from a
+routine body; a C<:> also separates the main parts of some value literals,
+such as the literal kind keyword from the main literal.  The C<< => >> is
+used for any context where two arbitrary value expressions are paired such
+as in a C<Bag> literal or a C<Dict> literal.  The C<< <- >> is used just
+between 2 entity names in the postcircumfix renaming operator.  The C<< <--
+>> is used just in a function signature between the result type and
+parameter list.
+
 =head1 RESOLVING AMBIGUITY
 
 =head2 Entity Names vs Keywords
@@ -5629,7 +5709,7 @@ examples of each level:
     Level            | Assoc | Examples
     -----------------+-------+---------------------------------------------
     Terms            | N/A   | Inf True Order:Same Down 42 3.14 -5/7 3*2^8
-                     |       | F;'27E04' 'eek' foo "x" #`comment!`#
+                     |       | F#'27E04' 'eek' foo "x" #`comment!`#
                      |       | {43,9,5} [1,2,3] {'Carrots'=>42} {11..20}
                      |       | $:{...} %:{...} @:{...} nlx.lib.MyType
                      |       | (1+2) myfunc(...) <Int> nlx.data.quux .age
